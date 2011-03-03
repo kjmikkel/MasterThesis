@@ -1,0 +1,16 @@
+===Content===
+
+My Computer Science Master Thesis, currently ongoing and scheduled to run in the interval 21/2-21/8. My Adviser is Martin Zachariasen.
+
+===Subject===
+The title of the thesis is Energy Affluent Mobile Ad-Hoc Networks.
+
+Ad-Hoc networks are networks where the topology of the networks is created by the individual nodes in the network, based on which other nodes they can find. A node does not necessarily transmit to all of these nodes, as there sometimes is no need (say, if the node only wants to transmit its information to a central base-station).
+
+In many of the Ad-Hoc networks no single node has all information about the network (where each node is located, how much power they have left, the topology of the network), and Shortest path algorithms like Dijkstra's algorithm or Bellman-Ford cannot be employed.
+
+A use case for Ad-Hoc networks could be disposable sensor motes which are distributed over inhospitable areas, and who then observe and analyse the surrounding area. These motes needs to communicate with the other motes - either to gain more data, or to transmit the information back home. Since it is a inhospitable area, the batteries of the motes cannot be replaced, and power conservation is therefore a big priority (especially since a disabled mote may partition the network, making it impossible for some of the motes to reach the base-station). This also means that GPS data is not always available.
+
+In Mobile Ad-Hoc Networks, the units are mobile (they might be say, smart-phones or laptops/net-books), and will therefore enter and leave the network more frequently, leading to greater changes in the overall topology of the network.
+
+Energy Affluent Mobile Ad-Hoc Networks are Mobile Ad-Hoc Networks where each unit does not  assume power is not a big concern - for example they might have access to a recharger. They might still use all of their energy, but this is acceptable, since they can recharge.
