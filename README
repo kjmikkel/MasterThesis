@@ -14,3 +14,10 @@ A use case for Ad-Hoc networks could be disposable sensor motes which are distri
 In Mobile Ad-Hoc Networks, the units are mobile (they might be say, smart-phones or laptops/net-books), and will therefore enter and leave the network more frequently, leading to greater changes in the overall topology of the network.
 
 Energy Affluent Mobile Ad-Hoc Networks are Mobile Ad-Hoc Networks where each unit does not  assume power is not a big concern - for example they might have access to a recharger. They might still use all of their energy, but this is acceptable, since they can recharge.
+
+===What can be found in this repository===
+The source code for the project can be found in the "src" folder, while the report itself can be found in the "report" folder. 
+
+The language (or indeed languages) for the source code has not been established, while the report will be made in the document preparation system LaTeX.
+
+It is my intention to release as much as possible under an open source license.
