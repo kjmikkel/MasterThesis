@@ -1,0 +1,11 @@
+
+This directory contains the files needed to build my report.
+
+The report is written in the LaTeX document preparation system. Since I like to have my image files in the .eps file format, I have opted first to produce a .dvi version of my report, and then transform this into a pdf version. 
+
+===How to build the report===
+In order to build the report to build type "make pdf" (to create a pdf) or "make dvi" or just "make" in order to make a dvi file.
+
+===Requirements===
+In order to produce my report, you will need the "latex" tool and the "dvipdft" tool, both of which can be installed for many all linux distributions.
+
