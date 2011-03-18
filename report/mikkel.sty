@@ -73,6 +73,15 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \newcommand{\todoNote}[2]{\fxnote{#1}{#2}}
 \newcommand{\justify}[1]{\texttt{Write a justification for this}\fxfatal{Write a justification for this: #1}}
 
+\usepackage{url}
+%% Define a new 'leo' style for the package that will use a smaller font.
+\makeatletter
+\def\url@leostyle{%
+  \@ifundefined{selectfont}{\def\UrlFont{\sf}}{\def\UrlFont{\ttfamily}}}
+\makeatother
+%% Now actually use the newly defined style.
+\urlstyle{leo}
+
 
 \newcommand{\eqaref}[1]{(equation \ref{#1})}
 
@@ -101,7 +110,8 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \label{code:#1}
 \lstinputlisting{../src/C++/#1.cpp}
 }
-\newcommand\ps@Standard{
-\renewcommand\@oddhead{Mikkel Kjær Jensen, CPR: 2501851747}
-\renewcommand\@evenhead{\@oddhead}
-}
+
+%\newcommand\ps@Standard{
+%\renewcommand\@oddhead{Mikkel Kjær Jensen, CPR: 2501851747}
+%\renewcommand\@evenhead{\@oddhead}
+%}
