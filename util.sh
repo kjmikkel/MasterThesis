@@ -2,6 +2,7 @@
 
 #archive the code
 cd report
+python shaWriter.py
 make
 make veryclean
 cd ..
