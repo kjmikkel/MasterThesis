@@ -1,9 +1,64 @@
 \section{Introduction}
+\label{section:introduction} 
+
+\subsection{Motivation}
+In the last few years we have seen a clear increase in the sale of mobile phones with an advanced OS, Internet access, GPS and large amounts of computing power. These so--called \emph{Smart Phones} are becoming increasingly common \justify{Find numbers or source}, replacing the standard mobile phone. Developers are encouraged to write custom applications to these small mobile computers.
+
+Many of these Smart Phones has a built-in GPS or WiFi triangulation tools, which can be access by the applications on the phone, making it possible to create services that uses the users data --- such as directional services (such as Google Maps) or social networking services (such as Foursquare).
+
+In normal Ad-Hoc research energy conservation is usually a high priority. Sine Ad-Hoc networks has mostly been used for sensor networks for research this makes sense. Since the sensor networks are mostly deployed in inhospitable and inaccessible regions, this makes sense, since it is unlikely that any of the batteries will ever be recharged. However, this underlying assumption is not true when applied to Laptops, Netbooks and Smart Phones in the developed world. 
+
+Mesh network could also easily play a vital role in humanitarian operations, such as after a earthquake, flood, hurricane etc. In these situation infrastructure tends to be heavily damaged, and there will be a great need for coordination in order to maximise relief efforts. If a 
+
+Preferably we would like to have these mesh networks connected to the Internet, but this is not strictly needed, and the network should be able to function without any Internet connection.
+ 
+\todo{finish this section and tighten it up}
+
+\subsection{Expectations to the Reader}
+\todo{Write this}
+
+\subsection{Scope and Limitations}
+While important in a real world application, I will in this thesis not concern myself with security, neither in the form of the authentication, anonymity of the sender or [something about rooting I think it might be possible]. For a treatment of this subject see \cite{trustedRouting}. \todo{finish this}
 
 
-\subsection{Justification}
-In the last few years we have seen a clear increase in the sale of mobile phones with an advanced OS, internet access, GPS and large amounts of computing power. These so-called \emph{Smart Phones} are becomming increasingly commen \justify{Find numbers or source}, replacing the standard mobile phone. Developers are encouraged to write custom applications to these small mobile compouters.
+\subsection{Node specifications}
+Since it is 
 
-Many of these Smart Phones has a build-in GPS or WiFi triangulation tools, which can be access by the applications on the phone, making it possible to create services that uses the users data - such as directional services (such as Google Maps) or social networking services (such as Foursquare).
+\subsection{Terminology}
+\label{Terminology}
+In this report I will use the following terms 
 
-In normal Ad-Hoc research energy conservation is usualy a high priority. Sine Ad-Hoc networks has mostly been used for sensor networks for research this makes sense. Since the sensor networks are mostly deployed in inhospitable and inaccessable regions, this makes sense, since it is unlikely that any of the batteries will ever be recharged. However, this underlying assumption is not true when applied to Laptops, Netbooks and Smart Phones in the developed world.  
+%\begin{defi}
+
+%\end{defi}
+
+\subsection{Anatomy of the solution}
+
+Any implementation of a Mobile Ad-Hoc Network will need the following elements
+
+\begin{description}
+\item[Location solution:] Are the nodes going to use their position from a GPS system, or are they going to use some kind relative position.
+\item[Routing algorithm:] How are the nodes going to route. 
+\end{description} 
+
+Furthermore, for the simulation there will be a need for a movement, in order to ensure that the movements are somewhat realistic.
+
+\subsection{Goals}
+In this section I will state the goals I will work toward in my this project:
+
+\begin{description}
+\item[Fairness:] Although I in this project assume that the devices in the Mesh network has plenty of power, I will still strive to ensure that the communication load across the network is somewhat fairly distributed. There are several reasons for this. Even if we assume that the devices that makes up the network can easily be recharged, extensive use of a node may deplete its current energy stores, and make it fall of the network. On the bandwidth side of the equation, it is likely a user will opt to retract his device from the network if he finds it is unable or slow to transmit even small messages (which might be the case if his device is heavily used by the network). Even with such a fairness system in place, unfair situations might still occur --- like when a single node becomes the bottleneck between 2 node clusters. 
+\item[make more goals] \todo{add more goals or more this}
+
+\subsection{Background Material Used}
+For this project I have read the following articles for background information: ``A Survey on Wireless Mesh Networks'' \cite{martinWirelessSurvey}, ``Mesh networks: commodity multihop ad hoc networks''\cite{martinMeshnetwork} \todo{continue to include the articles you have read and are useful, but that have not been included directly}
+
+\subsection{Source Code and Test Data}
+The source code and the data used in this report (in machine readable form) can be found in my GitHub repository at \underline{https://github.com/kjmikkel/MasterThesis}.
+
+\subsection{Overview}
+In this section I give a quick overview of what the different sections in report will cover.
+\begin{description}
+\item[Section \ref{section:introduction}] The introduction to the report, which will introduce the problem of Mobile Ad-Hoc Networking.
+\item[\todo{Add other sections}]
+\end{description}
