@@ -8,7 +8,7 @@ Many of these Smart Phones has a built-in GPS or WiFi triangulation tools, which
 
 In normal Ad-Hoc research energy conservation is usually a high priority. Sine Ad-Hoc networks has mostly been used for sensor networks for research this makes sense. Since the sensor networks are mostly deployed in inhospitable and inaccessible regions, this makes sense, since it is unlikely that any of the batteries will ever be recharged. However, this underlying assumption is not true when applied to Laptops, Netbooks and Smart Phones in the developed world. 
 
-Mesh network could also easily play a vital role in humanitarian operations, such as after a earthquake, flood, hurricane etc. In these situation infrastructure tends to be heavily damaged, and there will be a great need for coordination in order to maximise relief efforts. If a mesh network (with or without access to the Internet) could be established, then the coordination could be greatly improved. In such situations it is likely that the aid workers would have stationary relay stations or nodes, which in fact would simplify the problem.
+Mesh network could also easily play a vital role in humanitarian operations, such as after a earthquake, flood, hurricane etc. In these situation infrastructure tends to be heavily damaged, and there will be a great need for coordination to maximise relief efforts. If a mesh network (with or without access to the Internet) could be established, then the coordination could be greatly improved. In such situations it is likely that the aid workers would have stationary relay stations or nodes, which in fact would simplify the problem.
 
 Preferably we would like to have these mesh networks connected to the Internet, but this is not strictly needed, and the network should be able to function without any Internet connection.
  
@@ -23,14 +23,17 @@ While important in a real world application, I will in this thesis not concern m
 
 
 \subsection{Node specifications}
-It is clear that the properties of the mobile nodes in the system are going to influence the nature of the solution, I will therefore in this section define the nodes specifications, so  . The factors that I deem to be important are: 
+It is clear that the properties of the mobile nodes in the system are going to influence the nature of the solution, I will therefore in this section define the specifications of the nodes I will work on in this project. The factors that I deem to be important are: 
 \begin{description}
 \item[Power:] How much does each node have? Can their supply be recharged?
-\item[Mobility:] How mobile are the nodes? How fast can they move? Can the nodes only realistically be integrated in a vehicles, or can a person be expected to carry them around on their person?
-\item[]
+\item[Mobility:] How mobile are the nodes? How fast can they move, and what can we expect their movement pattern to be? Can the nodes only realistically be integrated in a vehicles, or can a person be expected to carry them around on their person?
+\item[(something - forgot what)]
+\item[Amount of data to transmit\todo{Find better name than amount of data to transmit}:] 
 \end{description}
 
-    . As noted in section~\todo{find section where I mention power for the first time}, I would in this project like to look at power affluent devices, i.e. devices that either has access to large amounts of energy, or which has an adequate amount of energy, but which can easily be recharged. In this project I pick latter version, on the ground that such an arrangement is more realistic for a mobile device, and the setting it is going to be used in\footnote{It is unlikely that a Smart Phone will be able to transmit for 10 hours straight, or that the average user is going to transport a large capacity battery.}. 
+As noted in section~\todo{find section where I mention power for the first time}, I would in this project like to look at power affluent devices, i.e. devices that either has access to large amounts of energy, or which has an adequate amount of energy, but which can easily be recharged. In this project I pick latter version, on the ground that such an arrangement is more realistic for a mobile device, and the setting it is going to be used in\footnote{It is unlikely that a Smart Phone will be able to transmit for 10 hours straight, or that the average user is going to transport a large capacity battery.}. In such a situation it is clear that my solution must be able to handle that nodes can suddenly disappear from the network from one moment to the next.
+
+Concerning mobility I think the most interesting movement pattern would be people moving within streets or within buildings. I can justify this by the fact that 
 
 \subsection{Terminology}
 \label{Terminology}
@@ -45,11 +48,14 @@ In this report I will use the following terms
 Any implementation of a Mobile Ad-Hoc Network will need the following elements
 
 \begin{description}
-\item[Location solution:] Are the nodes going to use their position from a GPS system, or are they going to use some kind relative position.
+\item[Location mecanism:] Most routing schemes uses location information in order to find an efficient path (for any given metric). Therefore we must decide how the nodes are going to find their location. This is also a question about the hardware the nodes have (such as GPS, and the required energy to power it for the nodes duration in the network),  and some solutions   
+
+Are the nodes going to use their position from a GPS system, or are they going to use some kind relative position.
+
 \item[Routing algorithm:] How are the nodes going to route. 
 \end{description} 
 
-Furthermore, for the simulation there will be a need for a movement, in order to ensure that the movements are somewhat realistic.
+Furthermore, for the simulation we will have to decide upon a movement model (or find a number of real world traces we find representative) to test the effectiveness of solution.
 
 \subsection{Goals}
 In this section I will state the goals I will work toward in my this project:
