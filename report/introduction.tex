@@ -45,14 +45,15 @@ In this report I will use the following terms
 
 \subsection{Anatomy of the solution}
 
-Any implementation of a Mobile Ad-Hoc Network will need the following elements
+A real-life implementation of a Mobile Ad-Hoc Network will need the following elements
 
 \begin{description}
-\item[Location mecanism:] Most routing schemes uses location information in order to find an efficient path (for any given metric). Therefore we must decide how the nodes are going to find their location. This is also a question about the hardware the nodes have (such as GPS, and the required energy to power it for the nodes duration in the network),  and some solutions   
+\item[Location mechanism:] Most routing schemes uses location information in order to find an efficient path (for any given metric). Therefore we must decide how the nodes are going to find their location. This is also a question about the hardware the nodes have (such as GPS, and the required energy to power it for the nodes duration in the network),  and some solutions   
 
 Are the nodes going to use their position from a GPS system, or are they going to use some kind relative position.
-
 \item[Routing algorithm:] How are the nodes going to route. 
+\item[Establishment of the underlying graph:]  Some routing algorithms will only work if the graph they are working on have certain properties\footnote{One such assumption might be that the graph is planar i.e. it can be drawn in the plane such that no edge crosses another}.
+\item[Hierarchy:] Whether or not the nodes are going to route through levels of so-called \emph{cluster nodes} that will service numerous nodes.
 \end{description} 
 
 Furthermore, for the simulation we will have to decide upon a movement model (or find a number of real world traces we find representative) to test the effectiveness of solution.
