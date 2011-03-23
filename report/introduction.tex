@@ -48,15 +48,17 @@ In this report I will use the following terms
 A real-life implementation of a Mobile Ad-Hoc Network will need the following elements
 
 \begin{description}
-\item[Location mechanism:] Most routing schemes uses location information in order to find an efficient path (for any given metric). Therefore we must decide how the nodes are going to find their location. This is also a question about the hardware the nodes have (such as GPS, and the required energy to power it for the nodes duration in the network),  and some solutions   
+\item[Entering and Merging networks:] When a node enters a new network, it needs to inform the network of its presence. Furthermore, when the node is already part of a secondary network (none of which are in the first network), then the networks need to be merged together.  
+\item[Coordinate scheme:] Most routing schemes uses coordinates in order to find an efficient path, for any given metric, to a node. Therefore we must decide how the nodes are going to find their location. This is also a question about the hardware the nodes have (such as GPS or WiFi, and the required energy to power it for the nodes duration in the network), and some solutions   
 
 Are the nodes going to use their position from a GPS system, or are they going to use some kind relative position.
+\item[Node location mechanism:] There needs to be a mechanism so that a node can retrieve the coordinates of another nodes it wants to come into contact with. 
 \item[Routing algorithm:] How are the nodes going to route. 
 \item[Establishment of the underlying graph:]  Some routing algorithms will only work if the graph they are working on have certain properties\footnote{One such assumption might be that the graph is planar i.e. it can be drawn in the plane such that no edge crosses another}.
 \item[Hierarchy:] Whether or not the nodes are going to route through levels of so-called \emph{cluster nodes} that will service numerous nodes.
 \end{description} 
 
-Furthermore, for the simulation we will have to decide upon a movement model (or find a number of real world traces we find representative) to test the effectiveness of solution.
+Furthermore, for the simulation we will have to decide upon a movement model (or find a number of real world traces we find representative) to test the effectiveness of solution. In this thesis I have decided to include \todo{decide upon which of these levels that I am going to implement, and which I will just assume have been solved}
 
 \subsection{Goals}
 In this section I will state the goals I will work toward in my this project:
