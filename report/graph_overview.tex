@@ -18,7 +18,7 @@
 \section{Routing graph}
 
 
-\section{Routing Algoirhtms}
+\section{Routing Algorithms}
 
 
 \section{Problems we have with movement}
@@ -28,19 +28,20 @@ Movement presents us with the following problems:
 \begin{itemize}
 \item Changes underlying graph
 \item Invalidates location information other nodes about about the node
-\item If the node is part of path from \emph{a} to \emph{b} (and the node is neither), which is stored and which is belived to be used again, then that path may fail, and a longer path may have to be taken. In degerate cases this may lead to situations where the new optimal path will lead away from the absolute coordiantes of the end node.
-\item The moving node may partition a network into 2 seperate networks, if the 2 networks can only communicate through it
+\item If the node is part of path from \emph{a} to \emph{b} (and the node is neither), which is stored and which is believed to be used again, then that path may fail, and a longer path may have to be taken. In degenerate cases this may lead to situations where the new optimal path will lead away from the absolute coordinates of the end node.
+\item The moving node may partition a network into 2 separate networks, if the 2 networks can only communicate through it
 \item The node may move into a position that creates a better path than the one before it moved - however, the surrounding nodes needs to be aware of it
 \end{itemize}
 
 The movement creates the need for the following solutions:
 \begin{itemize}
-\item There needs to be a way to restrucure the underlying graph so that it reflects the movement of the node \cite{practical}
-\item The location of the moving node needs to be updated. This does not neccesarry need to be done to all the nodes in the network, nor all the nodes that knew it before. There are many schemes for this, such as GLS \cite{scaleLocation} which partitions the world into squares of  
+\item There needs to be a way to restructure the underlying graph so that it reflects the movement of the node \cite{practical}
+\item The location of the moving node needs to be updated. This does not necessary need to be done to all the nodes in the network, nor all the nodes that knew it before. There are many schemes for this, such as GLS \cite{scaleLocation} which partitions the world into squares, and then partitions these squares into other squares, resulting in several layers of squares. In each of these squares, there is a single node that knows the location of the node (and a scheme to find it).
+\item   
 \end{itemize}
 
 
-When a node nmoves it changes the underlyusing graph, which has to be restructured in order to facilitate basic routing of any kind. It 
+When a node moves it changes the underlying graph, which has to be restructured in order to facilitate basic routing of any kind. It 
 
 \section{Fundamental Routing Graph problems}
 
