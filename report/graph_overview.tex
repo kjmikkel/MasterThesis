@@ -19,7 +19,7 @@
 
 In the case of mobile ad-hoc networks, the routing graph does not have a singular structure. Since nodes will be able to broadcast and receive signals to/from nodes in a radius (at least under optimal conditions) around them, the most routing graph with the maximum number of edges will not be planar. Furthermore, while most routing algorithms assume so, the edges do not have to be bidirectional. One could easily imagine a scenario where heterogeneous ad-hoc nodes had different broadcast radii, leading to cases where certain nodes could receive other nodes broadcast through 1 jump, but would have to route through several nodes to get the message back.
 
-The preferred structure of the underlying graph is that of planar graph. This makes sense since many traditionally popular routing algorithms makes this assumption (and simplifies the situation immensely). There are several methods for turning the underlying structure into a planar graph (i.e. making sure that for any given node, the only neighbours they have are the ones that do not violate the planarity of the graph, were it to be represented as a graph), and keeping it so for the lifetime of the network.
+The preferred structure of the underlying graph is that of planar graph. This makes sense since many traditionally popular routing algorithms makes this assumption (and simplifies the situation immensely). There are several methods for turning the underlying structure into a planar graph (i.e. making sure that for any given node, the only neighbours they have are the ones that do not violate the planar nature of the graph, were it to be represented as a graph), and keeping it so for the lifetime of the network.
 
 Since we are dealing with mobile units, the graph would be changing as the nodes moved around, which means that we would need a solution that could run continuously, making the necessary changes to the current structure, and not having to start over from scratch each time. Since we are dealing transmitting nodes, it is important to note that in practise changes is when a node leaves or enters another nodes radius (it does not matter which of them moves). While environmental factors will of course dampen signals, we can in most cases assume that the radio signal will behave more omni-directional than directional. Assuming we are sure that the desired node is in its transmit radius, a node can simply transmit its message (with some kind of recipient id --- unless it wants to flood the network), and hope that it avoids message collision.   
 
@@ -27,16 +27,28 @@ Since we are dealing with mobile units, the graph would be changing as the nodes
 
 The biggest conceptual difference for routing/shortest path algorithms in a mobile ad-hoc network compared to main-stray routing/shortest path algorithms, is the loss of global overview that these algorithms employ --- such as relaxing a specific nodes' edges at a specific time. There exist distributed version of some of the ``classic'' routing algorithms, but their usefulness may be limited in a mobile network, since they will have to be recomputed either each time a node wants to transmit a message, or each time the underlying graph changes.
 
+Most of the following algorithms will mostly be based around the idea of \emph{local routing algorithms}. Paraphrasing \cite{compass}, a local routing algorithm is an algorithm that for fills the following criteria:
+\begin{enumerate}
+\item Each message will have a limited memory to store information about a constant number of vertices's, but it have full access to the coordinates of the starting position and the destination. At no point does the message have full knowledge of the entire graph.
+\item Let $s$ be the source of the message, $t$ the sink, and $v$ be a node in the graph that can be reached from $s$. Arriving at $v$, the message can then use the information $v$ has stored about its neighbours, as well as its logical edges to the neighbours. Based on this information, one of the neighbours of $v$ is chosen as the next receiver of the message, unless $v = t$, in which case the message will not be propagated.
+\item A message will leave a node in the same state as it was when it arrived. In this sense nodes are considered stateless.\end{enumerate}
+
+Some routing algorithms, such as \cite{speed} violates the third property, writing information to the node in order to have congestion avoidance. Other algorithms uses the messages to have the nodes refresh their knowledge about the active nodes, and message ids of which messages that safely can be discarded. 
+
 Routing algorithms suited for mobile ad-hoc networks can be sorted into the following categories:
 \begin{description}
-\item[Greedy routing]: Greedy routing is when a node 
-\item[Geometrical routing:] 
-\item[]
+\item[Flooding:] The simplest of the routing algorithms. The entire networks is flooded with the message, ensuring that the message eventually reaches the sink. In order to ensure the network is not flooded with the same message forever, each node will need a mechanism that will allow it to record which messages they have already received, so that they can discard it if they ever receives it again. This technique is guarantied to work, but uses a lot of bandwidth.
+
+\item[Greedy routing]: Greedy routing is when a message is transmitted, the next node will always be the node of the neighbours that is closest to the sink. If the message ever arrives at a node where all neighbours are farther away from the current node -- a local minimum -- then no action is specified, and message will not be delivered. The greedy algorithm thus offers no guarantee in delivering the message, but in practise it improves as the density of the network increases.
+
+\item[Geometrical routing:] Geometrical routing uses the location of the current node and the location of the sink. There exist many different kinds of routing algorithms, but common for them is that unlike the greedy routing technique, they will transmit the message to a node that is not necessarily the closer node. This ensures that the message will eventually reach the sink. 
+ 
+\item[Shortest path:] 
 \end{description}
 
 Different routing algorithms make different assumptions about the underlying nature of the mobility of the graph. There are several routing algorithms \cite{two-tier}\cite{adaptive} that assumes a number of permanently stationary nodes or sensors as a part of the infrastructure, while still having a number of mobile nodes that needs to receive information. 
 
-In practical situations the system will have to deal with all the problems inherent in wireless communication, such as the hidden terminal problem and message collision. To avoid these, having a lower communications layer that took care of this would be preferable to implementing it in the algorithm itself (though care should be taken to ensure that the algorithm is build to withstand these conditions). 
+In practical situations the system will have to deal with all the problems inherent in wireless communication, such as the hidden terminal problem and message collision. To avoid these, having a lower communications layer that took care of this would be preferable to implementing it in the algorithm itself (though care should be taken to ensure that the algorithm is build to withstand these conditions).
 
 \section{Problems we have with movement}
 
