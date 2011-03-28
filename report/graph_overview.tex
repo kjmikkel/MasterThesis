@@ -23,7 +23,7 @@ The preferred structure of the underlying graph is that of planar graph. This ma
 
 Since we are dealing with mobile units, the graph would be changing as the nodes moved around, which means that we would need a solution that could run continuously, making the necessary changes to the current structure, and not having to start over from scratch each time. Since we are dealing transmitting nodes, it is important to note that in practise changes is when a node leaves or enters another nodes radius (it does not matter which of them moves). While environmental factors will of course dampen signals, we can in most cases assume that the radio signal will behave more omni-directional than directional. Assuming we are sure that the desired node is in its transmit radius, a node can simply transmit its message (with some kind of recipient id --- unless it wants to flood the network), and hope that it avoids message collision.   
 
-In practice no graph can be said to be entirely static. Even in cases where the nodes are completely staionary, all nodes in the ad-hoc network will eventually run out of energy or fail. The routing graph must therefore be amendable, even if the nodes are not moving. 
+In practise no graph can be said to be entirely static. Even in cases where the nodes are completely stationary, all nodes in the ad-hoc network will eventually run out of energy or fail. The routing graph must therefore be amendable, even if the nodes are not moving. 
 
 \section{Routing Algorithms}
 
@@ -47,7 +47,7 @@ Routing algorithms suited for mobile ad-hoc networks can be sorted into the foll
 
 \item[Geometrical routing:] Geometrical routing uses the location of the current node and the location of the sink. There exist many different kinds of routing algorithms, but common for them is that unlike the greedy routing technique, they will transmit the message to a node that is not necessarily the closer node. This ensures that the message will eventually reach the sink.
  
-\item[Shortest path:] The shortest path techinquie is to use distributed versions of the shortest path algorithms in order to find the shortest path from either one node to another, or from all nodes to all other nodes. As one might imagine, this approch has problems in mobile networks, where the structure of the graph can be in constant flux. Even in static networks the algorithms incur memory problems, since in the all-to-all solution, since for any node with a message for any node in the network must know which neighbour it must send it to get the most efficient route.  
+\item[Shortest path:] The shortest path technique is to use distributed versions of the shortest path algorithms in order to find the shortest path from either one node to another, or from all nodes to all other nodes. As one might imagine, this approach has problems in mobile networks, where the structure of the graph can be in constant flux. Even in static networks the algorithms incur memory problems, since in the all-to-all solution, since for any node with a message for any node in the network must know which neighbour it must send it to get the most efficient route.  
 \end{description}
 
 Different routing algorithms make different assumptions about the underlying nature of the mobility of the graph. There are several routing algorithms \cite{two-tier}\cite{adaptive} that assumes a number of permanently stationary nodes or sensors as a part of the infrastructure, while still having a number of mobile nodes that needs to receive information. 
@@ -80,7 +80,22 @@ The movement creates the need for the following solutions:
 \section{Fundamental Routing Graph problems}
 
 
+
 \section{Cluster methods}
+
+Cluster methods are routing algorithms where certain nodes have been chosen to be Cluster Heads (CH). All nodes have exactly 1 cluster head that they communicate with. While it is true that most of the time the nodes that belong to a certain CH is its direct neighbours, some schemes includes nodes that are farther away, in order to reduce the number of CHs. The idea behind CHs are to include a layer specialisation in the network, and adding some of the advantages of centralization with a still decentralized system. 
+
+Sometimes several levels of CHs are implemented, where we have second, third etc. levels of CHs, which administrates the CHs one level beneeth them.  
+
+Some of the practical advantages are:
+\begin{itemize}
+\item Depending on the implemented location schemes, the CHs can cut down on the number of necesary transmissions needed to check whether nodes are alive or not.
+\item It can make routing simpler, since all transmissions will havet to go up through the chain of CHs, and then down again to the sink. 
+\end{itemize}
+
+ CHs is to devide any communication between nodes into 3 stages: 1) From the source to the local CH, 2) From the local CH to the CH closest to the sink and 3) from the CH closets to the sink to the sink itself\footnote{If either CH is the sink or the source, and the first or third part is of course eliminated}. This way the amount of nodes who need to know  
+
+Since we are introducing a layer of centralization, it is also clear that there must be a system in place to detect and replace a CH should it fail (and to elect it in the first place. An often used system is a voting system, or a arbitrery selecting algorithm (such as having the lowest hash value).
 
 \bibliographystyle{plain}
 \bibliography{references}{}
