@@ -21,10 +21,22 @@ In the case of mobile ad-hoc networks, the routing graph does not have a singula
 
 The preferred structure of the underlying graph is that of planar graph. This makes sense since many traditionally popular routing algorithms makes this assumption (and simplifies the situation immensely). There are several methods for turning the underlying structure into a planar graph (i.e. making sure that for any given node, the only neighbours they have are the ones that do not violate the planarity of the graph, were it to be represented as a graph), and keeping it so for the lifetime of the network.
 
-Since we are dealing with mobile units, the graph would be changing as the nodes moved around, which means that we would need a solution that could run continuously, making the necessary changes to the current structure, and not having to start over from scratch each time. Since we are dealing transmitting nodes, it is important to note that in practise changes is when a node leaves or enters another nodes radius (it does not matter which of them moves). While environmental factors will of course dampen signals, we can in most cases assume that the radio signal will behave more like a disc with its centre on each node, than a line-segment that has to be tuned just right to communicate with another node. Assuming we are sure that the desired node is in its transmit radius, a node can simply transmit its message (with some kind of recipient id - unless it wants to flood the network), and hope that it avoids message collision.   
+Since we are dealing with mobile units, the graph would be changing as the nodes moved around, which means that we would need a solution that could run continuously, making the necessary changes to the current structure, and not having to start over from scratch each time. Since we are dealing transmitting nodes, it is important to note that in practise changes is when a node leaves or enters another nodes radius (it does not matter which of them moves). While environmental factors will of course dampen signals, we can in most cases assume that the radio signal will behave more omni-directional than directional. Assuming we are sure that the desired node is in its transmit radius, a node can simply transmit its message (with some kind of recipient id --- unless it wants to flood the network), and hope that it avoids message collision.   
 
 \section{Routing Algorithms}
 
+The biggest conceptual difference for routing/shortest path algorithms in a mobile ad-hoc network compared to mainstray routing/shortest path algorithms, is the loss of global overview that these algorihtms employ --- such as relaxing a specific nodes' edges at a specific time. There exist distrubted version of some of the ``clasic'' routing algorithms, but their usefullness may be limited in a mobile network, since they will have to be recomputed either each time a node wants to transmit a message, or each time the underlying graph changes.
+
+Routing algorithms suited for mobile ad-hoc networks can be sorted into the following categories:
+\begin{description}
+\item[Greedy routing]: Greedy routing is when a node 
+\item[Geometrical routing:] 
+\item[]
+\end{description}
+
+Different routing algorithms make different assumptions about the underlying nature of the mobility of the graph. There are seval routing algorithms \cite{two-tier}\cite{adaptive} that assumes a number of permanently stationary nodes or sensors as a part of the infrastructure, while still having a number of mobile nodes that needs to recive information. 
+
+In practical situations the system will have to deal with all the problems inheirent in wireless communication, such as the hidden terminal problem and message collision. To avoid these, having a lower communications layer that took care of this would be preferable to implementing it in the algoirhtm itself (though care should be taken to ensure that the algoirhtm is build to withstand these conditions). 
 
 \section{Problems we have with movement}
 
