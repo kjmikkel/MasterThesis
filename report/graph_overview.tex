@@ -17,6 +17,11 @@
 
 \section{Routing graph}
 
+In the case of mobile ad-hoc networks, the routing graph does not have a singular structure. Since nodes will be able to broadcast and receive signals to/from nodes in a radius (at least under optimal conditions) around them, the most routing graph with the maximum number of edges will not be planar. Furthermore, while most routing algorithms assume so, the edges do not have to be bidirectional. One could easily imagine a scenario where heterogeneous ad-hoc nodes had different broadcast radii, leading to cases where certain nodes could receive other nodes broadcast through 1 jump, but would have to route through several nodes to get the message back.
+
+The preferred structure of the underlying graph is that of planar graph. This makes sense since many traditionally popular routing algorithms makes this assumption (and simplifies the situation immensely). There are several methods for turning the underlying structure into a planar graph (i.e. making sure that for any given node, the only neighbours they have are the ones that do not violate the planarity of the graph, were it to be represented as a graph), and keeping it so for the lifetime of the network.
+
+Since we are dealing with mobile units, the graph would be changing as the nodes moved around, which means that we would need a solution that could run continuously, making the necessary changes to the current structure, and not having to start over from scratch each time. Since we are dealing transmitting nodes, it is important to note that in practise changes is when a node leaves or enters another nodes radius (it does not matter which of them moves). While environmental factors will of course dampen signals, we can in most cases assume that the radio signal will behave more like a disc with its centre on each node, than a line-segment that has to be tuned just right to communicate with another node. Assuming we are sure that the desired node is in its transmit radius, a node can simply transmit its message (with some kind of recipient id - unless it wants to flood the network), and hope that it avoids message collision.   
 
 \section{Routing Algorithms}
 
@@ -29,7 +34,8 @@ Movement presents us with the following problems:
 \item Changes underlying graph
 \item Invalidates location information other nodes about about the node
 \item If the node is part of path from \emph{a} to \emph{b} (and the node is neither), which is stored and which is believed to be used again, then that path may fail, and a longer path may have to be taken. In degenerate cases this may lead to situations where the new optimal path will lead away from the absolute coordinates of the end node.
-\item The moving node may partition a network into 2 separate networks, if the 2 networks can only communicate through it
+\item The moving node may partition a network into 2 separate networks, if the node was the only node the 2 networks could communicate through
+\item The moving node may create a link between 2 previously separate networks
 \item The node may move into a position that creates a better path than the one before it moved - however, the surrounding nodes needs to be aware of it
 \end{itemize}
 
@@ -37,11 +43,11 @@ The movement creates the need for the following solutions:
 \begin{itemize}
 \item There needs to be a way to restructure the underlying graph so that it reflects the movement of the node \cite{practical}
 \item The location of the moving node needs to be updated. This does not necessary need to be done to all the nodes in the network, nor all the nodes that knew it before. There are many schemes for this, such as GLS \cite{scaleLocation} which partitions the world into squares, and then partitions these squares into other squares, resulting in several layers of squares. In each of these squares, there is a single node that knows the location of the node (and a scheme to find it).
-\item   
+\item Depending on implementation there may be no problem (there is a time-out system that detects that the message did not arrive, the node right before the missing node reports back that it could not deliver the message etc.). Finding a new path should not be a real problem unless the algorithm employed is a greedy algorithm (i.e. an algorithm that will always choose to go to the node that brings it closest to the absolute coordinates of the goal node).
+\item If the network is partitioned, then the best course of action is to let the two networks figure out that the other part isn't available. Some kind of timeout mechanism in the location mechanism would seem like the most straightforward path
+\item If connection is established between network \emph{a} and network \emph{b}, there should be a mechanism so that network \emph{a} and inform network \emph{b} of its nodes, and vice versa. Optimally this should already be a part of how nodes advertise their presence.
+\item In order to take advantage of new nodes, they need to advertise their presence (and their location) to the entire system 
 \end{itemize}
-
-
-When a node moves it changes the underlying graph, which has to be restructured in order to facilitate basic routing of any kind. It 
 
 \section{Fundamental Routing Graph problems}
 
