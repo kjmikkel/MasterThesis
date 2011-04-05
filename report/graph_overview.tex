@@ -8,6 +8,12 @@
 #2
 \halfblankline
 }
+\acroterm{ch}{Cluster Heads}{CH}
+\acroterm{gabe}{Gabriel Graph}{GG}
+\acroterm{udg}{Unit Disk Graph}{UDG}
+\acroterm{manet}{Mobile Ad-Hoc Network}{MANET}
+\acroterm{anet}{Ad-Hoc Network}{ANET}
+\acroterm{rng}{Relative Neighbourhood Graph}{RNG}
 \title{Energy Affluent Mobile Ad-Hoc Networks}
 \author{Mikkel Kjær Jensen}
 \date{\today}
@@ -16,27 +22,25 @@
 \pagestyle{fancy}
 
 \section{Routing graph}
+In the case of \manet, the routing graph does not have a singular structure. Since nodes will be able to broadcast and receive signals to/from nodes in a radius (at least under optimal conditions) around them, the most routing graph with the maximum number of edges will not be planar. Furthermore, while most routing algorithms assume so, the edges do not have to be bidirectional. One could easily imagine a scenario where heterogeneous ad-hoc nodes had different broadcast radii, leading to cases where certain nodes could receive other nodes broadcast through 1 jump, but would have to route through several nodes to get the message back.
 
-In the case of mobile ad-hoc networks, the routing graph does not have a singular structure. Since nodes will be able to broadcast and receive signals to/from nodes in a radius (at least under optimal conditions) around them, the most routing graph with the maximum number of edges will not be planar. Furthermore, while most routing algorithms assume so, the edges do not have to be bidirectional. One could easily imagine a scenario where heterogeneous ad-hoc nodes had different broadcast radii, leading to cases where certain nodes could receive other nodes broadcast through 1 jump, but would have to route through several nodes to get the message back.
-
-Much of the literature bases their graph on the Unit Disk Graph (UDG), where there exist an edge between node $n_1$ and $n_2$ iff $|\overline{n_1n_2}| \leq 1$ i.e. the distance between the two nodes are less or equal to 1 unit\footnote{I owe this definition to \cite{gopher}}. In this case we assume that all the nodes have the same communication range, and so every edge indicates that the two nodes can talk together. However it is clear that a UDG is not always planar, which is the preferred structure for a underlying graph in Ad-Hoc networks. 
+Much of the literature bases their graph on the \udg, where there exist an edge between node $n_1$ and $n_2$ iff $|\overline{n_1n_2}| \leq 1$ i.e. the distance between the two nodes are less or equal to 1 unit\footnote{I owe this definition to \cite{gopher}}. In this case we assume that all the nodes have the same communication range, and so every edge indicates that the two nodes can talk together. However it is clear that a \udg is not always planar, which is the preferred structure for a underlying graph in \anet. 
 
 The planar graph is a sensible choice, since it simplifies routing immensely, which is why many traditionally popular routing algorithms also make this assumption. There are several methods for turning the underlying structure into a planar graph (i.e. making sure that for any given node, the only neighbours they have are the ones that do not violate the planarity of the graph, were it to be represented as a graph), and keeping it so for the lifetime of the network. 
 
 There exist the following common methods for making the graph planar. More exist, but they have yet to be widely adopted by the research community.
 \begin{description}
-\item[The Gabriel Graph (GG):] Two nodes $n_1$ and $n_2$ only share an edge iff the circle that has $\overline{n_1n_2}$ as its diameter does not contain a node $n_3$\footnote{I owe this definition to \cite{gopher}}. 
-\item[Relative Neighbourhood Graph (RNG):] Two nodes $n_1$ and $n_2$ share an edge if there is no node $n_3$ such that $|\overline{n_1n_3}|, |\overline{n_2n_3}| \leq |\overline{n_1n_2}|$ (i.e. $n_3$ is closer to both $n_1$ and $n_2$ than $n_1$ and $n_2$ are to each other).
+\item[The \gabe] Two nodes $n_1$ and $n_2$ only share an edge iff the circle that has $\overline{n_1n_2}$ as its diameter does not contain a node $n_3$\footnote{I owe this definition to \cite{gopher}}. 
+\item[The \rng:] Two nodes $n_1$ and $n_2$ share an edge if there is no node $n_3$ such that $|\overline{n_1n_3}|, |\overline{n_2n_3}| \leq |\overline{n_1n_2}|$ (i.e. $n_3$ is closer to both $n_1$ and $n_2$ than $n_1$ and $n_2$ are to each other).
 \end{description}
-
 
 Since we are dealing with mobile units, the graph would be changing as the nodes moved around, which means that we would need a solution that could run continuously, making the necessary changes to the current structure, and not having to start over from scratch each time. Since we are dealing transmitting nodes, it is important to note that in practise changes is when a node leaves or enters another nodes radius (it does not matter which of them moves). While environmental factors will of course dampen signals, we can in most cases assume that the radio signal will behave more omni-directional than directional. Assuming we are sure that the desired node is in its transmit radius, a node can simply transmit its message (with some kind of recipient id --- unless it wants to flood the network), and hope that it avoids message collision.   
 
-In practise no graph can be said to be entirely static. Even in cases where the nodes are completely stationary, all nodes in the ad-hoc network will eventually run out of energy or fail. The routing graph must therefore be amendable, even if the nodes are not moving. 
+In practise no graph can be said to be entirely static. Even in cases where the nodes are completely stationary, all nodes in the \anet will eventually run out of energy or fail. The routing graph must therefore be amendable, even if the nodes are not moving. 
 
 \section{Routing Algorithms}
 
-The biggest conceptual difference for routing/shortest path algorithms in a mobile ad-hoc network compared to main-stray routing/shortest path algorithms, is the loss of global overview that these algorithms employ --- such as relaxing a specific nodes' edges at a specific time. There exist distributed version of some of the ``classic'' routing algorithms, but their usefulness may be limited in a mobile network, since they will have to be recomputed either each time a node wants to transmit a message, or each time the underlying graph changes.
+The biggest conceptual difference for routing/shortest path algorithms in a \manet compared to main-stray routing/shortest path algorithms, is the loss of global overview that these algorithms employ --- such as relaxing a specific nodes' edges at a specific time. There exist distributed version of some of the ``classic'' routing algorithms, but their usefulness may be limited in a mobile network, since they will have to be recomputed either each time a node wants to transmit a message, or each time the underlying graph changes.
 
 Most of the following algorithms will mostly be based around the idea of \emph{local routing algorithms}. Paraphrasing \cite{compass}, a local routing algorithm is an algorithm that for fills the following criteria:
 \begin{enumerate}
@@ -44,9 +48,9 @@ Most of the following algorithms will mostly be based around the idea of \emph{l
 \item Let $s$ be the source of the message, $t$ the sink, and $v$ be a node in the graph that can be reached from $s$. Arriving at $v$, the message can then use the information $v$ has stored about its neighbours, as well as its logical edges to the neighbours. Based on this information, one of the neighbours of $v$ is chosen as the next receiver of the message, unless $v = t$, in which case the message will not be propagated.
 \item A message will leave a node in the same state as it was when it arrived. In this sense nodes are considered stateless.\end{enumerate}
 
-Some routing algorithms, such as \cite{speed} violates the third property, writing information to the node in order to have congestion avoidance. Other algorithms uses the messages to have the nodes refresh their knowledge about the active nodes, and message ids of which messages that safely can be discarded. 
+Some routing solutions, such as \cite{speed} seems to violate the third property, writing information to the node in order to have congestion avoidance, but in fact this occurs on a lower level, altering the information available to the routing algorithm. They use this information to refresh their knowledge of which nodes are active, to find which of their neighbours are suffering from congestion, and which message ids they have received so that future copies safely can be discarded. 
 
-Routing algorithms suited for mobile ad-hoc networks can be sorted into the following categories:
+Routing algorithms suited for \manet s can be sorted into the following categories:
 \begin{description}
 \item[Flooding:] The simplest of the routing algorithms. The entire networks is flooded with the message, ensuring that the message eventually reaches the sink. In order to ensure the network is not flooded with the same message forever, each node will need a mechanism that will allow it to record which messages they have already received, so that they can discard it if they ever receives it again. This technique is guarantied to work, but uses a lot of bandwidth.
 
@@ -54,7 +58,7 @@ Routing algorithms suited for mobile ad-hoc networks can be sorted into the foll
 
 \item[Greedy routing]: Greedy routing is when a message is transmitted, the next node will always be the node of the neighbours that is closest to the sink. If the message ever arrives at a node where all neighbours are farther away from the current node -- a local minimum -- then no action is specified, and message will not be delivered. The greedy algorithm thus offers no guarantee in delivering the message, but in practise it improves as the density of the network increases.
 
-\item[Geometrical routing:] Geometrical routing uses the location of the current node and the location of the sink. There exist many different kinds of routing algorithms, but common for them is that unlike the greedy routing technique, they will transmit the message to a node that is not necessarily the closer node. This ensures that the message will eventually reach the sink. Common for many of these algorithms is that they try to 
+\item[Geometrical routing:] Geometrical routing uses the location of the current node and the location of the sink. There exist many different kinds of routing algorithms, but common for them is that unlike the greedy routing technique, they will transmit the message to a node that is not necessarily the closer node. This ensures that the message will eventually reach the sink. An example of a Geometrical algorithm could be the OFR\footnote{See \cite{gopher} for an in-depth discussion of OFR} routing algorithm, which uses the line-segments between the sink and the source to find which faces in the graph it needs to route to eventually arrive at the sink.
 
 \item[Shortest path:] The shortest path technique is to use distributed versions of the shortest path algorithms in order to find the shortest path from either one node to another, or from all nodes to all other nodes. As one might imagine, this approach has problems in mobile networks, where the structure of the graph can be in constant flux. Even in static networks the algorithms incur memory problems, since in the all-to-all solution, since for any node with a message for any node in the network must know which neighbour it must send it to get the most efficient route.  
 \end{description}
@@ -88,23 +92,34 @@ The movement creates the need for the following solutions:
 
 \section{Fundamental Graph Routing problems}
 
+A fundamental problem that has to be answered in any \manet is now to deal with situations where the sink no longer has the location the source routed the message to (but still reachable from the source). There are several solutions to this problem:
 
+\begin{itemize}
+\item Once the sink has moved a certain distance away from its neighbours, it could inform them of its current position, and then flood its surroundings of its current location. Effectively this solution creates an area of way-points that can be used to find the sink.
+\item If we are dealing with a Cluster method (see Section \ref{cluster methods}), then the sink only needs to inform its old \ch that it has moved to a new \ch, and in the same way as before, the message will catch up with the sink.
+\item Instead of getting the exact location of the sink at the beginning and then routing blindly towards that location, layers of node location ``servers'' can be established. A server may not know where any given node is, but it may know where a server (which is physically closer to the sink) that either knows the location of the sink, or knows a server closer to the sink \ldots and so on until we find a server that knows where the sink is. Thus the sink will eventually be found.
+\end{itemize}
+
+Another problem found in Graph routing is that of security. Unless some kind of security system is employed, a malicious node can not only impersonate other nodes, but it can also sniff the messages that are transmitted in its area (not only the ones that are directly sent to it). Further a malicious node can spam the network with bogus messages, both congestion the network, as well as draining the networks power. One proposed solution to this problem is to include secure keys that uniquely identify each node. However, without a central key-server (both for distribution and authentication), this is not practical.
 
 \section{Cluster methods}
+\label{cluster methods}
+Cluster methods are routing algorithms where certain nodes have been chosen to be \ch. All nodes have exactly 1 cluster head that they communicate with. While it is true that most of the time the nodes that belong to a certain \ch is its direct neighbours, some schemes includes nodes that are farther away, in order to reduce the number of \ch. The idea behind \ch are to include a layer specialisation in the network, and adding some of the advantages of centralisation with a still decentralised system. 
 
-Cluster methods are routing algorithms where certain nodes have been chosen to be Cluster Heads (CH). All nodes have exactly 1 cluster head that they communicate with. While it is true that most of the time the nodes that belong to a certain CH is its direct neighbours, some schemes includes nodes that are farther away, in order to reduce the number of CHs. The idea behind CHs are to include a layer specialisation in the network, and adding some of the advantages of centralisation with a still decentralised system. 
+Sometimes several levels of \ch are implemented, where we have second, third etc. levels of \ch, which administrates the \ch one level beneath them.  
 
-Sometimes several levels of CHs are implemented, where we have second, third etc. levels of CHs, which administrates the CHs one level beneath them.  
+In order to improve the routing, \ch s are almost always accompanied by \emph{gateway nodes}. Gateway nodes are nodes that connect two clusters. \cite{spanners} defines a gateway node as follows:
+Let C(p) be the set of nodes that has the cluster p as its \ch (this includes p). Then for a pair of \ch s $c_1, c_2$ if there exists a pair of nodes $p_1 \in C(c_1), p_2 \in C(c_2)$ such that $p_1$ and $p_2$ can communicate with each other in the graph, then $p_1$ and $p_2$ are gateway nodes (and in particular they are the only gateway nodes between $c_1$ and $c_2$.  
 
 Some of the practical advantages are:
 \begin{itemize}
-\item Depending on the implemented location schemes, the CHs can cut down on the number of necessary transmissions needed to check whether nodes are alive or not.
-\item It can make routing simpler, since all transmissions will haven't to go up through the chain of CHs, and then down again to the sink. 
+\item Depending on the implemented location schemes, the \ch can cut down on the number of necessary transmissions needed to check whether nodes are alive or not.
+\item It can make routing simpler, since all transmissions will have to go though the node gateways or up through the chain of \ch s. Only the \ch and gateway nodes needs to have their location database updated. All data will of course till have to be transmitted through regular nodes, but instead of having to route directly from the source to the sink, it will route from \ch to gateway, gateway to \ch and so on until it reaches the sink.
 \end{itemize}
 
- CHs is to divide any communication between nodes into 3 stages: 1) From the source to the local CH, 2) From the local CH to the CH closest to the sink and 3) from the CH closets to the sink to the sink itself\footnote{If either CH is the sink or the source, and the first or third part is of course eliminated}. This way the amount of nodes who need to know  
+\ch is to divide any communication between nodes into 3 stages: 1) From the source to the local \ch, 2) From the local \ch to the \ch closest to the sink and 3) from the \ch closets to the sink to the sink itself\footnote{If either \ch is the sink or the source, and the first or third part is of course eliminated}. This is thus one way to decrease the number of nodes that needs to keep track of other nodes. Furthermore, if gateway nodes are employed, this can ease the routing problem, as a lengthy route is divided into shorter trips.  
 
-Since we are introducing a layer of centralisation, it is also clear that there must be a system in place to detect and replace a CH should it fail (and to elect it in the first place. An often used system is a voting system, or a arbitrary selecting algorithm (such as having the lowest hash value).
+However, since we are introducing a layer of centralisation, it is also clear that there must be a system in place to detect and replace a \ch should it fail (and to elect it in the first place). An often used system is a voting system, or an selection algorithm (based hash value of the node's id, its MAC value etc.). 
 
 \bibliographystyle{plain}
 \bibliography{references}{}
