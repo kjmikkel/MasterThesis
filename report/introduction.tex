@@ -3,7 +3,7 @@
 
 \subsection{Motivation}
 In the last few years we have seen a clear increase in the sale of mobile phones with an advanced OS, Internet access, GPS and large amounts of computing power. These so--called \emph{Smart Phones} are becoming increasingly common \justify{Find numbers or source}, replacing the standard mobile phone. Developers are encouraged to write custom applications to these small mobile computers.
-
+ 
 Many of these Smart Phones has a built-in GPS or WiFi triangulation tools, which can be access by the applications on the phone, making it possible to create services that uses the users data --- such as directional services (such as Google Maps) or social networking services (such as Foursquare).
 
 In normal Ad-Hoc research energy conservation is usually a high priority. Sine Ad-Hoc networks has mostly been used for sensor networks for research this makes sense. Since the sensor networks are mostly deployed in inhospitable and inaccessible regions, this makes sense, since it is unlikely that any of the batteries will ever be recharged. However, this underlying assumption is not true when applied to Laptops, Netbooks and Smart Phones in the developed world. 
@@ -37,11 +37,16 @@ Concerning mobility I think the most interesting movement pattern would be peopl
 
 \subsection{Terminology}
 \label{Terminology}
-In this report I will use the following terms 
+In this report I will use the following terms and notations
 
-%\begin{defi}
+\defi{Given two nodes $n_1$ and $n_2$ in the plane. Then $\overline{n_1n_2}$ will indicate that there is a line-segment between node $n_1$ and $n_2$.}
+\defi{Let $x$ be a line-segment, then $|x|$ is the length of $x$ in the space that is it. If no space is explicitly mentioned, this is the Euclidean space.}
+\defi{DEFINE local MINIMUM  }
+\defi{A \emph{source} will be the node in the network that begins a transmission (by sending a message) and a \emph{sink(s)} will be the node(s) that is supposed to receive the message.}
+\defi{The Routing Graph is the graph that a message has to navigate through in order to go from the source to the sink. In most cases this graph is not unique.}
+\defi{Geographic movement is when a node changes its position, this may or may not affect the topology of the routing graph}
+\defi{Topological movement is when the movement in the node causes a change in the routing graph.}
 
-%\end{defi}
 
 \subsection{Anatomy of the solution}
 
