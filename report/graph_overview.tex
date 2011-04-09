@@ -34,7 +34,7 @@ There exist the following common methods for making the graph planar \todo{expla
 \item[The \rng:] Two nodes $n_1$ and $n_2$ share an edge if there is no node $n_3$ such that $|\overline{n_1n_3}|, |\overline{n_2n_3}| \leq |\overline{n_1n_2}|$ (i.e. $n_3$ is closer to both $n_1$ and $n_2$ than $n_1$ and $n_2$ are to each other).
 \end{description}
 
-Since we are dealing with mobile units, the topology of the graph will change as the nodes move around, which means that we will need a solution that updates the topology continuesly, and not having to start over from scratch each time. Since we are dealing transmitting nodes, it is important to note that in practise changes is when a node leaves or enters another nodes radius (it does not matter which of them moves). While environmental factors will of course dampen signals, we can in most cases assume that the radio signal will behave more omni-directional than directional. Assuming we are sure that the desired node is in its transmit radius, a node can simply transmit its message (with some kind of recipient id --- unless it wants to flood the network), and hope that it avoids message collision. \todo{work in that we are working in an ideal situation, and that reality is messy}  
+Since we are dealing with mobile units, the topology of the graph will change as the nodes move around, which means that we will need a solution that updates the topology continuously, and not having to start over from scratch each time. Since we are dealing transmitting nodes, it is important to note that in practise changes is when a node leaves or enters another nodes radius (it does not matter which of them moves). While environmental factors will of course dampen signals, we can in most cases assume that the radio signal will behave more omni-directional than directional. Assuming we are sure that the desired node is in its transmit radius, a node can simply transmit its message (with some kind of recipient id --- unless it wants to flood the network), and hope that it avoids message collision. \todo{work in that we are working in an ideal situation, and that reality is messy}  
 
 In practise no graph can be said to be entirely static. Even in cases where the nodes are completely stationary, all nodes in the \anet will eventually run out of energy or fail. The routing graph must therefore be amendable, even if the nodes are not moving. 
 
@@ -60,15 +60,23 @@ It is worth noting that the 3 properties only apply to the routing algorithm its
 \subsection{Categories of Routing algorithms}
 When a routing algorithm wants to send a message or a number of messages from a sink to a source, an important question is whether there should first be sent a utility message to discover a path from the source to the sink, and then have all messages follow the established path, or each message should find its own way from the source to the sink.
 
-If the algorithm chooses the first way, then there has been established two fundamnetally differenet principles that can be applied.
+If the algorithm chooses the first way, then there has been established two fundamentally different principles that can be applied.
 \begin{description}
 \route{Destination Sequential Distance Vector (DSDV)}
-{With the DSDV, every node tries to remember as many as possible paths to the other nodes in the graph. The mapping from nodes to paths can either just be the next neighbor that a message needs to be routed to, or the entire path. In pure implementations of DSDV, each node knows a path to all other nodes. The advantage of DSDV is that when the information is correct it saves a lot of work, and is fast, while the disadvantage is that it is memory intensive and thus has problems scaling to large \manet. Depending on how much the nodes move, it could also be prone to contain outdated information.}
-{\cite{AODV} \todo{Find a primary source}}
+{With the DSDV, every node tries to remember as many as possible paths to the other nodes in the graph. The mapping from nodes to paths can either just be the next neighbour that a message needs to be routed to, or the entire path. In pure implementations of DSDV, each node knows a path to all other nodes. The advantage of DSDV is that when the information is correct it saves a lot of work, and is fast, while the disadvantage is that it is memory intensive and thus has problems scaling to large \manet. Depending on how much the nodes move, it could also be prone to contain outdated information.
+%In order to find a path DSDV uses a distributed version of Bell
+}
+{\cite{DSDV}}
 
 \route{Ad-Hoc On-demand Distance Vector (AODV)}
-{With the AODV   }
+{With the AODV, a node only records a path from any pair of nodes if it becomes relevant. This is done by a path discovery phase, where a route request package (RREQ) is sent from the source. When the RREQ arrives at a node it checks whether the node knows of a path to the sink. If the nodes does not, then the RREQ writes the node it was sent from and the number of hops to the current node, and is sent along. If the current node does know a path to the sink, then a bidirectional path is established from the source to the sink, so that messages can be exchanged.
+
+The AODV has route maintenance mechanism. Let node $n_k$ and $n_{k+1}$ be the [$k$]th and [$t+1$]th node on the path from the source to the sink for $k \in \N$. If $n_{k+1}$ is no longer adjacent to $n_{k}$, then it will begin a tear-down protocol that will delete its routing table, and then tell the [$k-1$]th to do the same until the message arrives at the source, which can then rebuild the path if the path is still relevant.
+AODV does not describe any specific routing algorithm in order to establish a route.}
 {\cite{larMotion, AODV}}
+
+
+
 \end{description}
 
 Routing algorithms suited for \manet s can be sorted into the following categories:
@@ -78,10 +86,10 @@ Routing algorithms suited for \manet s can be sorted into the following categori
 {\cite{larMANET, Sur2}} 
 
 \route{Restricted Direction Routing (RDR)}
-{Restricted Directed Routing is an algorithm that can be described as a kind of directed flooding. Let G be a geometrical shape. G is now placed such that it now contains both the source and the sink are both contined in G (preferably with a non-zero margian, to counter act any movement on the sinks part). The source now floods all nodes inside G, hopefully reaching the sink. Once a route to the sink has been established, the informat
+      {Restricted Directed Routing is an algorithm that can be described as a kind of directed flooding. Let G be a geometrical shape. G is now placed such that it now contains both the source and the sink are both contained in G (preferably with a non-zero margin, to counter act any movement on the sinks part). The source now floods all nodes inside G, hopefully reaching the sink. Once a route to the sink has been established, the information
 
-The there is no standard shape, but possible choices includes Linear Swept Sphere, Circle or Rectangle \todo{Include figure of them all}. Obviously, RDR is only applicaple when the source has an idea of the location of the sink, otherwise another algorithm (like flooding) has to be employed. In the case where both nodes wants to contact each other (say, in situations where timers are involved), a bi-directional RDR can take place, where each node tries to find each other, until both diffusion reach each other, and a path can be established.}
-{}
+The there is no standard shape, but possible choices includes Linear Swept Sphere, Circle or Rectangle \todo{Include figure of them all}. Obviously, RDR is only applicable when the source has an idea of the location of the sink, otherwise another algorithm (like flooding) has to be employed. In the case where both nodes wants to contact each other (say, in situations where timers are involved), a bi-directional RDR can take place, where each node tries to find each other, until both diffusion reach each other, and a path can be established.}
+{\cite{larMANET}}
 
 \route{Directed Diffusion (DD)}
 {}
@@ -105,6 +113,7 @@ Different routing algorithms make different assumptions about the underlying nat
 In practical situations the system will have to deal with all the problems inherent in wireless communication, such as the hidden terminal problem and message collision. To avoid these, having a lower communications layer that took care of this would be preferable to implementing it in the algorithm itself (though care should be taken to ensure that the algorithm is build to withstand these conditions).
 
 \section{Problems we have with movement}
+\qfigure{\tigz{graphTop}}{}{}
 
 Movement presents us with the following problems:
 

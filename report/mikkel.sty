@@ -25,20 +25,24 @@
 \usepackage{caption}
 \usepackage{afterpage}
 \usepackage{fancyhdr}
+
 \usepackage[section]{placeins}
 
 \captionsetup{justification=justified}
 \usepackage[final]{listings}
 
 %\usepackage{ulem}
-\ifPDF
-	\usepackage[pdftex]{hyperref}
-        \usepackage[pdftex]{graphicx}
+
+\usepackage{tikz} % For figures
+%\ifPDF
+%	\usepackage[pdftex]{hyperref}
+%        \usepackage[pdftex]{graphicx}
 	
-\else
-	\usepackage[dvips]{graphicx}
+%\else
+%	\usepackage[dvips]{graphicx}
 %	\usepackage[dvips]{hyperref}
-\fi
+%\fi
+
 \lstset{ %
 language=Python,                % choose the language of the code
 basicstyle=\scriptsize,       % the size of the fonts that are used for the code
@@ -109,7 +113,16 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 References: #3
 }
 
-\newcommand{\figref}[1]{see figure \ref{#1}}
+\newcommand{\qfigure}[3]{
+\begin{figure}
+\begin{center}
+#1
+\end{center}
+\caption{\label{#2}#3}
+\end{figure}
+}
+\newcommand{\tigz}[1]{\input{figures/tikz/#1.tex}}
+\newcommand{\figref}[1]{see figure~\ref{#1}}
 
 \newcommand{\src}[1]{
 \subsection{#1.cpp}
