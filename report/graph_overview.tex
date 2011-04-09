@@ -22,7 +22,15 @@
 \pagestyle{plain}
 
 \section{Routing graph}
-In the case of \manet, the routing graph does not have a singular structure. Since nodes will be able to broadcast and receive signals to/from nodes in a radius (at least under optimal conditions) around them, the most routing graph with the maximum number of edges will not be planar. Furthermore, while most routing algorithms assume so, the edges do not have to be bidirectional. One could easily imagine a scenario where heterogeneous ad-hoc nodes had different broadcast radii, leading to cases where certain nodes could receive other nodes broadcast through 1 jump, but would have to route through several nodes to get the message back.
+\tigfig{hidden_terminal}{}
+
+\tigfig{graphTop}{The hidden terminal problem. In this example the third node from the left is communicating with the middle node (symbolised by the grey colour) Since the transmission cannot reach the leftmost node, it is not possible for it to do collision avoidance}
+
+\tigfig{different_radius}{A node with different broadcast ranges. The first solid circle is the default broadcast range of the node, while the second dashed circle is the maximum range it can broadcast.}
+
+\tigfig{node_different_radius}{Two nodes with different broadcast ranges. The black node is not adjacent to the grey node, but the grey node is adjacent to the black node - thus one-way communication could take place.}
+
+There does currently not exist a consensus on what   routing graph does not have a singular structure. Since nodes will be able to broadcast and receive signals to/from nodes in a radius (at least under optimal conditions) around them, the most routing graph with the maximum number of edges will not be planar. Furthermore, while most routing algorithms assume so, the edges do not have to be bidirectional. One could easily imagine a scenario where heterogeneous ad-hoc nodes had different broadcast radii, leading to cases where certain nodes could receive other nodes broadcast through 1 jump, but would have to route through several nodes to get the message back.
 
 Much of the literature bases their graph on the \udg, where there exist an edge between node $n_1$ and $n_2$ iff $|\overline{n_1n_2}| \leq 1$ i.e. the distance between the two nodes are less or equal to 1 unit  \cite{gopher}. In this case we assume that all the nodes have the same communication range, and so every edge indicates that the two nodes can talk together. However it is clear that a \udg is not always planar, which is the preferred structure for a underlying graph in \anet. 
 
@@ -75,8 +83,6 @@ The AODV has route maintenance mechanism. Let node $n_k$ and $n_{k+1}$ be the [$
 AODV does not describe any specific routing algorithm in order to establish a route.}
 {\cite{larMotion, AODV}}
 
-
-
 \end{description}
 
 Routing algorithms suited for \manet s can be sorted into the following categories:
@@ -93,10 +99,9 @@ The there is no standard shape, but possible choices includes Linear Swept Spher
 
 \route{Directed Diffusion (DD)}
 {}
-{}
 
 \route{Greedy routing} 
-{Greedy routing is when a message is transmitted, the next node will always be the node of the neighbours that is closest to the sink. If the message ever arrives at a node where all neighbours are farther away from the current node -- a local minimum -- then no action is specified, and message will not be delivered. The greedy algorithm thus offers no guarantee in delivering the message, but in practise it improves as the density of the network increases.}
+{Greedy routing is a simple routing scheme that always chooses to route the message to that of its neighbours that is closest to the sink. In the case where the message arrives at a node $n$, where all of $n$'s neighbours are farther away from the sink than $n$, then no action is specified, and the message will not be delivered. The greedy algorithm thus offers no guarantee in delivering the message, but in practise it improves as the density of the network increases.}
 {}
 
 \route{Geometrical routing}
@@ -106,6 +111,7 @@ The there is no standard shape, but possible choices includes Linear Swept Spher
 \route{Shortest path} 
 {The shortest path technique is to use distributed versions of the shortest path algorithms in order to find the shortest path from either one node to another, or from all nodes to all other nodes. As one might imagine, this approach has problems in mobile networks, where the structure of the graph can be in constant flux. Even in static networks the algorithms incur memory problems, since in the all-to-all solution, since for any node with a message for any node in the network must know which neighbour it must send it to get the most efficient route.}
 {}  
+
 \end{description}
 
 Different routing algorithms make different assumptions about the underlying nature of the mobility of the graph. There are several routing algorithms \cite{adaptive, two-tier} that assumes a number of permanently stationary nodes or sensors as a part of the infrastructure, while still having a number of mobile nodes that need to receive information. 
@@ -113,7 +119,10 @@ Different routing algorithms make different assumptions about the underlying nat
 In practical situations the system will have to deal with all the problems inherent in wireless communication, such as the hidden terminal problem and message collision. To avoid these, having a lower communications layer that took care of this would be preferable to implementing it in the algorithm itself (though care should be taken to ensure that the algorithm is build to withstand these conditions).
 
 \section{Problems we have with movement}
-\qfigure{\tigz{graphTop}}{}{}
+
+
+
+
 
 Movement presents us with the following problems:
 

@@ -110,15 +110,16 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \newcommand{\route}[3]
 {
 \item[#1:] #2
-References: #3
+%\texttt{Needs sinkposition:} #3
+\texttt{References:} #3
 }
 
-\newcommand{\qfigure}[3]{
+\newcommand{\tigfig}[2]{
 \begin{figure}
 \begin{center}
-#1
+\tigz{#1}
 \end{center}
-\caption{\label{#2}#3}
+\caption{\label{#1}#2}
 \end{figure}
 }
 \newcommand{\tigz}[1]{\input{figures/tikz/#1.tex}}
