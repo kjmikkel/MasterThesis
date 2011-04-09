@@ -1,0 +1,25 @@
+% Definition of radii
+\def\smallradius{(0,0) circle (0.75cm)}
+\def\largeradius{(0,0) circle (1.5cm)}
+
+\def\radiinode{(0,0) circle (0.1cm)}
+
+\colorlet{circle edge}{black!50}
+
+\tikzset{
+  filled/.style={fill=circle area, draw=circle edge, thick},
+  outline/.style={draw=circle edge, thick},
+  dash/.style={very thick, dashed}
+}
+
+\setlength{\parskip}{5mm}
+\begin{tikzpicture}
+  \fill[black] \radiinode;
+
+  \draw[outline] \smallradius node {};
+  \draw[dash] \largeradius {};
+
+  \draw \smallradius node {};
+  \draw \largeradius node {};
+  \draw \radiinode node {};
+\end{tikzpicture}

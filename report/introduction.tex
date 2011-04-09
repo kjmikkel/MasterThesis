@@ -15,10 +15,10 @@ Preferably we would like to have these mesh networks connected to the Internet, 
 \todo{finish this section and tighten it up}
 
 \subsection{Expectations to the Reader}
-I expect the reader to have a university level understanding of Computer Networking\footnote{For instance having read \cite{ComNet} or similar}, especially when it comes to understanding the building blocks of the network stack, as well as the most common problems with wireless networks. I also expect the reader to have a university level understanding of Algorithms\footnote{Having read \cite{algo} or similar}. \todo{Give this a few extra passses}
+I expect the reader to have a university level understanding of Computer Networking\footnote{For instance having read \cite{ComNet} or similar}, especially when it comes to understanding the building blocks of the network stack, as well as the most common problems with wireless networks. I also expect the reader to have a university level understanding of Algorithms\footnote{Having read \cite{algo} or similar}. \todo{Give this a few extra passes}
 
 \subsection{Scope and Limitations}
-While important in a real world application, I will in this thesis not concern myself with security, neither in the form of the authentication, anonymity of the sender or [something about rooting I think it might be possible]. For a treatment of this subject see \cite{trustedRouting}. Furthermore, if there does not exist a path between two nodes, I will not make any guareentee that the message will ever arrive at the sink. \todo{finish this}
+While important in a real world application, I will in this thesis not concern myself with security, neither in the form of the authentication, anonymity of the sender or [something about rooting I think it might be possible]. For a treatment of this subject see \cite{trustedRouting}. Furthermore, if there does not exist a path between two nodes, I will not make any guarantee that the message will ever arrive at the sink. \todo{finish this}
 
 
 \subsection{Node specifications}
@@ -38,15 +38,18 @@ Concerning mobility I think the most interesting movement pattern would be peopl
 \label{Terminology}
 In this report I will use the following terms and notations
 
+\defi{In this thesis I will use the term \emph{node} when referring to a device that can both transmit and receive information, execute a routing algorithm based on the received message, and which is the part of the \manet.}
 \defi{Given two nodes $n_1$ and $n_2$ in the plane. Then $\overline{n_1n_2}$ will indicate that there is a line-segment between node $n_1$ and $n_2$.}
 \defi{Let $x$ be a line-segment, then $|x|$ is the length of $x$ in the space that is it. If no space is explicitly mentioned, this is the Euclidean space.}
-\defi{DEFINE local MINIMUM  }
 \defi{A \emph{source} will be the node in the network that begins a transmission (by sending a message) and a \emph{sink(s)} will be the node(s) that is supposed to receive the message.}
 \defi{The Routing Graph is the graph that a message has to navigate through in order to go from the source to the sink. In most cases this graph is not unique.}
 \defi{Geographic movement is when a node changes its position, this may or may not affect the topology of the routing graph}
-\defi{Topological movement is when the movement in the node causes a change in the routing graph.}
+\defi{Topological movement is when the movement in the node causes a change in the routing}
 \defi{When a node $n_x$ can transmit information to another node $n_y$ (i.e. $n_y$ lies within the range of $n_x$ transmitter), then I will say that $n_x$ can communicate with $n_y$}
 \defi{When two nodes $n_x$ and $n_y$ can communicate with each other, I will say that they are adjacent in the graph}
+\defi{When a node $n_x$ can transmit information to another node $n_y$ (i.e. $n_y$ lies within the range of $n_x$ transmitter), then I will say that $n_x$ is adjacent to $n_y$}
+\defi{Given two nodes $n_x$ and $n_y$, I will say that there exists a bidirectional link between them, when $n_x$ is adjacent to $n_y$ and $n_y$ is adjacent to $n_x$.}
+\defi{When 2 nodes have a unidirectional link, and they are connected in the underlying routing graph, I will say that the two nodes are neighbours. I find this clarification necessary since }
 
 \subsection{Anatomy of the solution}
 
