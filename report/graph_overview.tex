@@ -22,13 +22,14 @@
 \pagestyle{plain}
 
 \section{Routing graph}
-\tigfig{hidden_terminal}{}
 
-\tigfig{graphTop}{The hidden terminal problem. In this example the third node from the left is communicating with the middle node (symbolised by the grey colour) Since the transmission cannot reach the leftmost node, it is not possible for it to do collision avoidance}
+\tigfig{hidden_terminal}{The hidden terminal problem. In this example node c is communicating with node b (illustrated by the grey colour in node b's transmitting area) Since the transmission does not reach node a, it is not possible for node a to perform collision avoidance.}
+
+\tigfig{graphTop}{An example of the difference between Geometrical and Topological movement. For clarity I have opted not to include node c's transmission radius. In \ref{fig:graphTop2} node b has moved around inside node a and node c's transmission intersection, but since there has been no chance in which nodes node b is adjacent to, b is still a neighbour to both nodes. In \ref{fig:graphTop3} node b has moved outside of node a's transmission radius, but is still inside node c's radius, changing the topology of the graph.}
 
 \tigfig{different_radius}{A node with different broadcast ranges. The first solid circle is the default broadcast range of the node, while the second dashed circle is the maximum range it can broadcast.}
 
-\tigfig{node_different_radius}{Two nodes with different broadcast ranges. The black node is not adjacent to the grey node, but the grey node is adjacent to the black node - thus one-way communication could take place.}
+\tigfig{node_different_radius}{Two nodes with different broadcast ranges. Node a is not adjacent to node b, but node b is adjacent to node a -- thus only one-way communication could take place.}
 
 There does currently not exist a consensus on what   routing graph does not have a singular structure. Since nodes will be able to broadcast and receive signals to/from nodes in a radius (at least under optimal conditions) around them, the most routing graph with the maximum number of edges will not be planar. Furthermore, while most routing algorithms assume so, the edges do not have to be bidirectional. One could easily imagine a scenario where heterogeneous ad-hoc nodes had different broadcast radii, leading to cases where certain nodes could receive other nodes broadcast through 1 jump, but would have to route through several nodes to get the message back.
 
@@ -56,7 +57,7 @@ Most of the following algorithms will mostly be based around the idea of \emph{l
 
 Paraphrasing \cite{compass}, a local routing algorithm is an algorithm that for fills the following criteria:
 \begin{enumerate}
-\item Each message will have a limited memory to store information about a constant number of verticess, but it have full access to the position of the sink and the source. At no point does the message have full knowledge of the entire graph. 
+\item Each message will have a limited memory to store information about a constant number of vertexes, but it have full access to the position of the sink and the source. At no point does the message have full knowledge of the entire graph. 
 \item Let $s$ be the source of the message, $t$ the sink, and $v$ be a node in the graph that can be reached from $s$. Arriving at $v$, the message can then use the information $v$ has stored about its neighbours, as well as its logical edges to the neighbours. Based on this information, one of the neighbours of $v$ is chosen as the next receiver of the message, unless $v = t$, in which case the message will not be propagated.
 \item A message will not leave information that the nodes routing algorithm will be able to use. In this sense nodes are considered stateless.\end{enumerate}
 
