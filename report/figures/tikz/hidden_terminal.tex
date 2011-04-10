@@ -1,16 +1,10 @@
 % Definition of radii
 \def\firstradius{(0,0) circle (1.5cm)}
-\def\firstnode{(0,0) circle (0.1cm)}
-
 \def\secondradius{(1,0) circle (1.5cm)}
-\def\secondnode{(1,0) circle (0.1cm)}
-
 \def\thirdradius{(2,0) circle (1.5cm)}
-\def\thirdnode{(2,0) circle (0.1cm)}
 
 \colorlet{circle edge}{black!100}
 \colorlet{circle area}{gray!20}
-
 \tikzset{
   filled/.style={fill=circle area, draw=circle edge, thick},
   outline/.style={draw=circle edge, thick},
@@ -18,21 +12,23 @@
   dash/.style={very thick, dashed}
 }
 
+\tikzstyle{vertex}=[circle,fill=black!50,minimum size=10pt,inner sep=0pt]
+
 \setlength{\parskip}{5mm}
+ 
 \begin{tikzpicture}
-  \begin{scope}
+  \node[vertex] (a) at (0,0) {a};
+ 
+ \begin{scope}
     \fill[filled] \thirdradius;
   \end{scope}
-
-  \fill[black] \firstnode;
-  \fill[black] \secondnode;
-  \fill[black] \thirdnode;
+   
+   % Has to be defined here, or it will be overwritten 
+  \node[vertex] (b) at (1,0) {b};
+  \node[vertex] (c) at (2,0) {c};   
 
   \draw[outline] \firstradius node {};
   \draw[outline] \secondradius node {};
   \draw[strong] \thirdradius node {};
 
-  \draw \firstnode node {};
-  \draw \secondnode node {};
-  \draw \thirdnode node {};
 \end{tikzpicture}

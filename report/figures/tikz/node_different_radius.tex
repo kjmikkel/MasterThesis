@@ -1,9 +1,6 @@
 % Definition of radii
 \def\smallradius{(0,0) circle (0.75cm)}
-\def\smallradiinode{(0,0) circle (0.1cm)}
-
 \def\largeradius{(1.5,0) circle (1.5cm)}
-\def\largeradiinode{(1.5,0) circle (0.1cm)}
 
 \colorlet{circle edge}{black!50}
 
@@ -13,17 +10,16 @@
   dash/.style={very thick, dashed}
 }
 
+\tikzstyle{vertex}=[circle,fill=black!50,minimum size=10pt,inner sep=0pt]
+
 \setlength{\parskip}{5mm}
 \begin{tikzpicture}
-  \fill[black] \smallradiinode;
-  \fill[gray] \largeradiinode;
-
   \draw[outline] \smallradius node {};
   \draw[dash] \largeradius {};
 
   \draw \smallradius node {};
   \draw \largeradius node {};
 
-  \draw \smallradiinode node {};
-  \draw \largeradiinode node {};
+  \node[vertex] (a) at (0,0) {a};
+  \node[vertex] (b) at (1.5, 0) {b};
 \end{tikzpicture}
