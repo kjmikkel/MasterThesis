@@ -13,7 +13,7 @@
   outline/.style={draw=circle edge, thick}
   }
 
-\subfloat[foo]{\label{fig:short_path1}
+\subfloat[Initial]{\label{fig:short_path1}
 \begin{tikzpicture}
     % First we draw the vertices
     \foreach \pos/\name in {{(1,1.5)/+}, {(1.5, 2)/a}, {(2,2.7)/b}, {(3,3)/-}, {(4,3)/*}, {(4,2)/c}, {(5,2)/d},
@@ -32,7 +32,7 @@
     \end{pgfonlayer}
 \end{tikzpicture}}
 % Remove empty line
-\subfloat[bar]{\label{fig:short_path2}
+\subfloat[Node - has moved]{\label{fig:short_path2}
 \begin{tikzpicture}
     % First we draw the vertices
     \foreach \pos/\name in {{(1,1.5)/+}, {(1.5, 2)/a}, {(2,2.7)/b}, {(2.5,2.7)/-}, {(4,3)/*}, {(4,2)/c}, {(5,2)/d},
