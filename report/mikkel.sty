@@ -25,6 +25,7 @@
 \usepackage{caption}
 \usepackage{afterpage}
 \usepackage{fancyhdr}
+\usepackage{subfig}
 
 \usepackage[section]{placeins}
 
@@ -92,7 +93,6 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \newcommand{\pref}[1]{See Section \ref{#1} p. \pageref{#1}}
 \newcommand{\nref}[1]{see Section \ref{#1} p. \pageref{#1}}
 
-
 \newcommand{\highlights}{
 
 }
@@ -114,14 +114,15 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \texttt{References:} #3
 }
 
+
 \newcommand{\tigfig}[2]{
 \begin{figure}
-\begin{center}
+\centering
 \tigz{#1}
-\end{center}
 \caption{\label{#1}#2}
 \end{figure}
 }
+
 \newcommand{\tigz}[1]{\input{figures/tikz/#1.tex}}
 \newcommand{\figref}[1]{see figure~\ref{#1}}
 
