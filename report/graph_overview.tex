@@ -9,7 +9,6 @@
 \halfblankline
 }
 
-
 \title{Energy Affluent Mobile Ad-Hoc Networks}
 \author{Mikkel Kjær Jensen}
 \date{\today}
@@ -19,37 +18,39 @@
 
 \section{Routing graph}
 
-\tigfig{shortest_path_change}{In \ref{fig:short_path1} we see a path from node $+$ to node $*$. In \ref{fig:short_path2} we clearly see that the movement of node $-$ has caused the routing protocol to find a much longer path to the node $*$ from node $+$.}
 
-\tigfig{hidden_terminal}{The hidden terminal problem. In this example node c is communicating with node b (illustrated by the grey colour in node b's transmitting area) Since the transmission does not reach node a, it is not possible for node a to perform collision avoidance.}
-
-\tigfig{graphTop}{An example of the difference between Geometrical and Topological movement. For clarity I have opted not to include node c's transmission radius. In \ref{fig:graphTop2} node b has moved around inside node a and node c's transmission intersection, but since there has been no chance in which nodes node b is adjacent to, b is still a neighbour to both nodes. In \ref{fig:graphTop3} node b has moved outside of node a's transmission radius, but is still inside node c's radius, changing the topology of the graph.}
 
 \tigfig{different_radius}{A node with different broadcast ranges. The first solid circle is the default broadcast range of the node, while the second dashed circle is the maximum range it can broadcast.}
-
-\tigfig{node_different_radius}{Two nodes with different broadcast ranges. Node a is not adjacent to node b, but node b is adjacent to node a -- thus only one-way communication could take place.}
 
 Under optimal conditions a node has a uniform circular broadcast range. If node a and node b are in each other broadcast radii, then they can communicate with each other. A reasonable abstraction to this situation would be to deal with the \manet as a communications network. Furthermore it would seem logical to represent the connections between the nodes as a graph, where the nodes of the graphs are the \manet nodes, and the edges of the graph indicates that there exist a bidirectional both nodes are within each others broadcast radius. The problem of sending a message from the source to the sink then becomes a graph routing problem (but not necessary a shortest-path routing problem, since factors like fairness or maximization of the lifetime of the \manet becomes issues in practice).
 
 The next step is then to identify which kind graphs would be suitable for \manet. In the literature I have read, I have not been able to find a consensus on how the optimal graph should be structured. The first important question to answer should be whether the graph should be planar or not. A planar graph is defined as a graph that can be embedded in the plane. One of the properties of a planar embedding is that no edge will cross another edge. 
 
+In the case of \manet, making the routing graph planar will at best keep the maximum number of possible edges, and at worst remove some. However it is easier to reason about planar graphs\footnote{For instane if we let $v$ be the number of verticies, $f$ the number of faces and $e$ the number of edges then $v - e + f = 2$. Thus we can begin to reason about the ratio of the different parts of the graph given at least one of them}, and many routing algorihtms makes\todo{see if I can justify this}. For these reasons I will chose to work exclusively on planar graphs. There are several methods for turning the underlying structure into a planar graph (i.e. making sure that for any given node, the only neighbours they have are the ones that do not violate the planarity of the graph, were it to be represented as a graph), and keeping it so for the lifetime of the network. 
 
+\tigfig{node_different_radius}{Two nodes with different broadcast ranges. Node a is not adjacent to node b, but node b is adjacent to node a -- thus only one-way communication from b to a can take place.}
 
- nodes will be able to broadcast and receive signals to/from nodes in a given radius around them, the most routing graph with the maximum number of edges will not be planar. Furthermore, while most routing algorithms assume so, the edges do not have to be bidirectional. One could easily imagine a scenario where heterogeneous ad-hoc nodes had different broadcast radii, leading to cases where certain nodes could receive other nodes broadcast through 1 jump, but would have to route through several nodes to get the message back.
+The next question is then to define what constitutes an edge in the graph. Since one could easily imagine a scenario where heterogeneous ad-hoc nodes had different broadcast radii, leading to cases where certain nodes could receive other nodes broadcast through 1 jump, but would have to route through several nodes to get the message back -- see figure~\ref{fig:node_different_radius} for an example of this.
 
-Much of the literature bases their graph on the \udg, where there exist an edge between node $n_1$ and $n_2$ iff $|\overline{n_1n_2}| \leq 1$ i.e. the distance between the two nodes are less or equal to 1 unit  \cite{gopher}. In this case we assume that all the nodes have the same communication range, and so every edge indicates that the two nodes can talk together. However it is clear that a \udg is not always planar, which is the preferred structure for a underlying graph in \anet. 
-
-The planar graph is a sensible choice, since it simplifies routing immensely, which is why many traditionally popular routing algorithms also make this assumption. There are several methods for turning the underlying structure into a planar graph (i.e. making sure that for any given node, the only neighbours they have are the ones that do not violate the planarity of the graph, were it to be represented as a graph), and keeping it so for the lifetime of the network. 
-
-There exist the following common methods for making the graph planar \todo{explain}. More exist, but they have yet to be widely adopted by the research community.
+I have found the following methods for making the planar graphs:
 \begin{description}
-\item[The \gabe] Two nodes $n_1$ and $n_2$ only share an edge iff the circle that has $\overline{n_1n_2}$ as its diameter does not contain a node $n_3$ \cite{gopher}. 
+\item[The \gabe:] Two nodes $n_1$ and $n_2$ only share an edge iff the circle that has $\overline{n_1n_2}$ as its diameter does not contain a node $n_3$ \cite{gopher}. 
 \item[The \rng:] Two nodes $n_1$ and $n_2$ share an edge if there is no node $n_3$ such that $|\overline{n_1n_3}|, |\overline{n_2n_3}| \leq |\overline{n_1n_2}|$ (i.e. $n_3$ is closer to both $n_1$ and $n_2$ than $n_1$ and $n_2$ are to each other).
+\item[The \rdg:] The \rdg is a cluster\todo{Depending on whether I move clusters up or not, this may need explaination} based planar graph solution. After having clustered the nodes, each \ch calculates the local Delaunay edges, and then confers with its one-hop neighbours to check which Delaunay edges are valid. Besides being planar, computable in a distributed maner, the \rdg is also a spanner, which means that using it will only make the route a constant times longer than the optimal route \cite{GeoSpanners}.
+\hide{
+\item[The \udg] In the \udg, there exist an edge between node $n_1$ and $n_2$ iff $|\overline{n_1n_2}| \leq 1$ i.e. the distance between the two nodes are less or equal to 1 unit  \cite{gopher}. In this case we assume that all the nodes have the same communication range, and so every edge indicates that the two nodes can talk together. However it is clear that a \udg is not always planar, which is the preferred structure for a underlying graph in \anet.
+}
 \end{description}
 
-Since we are dealing with mobile units, the topology of the graph will change as the nodes move around, which means that we will need a solution that updates the topology continuously, and not having to start over from scratch each time. Since we are dealing transmitting nodes, it is important to note that in practise changes is when a node leaves or enters another nodes radius (it does not matter which of them moves). While environmental factors will of course dampen signals, we can in most cases assume that the radio signal will behave more omni-directional than directional. Assuming we are sure that the desired node is in its transmit radius, a node can simply transmit its message (with some kind of recipient id --- unless it wants to flood the network), and hope that it avoids message collision. \todo{work in that we are working in an ideal situation, and that reality is messy}  
+\tigfig{graph_comparison}{\ref{fig:rng1} and \ref{fig:rng2} are examples of the RNG, while \ref{fig:gg1} and \ref{fig:gg2} are examples of the GG. This figure is inspired by figure 7 in \cite{GeoSpanners}.}
 
-In practise no graph can be said to be entirely static. Even in cases where the nodes are completely stationary, all nodes in the \anet will eventually run out of energy or fail. The routing graph must therefore be amendable, even if the nodes are not moving. 
+It is not immediatly apparent how one would compare the graohps created by these three algorithms. Especially \rdg is a cluster based method. It is however clear that the \rng is slightly more accepting than the \gabe. See figure~\ref{fig:graph_comparison} for an example of the \rng and the \gabe.
+
+\tigfig{graphTop}{An example of the difference between Geometrical and Topological movement. For clarity I have opted not to include node c's transmission radius. In \ref{fig:graphTop2} node b has moved around inside node a and node c's transmission intersection, but since there has been no chance in which nodes node b is adjacent to, b is still a neighbour to both nodes. In \ref{fig:graphTop3} node b has moved outside of node a's transmission radius, but is still inside node c's radius, changing the topology of the graph.}
+
+Since we are dealing with mobile units, the topology of the graph will change as the nodes move around, which means that we will need a solution that updates the topology as needed, and not having to start over from scratch each time. Since we are dealing transmitting nodes, we must note the difference between Geometrical movment and Topological movement. I have illustrated the difference in figure~\ref{fig:graphTop}. In the rest of the thesis assume we are working in an idealised world, where the transmission radius is a perfect unit disc. In the real world this is not always the case\todo{work on this}.
+
+Neither the \manet or the \anet can be said to be entirely static. Even in an \anet, where we assume the nodes remain stationary, every single node will eventually run out of energy or fail. The routing graph must therefore always have a maintence system, be amendable. 
 
 \section{Routing Algorithms}
 
@@ -121,18 +122,21 @@ The there is no standard shape, but possible choices includes Linear Swept Spher
 
 Different routing algorithms make different assumptions about the underlying nature of the mobility of the graph. There are several routing algorithms \cite{adaptive, two-tier} that assumes a number of permanently stationary nodes or sensors as a part of the infrastructure, while still having a number of mobile nodes that need to receive information. 
 
-In practical situations the system will have to deal with all the problems inherent in wireless communication, such as the hidden terminal problem and message collision. To avoid these, having a lower communications layer that took care of this would be preferable to implementing it in the algorithm itself (though care should be taken to ensure that the algorithm is build to withstand these conditions).
+\tigfig{hidden_terminal}{The hidden terminal problem. In this example node c is communicating with node b (illustrated by the grey colour in node b's transmitting radius) Since the transmission does not reach node a, it is not possible for node a to dettect the communication between node b and node c, and it will thus belive that it is free to transmit its message to node b.}
+
+In practical situations the system will have to deal with all the problems inherent in wireless communication, such as the hidden terminal problem(see figure~\ref{fig:hidden_terminal}) and message collision. 
+
+
+To avoid these, having a lower communications layer that took care of this would be preferable to implementing it in the algorithm itself (though care should be taken to ensure that the algorithm is build to withstand these conditions).
 
 \section{Problems we have with movement}
 
-
-
-
-
 Movement presents us with the following problems:
 
+\tigfig{shortest_path_change}{In \ref{fig:short_path1} we see a path from node $+$ to node $*$. In \ref{fig:short_path2} we clearly see that the movement of node $-$ has caused the routing protocol to find a much longer path to the node $*$ from node $+$.}
+
 \begin{itemize}
-\item Changes underlying graph
+\item Changes underlying graph -- se figure~\ref{fig:shortest_path_change}.
 \item Invalidates location information about the node
 \item If the node is part of path from \emph{a} to \emph{b} (and the node is neither), which is stored and which is believed to be used again, then that path may fail, and a longer path may have to be taken. In degenerate cases this may lead to situations where the new optimal path will lead away from the absolute coordinates of the end node.
 \item The moving node may partition a network into 2 separate networks, if the node was the only node the 2 networks could communicate through
