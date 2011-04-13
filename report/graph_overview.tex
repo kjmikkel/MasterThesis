@@ -23,7 +23,7 @@ Movement presents us with the following problems:
 \tigfig{shortest_path_change}{In \ref{fig:short_path1} we see a path from node $+$ to node $*$. In \ref{fig:short_path2} we clearly see that the movement of node $-$ has caused the routing protocol to find a much longer path to the node $*$ from node $+$.}
 
 \begin{itemize}
-\item Changes underlying graph -- se figure~\ref{fig:shortest_path_change}.
+\item Changes underlying graph -- see figure~\ref{fig:shortest_path_change}.
 \item Invalidates location information about the node
 \item If the node is part of path from \emph{a} to \emph{b} (and the node is neither), which is stored and which is believed to be used again, then that path may fail, and a longer path may have to be taken. In degenerate cases this may lead to situations where the new optimal path will lead away from the absolute coordinates of the end node.
 \item The moving node may partition a network into 2 separate networks, if the node was the only node the 2 networks could communicate through
@@ -143,20 +143,20 @@ Routing algorithms suited for \manet s can be sorted into the following categori
 {The simplest of the routing algorithms. The entire network is flooded with the message, ensuring that the message eventually reaches the sink. We can be sure that the message will not flood the network forever, thanks to the recording system detailed in section \ref{record-recived}. If the sink can be reached from the source, then flooding is  guarantied to work, but uses a lot of bandwidth.} 
 {\cite{larMANET, Sur2}} 
 
-\tigfig{rdr}{}
+\tigfig{rdr}{The Grey area is the area in which routing take place. It is clear that the shape of the flooding will have a large effect on the number of nodes that will receive the transmission.}
 
 \route{Restricted Direction Routing (RDR)}
       {Restricted Directed Routing is an algorithm that can be described as a kind of directed flooding. Let G be a geometrical shape. G is now placed such that it now contains both the source and the sink are both contained in G (preferably with a non-zero margin, to counter act any movement on the sinks part). The source now floods all nodes inside G, hopefully reaching the sink. Once a route to the sink has been established, the information
 
-The there is no standard shape, but possible choices includes Linear Swept Sphere, Circle or Rectangle \todo{Include figure of them all}. Obviously, RDR is only applicable when the source has an idea of the location of the sink, otherwise another algorithm (like flooding) has to be employed. In the case where both nodes wants to contact each other (say, in situations where timers are involved), a bi-directional RDR can take place, where each node tries to find each other, until both diffusion reach each other, and a path can be established.}
+The there is no standard shape, but possible choices includes Linear Swept Sphere, Circle or Rectangle -- see figure \ref{fig:rdr}. Obviously, RDR is only applicable when the source has an idea of the location of the sink, otherwise another algorithm (like flooding) has to be employed. In the case where both nodes wants to contact each other (say, in situations where timers are involved), a bi-directional RDR can take place, where each node tries to find each other, until both diffusion reach each other, and a path can be established.}
 {\cite{larMANET}}
 
 \route{Directed Diffusion (DD)}
-{Directed Diffusion is a pull algorithm that works by having the sink send out a request for information. This requested information constitute a \emph{name} and can both be specific or be in a range\footnote{For instance it could be about data for a single day, or a range of days.}. This name, together with meta-data such as the sinks location and time-stamp, comprises an \emph{interest} which is transmitted to the rest of the network. Depending on the implementation, the request can flood the entire network, or just a section of it (like in RDR). When a node receives a request it checks with its data cache whether it has the information. If the node has the information, it sends a confirmation message back to the node it got the interest from. If the node does not have the information, it stores the interest in its own cache and creates a \emph{gradient} to both keep track of where the interest came from, have a timeout mechanism for that link, and a path maintenance mechanism (that also takes care of the interval between transmissions for that paticular interest). 
+{Directed Diffusion is a pull algorithm that works by having the sink send out a request for information. This requested information constitute a \emph{name} and can both be specific or be in a range\footnote{For instance it could be about data for a single day, or a range of days.}. This name, together with meta-data such as the sinks location and time-stamp, comprises an \emph{interest} which is transmitted to the rest of the network. Depending on the implementation, the request can flood the entire network, or just a section of it (like in RDR). When a node receives a request it checks with its data cache whether it has the information. If the node has the information, it sends a confirmation message back to the node it got the interest from. If the node does not have the information, it stores the interest in its own cache and creates a \emph{gradient} to both keep track of where the interest came from, have a timeout mechanism for that link, and a path maintenance mechanism (that also takes care of the interval between transmissions for that particular interest). 
 
-Once a confirmation message arrives at the sink, the sink will perform \emph{reinforcement} that will use the established network of gradients to create one or more paths to the source, and begin to have the requested data transmitted over these paths. As a sink begins to recive data from a path, it will increase the flow of data from that paticular path, leading to a positive feedback-loop that will eventually choose a single path over the others.
+Once a confirmation message arrives at the sink, the sink will perform \emph{reinforcement} that will use the established network of gradients to create one or more paths to the source, and begin to have the requested data transmitted over these paths. As a sink begins to receive data from a path, it will increase the flow of data from that particular path, leading to a positive feedback-loop that will eventually choose a single path over the others.
 
-Since DD is a pull algorithm it might be especially usefull in sensor networks. \cite{directed}
+Since DD is a pull algorithm it might be especially useful in sensor networks. \cite{directed}
 }
 
 \route{Greedy routing} 
@@ -175,7 +175,7 @@ Since DD is a pull algorithm it might be especially usefull in sensor networks. 
 
 Different routing algorithms make different assumptions about the underlying nature of the mobility of the graph. There are several routing algorithms \cite{adaptive, two-tier} that assumes a number of permanently stationary nodes or sensors as a part of the infrastructure, while still having a number of mobile nodes that need to receive information. 
 
-\tigfig{hidden_terminal}{The hidden terminal problem. In this example node c is communicating with node b (illustrated by the grey colour in node b's transmitting radius) Since the transmission does not reach node a, it is not possible for node a to dettect the communication between node b and node c, and it will thus belive that it is free to transmit its message to node b. For more detailed information, see \cite{ComNet} or similar.}
+\tigfig{hidden_terminal}{The hidden terminal problem. In this example node c is communicating with node b (illustrated by the grey colour in node b's transmitting radius) Since the transmission does not reach node a, it is not possible for node a to detect the communication between node b and node c, and it will thus believe that it is free to transmit its message to node b. For more detailed information, see \cite{ComNet} or similar.}
 
 In practical situations the system will have to deal with all the problems inherent in wireless communication, such as the hidden terminal problem (see figure~\ref{fig:hidden_terminal}) and message collision. To avoid these, having a lower communications layer that took care of this would be preferable to implementing it in the algorithm itself (though care should be taken to ensure that the algorithm is build to withstand these conditions).
 

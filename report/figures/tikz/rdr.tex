@@ -2,9 +2,7 @@
 \colorlet{circle area}{gray!20}
 
 \tikzset{
-  filled/.style={fill=circle area, 
-  %draw=circle edge, 
-  thick},
+  filled/.style={fill=circle area, thick},
   outline/.style={draw=circle edge, thick}
   }
 
@@ -13,7 +11,7 @@
 \tikzstyle{edge} = [draw, thick, -]
 \tikzstyle{vertex}=[circle,fill=black!50,minimum size=10pt,inner sep=0pt]
 \tikzstyle{selected edge} = [draw, line width=2cm,-,gray!20] 
-
+\tikzstyle{real edge} = [draw, line width=8pt,-, gray!70]
 
 \subfloat[Linear Swept Sphere]{\label{fig:rdr1}
 \begin{tikzpicture}  
@@ -24,12 +22,25 @@
 
     \fill[filled] \firstradius;
     \fill[filled] \secondradius;
- 
+    
+     % The real source and sink
     \foreach \pos/\name in {{(0,0)/a}, {(3, 1)/b}} {   
       \node[vertex] (\name) at \pos {$\name$};
     }
    
     \path[selected edge] (a) -- (b);
+
+    % the extra nodes
+    \foreach \pos/\name in {{(0.5,0.5)/c}, {(1,1)/d}, {(0.5, 2.5)/e}, {(1.25, 2.5)/f}, {(1.25, 1.5)/g}, {(1.25, 0.5 )/h}, {(1.75, 0.5)/i}, {(1.80, 1.8)/j}, {(1.20, -1)/k}, {(1.40, -0.6)/l}, {(2.6, 0.7)/m}} {   
+      \node[vertex] (\name) at \pos {$\name$};
+    }
+
+    % The connections between them
+    \foreach \source/\sink in {a/c, c/d, d/h, h/i, i/m, m/b, i/l, d/g} {
+      \path[real edge] (\source) -- (\sink);
+    }
+
+
 \end{tikzpicture}}
 % Remove empty line
 \subfloat[Circle]{\label{fig:rdr2}
@@ -38,10 +49,22 @@
     % Definition of the radii
     \def\radius{(1.5,0.5) circle (1.8)};
     \fill[filled] \radius;
- 
+
+     % The real source and sink
     \foreach \pos/\name in {{(0,0)/a}, {(3, 1)/b}} {   
       \node[vertex] (\name) at \pos {$\name$};
-    }   
+    }
+   
+    % the extra nodes
+    \foreach \pos/\name in {{(0.5,0.5)/c}, {(1,1)/d}, {(0.5, 2.5)/e}, {(1.25, 2.5)/f}, {(1.25, 1.5)/g}, {(1.25, 0.5 )/h}, {(1.75, 0.5)/i}, {(1.80, 1.8)/j}, {(1.20, -1)/k}, {(1.40, -0.6)/l}, {(2.6, 0.7)/m}} {   
+      \node[vertex] (\name) at \pos {$\name$};
+    }
+
+    % The connections between them
+   \foreach \source/\sink in {a/c, c/d, d/h, h/i, i/m, m/b, i/l, d/g, g/j, l/k} {
+      \path[real edge] (\source) -- (\sink);
+    }
+ 
 \end{tikzpicture}}
 % Remove empty line
 \subfloat[Rectangle]{\label{fig:rdr3}
@@ -51,7 +74,20 @@
     \def\rectangle{(0,0) rectangle (3,1)};
     \fill[filled] \rectangle;
  
+     
+    % The real source and sink
     \foreach \pos/\name in {{(0,0)/a}, {(3, 1)/b}} {   
       \node[vertex] (\name) at \pos {$\name$};
-    }   
+    }
+   
+    % the extra nodes
+    \foreach \pos/\name in {{(0.5,0.5)/c}, {(1,1)/d}, {(0.5, 2.5)/e}, {(1.25, 2.5)/f}, {(1.25, 1.5)/g}, {(1.25, 0.5 )/h}, {(1.75, 0.5)/i}, {(1.80, 1.8)/j}, {(1.20, -1)/k}, {(1.40, -0.6)/l}, {(2.6, 0.7)/m}} {   
+      \node[vertex] (\name) at \pos {$\name$};
+    }
+
+    % The connections between them
+   \foreach \source/\sink in {a/c, c/d, d/h, h/i, i/m, m/b} {
+      \path[real edge] (\source) -- (\sink);
+    }
+   
 \end{tikzpicture}}
