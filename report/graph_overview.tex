@@ -54,6 +54,25 @@ To complicate matter further different nodes can have different communications r
 
 Likewise it is important to remember that a node in practice might be able to adjust its communications range (at a higher energy cost). See figure~\ref{fig:different_raidus}\todo{improve this}.
 
+\subsection{Cluster methods}
+\label{cluster methods}
+Cluster methods are routing algorithms where certain nodes have been chosen to be \ch. All nodes have exactly 1 cluster head that they communicate with. While it is true that most of the time the nodes that belong to a certain \ch is its direct neighbours, some schemes includes nodes that are farther away, in order to reduce the number of \ch. The idea behind \ch are to include a layer specialisation in the network, and adding some of the advantages of centralisation with a still decentralised system. 
+
+Sometimes several levels of \ch are implemented, where we have second, third etc. levels of \ch, which administrates the \ch one level beneath them.  
+
+In order to improve the routing, \ch s are almost always accompanied by \emph{gateway nodes}. Gateway nodes are nodes that connect two clusters. \cite{spanners} defines a gateway node as follows:
+Let C(p) be the set of nodes that has the cluster p as its \ch (this includes p). Then for a pair of \ch s $c_1, c_2$ if there exists a pair of nodes $p_1 \in C(c_1), p_2 \in C(c_2)$ such that $p_1$ and $p_2$ can communicate with each other in the graph, then $p_1$ and $p_2$ are gateway nodes (and in particular they are the only gateway nodes between $c_1$ and $c_2$.  
+
+Some of the practical advantages are:
+\begin{itemize}
+\item Depending on the implemented location schemes, the \ch can cut down on the number of necessary transmissions needed to check whether nodes are alive or not.
+\item It can make routing simpler, since all transmissions will have to go though the node gateways or up through the chain of \ch s. Only the \ch and gateway nodes needs to have their location database updated. All data will of course till have to be transmitted through regular nodes, but instead of having to route directly from the source to the sink, it will route from \ch to gateway, gateway to \ch and so on until it reaches the sink.
+\end{itemize}
+
+\ch is to divide any communication between nodes into 3 stages: 1) From the source to the local \ch, 2) From the local \ch to the \ch closest to the sink and 3) from the \ch closets to the sink to the sink itself\footnote{If either \ch is the sink or the source, and the first or third part is of course eliminated}. This is thus one way to decrease the number of nodes that needs to keep track of other nodes. Furthermore, if gateway nodes are employed, this can ease the routing problem, as a lengthy route is divided into shorter trips.  
+
+However, since we are introducing a layer of centralisation, it is also clear that there must be a system in place to detect and replace a \ch should it fail (and to elect it in the first place). An often used system is a voting system, or an selection algorithm (based hash value of the node's id, its MAC value etc.). 
+
 \section{Routing Algorithms}
 
 The biggest conceptual difference for routing/shortest path algorithms in a \manet compared to main-stray routing/shortest path algorithms, is the loss of global overview that these algorithms employ --- such as relaxing a specific nodes' edges at a specific time. There exist distributed version of some of the ``classic'' routing algorithms, but their usefulness may be limited in a mobile network, since they will have to be recomputed either each time a node wants to transmit a message, or each time the underlying graph changes.
@@ -165,24 +184,7 @@ A fundamental problem that has to be answered in any \manet is now to deal with 
 
 Another problem found in Graph routing is that of security. Unless some kind of security system is employed, a malicious node can not only impersonate other nodes, but it can also sniff the messages that are transmitted in its area (not only the ones that are directly sent to it). Further a malicious node can spam the network with bogus messages, both congestion the network, as well as draining the networks power. One proposed solution to this problem is to include secure keys that uniquely identify each node. However, without a central key-server (both for distribution and authentication), this is not practical.
 
-\section{Cluster methods}
-\label{cluster methods}
-Cluster methods are routing algorithms where certain nodes have been chosen to be \ch. All nodes have exactly 1 cluster head that they communicate with. While it is true that most of the time the nodes that belong to a certain \ch is its direct neighbours, some schemes includes nodes that are farther away, in order to reduce the number of \ch. The idea behind \ch are to include a layer specialisation in the network, and adding some of the advantages of centralisation with a still decentralised system. 
 
-Sometimes several levels of \ch are implemented, where we have second, third etc. levels of \ch, which administrates the \ch one level beneath them.  
-
-In order to improve the routing, \ch s are almost always accompanied by \emph{gateway nodes}. Gateway nodes are nodes that connect two clusters. \cite{spanners} defines a gateway node as follows:
-Let C(p) be the set of nodes that has the cluster p as its \ch (this includes p). Then for a pair of \ch s $c_1, c_2$ if there exists a pair of nodes $p_1 \in C(c_1), p_2 \in C(c_2)$ such that $p_1$ and $p_2$ can communicate with each other in the graph, then $p_1$ and $p_2$ are gateway nodes (and in particular they are the only gateway nodes between $c_1$ and $c_2$.  
-
-Some of the practical advantages are:
-\begin{itemize}
-\item Depending on the implemented location schemes, the \ch can cut down on the number of necessary transmissions needed to check whether nodes are alive or not.
-\item It can make routing simpler, since all transmissions will have to go though the node gateways or up through the chain of \ch s. Only the \ch and gateway nodes needs to have their location database updated. All data will of course till have to be transmitted through regular nodes, but instead of having to route directly from the source to the sink, it will route from \ch to gateway, gateway to \ch and so on until it reaches the sink.
-\end{itemize}
-
-\ch is to divide any communication between nodes into 3 stages: 1) From the source to the local \ch, 2) From the local \ch to the \ch closest to the sink and 3) from the \ch closets to the sink to the sink itself\footnote{If either \ch is the sink or the source, and the first or third part is of course eliminated}. This is thus one way to decrease the number of nodes that needs to keep track of other nodes. Furthermore, if gateway nodes are employed, this can ease the routing problem, as a lengthy route is divided into shorter trips.  
-
-However, since we are introducing a layer of centralisation, it is also clear that there must be a system in place to detect and replace a \ch should it fail (and to elect it in the first place). An often used system is a voting system, or an selection algorithm (based hash value of the node's id, its MAC value etc.). 
 
 \bibliographystyle{plain}
 \bibliography{references}{}
