@@ -118,6 +118,8 @@ Routing algorithms suited for \manet s can be sorted into the following categori
 {The simplest of the routing algorithms. The entire network is flooded with the message, ensuring that the message eventually reaches the sink. We can be sure that the message will not flood the network forever, thanks to the recording system detailed in section \ref{record-recived}. If the sink can be reached from the source, then flooding is  guarantied to work, but uses a lot of bandwidth.} 
 {\cite{larMANET, Sur2}} 
 
+\tigfig{rdr}{}
+
 \route{Restricted Direction Routing (RDR)}
       {Restricted Directed Routing is an algorithm that can be described as a kind of directed flooding. Let G be a geometrical shape. G is now placed such that it now contains both the source and the sink are both contained in G (preferably with a non-zero margin, to counter act any movement on the sinks part). The source now floods all nodes inside G, hopefully reaching the sink. Once a route to the sink has been established, the information
 
