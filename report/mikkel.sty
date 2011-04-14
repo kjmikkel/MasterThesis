@@ -110,8 +110,8 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \newcommand{\route}[3]
 {
 \item[#1:] #2
-%\texttt{Needs sinkposition:} #3
-\texttt{References:} #3
+
+\texttt{References:} \cite{#3}
 }
 
 
@@ -119,7 +119,7 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \begin{figure}
 \centering
 \tigz{#1}
-\caption{\label{fig:o#1}#2}
+\caption{\label{fig:#1}#2}
 \end{figure}
 }
 
