@@ -72,11 +72,11 @@ To complicate matter further different nodes can have different communications r
 
 Likewise it is important to remember that a node in practise might be able to adjust its communications range (at a higher energy cost). See figure~\ref{fig:different_radius}\todo{improve this}.
 
-\subsection{Cluster methods}
+\subsection{Node Clustering}
 \label{cluster methods}
-Cluster methods are routing algorithms or graph compositions where certain nodes have been chosen to be \ch. All nodes have exactly 1 cluster head that they communicate with. Most of the time the nodes that belong to a certain \ch is its direct neighbours, some schemes includes nodes that are farther away, in order to reduce the number of \ch. The idea behind \ch are to include a layer specialisation in the network, and adding some of the advantages of centralisation with a still decentralised system.
-
-Sometimes several levels of \ch are implemented, where we have second, third etc. levels of \ch, which administrates the \ch one level beneath them.  
+Node Clustering is a hierarical alternative to the flat graph. Instead of having every node being the same, a number of nodes are made into \ch such that all nodes in the graph has 1 cluster head that they communicate with. Most of the time the nodes that belong to a certain \ch is its one-hop neighbours, but there are also schemes that allows nodes to have a clustehead that is farther away, in order to reduce the number of \ch. With \ch a layer specialisation and hierarcy is added to the network, which reduces the complexity of an otherwise entirely flat network, while still retaining some decentralisation.
+  
+Sometimes several levels of \ch are implemented, where we have [$n$]thsecond ($n \in \N, n > 1$) level of \ch, which administrates the [$n-1$] layer of \ch.  
 
 In order to improve the routing, \ch are almost always accompanied by \emph{gateway nodes}. Gateway nodes are nodes that connect two clusters. \cite{spanners} defines a gateway node as follows:
 Let C(p) be the set of nodes that has the cluster p as its \ch (this includes p). Then for a pair of \ch s $c_1, c_2$ if there exists a pair of nodes $p_1 \in C(c_1), p_2 \in C(c_2)$ such that $p_1$ and $p_2$ can communicate with each other in the graph, then $p_1$ and $p_2$ are gateway nodes (and in particular they are the only gateway nodes between $c_1$ and $c_2$.  
@@ -89,7 +89,9 @@ Some of the practical advantages are:
 
 \ch is to divide any communication between nodes into 3 stages: 1) From the source to the local \ch, 2) From the local \ch to the \ch closest to the sink and 3) from the \ch closets to the sink to the sink itself\footnote{If either \ch is the sink or the source, and the first or third part is of course eliminated}. This is thus one way to decrease the number of nodes that needs to keep track of other nodes. Furthermore, if gateway nodes are employed, this can ease the routing problem, as a lengthy route is divided into shorter trips.  
 
-However, since we are introducing a layer of centralisation, it is also clear that there must be a system in place to detect and replace a \ch should it fail (and to elect it in the first place). An often used system is a voting system, or an selection algorithm (based hash value of the node's id, its MAC value etc.). 
+However, since we are introducing a layer of centralisation, it is also clear that there must be a system in place to detect and replace a \ch should it fail (and to elect it in the first place). An often used system is a voting system, or an selection algorithm (based hash value of the node's id, its MAC value etc.).
+
+In the case of \manet where there are some hardware in which some nodes are stationary, it might be preferable to use these stationary nodes as a subset of the \ch, since it would cut down on the amount of adminestration 
 
 \section{Routing Algorithms}
 

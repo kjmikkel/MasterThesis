@@ -20,7 +20,7 @@ I expect the reader to have a university level understanding of Computer Network
 \subsection{Scope and Limitations}
 While important in a real world application, I will in this thesis not concern myself with security, neither in the form of the authentication, anonymity of the sender or [something about rooting I think it might be possible]. For a treatment of this subject see \cite{trustedRouting}. Furthermore, if there does not exist a path between two nodes, I will not make any guarantee that the message will ever arrive at the sink. I will furthermore assume that all nodes have the same broadcast radius. \todo{finish this}
 
-
+\hide{
 \subsection{Node specifications}
 It is clear that the properties of the mobile nodes in the system are going to influence the nature of the solution, I will therefore in this section define the specifications of the nodes I will work on in this project. The factors that I deem to be important are: 
 \begin{description}
@@ -33,7 +33,7 @@ It is clear that the properties of the mobile nodes in the system are going to i
 As noted in section~\todo{find section where I mention power for the first time}, I would in this project like to look at power affluent devices, i.e. devices that either has access to large amounts of energy, or which has an adequate amount of energy, but which can easily be recharged. In this project I pick latter version, on the ground that such an arrangement is more realistic for a mobile device, and the setting it is going to be used in\footnote{It is unlikely that a Smart Phone will be able to transmit for 10 hours straight, or that the average user is going to transport a large capacity battery.}. In such a situation it is clear that my solution must be able to handle that nodes can suddenly disappear from the network from one moment to the next.
 
 Concerning mobility I think the most interesting movement pattern would be people moving within streets or within buildings. I can justify this by the fact that 
-
+}
 \subsection{Terminology}
 \label{Terminology}
 In this report I will use the following terms and notations
@@ -49,6 +49,7 @@ In this report I will use the following terms and notations
 \defi{Given two nodes $n_x$ and $n_y$, I will say that there exists a \emph{bidirectional link} between the nodes, iff $n_x$ is adjacent to $n_y$ and $n_y$ is adjacent to $n_x$.}
 \defi{When 2 nodes have a bidirectional link, and they are connected in the underlying routing graph, I will say that the two nodes are \emph{neighbours}.}
 
+\hide{
 \subsection{Anatomy of the solution}
 
 A real-life implementation of a Mobile Ad-Hoc Network will need the following elements
@@ -86,3 +87,4 @@ In this section I give a quick overview of what the different sections in report
 \item[Section \ref{section:introduction}] The introduction to the report, which will introduce the problem of Mobile Ad-Hoc Networking.
 \item[\todo{Add other sections}]
 \end{description}
+}
