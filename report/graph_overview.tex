@@ -9,31 +9,6 @@
 
 \pagestyle{plain}
 
-\section{Problems we have with movement}
-
-Movement presents us with the following problems:
-
-\tigfig{shortest_path_change}{In \ref{fig:short_path1} we see a path from node $+$ to node $*$. In \ref{fig:short_path2} we clearly see that the movement of node $-$ has caused the routing protocol to find a much longer path to the node $*$ from node $+$.}
-
-\begin{itemize}
-\item Changes underlying graph -- see figure~\ref{fig:shortest_path_change}.
-\item Invalidates location information about the node
-\item If the node is part of path from \emph{a} to \emph{b} (and the node is neither), which is stored and which is believed to be used again, then that path may fail, and a longer path may have to be taken. In degenerate cases this may lead to situations where the new optimal path will lead away from the absolute coordinates of the end node.
-\item The moving node may partition a network into 2 separate networks, if the node was the only node the 2 networks could communicate through
-\item The moving node may create a link between 2 previously separate networks
-\item The node may move into a position that creates a better path than the one before it moved - however, the surrounding nodes needs to be aware of it
-\end{itemize}
-
-The movement creates the need for the following solutions:
-\begin{itemize}
-\item There needs to be a way to restructure the underlying graph so that it reflects the movement of the node \cite{practical}
-\item The location of the moving node needs to be updated. This does not necessary need to be done to all the nodes in the network, nor all the nodes that knew it before. There are many schemes for this, such as GLS \cite{scaleLocation} which partitions the world into squares, and then partitions these squares into other squares, resulting in several layers of squares. In each of these squares, there is a single node that knows the location of the node (and a scheme to find it).
-\item Depending on implementation there may be no problem (there is a time-out system that detects that the message did not arrive, the node right before the missing node reports back that it could not deliver the message etc.). Finding a new path should not be a real problem unless the algorithm employed is a greedy algorithm (i.e. an algorithm that will always choose to go to the node that brings it closest to the absolute coordinates of the goal node).
-\item If the network is partitioned, then the best course of action is to let the two networks figure out that the other part isn't available. Some kind of timeout mechanism in the location mechanism would seem like the most straightforward path
-\item If connection is established between network \emph{a} and network \emph{b}, there should be a mechanism so that network \emph{a} and inform network \emph{b} of its nodes, and vice versa. Optimally this should already be a part of how nodes advertise their presence.
-\item In order to take advantage of new nodes, they need to advertise their presence (and their location) to the entire system 
-\end{itemize}
-
 \section{Routing graph}
 
 Under optimal conditions a node has a uniform circular broadcast range. If node a and node b are in each other broadcast radii, then they can communicate with each other. A reasonable abstraction to this situation would be to deal with the \manet as a communications network. Furthermore it would seem logical to represent the connections between the nodes as a graph, where the nodes of the graphs are the \manet nodes, and the edges of the graph indicates that there exist a bidirectional both nodes are within each others broadcast radius. The problem of sending a message from the source to the sink then becomes a graph routing problem (but not necessary a shortest-path routing problem, since factors like fairness or maximisation of the lifetime of the \manet becomes issues in practise).
@@ -174,7 +149,7 @@ Different routing algorithms make different assumptions about the underlying nat
 
 In practical situations the system will have to deal with all the problems inherent in wireless communication, such as the hidden terminal problem (see figure~\ref{fig:hidden_terminal}) and message collision. To avoid these, having a lower communications layer that took care of this would be preferable to implementing it in the algorithm itself (though care should be taken to ensure that the algorithm is build to withstand these conditions).
 
-\section{Fundamental Graph Routing problems}
+\subsection{Fundamental Graph Routing problems}
 
 A fundamental problem that has to be answered in any \manet is now to deal with situations where the sink no longer has the location the source routed the message to (but still reachable from the source). There are several solutions to this problem:
 
@@ -186,9 +161,34 @@ A fundamental problem that has to be answered in any \manet is now to deal with 
 
 Another problem found in Graph routing is that of security. Unless some kind of security system is employed, a malicious node can not only impersonate other nodes, but it can also sniff the messages that are transmitted in its area (not only the ones that are directly sent to it). Further a malicious node can spam the network with bogus messages, both congestion the network, as well as draining the networks power. One proposed solution to this problem is to include secure keys that uniquely identify each node. However, without a central key-server (both for distribution and authentication), this is not practical.
 
+\section{Problems we have with movement}
+
+Movement presents us with the following problems:
+
+\tigfig{shortest_path_change}{In \ref{fig:short_path1} we see a path from node $+$ to node $*$. In \ref{fig:short_path2} we clearly see that the movement of node $-$ has caused the routing protocol to find a much longer path to the node $*$ from node $+$.}
+
+\begin{itemize}
+\item Changes underlying graph -- see figure~\ref{fig:shortest_path_change}.
+\item Invalidates location information about the node
+\item If the node is part of path from \emph{a} to \emph{b} (and the node is neither), which is stored and which is believed to be used again, then that path may fail, and a longer path may have to be taken. In degenerate cases this may lead to situations where the new optimal path will lead away from the absolute coordinates of the end node.
+\item The moving node may partition a network into 2 separate networks, if the node was the only node the 2 networks could communicate through
+\item The moving node may create a link between 2 previously separate networks
+\item The node may move into a position that creates a better path than the one before it moved - however, the surrounding nodes needs to be aware of it
+\end{itemize}
+
+The movement creates the need for the following solutions:
+\begin{itemize}
+\item There needs to be a way to restructure the underlying graph so that it reflects the movement of the node \cite{practical}
+\item The location of the moving node needs to be updated. This does not necessary need to be done to all the nodes in the network, nor all the nodes that knew it before. There are many schemes for this, such as GLS \cite{scaleLocation} which partitions the world into squares, and then partitions these squares into other squares, resulting in several layers of squares. In each of these squares, there is a single node that knows the location of the node (and a scheme to find it).
+\item Depending on implementation there may be no problem (there is a time-out system that detects that the message did not arrive, the node right before the missing node reports back that it could not deliver the message etc.). Finding a new path should not be a real problem unless the algorithm employed is a greedy algorithm (i.e. an algorithm that will always choose to go to the node that brings it closest to the absolute coordinates of the goal node).
+\item If the network is partitioned, then the best course of action is to let the two networks figure out that the other part isn't available. Some kind of timeout mechanism in the location mechanism would seem like the most straightforward path
+\item If connection is established between network \emph{a} and network \emph{b}, there should be a mechanism so that network \emph{a} and inform network \emph{b} of its nodes, and vice versa. Optimally this should already be a part of how nodes advertise their presence.
+\item In order to take advantage of new nodes, they need to advertise their presence (and their location) to the entire system 
+\end{itemize}
 
 
-%\bibliographystyle{plain}
-%\bibliography{references}{}
 
-%\end{document}
+\bibliographystyle{plain}
+\bibliography{references}{}
+
+\end{document}
