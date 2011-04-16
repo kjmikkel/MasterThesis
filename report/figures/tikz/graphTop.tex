@@ -1,6 +1,7 @@
 % Definition of the radii
 \def\firstradius{(0,0) circle (1.5cm)}
 \def\secondradius{(0:2cm) circle (1.5cm)}
+\def\scale{0.80}
 
 \colorlet{circle edge}{black!50}
 \colorlet{circle area}{gray!20}
@@ -16,7 +17,7 @@
 \tikzstyle{vertex}=[circle,fill=black!50,minimum size=10pt,inner sep=0pt]
  
 \subfloat[Initial state]{\label{fig:graphTop1}
-\begin{tikzpicture}[scale=0.80]
+\begin{tikzpicture}[scale=\scale]
    \node[vertex] (a) at (0,0) {a};   
    \node[vertex] (c) at (2,0) {c};    
 
@@ -36,7 +37,7 @@
 \end{tikzpicture}}
 % Remove empty line
 \subfloat[Geometrical movement]{\label{fig:graphTop2}
-\begin{tikzpicture}[scale=0.80]
+\begin{tikzpicture}[scale=\scale]
    \node[vertex] (a) at (0,0) {a};   
    \node[vertex] (c) at (2,0) {c};    
 
@@ -57,7 +58,7 @@
 }
 % Remove empty line
 \subfloat[Topological movement]{\label{fig:graphTop3}
-\begin{tikzpicture}[scale=0.80]
+\begin{tikzpicture}[scale=\scale]
    \node[vertex] (a) at (0,0) {a};   
    \node[vertex] (c) at (2,0) {c};    
 
