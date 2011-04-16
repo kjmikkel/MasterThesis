@@ -11,64 +11,33 @@
 \tikzstyle{edge} = [draw, thick, -]
 \tikzstyle{vertex}=[circle,fill=black!50,minimum size=10pt,inner sep=0pt]
 \tikzstyle{selected edge} = [draw, line width=2cm,-,gray!20] 
-\tikzstyle{real edge} = [draw, line width=8pt,-, gray!70]
+\tikzstyle{real edge} = [draw, line width=2pt,-, gray!70]
 
-\subfloat[Graph with transmission radius]{\label{fig:trans}
-\begin{tikzpicture}  
-    
-       \foreach \pos/\name in {{(0,2)/a}, {(2,1)/b}, {(-2,1)/c}, {(1,-1)/d}, {(-1,-1)/e}, {(0,3)/g}, {(3,1.5)/h}, {(-3, 1.5)/i}, {(2,-2)/j}, {(-2,-2)/k}} {
+\subfloat[The initial graph]{\label{fig:trans}
+\begin{tikzpicture}[scale=0.75]      
+       \foreach \pos/\name in {{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}} {
            \node[vertex] (\name) at \pos {$\name$};
+%           \draw[outline] {\pos circle (4cm)};          
        }
+
 
 \end{tikzpicture}}
 \subfloat[Connection graph]{\label{fig:connec}
-\begin{tikzpicture}  
-    % Definition of the radii
-    \def\firstradius{(0,0) circle (1cm)};
-    \def\secondradius{(3, 1) circle (1cm)};
-
-    \fill[filled] \firstradius;
-    \fill[filled] \secondradius;
-    
-     % The real source and sink
-    \foreach \pos/\name in {{(0,0)/a}, {(3, 1)/b}} {   
-      \node[vertex] (\name) at \pos {$\name$};
-    }
-   
-    \path[selected edge] (a) -- (b);
-
-    % the extra nodes
-    \foreach \pos/\name in {{(0.5,0.5)/c}, {(1,1)/d}, {(0.5, 2.5)/e}, {(1.25, 2.5)/f}, {(1.25, 1.5)/g}, {(1.25, 0.5 )/h}, {(1.75, 0.5)/i}, {(1.80, 1.8)/j}, {(1.20, -1)/k}, {(1.40, -0.6)/l}, {(2.6, 0.7)/m}} {   
-      \node[vertex] (\name) at \pos {$\name$};
-    }
-
-    % The connections between them
-    \foreach \source/\sink in {a/c, c/d, d/h, h/i, i/m, m/b, i/l, d/g} {
-      \path[real edge] (\source) -- (\sink);
-    }
-
-
+\begin{tikzpicture}[scale=0.75]  
+       \foreach \pos/\name in {{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}} {
+           \node[vertex] (\name) at \pos {$\name$};
+       }    
+       \foreach \source/\sink in {a/f, a/g, a/b, a/c, a/d, a/e, a/j, b/g, b/h, b/c, b/h, b/c, b/d, b/e, b/f, c/h, c/d, c/i, c/e, d/i, d/e, d/h, d/j, e/i, e/f, e/j} {
+           \path[real edge] (\source) -- (\sink); 
+       }
 \end{tikzpicture}}
 % Remove empty line
 \subfloat[Routing graph]{\label{fig:routing}
-\begin{tikzpicture}  
-
-    % Definition of the radii
-    \def\radius{(1.5,0.5) circle (1.8)};
-    \fill[filled] \radius;
-
-     % The real source and sink
-    \foreach \pos/\name in {{(0,0)/a}, {(3, 1)/b}} {   
-      \node[vertex] (\name) at \pos {$\name$};
-    }
-   
-    % the extra nodes
-    \foreach \pos/\name in {{(0.5,0.5)/c}, {(1,1)/d}, {(0.5, 2.5)/e}, {(1.25, 2.5)/f}, {(1.25, 1.5)/g}, {(1.25, 0.5 )/h}, {(1.75, 0.5)/i}, {(1.80, 1.8)/j}, {(1.20, -1)/k}, {(1.40, -0.6)/l}, {(2.6, 0.7)/m}} {   
-      \node[vertex] (\name) at \pos {$\name$};
-    }
-
-    % The connections between them
-   \foreach \source/\sink in {a/c, c/d, d/h, h/i, i/m, m/b, i/l, d/g, g/j, l/k} {
-      \path[real edge] (\source) -- (\sink);
-    } 
+\begin{tikzpicture}[scale=0.75]  
+       \foreach \pos/\name in {{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}} {
+           \node[vertex] (\name) at \pos {$\name$};
+       }    
+       \foreach \source/\sink in {a/f, a/b, a/c, a/d, a/e, b/g, b/c, b/c, b/d, b/e, c/h, c/d, c/e, d/i, d/e, e/j} {
+           \path[real edge] (\source) -- (\sink); 
+       }
 \end{tikzpicture}}
