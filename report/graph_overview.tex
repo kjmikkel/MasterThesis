@@ -33,9 +33,7 @@ I have found the following methods for making the planar graphs:
 
 It is not immediately apparent how one would compare the groups created by these three algorithms. Especially \rdg is a cluster based method. It is however clear that the \rng is slightly more accepting than the \gabe. See figure~\ref{fig:graph_comparison} for an example of the \rng and the \gabe.
 
-\tikfig{graphTop}{An example of the difference between Geometrical and Topological movement. For clarity I have opted not to include node c's transmission radius. In \ref{fig:graphTop2} node b has moved around inside node a and node c's transmission intersection, but since there has been no chance in which nodes node b is adjacent to, b is still a neighbour to both nodes. In \ref{fig:graphTop3} node b has moved outside of node a's transmission radius, but is still inside node c's radius, changing the topology of the graph.}
 
-Since we are dealing with mobile units, the topology of the graph will change as the nodes move around, which means that we will need a solution that updates the topology as needed, and not having to start over from scratch each time. Since we are dealing transmitting nodes, we must note the difference between Geometrical movement and Topological movement. I have illustrated the difference in figure~\ref{fig:graphTop}. In the rest of the thesis assume we are working in an idealised world, where the transmission radius is a perfect unit disc. In the real world this is not always the case\todo{work on this}.
 
 Neither the \manet or the \anet can be said to be entirely static. Even in an \anet, where we assume the nodes remain stationary, every single node will eventually run out of energy or fail. The routing graph must therefore always have a maintenance system that can deal with changes to the underlying graph. 
 
@@ -185,8 +183,6 @@ The movement creates the need for the following solutions:
 \item If connection is established between network \emph{a} and network \emph{b}, there should be a mechanism so that network \emph{a} and inform network \emph{b} of its nodes, and vice versa. Optimally this should already be a part of how nodes advertise their presence.
 \item In order to take advantage of new nodes, they need to advertise their presence (and their location) to the entire system 
 \end{itemize}
-
-
 
 \bibliographystyle{plain}
 \bibliography{references}{}
