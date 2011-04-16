@@ -1,6 +1,6 @@
 \colorlet{circle edge}{black!50}
 \colorlet{circle area}{gray!20}
-\def\scale{0.67}
+\def\scale{0.62}
 
 \tikzset{
   filled/.style={fill=circle area, draw=circle edge, thick},
@@ -14,12 +14,13 @@
 \tikzstyle{selected edge} = [draw, line width=2cm,-,gray!20] 
 \tikzstyle{real edge} = [draw, line width=2pt,-, gray!70]
 
-\subfloat[The nodes]{\label{fig:trans}
+\subfloat[The nodes]{\label{fig:nodes}
 \begin{tikzpicture}[scale=\scale]      
+       \draw {(0,2) circle (4cm)};
        \foreach \pos/\name in {{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}} {
            \node[vertex] (\name) at \pos {$\name$};
-%           \draw[outline] {\pos circle (4cm)};          
        }
+       
 
 
 \end{tikzpicture}}

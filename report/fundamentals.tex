@@ -1,6 +1,8 @@
 \section{Fundamental Graph Routing}
 \label{fundamental}
 
+\tikfig{connec-route}{Figure~\ref{fig:nodes} shows the nodes of the network. The circle indicates the range that node a can transmit to (all the other nodes have the same range, but they have been left out for clarity) . Figure~\ref{fig:connec} shows us a connectivity grap. Figure~\ref{fig:routing} is the routing graph, a subset of the connectivity graph, giving us the Peterson graph.}
+
 In this report I will use the following terms and notations
 
 \defi{In this thesis I will use the term \emph{node} when referring to a device that can both transmit and receive information, execute a routing algorithm based on the received message, and which is the part of the \manet.}
@@ -9,6 +11,8 @@ In this report I will use the following terms and notations
 \defi{A \emph{source} will be the node in the network that begins a transmission (by sending a message) and a \emph{sink(s)} will be the node(s) that is supposed to receive the message.}
 \defi{The \emph{Routing Graph} is the graph that a message has to navigate through in order to go from the source to the sink. In most cases this graph is not unique.}
 \defi{\emph{Geographic movement} is when a node changes its position, this may or may not affect the topology of the routing graph}
+
+
 \defi{\emph{Topological movement} is when the movement in the node causes a change in the routing}
 \defi{When a node $n_x$ can transmit information to another node $n_y$ (i.e. $n_y$ lies within the range of $n_x$ transmitter), then I will say that $n_x$ is \emph{adjacent} to $n_y$}
 \defi{Given two nodes $n_x$ and $n_y$, I will say that there exists a \emph{bidirectional link} between the nodes, iff $n_x$ is adjacent to $n_y$ and $n_y$ is adjacent to $n_x$.}

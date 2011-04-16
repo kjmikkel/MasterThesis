@@ -9,8 +9,6 @@
 
 \pagestyle{plain}
 
-\tikfig{connec-route}{}
-
 \section{Routing graph}
 
 Under optimal conditions a node has a uniform circular broadcast range. If node a and node b are in each other broadcast radii, then they can communicate with each other. A reasonable abstraction to this situation would be to deal with the \manet as a communications network. Furthermore it would seem logical to represent the connections between the nodes as a graph, where the nodes of the graphs are the \manet nodes, and the edges of the graph indicates that there exist a bidirectional both nodes are within each others broadcast radius. The problem of sending a message from the source to the sink then becomes a graph routing problem (but not necessary a shortest-path routing problem, since factors like fairness or maximisation of the lifetime of the \manet becomes issues in practise).
