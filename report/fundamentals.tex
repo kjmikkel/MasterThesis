@@ -1,27 +1,26 @@
 \section{Fundamental Graph Routing}
 \label{fundamental}
-In this section I will describe the fundamentals of graph routing   . Furthermore I will use this section to introduce definitions and termanlogy that will be used throughout the thesis.
+In this section I will describe the fundamentals of graph routing   . Furthermore I will use this section to introduce definitions and terminology that will be used throughout the thesis.
 
-In order to be able to reason about \manet, we will have to give it a proper theoretical formulation. The most logical of these is that of the graph. A graph $G$ is a set of \emph{nodes} $V$ and \emph{edges} $E$ that connects the points. The nodes are represented as points, while the edges are represented as line-segments, with their endpoints being 2 different nodes. For simpilcities sake, I will assume that the graph exists in the plane. I find this to be a reasonable simplification since almost all the literature about \manet and \anet that I have been able to find does the same, but also because there in practice shouldn't be a large difference between 2D and 3D networks. 
+In order to be able to reason about \manet, we will have to give it a proper theoretical formulation. The most logical of these is that of the graph. A graph $G$ is a set of \emph{nodes} $V$ and \emph{edges} $E$ that connects the points. The nodes are represented as points, while the edges are represented as line-segments, with their endpoints being 2 different nodes. For simplicities sake, I will assume that the graph exists in the plane. I find this to be a reasonable simplification since almost all the literature about \manet and \anet that I have been able to find does the same, but also because there in practice shouldn't be a large difference between 2D and 3D networks. 
 
-In a graph I will say that a when a node $n_x$ can transmit information to another node $n_y$ (i.e. $n_y$ lies within the range of $n_x$ transmitter), then $n_x$ is \emph{adjacent} to $n_y$. However, having node $n_x$ being adjacent to $n_y$ does not necesarily mean that the two nodes can communicate\footnote{Two-way communication is important, since $n_x$ may ask $n_y$ to fetch it a document, but $n_y$ will be unable to send it to $n_x$. A possible solution could be to transmit the file through a different path to $n_x$, but I feel this would be too complex.}, since we do not know whether or not node $n_x$'s transmitter is more powerful than $n_y$'s.   
+The object of routing in any network is to send a message from its start position, or its \emph{source}, to some end position, or \emph{sink}. In some cases there may be multiple sources and sinks, but in this thesis I will assume there is only one of each. I will now explain how I have chosen to model this network. 
 
-\tikfig{connec-route}{Figure~\ref{fig:nodes} shows the nodes of the network. The circle indicates the range that node a can transmit to (all the other nodes have the same range, but they have been left out for clarity) . Figure~\ref{fig:connec} shows us a connectivity grap. Figure~\ref{fig:routing} is the routing graph, a subset of the connectivity graph, giving us the Peterson graph.}
+In a graph I will say that a when a node $n_x$ can transmit information to another node $n_y$ (i.e. $n_y$ lies within the range of $n_x$ transmitter), then $n_x$ is \emph{adjacent} to $n_y$. However, having node $n_x$ being adjacent to $n_y$ does not necessarily mean that the two nodes can communicate\footnote{Two-way communication is important, since $n_x$ may ask $n_y$ to fetch it a document, but $n_y$ will be unable to send it to $n_x$. A possible solution could be to transmit the file through a different path to $n_x$, but I feel this would be too complex.}, since we do not know whether or not node $n_x$'s transmitter is more powerful than $n_y$'s (since transmitter devices in the real world are heterogeneous). I will therefore say that two nodes nodes $n_x$ and $n_y$ can only communicate if there exists a \emph{bidirectional link} between the nodes, and that there is only a bidirectional link iff $n_x$ is adjacent to $n_y$ and $n_y$ is adjacent to $n_x$.
 
+\tikfig{connec-route}{Figure~\ref{fig:nodes} shows a set of nodes. The circle indicates the range that node a can transmit to -- all the other nodes have the same range, but they have been left out for clarity. Figure~\ref{fig:connec} shows us a connectivity graph. Figure~\ref{fig:routing_not_planar} and \ref{fig:routing_planar} are examples of routing graph, a subset of the connectivity graph. Since figure~\ref{fig:routing_planar} is planar, it would be preferred over figure~\ref{fig:routing_not_planar}.}
 
-
-\defi{The \emph{Routing Graph} is the graph that a message has to navigate through in order to go from the source to the sink. In most cases this graph is not unique.}
+Now we can begin to define the \emph{connectivity graph}. Given a set of nodes $V$ the connectivity graph C will be $C = (V, E)$, where $E$ contains an edge between node $n_x$ and $n_y$ iff there is a bidirectional link between $n_x$ and $n_y$ -- see figure~\ref{fig:connec} for an example of this. It is important to note that the connectivity graph only tells us which nodes can communicate with each other in a \manet, not which actually does (since it may be impractical). Therefore I introduce the \emph{Routing Graph} R, where $R = (V, E\prime)$, where $E\prime \subseteq E$. the graph that a message has to navigate through in order to go from the source to the sink. In most cases this graph is not unique - as we can .
 
 
 
 
  
-\defi{Given two nodes $n_x$ and $n_y$, I will say that there exists a \emph{bidirectional link} between the nodes, iff $n_x$ is adjacent to $n_y$ and $n_y$ is adjacent to $n_x$.}
-\defi{When 2 nodes have a bidirectional link, and they are connected in the underlying routing graph, I will say that the two nodes are \emph{neighbours}.}
 
 
 
-\defi{A \emph{source} will be the node in the network that begins a transmission (by sending a message) and a \emph{sink(s)} will be the node(s) that is supposed to receive the message.}
+
+
 
 
 
