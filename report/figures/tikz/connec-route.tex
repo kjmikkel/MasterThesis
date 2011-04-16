@@ -15,10 +15,10 @@
 
 \subfloat[Graph with transmission radius]{\label{fig:trans}
 \begin{tikzpicture}  
-    \foreach \pos/\name in {{(0.5, 0.5)/a}, {(0.5, 1.5)/b}, {(0.5, 2.5)/c}, {(0.5, 4.5)/d}, {(1,1)/e}, {(1, 2)/f}, {(1, 3)/g}, {(1, 4)/h}, {(1, 5)/i}, {(1.5, 0.5)/j}, {(1.5, 1.5)/k}}{
-       \draw[outline]{\pos circle (1cm)};   
-       \node[vertex] (\name) at \pos {$\name$};
-    }
+    
+       \foreach \pos/\name in {{(0,2)/a}, {(2,1)/b}, {(-2,1)/c}, {(1,-1)/d}, {(-1,-1)/e}, {(0,3)/g}, {(3,1.5)/h}, {(-3, 1.5)/i}, {(2,-2)/j}, {(-2,-2)/k}} {
+           \node[vertex] (\name) at \pos {$\name$};
+       }
 
 \end{tikzpicture}}
 \subfloat[Connection graph]{\label{fig:connec}
