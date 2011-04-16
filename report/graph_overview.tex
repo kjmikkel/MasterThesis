@@ -9,6 +9,8 @@
 
 \pagestyle{plain}
 
+\tikfig{connec-route}{}
+
 \section{Routing graph}
 
 Under optimal conditions a node has a uniform circular broadcast range. If node a and node b are in each other broadcast radii, then they can communicate with each other. A reasonable abstraction to this situation would be to deal with the \manet as a communications network. Furthermore it would seem logical to represent the connections between the nodes as a graph, where the nodes of the graphs are the \manet nodes, and the edges of the graph indicates that there exist a bidirectional both nodes are within each others broadcast radius. The problem of sending a message from the source to the sink then becomes a graph routing problem (but not necessary a shortest-path routing problem, since factors like fairness or maximisation of the lifetime of the \manet becomes issues in practise).
@@ -29,21 +31,21 @@ I have found the following methods for making the planar graphs:
 }
 \end{description}
 
-\tigfig{graph_comparison}{\ref{fig:rng1} and \ref{fig:rng2} are examples of the RNG, while \ref{fig:gg1} and \ref{fig:gg2} are examples of the GG. This figure is inspired by figure~7 in \cite{GeoSpanners}.}
+\tikfig{graph_comparison}{\ref{fig:rng1} and \ref{fig:rng2} are examples of the RNG, while \ref{fig:gg1} and \ref{fig:gg2} are examples of the GG. This figure is inspired by figure~7 in \cite{GeoSpanners}.}
 
 It is not immediately apparent how one would compare the groups created by these three algorithms. Especially \rdg is a cluster based method. It is however clear that the \rng is slightly more accepting than the \gabe. See figure~\ref{fig:graph_comparison} for an example of the \rng and the \gabe.
 
-\tigfig{graphTop}{An example of the difference between Geometrical and Topological movement. For clarity I have opted not to include node c's transmission radius. In \ref{fig:graphTop2} node b has moved around inside node a and node c's transmission intersection, but since there has been no chance in which nodes node b is adjacent to, b is still a neighbour to both nodes. In \ref{fig:graphTop3} node b has moved outside of node a's transmission radius, but is still inside node c's radius, changing the topology of the graph.}
+\tikfig{graphTop}{An example of the difference between Geometrical and Topological movement. For clarity I have opted not to include node c's transmission radius. In \ref{fig:graphTop2} node b has moved around inside node a and node c's transmission intersection, but since there has been no chance in which nodes node b is adjacent to, b is still a neighbour to both nodes. In \ref{fig:graphTop3} node b has moved outside of node a's transmission radius, but is still inside node c's radius, changing the topology of the graph.}
 
 Since we are dealing with mobile units, the topology of the graph will change as the nodes move around, which means that we will need a solution that updates the topology as needed, and not having to start over from scratch each time. Since we are dealing transmitting nodes, we must note the difference between Geometrical movement and Topological movement. I have illustrated the difference in figure~\ref{fig:graphTop}. In the rest of the thesis assume we are working in an idealised world, where the transmission radius is a perfect unit disc. In the real world this is not always the case\todo{work on this}.
 
 Neither the \manet or the \anet can be said to be entirely static. Even in an \anet, where we assume the nodes remain stationary, every single node will eventually run out of energy or fail. The routing graph must therefore always have a maintenance system that can deal with changes to the underlying graph. 
 
-\tigfig{node_different_radius}{Two nodes with different broadcast ranges. Node a is not adjacent to node b, but node b is adjacent to node a -- thus only one-way communication from b to a can take place.}
+\tikfig{node_different_radius}{Two nodes with different broadcast ranges. Node a is not adjacent to node b, but node b is adjacent to node a -- thus only one-way communication from b to a can take place.}
 
 To complicate matter further different nodes can have different communications radius as exemplified in figure~\ref{fig:node_different_radius}, which shows us that a node needs to confirm that it indeed has a bidirectional link to each of its adjacent nodes, and cannot take it for granted.
 
-\tigfig{different_radius}{A node with different broadcast ranges. The first solid circle is the default broadcast range of node a, which does not reach node b. The second circle is the maximum range that a can broadcast, which does reach node b.}
+\tikfig{different_radius}{A node with different broadcast ranges. The first solid circle is the default broadcast range of node a, which does not reach node b. The second circle is the maximum range that a can broadcast, which does reach node b.}
 
 Likewise it is important to remember that a node in practise might be able to adjust its communications range (at a higher energy cost). See figure~\ref{fig:different_radius}\todo{improve this}.
 
@@ -113,7 +115,7 @@ Routing algorithms suited for \manet s can be sorted into the following categori
 {The simplest of the routing algorithms. The entire network is flooded with the message, ensuring that the message eventually reaches the sink. We can be sure that the message will not flood the network forever, thanks to the recording system detailed in section \ref{record-recived}. If the sink can be reached from the source, then flooding is  guarantied to work, but uses a lot of bandwidth.}
 {Sur2, larMANET} 
 
-\tigfig{rdr}{The Grey area is the area in which routing take place. It is clear that the shape of the flooding will have a large effect on the number of nodes that will receive the transmission.}
+\tikfig{rdr}{The Grey area is the area in which routing take place. It is clear that the shape of the flooding will have a large effect on the number of nodes that will receive the transmission.}
 
 \route{Restricted Direction Routing (RDR)}
       {Restricted Directed Routing is an algorithm that can be described as a kind of directed flooding. Let G be a geometrical shape. G is now placed such that it now contains both the source and the sink are both contained in G (preferably with a non-zero margin, to counter act any movement on the sinks part). The source now floods all nodes inside G, hopefully reaching the sink. Once a route to the sink has been established, the information
@@ -145,7 +147,7 @@ Since DD is a pull algorithm it might be especially useful in sensor networks.}
 
 Different routing algorithms make different assumptions about the underlying nature of the mobility of the graph. There are several routing algorithms \cite{adaptive, two-tier} that assumes a number of permanently stationary nodes or sensors as a part of the infrastructure, while still having a number of mobile nodes that need to receive information. 
 
-\tigfig{hidden_terminal}{The hidden terminal problem. In this example node c is communicating with node b (illustrated by the grey colour in node b's transmitting radius) Since the transmission does not reach node a, it is not possible for node a to detect the communication between node b and node c, and it will thus believe that it is free to transmit its message to node b. For more detailed information, see \cite{ComNet} or similar.}
+\tikfig{hidden_terminal}{The hidden terminal problem. In this example node c is communicating with node b (illustrated by the grey colour in node b's transmitting radius) Since the transmission does not reach node a, it is not possible for node a to detect the communication between node b and node c, and it will thus believe that it is free to transmit its message to node b. For more detailed information, see \cite{ComNet} or similar.}
 
 In practical situations the system will have to deal with all the problems inherent in wireless communication, such as the hidden terminal problem (see figure~\ref{fig:hidden_terminal}) and message collision. To avoid these, having a lower communications layer that took care of this would be preferable to implementing it in the algorithm itself (though care should be taken to ensure that the algorithm is build to withstand these conditions).
 
@@ -165,7 +167,7 @@ Another problem found in Graph routing is that of security. Unless some kind of 
 
 Movement presents us with the following problems:
 
-\tigfig{shortest_path_change}{In \ref{fig:short_path1} we see a path from node $+$ to node $*$. In \ref{fig:short_path2} we clearly see that the movement of node $-$ has caused the routing protocol to find a much longer path to the node $*$ from node $+$.}
+\tikfig{shortest_path_change}{In \ref{fig:short_path1} we see a path from node $+$ to node $*$. In \ref{fig:short_path2} we clearly see that the movement of node $-$ has caused the routing protocol to find a much longer path to the node $*$ from node $+$.}
 
 \begin{itemize}
 \item Changes underlying graph -- see figure~\ref{fig:shortest_path_change}.
