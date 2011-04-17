@@ -10,34 +10,31 @@
 \pagestyle{plain}
 
 \section{Routing graph}
+Having defined our problem in Section~\ref{fundamental}, I will in this section describe some of the different kinds of Routing graphs that can be used for \manet, and will describe the one I have used for this thesis. Furthermore I will give an introduction to single, second, and multi-level routing node organization. 
 
-Under optimal conditions a node has a uniform circular broadcast range. If node a and node b are in each other broadcast radii, then they can communicate with each other. A reasonable abstraction to this situation would be to deal with the \manet as a communications network. Furthermore it would seem logical to represent the connections between the nodes as a graph, where the nodes of the graphs are the \manet nodes, and the edges of the graph indicates that there exist a bidirectional both nodes are within each others broadcast radius. The problem of sending a message from the source to the sink then becomes a graph routing problem (but not necessary a shortest-path routing problem, since factors like fairness or maximisation of the lifetime of the \manet becomes issues in practise).
+In the literature I have read, I have not been able to find a consensus on how the optimal graph for \manet should be structured. It is furthermore my experience that the structure of the graph heavily influences the routing algorithm, making the two heavily dependant on each other.
 
-The next step is then to identify which kind graphs would be suitable for \manet. In the literature I have read, I have not been able to find a consensus on how the optimal graph should be structured. The first important question to answer should be whether the graph should be planar or not. A planar graph is defined as a graph that can be embedded in the plane. One of the properties of a planar embedding is that no edge will cross another edge. 
-
-In the case of \manet, making the routing graph planar will at best keep the maximum number of possible edges, and at worst remove some. However it is easier to reason about planar graphs\footnote{For instance if we let $v$ be the number of vertices's, $f$ the number of faces and $e$ the number of edges then $v - e + f = 2$. Thus we can begin to reason about the ratio of the different parts of the graph given at least one of them}, and many routing algorithms makes\todo{see if I can justify this}. For these reasons I will chose to work exclusively on planar graphs. There are several methods for turning the underlying structure into a planar graph (i.e. making sure that for any given node, the only neighbours they have are the ones that do not violate the planarity of the graph, were it to be represented as a graph), and keeping it so for the lifetime of the network. 
-
-The next question is then to define what constitutes an edge in the graph. Since one could easily imagine a scenario where heterogeneous ad-hoc nodes had different broadcast radii, leading to cases where certain nodes could receive other nodes broadcast through 1 jump, but would have to route through several nodes to get the message back -- see figure~\ref{fig:node_different_radius} for an example of this.
+\subsection{Single-level graphs}
+The first important question to answer should be whether the graph should be planar or not. A planar graph is defined as a graph that can be embedded in the plane. One of the properties of a planar embedding is that no edge will cross another edge. As we saw in figure~\ref{fig:routing_not_planar} and \ref{fig:routing_planar}, that in the non-planar graph, each node can communicate directly with more nodes, compared to the planar graph. However, since it is harder to reason about non-planar graphs, I will chose only to work with planar graphs. \hide{\footnote{For instance if we let $v$ be the number of vertices's, $f$ the number of faces and $e$ the number of edges then $v - e + f = 2$. Thus we can begin to reason about the ratio of the different parts of the graph given at least one of them}, and many routing algorithms makes\todo{see if I can justify this}.}. This of course means that I must now take pains to ensure that the graph will remain planar for its lifetime.
 
 I have found the following methods for making the planar graphs:
+
 \begin{description}
 \item[The \gabe:] Two nodes $n_1$ and $n_2$ only share an edge iff the circle that has $\overline{n_1n_2}$ as its diameter does not contain a node $n_3$ \cite{gopher}. 
 \item[The \rng:] Two nodes $n_1$ and $n_2$ share an edge if there is no node $n_3$ such that $|\overline{n_1n_3}|, |\overline{n_2n_3}| \leq |\overline{n_1n_2}|$ (i.e. $n_3$ is closer to both $n_1$ and $n_2$ than $n_1$ and $n_2$ are to each other).
-\item[The \rdg:] The \rdg is a graph scheme that employs \ch (see Section~\ref{cluster methods}) based planar graph solution. After having clustered the nodes, each \ch calculates the local Delaunay edges, and then confers with its one-hop neighbours to check which Delaunay edges are valid. Besides being planar, computable in a distributed manner, the \rdg is also a spanner, which means that using it will only make the route a constant times longer than the optimal route \cite{GeoSpanners}.
-\hide{
-\item[The \udg] In the \udg, there exist an edge between node $n_1$ and $n_2$ iff $|\overline{n_1n_2}| \leq 1$ i.e. the distance between the two nodes are less or equal to 1 unit  \cite{gopher}. In this case we assume that all the nodes have the same communication range, and so every edge indicates that the two nodes can talk together. However it is clear that a \udg is not always planar, which is the preferred structure for a underlying graph in \anet.
-}
+\end{description}
+Both \gabe and \rng are based on the Unit graph assumption, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}.
+
+\begin{description}
+\item[The \cldp:] \cldp works by having each node uses \emph{the right-hand-rule}\footnote{The right-hand-rule states that for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started.} and checks whether or not any of its links crosses/is crossed by another edge. \cldp does is not dependent on the Unit graph assumption \cite{practical}. 
+\end{description}
 \end{description}
 
 \tikfig{graph_comparison}{\ref{fig:rng1} and \ref{fig:rng2} are examples of the RNG, while \ref{fig:gg1} and \ref{fig:gg2} are examples of the GG. This figure is inspired by figure~7 in \cite{GeoSpanners}.}
 
-It is not immediately apparent how one would compare the groups created by these three algorithms. Especially \rdg is a cluster based method. It is however clear that the \rng is slightly more accepting than the \gabe. See figure~\ref{fig:graph_comparison} for an example of the \rng and the \gabe.
-
-
+It is not immediately apparent how one would compare the groups created by these three algorithms. \cldp is especially hard to compare to the others given, that it is very much affected by the run-time behaviour of the transmission between the nodes. It is however clear that the \rng is slightly more accepting than the \gabe. See figure~\ref{fig:graph_comparison} for an example of the \rng and the \
 
 Neither the \manet or the \anet can be said to be entirely static. Even in an \anet, where we assume the nodes remain stationary, every single node will eventually run out of energy or fail. The routing graph must therefore always have a maintenance system that can deal with changes to the underlying graph. 
-
-\tikfig{node_different_radius}{Two nodes with different broadcast ranges. Node a is not adjacent to node b, but node b is adjacent to node a -- thus only one-way communication from b to a can take place.}
 
 To complicate matter further different nodes can have different communications radius as exemplified in figure~\ref{fig:node_different_radius}, which shows us that a node needs to confirm that it indeed has a bidirectional link to each of its adjacent nodes, and cannot take it for granted.
 
@@ -45,9 +42,9 @@ To complicate matter further different nodes can have different communications r
 
 Likewise it is important to remember that a node in practise might be able to adjust its communications range (at a higher energy cost). See figure~\ref{fig:different_radius}\todo{improve this}.
 
-\subsection{Node Clustering}
+\subsection{Two-Level graphs}
 \label{cluster methods}
-Node Clustering is a hierarical alternative to the flat graph. Instead of having every node being the same, a number of nodes are made into \ch such that all nodes in the graph has 1 cluster head that they communicate with. Most of the time the nodes that belong to a certain \ch is its one-hop neighbours, but there are also schemes that allows nodes to have a clustehead that is farther away, in order to reduce the number of \ch. With \ch a layer specialisation and hierarcy is added to the network, which reduces the complexity of an otherwise entirely flat network, while still retaining some decentralisation.
+Node Clustering is a hierarchical alternative to the flat graph. Instead of having every node being the same, a number of nodes are made into \ch such that all nodes in the graph has 1 cluster head that they communicate with. Most of the time the nodes that belong to a certain \ch is its one-hop neighbours, but there are also schemes that allows nodes to have a clustered that is farther away, in order to reduce the number of \ch. With \ch a layer specialisation and hierarchy is added to the network, which reduces the complexity of an otherwise entirely flat network, while still retaining some decentralisation.
   
 Sometimes several levels of \ch are implemented, where we have [$n$]thsecond ($n \in \N, n > 1$) level of \ch, which administrates the [$n-1$] layer of \ch.  
 
@@ -64,11 +61,18 @@ Some of the practical advantages are:
 
 However, since we are introducing a layer of centralisation, it is also clear that there must be a system in place to detect and replace a \ch should it fail (and to elect it in the first place). An often used system is a voting system, or an selection algorithm (based hash value of the node's id, its MAC value etc.).
 
-In the case of \manet where there are some hardware in which some nodes are stationary, it might be preferable to use these stationary nodes as a subset of the \ch, since it would cut down on the amount of adminestration 
+In the case of \manet where there are some hardware in which some nodes are stationary, it might be preferable to use these stationary nodes as a subset of the \ch, since it would cut down on the amount of administration 
+
+A routing algorithm for the 
+\begin{description}
+\item[The \rdg:] The \rdg is a graph scheme that employs \ch (see Section~\ref{cluster methods}) based planar graph solution. After having clustered the nodes, each \ch calculates the local Delaunay edges, and then confers with its one-hop neighbours to check which Delaunay edges are valid. Besides being planar, computable in a distributed manner, the \rdg is also a spanner, which means that using it will only make the route a constant times longer than the optimal route \cite{GeoSpanners}.
+\end{description}
 
 \section{Routing Algorithms}
 
 The biggest conceptual difference for routing/shortest path algorithms in a \manet compared to main-stray routing/shortest path algorithms, is the loss of global overview that these algorithms employ --- such as relaxing a specific nodes' edges at a specific time. There exist distributed version of some of the ``classic'' routing algorithms, but their usefulness may be limited in a mobile network, since they will have to be recomputed either each time a node wants to transmit a message, or each time the underlying graph changes.
+
+As mentioned in Section~\ref{fundamental}, the problem of sending a message from the source to the sink  becomes a graph routing problem (but not necessary a shortest-path routing problem, since factors like fairness or maximisation of the lifetime of the \manet becomes issues in practise).
 
 When routing a message from the source to the sink, it is important to distinguish the message that is being transmitted and the nodes that are transmitting. The transmitted message does not only include the information that is intended for the node at the sink, but also extra meta-data needed for routing. This includes time-to-live, position of the source node, position of the sink, message id etc. The nodes are all assumed to use the same routing algorithm, and at least know who their neighbours are.
 
