@@ -56,7 +56,7 @@ def fix_coordinates(file_name):
 
             speed = math.sqrt(x_delta * x_delta + y_delta * y_delta) / (time_to_arrive - time_to_move)
 
-            to_write += "$ns at " + remove_decimal(time_to_move) + " " + node_name + " setdest " + str(x_to) + " " + str(y_to) + str(speed) + "\n"
+            to_write += "$ns at " + remove_decimal(time_to_move) + " " + node_name + " setdest " + str(x_to) + " " + str(y_to) + " " + str(speed) + "\n"
 
             split_line_index += 1
         to_write += "\n\n"
