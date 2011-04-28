@@ -12,30 +12,21 @@ def fix_coordinates(file_name):
     lines = file_open.readlines()
     file_open.close()
 
-    to_write = "set ns [new Simulator]\n"
-    id = 0
-
-    # I create the nodes
-    while(id < len(lines)):
-        id += 1        
-        to_write += "$ns node" + str(id) + "\n"
-        
-    to_write += "\n"
+    to_write = ""
 
     id = 0
     # In this loop we take the movements for each node and turns it into data that can be understood by the program
     for line in lines:
-        id += 1
         split_line = line.split(' ')
         # For each location there are 3 values -- time x_coor y_coor . Thus we know that split_line must contain a multiplum of 3 items 
         split_line_index = 0
 
-        node_name = "$node" + str(id)
+        node_name = "$node_(" + str(id) + ")"
 
         # I set the intial address
         to_write += node_name + " set X_ " + str(split_line[1]) + "\n"
         to_write += node_name + " set Y_ " + str(split_line[2]) + "\n"
-        to_write += node_name + " set Z_ 0\n\n"       
+        to_write += node_name + " set Z_ 0.0\n\n"       
 
         while((split_line_index + 1) * 3 < len(split_line)):
 
@@ -56,16 +47,29 @@ def fix_coordinates(file_name):
 
             speed = math.sqrt(x_delta * x_delta + y_delta * y_delta) / (time_to_arrive - time_to_move)
 
-            to_write += "$ns at " + remove_decimal(time_to_move) + " " + node_name + " setdest " + str(x_to) + " " + str(y_to) + " " + str(speed) + "\n"
+            to_write += "$ns at " + str(time_to_move) + " " + node_name + " setdest " + str(x_to) + " " + str(y_to) + " " + str(speed) + "\n"
 
             split_line_index += 1
         to_write += "\n\n"
+        id += 1
     
-    # We write the data we have processed
+    # We write the node movement
     save_file_name = os.path.join(current_dir, "Processed Motion", file_name)
     file_write = open(save_file_name, 'w')
     file_write.write(to_write)
     file_write.close()
+
+    to_write = "set ns [new Simulator]\n"
+    id = 0
+
+    # I create the nodes
+    to_write += "set opt(nn)\t" + str(id) + ";# number of nodes \n"
+   
+
+    to_write += "for {set i 0} {$i < " + str(len(lines))  + "} {incr i} {\n"
+    to_write += "\tset node($i) [$ns node]\n"
+    to_write += "}\n"
+    to_write += "\n"   
 
 
 fix_coordinates("scenario1")
