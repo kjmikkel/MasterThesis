@@ -10,7 +10,7 @@
 \pagestyle{plain}
 
 \section{Routing graph}
-Having defined our problem in Section~\ref{fundamental}, I will in this section describe some of the different kinds of Routing graphs that can be used for \manet, and will describe the one I have used for this thesis. Furthermore I will give an introduction to single, second, and multi-level routing node organization. 
+Having defined our problem in Section~\ref{fundamental}, I will in this section describe some of the different kinds of Routing graphs that can be used for \manet, and will describe the one I have used for this thesis. Furthermore I will give an introduction to single, second, and multi-level routing node organisation. 
 
 In the literature I have read, I have not been able to find a consensus on how the optimal graph for \manet should be structured. It is furthermore my experience that the structure of the graph heavily influences the routing algorithm, making the two heavily dependant on each other.
 
@@ -45,8 +45,6 @@ Likewise it is important to remember that a node in practise might be able to ad
 \subsection{Two-Level graphs}
 \label{cluster methods}
 Node Clustering is a hierarchical alternative to the flat graph. Instead of having every node being the same, a number of nodes are made into \ch such that all nodes in the graph has 1 cluster head that they communicate with. Most of the time the nodes that belong to a certain \ch is its one-hop neighbours, but there are also schemes that allows nodes to have a clustered that is farther away, in order to reduce the number of \ch. With \ch a layer specialisation and hierarchy is added to the network, which reduces the complexity of an otherwise entirely flat network, while still retaining some decentralisation.
-  
-Sometimes several levels of \ch are implemented, where we have [$n$]thsecond ($n \in \N, n > 1$) level of \ch, which administrates the [$n-1$] layer of \ch.  
 
 In order to improve the routing, \ch are almost always accompanied by \emph{gateway nodes}. Gateway nodes are nodes that connect two clusters. \cite{spanners} defines a gateway node as follows:
 Let C(p) be the set of nodes that has the cluster p as its \ch (this includes p). Then for a pair of \ch s $c_1, c_2$ if there exists a pair of nodes $p_1 \in C(c_1), p_2 \in C(c_2)$ such that $p_1$ and $p_2$ can communicate with each other in the graph, then $p_1$ and $p_2$ are gateway nodes (and in particular they are the only gateway nodes between $c_1$ and $c_2$.  
@@ -69,7 +67,7 @@ Since we are dealing with routing between \ch now, we can exploit this in the ro
 \end{description}
 
 \subsection{Multiple-level graphs}
-A logical extension to the Two-level graph is the multiple-level graph. In the multiple-level graph the $[n]$th level contains the location of the nodes on the $[n-1]$th level, for $n \geq 3$.     
+A logical extension to the Two-level graph is the multiple-level graph. In the multiple-level graph the $[n]$th level contains the location of the nodes on the $[n-1]$th level, for $n \geq 3$. 
  \todo{find article and cite}
 
 \section{Routing Algorithms}
@@ -194,11 +192,33 @@ The movement creates the need for the following solutions:
 
 \section{Network simulators}
 
+In order to test any algorithm I might implement, I will need a network simulator, to check how good it is compared to already existing algorithms. I have been able to identify 3 big network simulators: NS-2, GloMoSim and Opnet.
+
 \begin{description}
-\item[The NS2 network simulator]
-\item[GloMoSim]
-\item[Opnet]
+\item[NS-2:] NS-2 is a discrete event   . The last version I have been able to find is from 2009. NS-2 uses the programming language TCL for most of its non-core engine files -- such as routing algorithms and the scenario files that configures how the test is to be performed.
+\item[GloMoSim:] GloMoSim is a parallel     GloMoSim is an old simulator. I have not been able   . GloMoSim uses the programming language \emph{Parsec}, a dialect of C, to write most of the non-core engine files -- such as routing algorithms. 
+\item[Opnet:] Opnet is a commercial network simulator. 
 \end{description}
+
+From [article] it is clear that the Network simulators gives widely different results. Since it is not clear which of the simulators which gives the result that is closest to reality, the parameters I will have to apply to find the best network simulator are: How many other articles use the network simulator\footnote{Since this means I would been able to compare it to more articles}, how flexible is it, how difficult is it to configure scenarios, how difficult is it to write new routing algorithms and how difficult is it to get a hold of.
+
+Most of the articles I have read that have named their network simulator uses NS-2 [Find articles and cite them].
+
+Both NS-2 and GloMoSim are very configurable, but NS-2 is more flexible than GloMoSim and has both more built-in features.
+
+From what I have been able to derive from the manuals, and examples from both NS-2 and GloMoSim, GloMoSim is less complicated than NS-2.
+
+
+
+
+Comparing NS-2 and GloMoSim it is clear that NS-2 is both the more complicated program to set up and program for. It is 
+
+Both NS-2 and GloMoSim are free for education, while I will have to pay for Opnet.
+
+Both NS-2 and GloMoSim has simple mobility models for the nodes built in. However, I have chosen a separate program, BonnMotion, which has been produced as a collaboration between the University of Bonn and the Toilers at \url{toilers.mines.edu} \todo{find a date where you last accessed it and write it -- perhaps this should be moved}. The program has multiple mobility methods built in -- such as ``Random Waypoint'', ``Manhatten Grid'' and 2 different flavours of ``Gauss-Markov''. The program can furthermore output the data in the input format for both ns-2 and GloMoSim (Both are however rather simple and could easily be created from raw motion files).
+
+
+\todo{Include tribute to bonnmotion and the toilers group}
 
 \bibliographystyle{plain}
 \bibliography{references}{}
