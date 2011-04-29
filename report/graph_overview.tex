@@ -61,12 +61,16 @@ Some of the practical advantages are:
 
 However, since we are introducing a layer of centralisation, it is also clear that there must be a system in place to detect and replace a \ch should it fail (and to elect it in the first place). An often used system is a voting system, or an selection algorithm (based hash value of the node's id, its MAC value etc.).
 
-In the case of \manet where there are some hardware in which some nodes are stationary, it might be preferable to use these stationary nodes as a subset of the \ch, since it would cut down on the amount of administration 
+In the case of \manet where there are some hardware in which some nodes are stationary, it might be preferable to use these stationary nodes as a subset of the \ch, since these nodes status as \ch would never change.
 
-A routing algorithm for the 
+Since we are dealing with routing between \ch now, we can exploit this in the routing:
 \begin{description}
 \item[The \rdg:] The \rdg is a graph scheme that employs \ch (see Section~\ref{cluster methods}) based planar graph solution. After having clustered the nodes, each \ch calculates the local Delaunay edges, and then confers with its one-hop neighbours to check which Delaunay edges are valid. Besides being planar, computable in a distributed manner, the \rdg is also a spanner, which means that using it will only make the route a constant times longer than the optimal route \cite{GeoSpanners}.
 \end{description}
+
+\subsection{Multiple-level graphs}
+A logical extension to the Two-level graph is the multiple-level graph. In the multiple-level graph the $[n]$th level contains the location of the nodes on the $[n-1]$th level, for $n \geq 3$.     
+ \todo{find article and cite}
 
 \section{Routing Algorithms}
 
