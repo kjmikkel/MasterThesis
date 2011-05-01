@@ -33,23 +33,3 @@
            \path[real edge] (\source) -- (\sink); 
        }
 \end{tikzpicture}}
-
-\subfloat[Routing graph]{\label{fig:routing_not_planar}
-\begin{tikzpicture}[scale=\scale]  
-       \foreach \pos/\name in {{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}} {
-           \node[vertex] (\name) at \pos {$\name$};
-       }    
-       \foreach \source/\sink in {a/f, a/b, a/c, a/d, a/e, b/g, b/c, b/c, b/d, b/e, c/h, c/d, c/e, d/i, d/e, e/j} {
-           \path[real edge] (\source) -- (\sink); 
-       }
-\end{tikzpicture}}
-% Remove empty line
-\subfloat[Planar Routing graph]{\label{fig:routing_planar}
-\begin{tikzpicture}[scale=\scale]  
-       \foreach \pos/\name in {{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}} {
-           \node[vertex] (\name) at \pos {$\name$};
-       }    
-       \foreach \source/\sink in {a/f, a/b, a/e, b/g, b/c, b/c, b/e, c/h, c/d, c/e, d/e, d/i, e/j} {
-           \path[real edge] (\source) -- (\sink); 
-       }
-\end{tikzpicture}}
