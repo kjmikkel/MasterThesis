@@ -1,0 +1,22 @@
+\section{Test description}
+In this section I will describe which metrics I am going to use to compare the different algorithms. Having specified these I will describe the tests in detail.
+
+\subsection{Metrics}
+
+The metrics I will measure in the tests will be 
+\begin{description}
+\item[Number of hops:] The number of hops from the source to the sink. For this I will measure the maximum number of hops, the minimum number of hops, as well as the average. I feel the number of hops is a usefull metric, for multiple reasons. Firstly it tells us whether the algorithm might lead the message astray \todo{add more} . Secondly, the more hops a message performs, the more engery has to be expended on routing it, cutting down down on the life-time of the network.
+
+as it can give us insight into whether a routing algorithm 
+\item[Time:] The amount of time spent sending the message from the source to the sink. I will likewise measure the maximum, minimum and average time spent. It is clear that the faster a message arrives at its sink, the better.
+
+\item[Number of misses:] The number of misses timeouts/etc. \todo{make this more precise}
+
+\item[Percentages of successfuly arrived messages:] While most\todo{qualify/quantify this} routing algorithms gurantees that the message will always arrive, this is not always the case. The best example of a routing algorithm that does not have this gurantee is the greedy routing algorithm (see Section~\ref{greedy} p. \pageref{greedy}). Also, since we are trying to simulate mobile nodes with limited energy storage, critical parts of the topology may be fail, making it impossible for the message to arrive.
+
+\end{description}
+
+For the number of hops, the amount of time and number of misses I will record the maximum, the minimum and the average value. The main value for comparison will be the average value, but I feel that recording both the maximum and the minimum values will give me a view of both the extreemes, but also gives me additional information about the average.
+
+* Antal timeouts
+* Antal colisioner
