@@ -1,0 +1,36 @@
+\section{Test description}
+In this section I will describe which metrics I am going to use to compare the different algorithms. Having specified these I will describe the tests in detail.
+
+\subsection{Metrics}
+
+The metrics I will measure in the tests will be 
+\begin{description}
+\item[Number of hops:] The number of hops from the source to the sink. For this I will measure the maximum number of hops, the minimum number of hops, as well as the average. I feel the number of hops is a useful metric, for multiple reasons. Firstly it tells us whether the algorithm might lead the message astray \todo{add more} . Secondly, the more hops a message performs, the more energy has to be expended on routing it, cutting down down on the life-time of the network.
+
+\item[Time:] The amount of time spent sending the message from the source to the sink. I will likewise measure the maximum, minimum and average time spent. It is clear that the faster a message arrives at its sink, the better.
+
+\item[Number of misses:] The ratio of timeouts compared to the number of sent messages. This will apply whether we are using UDP or TCP. \todo{make this more precise}
+
+\item[Percentages of successfully arrived messages:] While most\todo{qualify/quantify this} routing algorithms guarantees that the message will always arrive, this is not always the case. The best example of a routing algorithm that does not have this guarantee is the greedy routing algorithm (see Section~\ref{greedy} p. \pageref{greedy}). Also, since we are trying to simulate mobile nodes with limited energy storage, critical parts of the topology may be fail, making it impossible for the message to arrive.
+\end{description}
+
+For the number of hops, the amount of time and number of misses I will record the maximum, the minimum and the average value. The main value for comparison will be the average value, but I feel that recording both the maximum and the minimum values will give me a view of both the extremes, but also gives me additional information about the average.
+
+* Antal timeouts
+* Antal colisioner
+
+
+\subsection{Input parameters}
+In order to perform the tests I will need to define the parameters that are going to vary for the different tests.
+
+Movement model: The topology is clearly going to be influenced by the way that the nodes move, therefore it would be interesting to test out several models. DisasterArea \cite{disasterArea},  Random Street \cite{randomStreet}, and Gauss-Markow. In practice I will create a trace using the BonnMotion \todo{make reference to bonn motion} tool use to create the movment files which can then be imported into ns-2.
+
+Algorithms: GOAFR \cite{gopher}, GOAFR+ \cite{gopher+}, Greedy \cite{gopher}, 
+
+Amount and data-transmission type: In real world situations there will be different levels of trafic on the network, and therfore to test it we must likewise simulate these differences. Directly effecting this is the protocol used to send the data through the network. Applications that use UDP\todo{explain UDP} transmissions will fill the network less than TCP packages.
+
+Node density: It is clear that denser node distribution, all other things being equal, will give a more robust network.
+
+Percentage of nodes failing or entering/leaving the network: In a \manet we are dealing with a lot of small mobile nodes that easily can enter and leave the network. Furthermore nodes may fail (either from having exhusted their energy, being turned off, or suffering from a fatal error).
+
+
