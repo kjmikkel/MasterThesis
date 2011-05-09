@@ -16,21 +16,31 @@ The metrics I will measure in the tests will be
 
 For the number of hops, the amount of time and number of misses I will record the maximum, the minimum and the average value. The main value for comparison will be the average value, but I feel that recording both the maximum and the minimum values will give me a view of both the extremes, but also gives me additional information about the average.
 
-* Antal timeouts
-* Antal colisioner
-
-
 \subsection{Input parameters}
 In order to perform the tests I will need to define the parameters that are going to vary for the different tests.
+\begin{description}
+\item[Movement model:] The topology is clearly going to be influenced by the way that the nodes move, therefore it would be interesting to test out several models. 
 
-Movement model: The topology is clearly going to be influenced by the way that the nodes move, therefore it would be interesting to test out several models. DisasterArea \cite{disasterArea},  Random Street \cite{randomStreet}, and Gauss-Markow. In practice I will create a trace using the BonnMotion \todo{make reference to bonn motion} tool use to create the movment files which can then be imported into ns-2.
+\item[Routing Algorithms:] 
 
-Algorithms: GOAFR \cite{gopher}, GOAFR+ \cite{gopher+}, Greedy \cite{gopher}, 
+\item[Amount and data-transmission type:] In real world situations there will be different levels of traffic on the network, and therefore to test it we must likewise simulate these differences. Directly effecting this is the protocol used to send the data through the network. Applications that uses the UDP protocol is less likely to cause congestion in the network, compare to TCP packages.
 
-Amount and data-transmission type: In real world situations there will be different levels of trafic on the network, and therfore to test it we must likewise simulate these differences. Directly effecting this is the protocol used to send the data through the network. Applications that use UDP\todo{explain UDP} transmissions will fill the network less than TCP packages.
+\item[Size of the simulation area:] The size of the simulation area has a direct influence on how far apart the nodes can move and how many nodes are needed for a given node density. Everything else being equal, a larger simulation area will make the network less robust.
 
-Node density: It is clear that denser node distribution, all other things being equal, will give a more robust network.
+\item[Number of nodes:] It is clear that denser node distribution, everything else being equal, will give a more robust network,
 
-Percentage of nodes failing or entering/leaving the network: In a \manet we are dealing with a lot of small mobile nodes that easily can enter and leave the network. Furthermore nodes may fail (either from having exhusted their energy, being turned off, or suffering from a fatal error).
+\item[Percentage of nodes failing/leaving the network:] Since we are dealing with a \manet, it is clear that a nodes may leave the network or fail (either due to equipment failure or lack of power). 
+\item[Percentage of nodes entering the network:] In \manet nodes can also enter the network, something we need to simulate if we are to get an adequate picture of the algorithms worth.
+\end{description}
 
 
+\subsection{Actual parameters}
+I now that I have detailed which kinds of parameters we can change 
+
+\begin{itemize}
+\item[Movement models:] DisasterArea \cite{disasterArea},  Random Street \cite{randomStreet}, and Gauss-Markow. In practise I will create a trace using the BonnMotion tool \cite{toilers} use to create the movement files which can then be imported into ns-2.
+\item[Routing algorithms:] GOAFR \cite{gopher}, GOAFR+ \cite{gopher+}, Greedy \cite{gopher}, DSDV \todo{find article and refer to it}
+\item[Number of nodes:] 500, 1000\footnote{Neither GloMoSim or ns-2 can handle that many nodes without extensive \todo{find and cite their problems}}
+\item[Nodes failing:] 0\%, 10\%, 25\%, 40\%
+\item[Nodes entering:] 0\%, 5\%, 25\%
+\end{itemize}
