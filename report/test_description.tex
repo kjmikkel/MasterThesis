@@ -17,6 +17,7 @@ The metrics I will measure in the tests will be
 For the number of hops, the amount of time and number of misses I will record the maximum, the minimum and the average value. The main value for comparison will be the average value, but I feel that recording both the maximum and the minimum values will give me a view of both the extremes, but also gives me additional information about the average.
 
 \subsection{Input parameters}
+\label{input_parameters}
 In order to perform the tests I will need to define the parameters that are going to vary for the different tests.
 \begin{description}
 \item[Movement model:] The topology is clearly going to be influenced by the way that the nodes move, therefore it would be interesting to test out several models. 
@@ -35,12 +36,14 @@ In order to perform the tests I will need to define the parameters that are goin
 
 
 \subsection{Actual parameters}
-I now that I have detailed which kinds of parameters we can change 
+As I have now detailed in section~\ref{input_parameters} which paramters it would be useful to vary, I will in this subsection detail the actual value of the differnet parameters. 
 
 \begin{itemize}
-\item[Movement models:] DisasterArea \cite{disasterArea},  Random Street \cite{randomStreet}, and Gauss-Markow. In practise I will create a trace using the BonnMotion tool \cite{toilers} use to create the movement files which can then be imported into ns-2.
+\item[Movement models:] DisasterArea \cite{disasterArea},  Random Street \cite{randomStreet}, and Gauss-Markow \todo{find and cite}. In practise I will create a trace using the BonnMotion tool \cite{toilers} use to create the movement files which can then be imported into ns-2.
+\item[Amount and Data-transmission type:] 500 kB, 1024 kB, 5120 kB, 20480 kB (TCP), 500 kB, 5120 kB, 51200 kB (UDP)
+\item[Size of simulation area:] 500 by 500 units and 1000 by 1000 units
 \item[Routing algorithms:] GOAFR \cite{gopher}, GOAFR+ \cite{gopher+}, Greedy \cite{gopher}, DSDV \todo{find article and refer to it}
-\item[Number of nodes:] 500, 1000\footnote{Neither GloMoSim or ns-2 can handle that many nodes without extensive \todo{find and cite their problems}}
+\item[Number of nodes:] 500, 1000\footnote{Neither GloMoSim or ns-2 can handle too many nodes \todo{find and cite their problems}}
 \item[Nodes failing:] 0\%, 10\%, 25\%, 40\%
 \item[Nodes entering:] 0\%, 5\%, 25\%
 \end{itemize}
