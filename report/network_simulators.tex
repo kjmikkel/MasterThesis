@@ -9,23 +9,22 @@ In order to test any algorithm I might implement, I will need a network simulato
 \item[Opnet Modeler:] Opnet is a commercial network simulator. Every layer of the network stack has to be modelled as a finite state machine \cite{MANcom}.
 \end{description}
 
-From \cite{MANcom} it is clear that the Network simulators gives widely different results. Since it is not clear which of the simulators which gives the result that is closest to reality, the parameters I will have to apply to find the best network simulator are: How many other articles use the network simulator\footnote{Since this means I would been able to compare it to more articles}, how flexible is it, how difficult is it to configure scenarios, how difficult is it to write new routing algorithms and how difficult is it to get a hold of.
+From \cite{MANcom} it is clear that the Network simulators gives widely different results. Since it is not clear which of the simulators which gives the result that is closest to reality, the parameters I will have to apply to find the best network simulator are: How many other articles use the network simulator\footnote{Since this means I would been able to compare it to more articles}, how flexible is it, how difficult is it to configure scenarios and how difficult is it to write new routing algorithms.
 
 \begin{tabular}[3]{l|c|c}
- & NS-2 & GloMoSim \\
+                          & NS-2      & GloMoSim \\
 \hline
-License: & GNU GPL & Academic \\
-\hline
-Cost & & \\
-Availability & & \\
-Last updated & & \\
-Configurability & & \\
-Support for wireless & & \\
-Memory requirements & & \\
-Req for routing protocol & & \\
-Req for new scenario & & \\
+License:                  & GNU GPL   & Academic \\
+Cost                      & Free      & Free for educational use \\
+Last updated              & 2011-05-1\footnote{See \url{http://sourceforge.net/projects/nsnam/}} & 2001-19-12\footnote{See \url{http://pcl.cs.ucla.edu/projects/glomosim/academic/download.html}}\\
+Configurability           & Extensive & Sligtly less extensive \\
+Support for wireless      & Yes       & Yes \\
+Memory requirements       & Very high & High \\
+Req for routing protocol  & C++ and OTCL & Parsec \\
+Req for new scenario      & OTCL      & \\
 \# of different citations & & \\
-Plug-in or Recompile & & \\
+Plug-in or Recompile      & Recompile & Recompile \\
+
 \end{tabular}\\
 
 Most of the articles I have read that have named their network simulator uses NS-2 [Find articles and cite them].
