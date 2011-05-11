@@ -11,5 +11,6 @@ cp ns-packet.tcl $NS_ROOT"/tcl/lib/ns-packet.tcl"
 cp ns-lib.tcl $NS_ROOT"/tcl/lib/ns-lib.tcl"
 cp ns-agent.tcl $NS_ROOT"/tcl/lib/ns-agent.tcl"
 cp ns-mobilenode.tcl $NS_ROOT"/tcl/lib/ns-mobilenode.tcl"
-cp -r wfrp $NS_ROOT"wfrp"
-cp -r greedy $NS_ROOT"greedy"
+
+cp -rf wfrp $NS_ROOT
+cp -rf greedy $NS_ROOT

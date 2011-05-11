@@ -24,8 +24,8 @@
  *
  */
 
-#ifndef __wfrp_h__
-#define __wfrp_h__
+#ifndef __greedy_h__
+#define __greedy_h__
 
 #include <cmu-trace.h>
 #include <priqueue.h>
@@ -36,67 +36,63 @@
 #define DEFAULT_ROUTE_EXPIRE 		2*DEFAULT_BEACON_INTERVAL // seconds;
 #define ROUTE_PURGE_FREQUENCY		2 // seconds
 
-
-
 #define ROUTE_FRESH		0x01
 #define ROUTE_EXPIRED		0x02
 #define ROUTE_FAILED		0x03
 
-class WFRP;
+class GREEDY;
 
 // ======================================================================
 //  Timers : Beacon Timer, Route Cache Timer
 // ======================================================================
 
-class wfrpBeaconTimer : public Handler {
+class greedyBeaconTimer : public Handler {
 public:
-        wfrpBeaconTimer(WFRP* a) : agent(a) {}
+        greedyBeaconTimer(GREEDY* a) : agent(a) {}
         void	handle(Event*);
 private:
-        WFRP    *agent;
+        GREEDY    *agent;
 	Event	intr;
 };
 
-class wfrpRouteCacheTimer : public Handler {
+class greedyRouteCacheTimer : public Handler {
 public:
-        wfrpRouteCacheTimer(WFRP* a) : agent(a) {}
+        greedyRouteCacheTimer(GREEDY* a) : agent(a) {}
         void	handle(Event*);
 private:
-        WFRP    *agent;
+        GREEDY    *agent;
 	Event	intr;
 };
 
 // ======================================================================
 //  Route Cache Table
 // ======================================================================
-class RouteCache {
-	friend class WFRP;
+class Neighbor {
+	friend class GREEDY;
  public:
-	RouteCache(nsaddr_t bsrc, u_int32_t bid) { rt_dst = bsrc; rt_seqno = bid;  }
+	Neighbor(nsaddr_t neigh, u_int32_t bid) { nb_neigh = neigh; nb_seqno = bid;  }
  protected:
-	LIST_ENTRY(RouteCache) rt_link;
-	u_int32_t       rt_seqno;	// route sequence number
-	nsaddr_t        rt_dst;		// route destination
-       	nsaddr_t	rt_nexthop;	// next hop node towards the destionation
-	u_int32_t	rt_xpos;	// x position of destination;
-	u_int32_t	rt_ypos;	// y position of destination;
-	u_int8_t	rt_state;	// state of the route: FRESH, EXPIRED, FAILED (BROKEN)
-	u_int8_t	rt_hopcount;    // number of hops up to the destination (sink)
-        double          rt_expire; 	// when route expires : Now + DEFAULT_ROUTE_EXPIRE
+	LIST_ENTRY(Neighbor) nb_link;
+	u_int32_t       nb_seqno;	// neighbor sequence number
+       	nsaddr_t	nb_neigh;	// One of its neighbors
+	u_int32_t	nb_xpos;	// x position of the neighbor;
+	u_int32_t	nb_ypos;	// y position of the neighbor;
+	u_int8_t	nb_state;	// state of the link: FRESH, EXPIRED, FAILED (BROKEN)
+        double          nb_expire; 	// when route expires : Now + DEFAULT_ROUTE_EXPIRE
 
 };
-LIST_HEAD(wfrp_rtcache, RouteCache);
+LIST_HEAD(greedy_nb, Neighbor);
 
 
 // ======================================================================
-//  WFRP Routing Agent : the routing protocol
+//  GREEDY Routing Agent : the routing protocol
 // ======================================================================
 
-class WFRP : public Agent {
+class GREEDY : public Agent {
 	friend class RouteCacheTimer;
 
  public:
-	WFRP(nsaddr_t id);
+	GREEDY(nsaddr_t id);
 
 	void		recv(Packet *p, Handler *);
 
@@ -112,17 +108,17 @@ class WFRP : public Agent {
 		
 
 	// Routing Table Management
-	void		rt_insert(nsaddr_t src, u_int32_t id, nsaddr_t nexthop, u_int32_t xpos, u_int32_t ypos, u_int8_t hopcount);
-	void		rt_remove(RouteCache *rt);
-	void		rt_purge();
-	RouteCache*	rt_lookup(nsaddr_t dst);
+	void		nb_insert(nsaddr_t src, u_int32_t id, u_int32_t xpos, u_int32_t ypos);
+	void		nb_remove(Neighbor *nb);
+	void		nb_purge();
+	Neighbor*	nb_lookup(nsaddr_t dst);
 
 	// Timers
-	wfrpBeaconTimer		bcnTimer;
-	wfrpRouteCacheTimer	rtcTimer;
+	greedyBeaconTimer		bcnTimer;
+	greedyRouteCacheTimer	rtcTimer;
 	
-	// Caching Head
-	wfrp_rtcache	rthead;
+	// Neighbor Head
+	greedy_nb	nbhead;
 	
 	// Send Routines
 	void		send_beacon();
@@ -131,7 +127,7 @@ class WFRP : public Agent {
 	
 	// Recv Routines
 	void		recv_data(Packet *p);
-	void		recv_wfrp(Packet *p);
+	void		recv_greedy(Packet *p);
 	void 		recv_beacon(Packet *p);
 	void		recv_error(Packet *p);
 	
@@ -151,4 +147,4 @@ class WFRP : public Agent {
 };
 
 
-#endif /* __wfrp_h__ */
+#endif /* __greedy_h__ */

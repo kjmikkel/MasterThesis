@@ -39,13 +39,13 @@
 //  TCL Hooking Classes
 // ======================================================================
 
-int hdr_wfrp::offset_;
+int hdr_greedy::offset_;
 static class GREEDYHeaderClass : public PacketHeaderClass {
  public:
 	GREEDYHeaderClass() : PacketHeaderClass("PacketHeader/GREEDY", sizeof(hdr_all_greedy)) {
 	  bind_offset(&hdr_greedy::offset_);
 	} 
-} class_rtProtoGREEDY_hdr;
+} class_ProtoGREEDY_hdr;
 
 static class GREEDYclass : public TclClass {
  public:
@@ -57,8 +57,7 @@ static class GREEDYclass : public TclClass {
 } class_rtProtoGREEDY;
 
 
-int
-GREEDY::command(int argc, const char*const* argv) {
+int GREEDY::command(int argc, const char*const* argv) {
 	if(argc == 2) {
 	Tcl& tcl = Tcl::instance();
     
@@ -137,13 +136,29 @@ GREEDY::GREEDY(nsaddr_t id) : Agent(PT_GREEDY), bcnTimer(this), rtcTimer(this) {
 	index = id;
 	seqno = 1;
 
-	LIST_INIT(&rthead);
+	LIST_INIT(&nbhead);
 	posx = 0;
 	posy = 0;
 
 	logtarget = 0;
 	ifqueue = 0;
 
+}
+
+// ======================================================================
+//  Timer Functions
+// ======================================================================
+
+void
+greedyRouteCacheTimer::handle(Event*) {
+	agent->nb_purge();
+	Scheduler::instance().schedule(this, &intr, ROUTE_PURGE_FREQUENCY);
+}
+
+void
+greedyBeaconTimer::handle(Event*) {
+	agent->send_beacon();
+	Scheduler::instance().schedule(this, &intr, DEFAULT_BEACON_INTERVAL);
 }
 
 // ======================================================================
@@ -288,7 +303,7 @@ struct hdr_ip *ih = HDR_IP(p);
 void 
 GREEDY::recv_data(Packet *p) {
 	struct hdr_ip *ih = HDR_IP(p);
-	RouteCache *rt;
+	Neighbor *rt;
 	
 	// if route fails at link layer, (link layer could not find next hop node) it will cal rt_failed_callback function
 	//ch->xmit_failure_ = rt_failed_callback;
@@ -298,7 +313,7 @@ GREEDY::recv_data(Packet *p) {
 	printf("R (%.6f): recv data by %d  \n", CURRENT_TIME, index);
 #endif 
 
-	rt = rt_lookup(ih->daddr());
+	rt = nb_lookup(ih->daddr());
 
 	// There is no route for the destination
 	if (rt == NULL) {
@@ -307,8 +322,8 @@ GREEDY::recv_data(Packet *p) {
 	}
 
 	// if the route is not failed forward it;
-	else if (rt->rt_state != ROUTE_FAILED) {
-		forward(p, rt->rt_nexthop, 0.0);
+	else if (rt->nb_state != ROUTE_FAILED) {
+	  // Find next legal state
 	}
 	
 	// if the route has failed, wait to be updated;
@@ -367,11 +382,11 @@ GREEDY::recv_beacon(Packet *p) {
 #endif 
 	
 	// search for a route 
-	RouteCache	*rt = rt_lookup(bcn->beacon_src);
+	Neighbor	*rt = nb_lookup(bcn->beacon_src);
 	
 	// if there is no route toward this destination, insert the route and forward
  	if (rt == NULL)  {
-		rt_insert(bcn->beacon_src,bcn->beacon_id, ih->saddr(), bcn->beacon_posx, bcn->beacon_posy, bcn->beacon_hops);
+		nb_insert(bcn->beacon_src,bcn->beacon_id, bcn->beacon_posx, bcn->beacon_posy);
 
 		ih->saddr() = index;		
 		bcn->beacon_hops +=1; // increase hop count
@@ -382,18 +397,16 @@ GREEDY::recv_beacon(Packet *p) {
 	printf("F (%.6f): NEW ROUTE, forward beacon by %d \n", CURRENT_TIME, index);
 #endif 
 
-		forward(p, IP_BROADCAST, delay);
+	//	forward(p, IP_BROADCAST, delay);
 	}
 	// if the route is newer than I have (i.e. new beacon is received): update the route and forward
-	else if (bcn->beacon_id > rt->rt_seqno) {
+	else if (bcn->beacon_id > rt->nb_seqno) {
 	
-		rt->rt_seqno = bcn->beacon_id;
-		rt->rt_nexthop = ih->saddr();
-		rt->rt_xpos = bcn->beacon_posx;
-		rt->rt_ypos = bcn->beacon_posy;
-		rt->rt_state = ROUTE_FRESH;
-		rt->rt_hopcount = bcn->beacon_hops;
-		rt->rt_expire = CURRENT_TIME + DEFAULT_ROUTE_EXPIRE;
+		rt->nb_seqno = bcn->beacon_id;
+		rt->nb_xpos = bcn->beacon_posx;
+		rt->nb_ypos = bcn->beacon_posy;
+		rt->nb_state = ROUTE_FRESH;
+		rt->nb_expire = CURRENT_TIME + DEFAULT_ROUTE_EXPIRE;
 		
 		ih->saddr() = index;
 		bcn->beacon_hops +=1; // increase hop count
@@ -406,15 +419,13 @@ GREEDY::recv_beacon(Packet *p) {
 		forward(p, IP_BROADCAST, delay);
 	}
 	// if the route is shorter than I have, update it
-	else if ((bcn->beacon_id == rt->rt_seqno) && (bcn->beacon_hops < rt->rt_hopcount )) {
+	else if ((bcn->beacon_id == rt->nb_seqno)) {
 
-		rt->rt_seqno = bcn->beacon_id;
-		rt->rt_nexthop = ih->saddr();
-		rt->rt_xpos = bcn->beacon_posx;
-		rt->rt_ypos = bcn->beacon_posy;
-		rt->rt_state = ROUTE_FRESH;
-		rt->rt_hopcount = bcn->beacon_hops;
-		rt->rt_expire = CURRENT_TIME + DEFAULT_ROUTE_EXPIRE;
+		rt->nb_seqno = bcn->beacon_id;
+		rt->nb_xpos = bcn->beacon_posx;
+		rt->nb_ypos = bcn->beacon_posy;
+		rt->nb_state = ROUTE_FRESH;
+		rt->nb_expire = CURRENT_TIME + DEFAULT_ROUTE_EXPIRE;
 	}
 
 	// TODO : initiate dequeue() routine to send queued packets;
@@ -442,47 +453,50 @@ GREEDY::rt_failed_callback(Packet *p, void *arg) {
 }*/
 
 void
-GREEDY::rt_insert(nsaddr_t src, u_int32_t id, nsaddr_t nexthop, u_int32_t xpos, u_int32_t ypos, u_int8_t hopcount) {
-	RouteCache	*rt = new RouteCache(src, id);
+GREEDY::nb_insert(nsaddr_t src, u_int32_t id, u_int32_t xpos, u_int32_t ypos) {
+	Neighbor	*rt = new Neighbor(src, id);
 
-	rt->rt_nexthop = nexthop;
-	rt->rt_xpos = xpos;
-	rt->rt_ypos = ypos;
-	rt->rt_state = ROUTE_FRESH;
-	rt->rt_hopcount = hopcount;
-	rt->rt_expire = CURRENT_TIME + DEFAULT_ROUTE_EXPIRE;
+	rt->nb_xpos = xpos;
+	rt->nb_ypos = ypos;
+	rt->nb_state = ROUTE_FRESH;
+	rt->nb_expire = CURRENT_TIME + DEFAULT_ROUTE_EXPIRE;
 
-	LIST_INSERT_HEAD(&rthead, rt, rt_link);
+	LIST_INSERT_HEAD(&nbhead, rt, nb_link);
 }
 
 
 
-RouteCache*	
-GREEDY::rt_lookup(nsaddr_t dst) {
-	RouteCache *r = rthead.lh_first;
+Neighbor*	
+GREEDY::nb_lookup(nsaddr_t dst) {
+	Neighbor *r = nbhead.lh_first;
+	
+	return NULL;
+	// The greedy lookup code, it is here we must have the comparison
 
-  	for( ; r; r = r->rt_link.le_next) {
+	/*
+  	for( ; r; r = r->nb_link.le_next) {
 		if (r->rt_dst == dst)
 			return r;
  	}
 	
 	return NULL;
+	*/
 }
 
 void
-GREEDY::rt_purge() {
-	RouteCache *rt= rthead.lh_first;
+GREEDY::nb_purge() {
+	Neighbor *rt= nbhead.lh_first;
 	double now = CURRENT_TIME;
 
-	for(; rt; rt = rt->rt_link.le_next) {
-		if(rt->rt_expire <= now)
-			rt->rt_state = ROUTE_EXPIRED;
+	for(; rt; rt = rt->nb_link.le_next) {
+		if(rt->nb_expire <= now)
+			rt->nb_state = ROUTE_EXPIRED;
  	}
 }
 
 void
-GREEDY::rt_remove(RouteCache *rt) {
-	LIST_REMOVE(rt,rt_link);
+GREEDY::nb_remove(Neighbor *nb) {
+	LIST_REMOVE(nb,nb_link);
 }
 
 

@@ -24,38 +24,38 @@
  *
  */
 
-#ifndef __wfrp_packet_h__
-#define __wrfp_packet_h__
+#ifndef __greedy_packet_h__
+#define __greedy_packet_h__
 
 // ======================================================================
 //  Packet Formats: Beacon, Data, Error
 // ======================================================================
  
-#define WFRP_BEACON	0x01
-#define WFRP_ERROR	0x02
+#define GREEDY_BEACON	0x01
+#define GREEDY_ERROR	0x02
 
 
 // ======================================================================
 // Direct access to packet headers
 // ======================================================================
 
-#define HDR_WFRP(p)		((struct hdr_wfrp*)hdr_wfrp::access(p))
-#define HDR_WFRP_BEACON(p)	((struct hdr_wfrp_beacon*)hdr_wfrp::access(p))
-#define HDR_WFRP_ERROR(p)	((struct hdr_wfrp_error*)hdr_wfrp::access(p))
+#define HDR_GREEDY(p)		((struct hdr_greedy*)hdr_greedy::access(p))
+#define HDR_GREEDY_BEACON(p)	((struct hdr_greedy_beacon*)hdr_greedy::access(p))
+#define HDR_GREEDY_ERROR(p)	((struct hdr_greedy_error*)hdr_greedy::access(p))
 
 
 // ======================================================================
-// Default WFRP packet
+// Default GREEDY packet
 // ======================================================================
 
-struct hdr_wfrp {
+struct hdr_greedy {
 	u_int8_t	pkt_type;
 
 	// header access
 	static int offset_;
 	inline static int& offset() { return offset_;}
-	inline static hdr_wfrp* access(const Packet *p) {
-		return (hdr_wfrp*) p->access(offset_);
+	inline static hdr_greedy* access(const Packet *p) {
+		return (hdr_greedy*) p->access(offset_);
 	}
 
 };
@@ -64,7 +64,7 @@ struct hdr_wfrp {
 // Beacon Packet Format  
 // ======================================================================
 
-struct hdr_wfrp_beacon {
+struct hdr_greedy_beacon {
 	u_int8_t 	pkt_type;    // type of packet : Beacon or Error
 	u_int8_t	beacon_hops;  // hop count, increadecreases as beacon is forwarded
 	u_int32_t	beacon_id;   // unique identifier for the beacon
@@ -76,7 +76,7 @@ struct hdr_wfrp_beacon {
 
 	inline int size() {
 		int sz = 0;
-		sz = sizeof(struct hdr_wfrp_beacon);
+		sz = sizeof(struct hdr_greedy_beacon);
 		assert(sz>=0);
 		return sz;
 	}
@@ -86,7 +86,7 @@ struct hdr_wfrp_beacon {
 // Error Packet Format
 // =====================================================================
 
-struct hdr_wfrp_error {
+struct hdr_greedy_error {
 	u_int8_t	pkt_type;  // type of packet : Beacon or Error
 	u_int8_t	reserved;  // reserved for future use
 	nsaddr_t	error_src; // error packet source node;
@@ -95,7 +95,7 @@ struct hdr_wfrp_error {
 
 	inline int size() {
 		int sz = 0;
-		sz = sizeof(struct hdr_wfrp_error);
+		sz = sizeof(struct hdr_greedy_error);
 		assert(sz>=0);
 		return sz;
 	}
@@ -103,11 +103,11 @@ struct hdr_wfrp_error {
 
 
 // For size calculation of header-space reservation
-union hdr_all_wfrp {
-	hdr_wfrp		wfrp;
-	hdr_wfrp_beacon		beacon;
-	hdr_wfrp_error		error;
+union hdr_all_greedy {
+  hdr_greedy		                greedy;
+	hdr_greedy_beacon		beacon;
+	hdr_greedy_error		error;
 };
 
-#endif /* __wfrp_packet_h__ */
+#endif /* __greedy_packet_h__ */
 
