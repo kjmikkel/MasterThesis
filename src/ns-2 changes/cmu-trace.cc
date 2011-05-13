@@ -1127,7 +1127,7 @@ CMUTrace::format_aomdv(Packet *p, int offset)
 	            abort();
 	    }
 	}
-
+/*
 // GREEDY patch
 	void
 	CMUTrace::format_greedy(Packet *p, int offset)
@@ -1192,7 +1192,7 @@ CMUTrace::format_aomdv(Packet *p, int offset)
 	            abort();
 	    }
 	}
-
+*/
 void
 CMUTrace::nam_format(Packet *p, int offset)
 {
@@ -1492,6 +1492,8 @@ void CMUTrace::format(Packet* p, const char *why)
 			break;
 		case PT_GAF:
 		case PT_PING:
+			break;
+	        case PT_GREEDY:
 			break;
 		default:
 

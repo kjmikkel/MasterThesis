@@ -1,113 +1,133 @@
-/* 
- * Copyright (c) 2010, Elmurod A. Talipov, Yonsei University
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+/* -*- Mode:C++; c-basic-offset: 2; tab-width:2; indent-tabs-width:t -*- 
+ * Copyright (C) 2005 State University of New York, at Binghamton
+ * All rights reserved.
  *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * 3. The name of the author may not be used to endorse or promote products
- * derived from this software without specific prior written permission.
+ * NOTICE: This software is provided "as is", without any warranty,
+ * including any implied warranty for merchantability or fitness for a
+ * particular purpose.  Under no circumstances shall SUNY Binghamton
+ * or its faculty, staff, students or agents be liable for any use of,
+ * misuse of, or inability to use this software, including incidental
+ * and consequential damages.
+
+ * License is hereby given to use, modify, and redistribute this
+ * software, in whole or in part, for any commercial or non-commercial
+ * purpose, provided that the user agrees to the terms of this
+ * copyright notice, including disclaimer of warranty, and provided
+ * that this copyright notice, including disclaimer of warranty, is
+ * preserved in the source code and documentation of anything derived
+ * from this software.  Any redistributor of this software or anything
+ * derived from this software assumes responsibility for ensuring that
+ * any parties to whom such a redistribution is made are fully aware of
+ * the terms of this license and disclaimer.
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Author: Ke Liu, CS Dept., State University of New York, at Binghamton 
+ * October, 2005
  *
+ * GPSR code for NS2 version 2.26 or later
+ * Note: this implementation of GPSR is different from its original 
+ *       version wich implemented by Brad Karp, Harvard Univ. 1999
+ *       It is not guaranteed precise implementation of the GPSR design
  */
 
-#ifndef __greedy_packet_h__
-#define __greedy_packet_h__
+/* gpsr_packet.h : the definition the gpsr routing protocol packet header
+ *
+ * hdr_hello : hello message header, broadcast to one hop neighbors
+ * hdr_query : query message header, flood the data sink info into networks 
+ * hdr_data  : not a really data packet header, it is just used to 
+ *             be attached to any data packet created by higher layer apps
+ *             The reason to use this type of header is decided by the 
+ *             design of the GPSR: each data packet has to carry the 
+ *             location info of its data sink, maintain the routing protocol
+ *             stateless.
+ */
 
-// ======================================================================
-//  Packet Formats: Beacon, Data, Error
-// ======================================================================
- 
-#define GREEDY_BEACON	0x01
-#define GREEDY_ERROR	0x02
+#ifndef GREEDY_PACKET_H_
+#define GREEDY_PACKET_H_
 
+#include "packet.h"
+#include <math.h>
 
-// ======================================================================
-// Direct access to packet headers
-// ======================================================================
+#define SINK_TRACE_FILE "sink_trace.tr"
+#define NB_TRACE_FILE "greedynb_trace.tr"
 
-#define HDR_GREEDY(p)		((struct hdr_greedy*)hdr_greedy::access(p))
-#define HDR_GREEDY_BEACON(p)	((struct hdr_greedy_beacon*)hdr_greedy::access(p))
-#define HDR_GREEDY_ERROR(p)	((struct hdr_greedy_error*)hdr_greedy::access(p))
+#define GREEDY_CURRENT Scheduler::instance().clock()
+#define INFINITE_DELAY 5000000000000.0
 
+#define GREEDYTYPE_HELLO  0x01   //hello msg
+#define GREEDYTYPE_QUERY  0x02   //query msg from the sink
+#define GREEDYTYPE_DATA   0x04   //the CBR data msg
 
-// ======================================================================
-// Default GREEDY packet
-// ======================================================================
+#define GREEDY_MODE_GF    0x01   //greedy forwarding mode
+#define GREEDY_MODE_PERI  0x02   //perimeter routing mode
+
+#define HDR_GREEDY(p)   ((struct hdr_greedy*)hdr_greedy::access(p))
+#define HDR_GREEDY_HELLO(p) ((struct hdr_greedy_hello*)hdr_greedy::access(p))
+#define HDR_GREEDY_QUERY(p) ((struct hdr_greedy_query*)hdr_greedy::access(p))
+#define HDR_GREEDY_DATA(p) ((struct hdr_greedy_data*)hdr_greedy::access(p))
 
 struct hdr_greedy {
-	u_int8_t	pkt_type;
-
-	// header access
-	static int offset_;
-	inline static int& offset() { return offset_;}
-	inline static hdr_greedy* access(const Packet *p) {
-		return (hdr_greedy*) p->access(offset_);
-	}
-
-};
-
-// ======================================================================
-// Beacon Packet Format  
-// ======================================================================
-
-struct hdr_greedy_beacon {
-	u_int8_t 	pkt_type;    // type of packet : Beacon or Error
-	u_int8_t	beacon_hops;  // hop count, increadecreases as beacon is forwarded
-	u_int32_t	beacon_id;   // unique identifier for the beacon
-	nsaddr_t	beacon_src;  // source address of beacon, this is sink address
-	u_int32_t	beacon_posx; // x position of beacon source, if available
-	u_int32_t	beacon_posy; // y position of beacon source, if available
-
-	double		timestamp;   // emission time of beacon message
-
-	inline int size() {
-		int sz = 0;
-		sz = sizeof(struct hdr_greedy_beacon);
-		assert(sz>=0);
-		return sz;
-	}
-};
-
-// =====================================================================
-// Error Packet Format
-// =====================================================================
-
-struct hdr_greedy_error {
-	u_int8_t	pkt_type;  // type of packet : Beacon or Error
-	u_int8_t	reserved;  // reserved for future use
-	nsaddr_t	error_src; // error packet source node;
-	nsaddr_t	urch_dst;  // unreachable destination
-	double		timestamp; // emission time 
-
-	inline int size() {
-		int sz = 0;
-		sz = sizeof(struct hdr_greedy_error);
-		assert(sz>=0);
-		return sz;
-	}
+  u_int8_t type_;
+  
+  static int offset_;
+  inline static int& offset() {return offset_;}
+  inline static struct hdr_greedy* access(const Packet *p){
+    return (struct hdr_greedy*) p->access(offset_);
+  }
 };
 
 
-// For size calculation of header-space reservation
+struct hdr_greedy_hello {
+  u_int8_t type_;
+  float x_;     //My geo info
+  float y_;
+  inline int size(){
+    int sz =
+      sizeof(u_int8_t) +
+      2*sizeof(float);
+    return sz;
+  }
+};
+
+struct hdr_greedy_query {
+  u_int8_t type_;
+  float x_;      //The sink geo info
+  float y_;
+  float ts_;     //time stampe
+  int hops_;
+  u_int8_t seqno_;     //query sequence number
+  inline int size(){
+    int sz =
+      2*sizeof(u_int8_t) +
+      3*sizeof(float) +
+      sizeof(int);
+    return sz;
+  }
+};
+
+struct hdr_greedy_data {
+  u_int8_t type_;
+  u_int8_t mode_;  //Greedy forwarding or Perimeter Routing
+
+  float sx_;      //the geo info of src
+  float sy_;
+  float dx_;      //the geo info of dst 
+  float dy_;
+  float ts_;      //the originating time stamp
+  inline int size(){
+    int sz =
+      2*sizeof(u_int8_t) +
+      5*sizeof(float);
+    return sz;
+  }
+};
+
 union hdr_all_greedy {
-  hdr_greedy		                greedy;
-	hdr_greedy_beacon		beacon;
-	hdr_greedy_error		error;
+  hdr_greedy       gh;
+  hdr_greedy_hello ghh;
+  hdr_greedy_query gqh;
+  hdr_greedy_data  gdh;
 };
 
-#endif /* __greedy_packet_h__ */
 
+
+#endif

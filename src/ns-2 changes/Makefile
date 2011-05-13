@@ -267,7 +267,6 @@ OBJ_CC = \
 	imep/imep_rt.o imep/rxmit_queue.o imep/imep_timers.o \
 	imep/imep_util.o imep/imep_io.o \
 	wfrp/wfrp.o \
-	greedy/greedy.o \
 	tora/tora.o tora/tora_api.o tora/tora_dest.o \
 	tora/tora_io.o tora/tora_logs.o tora/tora_neighbor.o \
 	dsr/dsragent.o dsr/hdr_sr.o dsr/mobicache.o dsr/path.o \
@@ -330,8 +329,10 @@ OBJ_CC = \
 	wpan/p802_15_4sscs.o wpan/p802_15_4timer.o \
 	wpan/p802_15_4trace.o wpan/p802_15_4transac.o \
 	apps/pbc.o \
-	$(OBJ_STL)
-
+	$(OBJ_STL) \
+	greedy/greedy.o \
+	greedy/greedy_neighbor.o \
+	greedy/greedy_sinklist.o
 
 # don't allow comments to follow continuation lines
 

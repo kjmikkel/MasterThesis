@@ -1,150 +1,163 @@
-/* 
- * Copyright (c) 2010, Elmurod A. Talipov, Yonsei University
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+/* -*- Mode:C++; c-basic-offset: 2; tab-width:2, indent-tabs-width:t -*- 
+ * Copyright (C) 2005 State University of New York, at Binghamton
+ * All rights reserved.
  *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * 3. The name of the author may not be used to endorse or promote products
- * derived from this software without specific prior written permission.
+ * NOTICE: This software is provided "as is", without any warranty,
+ * including any implied warranty for merchantability or fitness for a
+ * particular purpose.  Under no circumstances shall SUNY Binghamton
+ * or its faculty, staff, students or agents be liable for any use of,
+ * misuse of, or inability to use this software, including incidental
+ * and consequential damages.
+
+ * License is hereby given to use, modify, and redistribute this
+ * software, in whole or in part, for any commercial or non-commercial
+ * purpose, provided that the user agrees to the terms of this
+ * copyright notice, including disclaimer of warranty, and provided
+ * that this copyright notice, including disclaimer of warranty, is
+ * preserved in the source code and documentation of anything derived
+ * from this software.  Any redistributor of this software or anything
+ * derived from this software assumes responsibility for ensuring that
+ * any parties to whom such a redistribution is made are fully aware of
+ * the terms of this license and disclaimer.
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Author: Ke Liu, CS Dept., State University of New York, at Binghamton 
+ * October, 2005
+ *
+ * GPSR code for NS2 version 2.26 or later
+ * Note: this implementation of GPSR is different from its original 
+ *       version wich implemented by Brad Karp, Harvard Univ. 1999
+ *       It is not guaranteed precise implementation of the GPSR design
+ */
+
+/* gpsr.h : The head file for the GPSR routing agent, defining the 
+ *          routing agent, methods (behaviors) of the routing 
+ *          
+ * Note: the routing table (local neighborhood) information is kept 
+ *       in another class gpsr_neighbor which is defined in 
+ *       gpsr_neighbor{.h, .cc}. So the planarizing and next hop deciding
+ *       is made there, not in this file
  *
  */
 
-#ifndef __greedy_h__
-#define __greedy_h__
+#ifndef GREEDY_ROUTING_H_
+#define GREEDY_ROUTING_H_
 
-#include <cmu-trace.h>
-#include <priqueue.h>
-#include <classifier/classifier-port.h>
+#include "config.h"
+#include "agent.h"
+#include "ip.h"
+#include "address.h"
+//#include "scheduler.h"
+#include "timer-handler.h"
+#include "mobilenode.h"
+#include "tools/random.h"
+#include "packet.h"
+#include "trace.h"
+#include "classifier-port.h"
+#include "cmu-trace.h"
 
-#define NETWORK_DIAMETER		64
-#define DEFAULT_BEACON_INTERVAL		10 // seconds;
-#define DEFAULT_ROUTE_EXPIRE 		2*DEFAULT_BEACON_INTERVAL // seconds;
-#define ROUTE_PURGE_FREQUENCY		2 // seconds
+#include "greedy_packet.h"
+#include "greedy_neighbor.h"
+#include "greedy_sinklist.h"
 
-#define ROUTE_FRESH		0x01
-#define ROUTE_EXPIRED		0x02
-#define ROUTE_FAILED		0x03
+class GREEDYAgent;
 
-class GREEDY;
-
-// ======================================================================
-//  Timers : Beacon Timer, Route Cache Timer
-// ======================================================================
-
-class greedyBeaconTimer : public Handler {
+/*
+ * Hello timer which is used to fire the hello message periodically
+ */
+class GREEDYHelloTimer : public TimerHandler {
 public:
-        greedyBeaconTimer(GREEDY* a) : agent(a) {}
-        void	handle(Event*);
-private:
-        GREEDY    *agent;
-	Event	intr;
+  GREEDYHelloTimer(GREEDYAgent *a) : TimerHandler() {a_=a;}
+protected:
+  virtual void expire(Event *e);
+  GREEDYAgent *a_;
 };
 
-class greedyRouteCacheTimer : public Handler {
+/*
+ * The Query Timer which is used by the data sink to fire the 
+ * data query. It is not a part of the design of the GREEDY routing.
+ * Since the information of the data sink mostly is not able to be 
+ * obtained directly (mostly, by DHT: distributed hash table), I 
+ * just let the data sink to trigger the routing, like a common 
+ * On-Demond routing.
+ * 
+ */
+class GREEDYQueryTimer : public TimerHandler {
 public:
-        greedyRouteCacheTimer(GREEDY* a) : agent(a) {}
-        void	handle(Event*);
+  GREEDYQueryTimer(GREEDYAgent *a) : TimerHandler() {a_=a;}
+protected:
+  virtual void expire(Event *e);
+  GREEDYAgent *a_;
+};
+
+class GREEDYAgent : public Agent {
 private:
-        GREEDY    *agent;
-	Event	intr;
-};
 
-// ======================================================================
-//  Route Cache Table
-// ======================================================================
-class Neighbor {
-	friend class GREEDY;
- public:
-	Neighbor(nsaddr_t neigh, u_int32_t bid) { nb_neigh = neigh; nb_seqno = bid;  }
- protected:
-	LIST_ENTRY(Neighbor) nb_link;
-	u_int32_t       nb_seqno;	// neighbor sequence number
-       	nsaddr_t	nb_neigh;	// One of its neighbors
-	u_int32_t	nb_xpos;	// x position of the neighbor;
-	u_int32_t	nb_ypos;	// y position of the neighbor;
-	u_int8_t	nb_state;	// state of the link: FRESH, EXPIRED, FAILED (BROKEN)
-        double          nb_expire; 	// when route expires : Now + DEFAULT_ROUTE_EXPIRE
+  friend class GREEDYHelloTimer;
+  friend class GREEDYQueryTimer;
+  
+  MobileNode *node_;             //the attached mobile node
+  PortClassifier *port_dmux_;    //for the higher layer app de-multiplexing
+  
+  nsaddr_t my_id_;               //node id (address), which is NOT necessary
+  double my_x_;                  //node location info, fatal info
+  double my_y_;                  //     obtained from the attached node
 
-};
-LIST_HEAD(greedy_nb, Neighbor);
+  Sinks *sink_list_;      //for multiple sinks
 
+  GREEDYNeighbors *nblist_; //neighbor list: routing table implemenation 
+                          //               and planarizing implementation
 
-// ======================================================================
-//  GREEDY Routing Agent : the routing protocol
-// ======================================================================
+  int recv_counter_;           
+  u_int8_t query_counter_;
 
-class GREEDY : public Agent {
-	friend class RouteCacheTimer;
+  GREEDYHelloTimer hello_timer_;
+  GREEDYQueryTimer query_timer_;
 
- public:
-	GREEDY(nsaddr_t id);
+  int planar_type_; //1=GG planarize, 0=RNG planarize
 
-	void		recv(Packet *p, Handler *);
+  double hello_period_;
+  double query_period_;
 
-        int             command(int, const char *const *);
+  void turnon();              //set to be alive
+  void turnoff();             //set to be dead
+  void startSink();          
+  void startSink(double);
 
-	// Agent Attributes
-	nsaddr_t	index;     // node address (identifier)
-	nsaddr_t	seqno;     // beacon sequence number (used only when agent is sink)
+  void GetLocation(double*, double*); //called at initial phase
+  virtual void getLoc();
 
-	// Node Location
-	uint32_t	posx;       // position x;
-	uint32_t	posy;       // position y;
-		
+  void hellomsg();
+  void query(nsaddr_t);
 
-	// Routing Table Management
-	void		nb_insert(nsaddr_t src, u_int32_t id, u_int32_t xpos, u_int32_t ypos);
-	void		nb_remove(Neighbor *nb);
-	void		nb_purge();
-	Neighbor*	nb_lookup(nsaddr_t dst);
+  void recvHello(Packet*);
+  void recvQuery(Packet*);
+  
+  void sinkRecv(Packet*);
+  void forwardData(Packet*);
 
-	// Timers
-	greedyBeaconTimer		bcnTimer;
-	greedyRouteCacheTimer	rtcTimer;
-	
-	// Neighbor Head
-	greedy_nb	nbhead;
-	
-	// Send Routines
-	void		send_beacon();
-	void		send_error(nsaddr_t unreachable_destination);
-	void		forward(Packet *p, nsaddr_t nexthop, double delay);
-	
-	// Recv Routines
-	void		recv_data(Packet *p);
-	void		recv_greedy(Packet *p);
-	void 		recv_beacon(Packet *p);
-	void		recv_error(Packet *p);
-	
-	// Position Management
-	void		update_position();
+  RNG randSend_;
 
+  /**
+   * The below variables and functions are used for 
+   * localization algorithms
+   */
+  double localized_x_; 
+  double localized_y_;
+  void dvhop();
 
-        //  A mechanism for logging the contents of the routing table.
-        Trace		*logtarget;
+protected:
+  Trace *tracetarget;              //for routing agent special trace
+  void trace(char *fmt,...);       //   Not necessary 
 
-        // A pointer to the network interface queue that sits between the "classifier" and the "link layer"
-        PriQueue	*ifqueue;
+  void hellotout();                //called by timer::expire(Event*)
+  void querytout();
 
-	// Port classifier for passing packets up to agents
-	PortClassifier	*dmux_;
+public:
+  GREEDYAgent();
+
+  int command(int, const char*const*);
+  void recv(Packet*, Handler*);         //inherited virtual function
 
 };
 
-
-#endif /* __greedy_h__ */
+#endif

@@ -1,506 +1,405 @@
 /* 
- * Copyright (c) 2010, Elmurod A. Talipov, Yonsei University
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+-*- Mode:C++; c-basic-offset: 2; tab-width:2, indent-tabs-width:t -*- 
+ * Copyright (C) 2005 State University of New York, at Binghamton
+ * All rights reserved.
  *
- * 1. Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * 3. The name of the author may not be used to endorse or promote products
- * derived from this software without specific prior written permission.
+ * NOTICE: This software is provided "as is", without any warranty,
+ * including any implied warranty for merchantability or fitness for a
+ * particular purpose.  Under no circumstances shall SUNY Binghamton
+ * or its faculty, staff, students or agents be liable for any use of,
+ * misuse of, or inability to use this software, including incidental
+ * and consequential damages.
+
+ * License is hereby given to use, modify, and redistribute this
+ * software, in whole or in part, for any commercial or non-commercial
+ * purpose, provided that the user agrees to the terms of this
+ * copyright notice, including disclaimer of warranty, and provided
+ * that this copyright notice, including disclaimer of warranty, is
+ * preserved in the source code and documentation of anything derived
+ * from this software.  Any redistributor of this software or anything
+ * derived from this software assumes responsibility for ensuring that
+ * any parties to whom such a redistribution is made are fully aware of
+ * the terms of this license and disclaimer.
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
- * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
- * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
- * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
- * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * Author: Ke Liu, CS Dept., State University of New York, at Binghamton 
+ * October, 2005, modified into the Greedy routing algorithm by Mikkel Kjær Jensen
  *
  */
 
-#include <greedy/greedy.h>
-#include <greedy/greedy_packet.h>
-#include <random.h>
-#include <cmu-trace.h>
-#include <energy-model.h>
-
-#define max(a,b)        ( (a) > (b) ? (a) : (b) )
-#define CURRENT_TIME    Scheduler::instance().clock()
-
-#define DEBUG
-
-// ======================================================================
-//  TCL Hooking Classes
-// ======================================================================
+/* greedy.cc : the definition of the greedy routing agent class
+ *           
+ */
+#include "greedy.h"
 
 int hdr_greedy::offset_;
-static class GREEDYHeaderClass : public PacketHeaderClass {
- public:
-	GREEDYHeaderClass() : PacketHeaderClass("PacketHeader/GREEDY", sizeof(hdr_all_greedy)) {
-	  bind_offset(&hdr_greedy::offset_);
-	} 
-} class_ProtoGREEDY_hdr;
 
-static class GREEDYclass : public TclClass {
- public:
-	GREEDYclass() : TclClass("Agent/GREEDY") {}
-	TclObject* create(int argc, const char*const* argv) {
-		assert(argc == 5);
-		return (new GREEDY((nsaddr_t) Address::instance().str2addr(argv[4])));
-	}
-} class_rtProtoGREEDY;
+static class GREEDYHeaderClass : public PacketHeaderClass{
+public:
+  GREEDYHeaderClass() : PacketHeaderClass("PacketHeader/GREEDY",
+					 sizeof(hdr_all_greedy)){
+    bind_offset(&hdr_greedy::offset_);
+  }
+}class_greedyhdr;
+
+static class GREEDYAgentClass : public TclClass {
+public:
+  GREEDYAgentClass() : TclClass("Agent/GREEDY"){}
+  TclObject *create(int, const char*const*){
+    return (new GREEDYAgent());
+  }
+}class_greedy;
+
+void
+GREEDYHelloTimer::expire(Event *e){
+  a_->hellotout();
+}
+
+void
+GREEDYQueryTimer::expire(Event *e){
+  a_->querytout();
+}
+
+void
+GREEDYAgent::hellotout(){
+  hellomsg();
+  hello_timer_.resched(hello_period_);
+}
+
+void
+GREEDYAgent::startSink(){
+  if(sink_list_->new_sink(my_id_, my_x_, my_y_, 
+			  my_id_, 0, query_counter_))
+    querytout();
+}
+
+void
+GREEDYAgent::startSink(double gp){
+  query_period_ = gp;
+  startSink();
+}
+
+void
+GREEDYAgent::querytout(){
+  query(my_id_);
+  query_counter_++;
+  query_timer_.resched(query_period_);
+}
+
+void
+GREEDYAgent::getLoc(){
+  GetLocation(&my_x_, &my_y_);
+}
+
+void
+GREEDYAgent::GetLocation(double *x, double *y){
+  double pos_x_, pos_y_, pos_z_;
+  node_->getLoc(&pos_x_, &pos_y_, &pos_z_);
+  *x=pos_x_;
+  *y=pos_y_;
+}
 
 
-int GREEDY::command(int argc, const char*const* argv) {
-	if(argc == 2) {
-	Tcl& tcl = Tcl::instance();
+GREEDYAgent::GREEDYAgent() : Agent(PT_GREEDY), 
+		     hello_timer_(this), query_timer_(this),
+		     my_id_(-1), my_x_(0.0), my_y_(0.0),
+		     recv_counter_(0), query_counter_(0),
+		     query_period_(INFINITE_DELAY)
+{
+  bind("planar_type_", &planar_type_);  
+  bind("hello_period_", &hello_period_);
+  
+  sink_list_ = new Sinks();
+  nblist_ = new GREEDYNeighbors();
+  
+  for(int i=0; i<5; i++)
+    randSend_.reset_next_substream();
+}
+
+void
+GREEDYAgent::turnon(){
+  getLoc();
+  nblist_->myinfo(my_id_, my_x_, my_y_);
+  hello_timer_.resched(randSend_.uniform(0.0, 0.5));
+}
+
+void
+GREEDYAgent::turnoff(){
+  hello_timer_.resched(INFINITE_DELAY);
+  query_timer_.resched(INFINITE_DELAY);
+}
+
+void 
+GREEDYAgent::hellomsg(){
+  if(my_id_ < 0) return;
+
+  Packet *p = allocpkt();
+  struct hdr_cmn *cmh = HDR_CMN(p);
+  struct hdr_ip *iph = HDR_IP(p);
+  struct hdr_greedy_hello *ghh = HDR_GREEDY_HELLO(p);
+
+  cmh->next_hop_ = IP_BROADCAST;
+  cmh->last_hop_ = my_id_;
+  cmh->addr_type_ = NS_AF_INET;
+  cmh->ptype() = PT_GREEDY;
+  cmh->size() = IP_HDR_LEN + ghh->size();
+
+  iph->daddr() = IP_BROADCAST;
+  iph->saddr() = my_id_;
+  iph->sport() = RT_PORT;
+  iph->dport() = RT_PORT;
+  iph->ttl_ = IP_DEF_TTL;
+
+  ghh->type_ = GREEDYTYPE_HELLO;
+  ghh->x_ = (float)my_x_;
+  ghh->y_ = (float)my_y_;
+
+  send(p, 0);
+}
+
+
+void
+GREEDYAgent::query(nsaddr_t id){
+  if(my_id_ < 0) return;
+
+  Packet *p = allocpkt();
+
+  struct hdr_cmn *cmh = HDR_CMN(p);
+  struct hdr_ip *iph = HDR_IP(p);
+  struct hdr_greedy_query *gqh = HDR_GREEDY_QUERY(p);
+
+  cmh->next_hop_ = IP_BROADCAST;
+  cmh->last_hop_ = my_id_;
+  cmh->addr_type_ = NS_AF_INET;
+  cmh->ptype() = PT_GREEDY;
+  cmh->size() = IP_HDR_LEN + gqh->size();
+  
+  iph->daddr() = IP_BROADCAST;
+  iph->saddr() = id;
+  iph->sport() = RT_PORT;
+  iph->dport() = RT_PORT;
+  iph->ttl_ = IP_DEF_TTL;
+
+  gqh->type_ = GREEDYTYPE_QUERY;
+  double tempx, tempy;
+  int hops; 
+  sink_list_->getLocbyID(id, tempx, tempy, hops);
+  if(tempx >= 0.0){
+    gqh->x_ = (float)tempx;
+    gqh->y_ = (float)tempy;
+    gqh->hops_ = hops;
+  }else {
+    Packet::free(p);
+    return;
+  }
+  gqh->ts_ = (float)GREEDY_CURRENT;
+  gqh->seqno_ = query_counter_;
+
+  send(p, 0);
+}
+
+void
+GREEDYAgent::recvHello(Packet *p){
+  struct hdr_cmn *cmh = HDR_CMN(p);
+  struct hdr_greedy_hello *ghh = HDR_GREEDY_HELLO(p);
+
+  nblist_->newNB(cmh->last_hop_, (double)ghh->x_, (double)ghh->y_);
+  //  trace("%d recv Hello from %d", my_id_, cmh->last_hop_);
+}
+
+void
+GREEDYAgent::recvQuery(Packet *p){
+  struct hdr_cmn *cmh = HDR_CMN(p);
+  struct hdr_ip *iph = HDR_IP(p);
+  struct hdr_greedy_query *gqh = HDR_GREEDY_QUERY(p);
+  
+  if(sink_list_->new_sink(iph->saddr(), gqh->x_, gqh->y_, 
+			  cmh->last_hop_, 1+gqh->hops_, gqh->seqno_))
+    query(iph->saddr());
+  //  trace("%d recv Query from %d ", my_id_, iph->saddr());  
+}
+
+void
+GREEDYAgent::sinkRecv(Packet *p){
+  FILE *fp = fopen(SINK_TRACE_FILE, "a+");
+  struct hdr_cmn *cmh = HDR_CMN(p);
+  struct hdr_ip *iph = HDR_IP(p);
+  //  struct hdr_greedy_data *gdh = HDR_GREEDY_DATA(p);
+
+  fprintf(fp, "%2.f\t%d\t%d\n", GREEDY_CURRENT,
+	  iph->saddr(), cmh->num_forwards());
+  fclose(fp);
+}
+void
+GREEDYAgent::forwardData(Packet *p){
+  struct hdr_cmn *cmh = HDR_CMN(p);
+  struct hdr_ip *iph = HDR_IP(p);
+
+  if(cmh->direction() == hdr_cmn::UP &&
+     ((nsaddr_t)iph->daddr() == IP_BROADCAST ||
+      iph->daddr() == my_id_)){
+    sinkRecv(p);
+    printf("receive\n");
+    port_dmux_->recv(p, 0);
+    return;
+  }
+  else {
+    struct hdr_greedy_data *gdh=HDR_GREEDY_DATA(p);
     
-		if(strncasecmp(argv[1], "id", 2) == 0) {
-			tcl.resultf("%d", index);
-			return TCL_OK;
-		}
+    double dx = gdh->dx_;
+    double dy = gdh->dy_;
+    
+    nsaddr_t nexthop;
+    // Finds the next hop
+    nexthop = nblist_->gf_nexthop(dx, dy);
  
-		if(strncasecmp(argv[1], "start", 5) == 0) {
-			rtcTimer.handle((Event*) 0);
-			return TCL_OK;
-		}
+    //  if we don't somewhere to send it, we just throw it away
+    if (nexthop == -1)
+      return;
 
-		// Start Beacon Timer (which sends beacon message)
-		if(strncasecmp(argv[1], "sink", 4) == 0) {
-			bcnTimer.handle((Event*) 0);
-#ifdef DEBUG
-		printf("N (%.6f): sink node is set to %d, start beaconing  \n", CURRENT_TIME, index);
-#endif 
-			return TCL_OK;
-		}
-	}
-	else if(argc == 3) {
-		if(strcmp(argv[1], "index") == 0) {
-			index = atoi(argv[2]);
-			return TCL_OK;
-		}
-
-		else if(strcmp(argv[1], "log-target") == 0 || strcmp(argv[1], "tracetarget") == 0) {
-			logtarget = (Trace*) TclObject::lookup(argv[2]);
-			if(logtarget == 0)
-				return TCL_ERROR;
-      			return TCL_OK;
-		}
-		
-		else if(strcmp(argv[1], "drop-target") == 0) {
-			/* int stat = rqueue.command(argc,argv);
-			if (stat != TCL_OK)
-				return stat;
-			return Agent::command(argc, argv);*/
-			return TCL_OK;
-		}
-
-		else if(strcmp(argv[1], "if-queue") == 0) {
-			ifqueue = (PriQueue*) TclObject::lookup(argv[2]);
-      
-			if(ifqueue == 0)
-				return TCL_ERROR;
-			return TCL_OK;
-		}
-
-		else if (strcmp(argv[1], "port-dmux") == 0) {
-			dmux_ = (PortClassifier *)TclObject::lookup(argv[2]);
-			if (dmux_ == 0) {
-				fprintf (stderr, "%s: %s lookup of %s failed\n", __FILE__,
-				argv[1], argv[2]);
-				return TCL_ERROR;
-			}
-			return TCL_OK;
-		}
-	}
-	
-	return Agent::command(argc, argv);
+    cmh->direction() = hdr_cmn::DOWN;
+    cmh->addr_type() = NS_AF_INET;
+    cmh->last_hop_ = my_id_;
+    cmh->next_hop_ = nexthop;
+    send(p, 0);
+  }
 }
 
-// ======================================================================
-//  Agent Constructor
-// ======================================================================
 
-GREEDY::GREEDY(nsaddr_t id) : Agent(PT_GREEDY), bcnTimer(this), rtcTimer(this) {
-             
-
-#ifdef DEBUG
-	printf("N (%.6f): Routing agent is initialized for node %d \n", CURRENT_TIME, id);
-#endif 
-	index = id;
-	seqno = 1;
-
-	LIST_INIT(&nbhead);
-	posx = 0;
-	posy = 0;
-
-	logtarget = 0;
-	ifqueue = 0;
-
-}
-
-// ======================================================================
-//  Timer Functions
-// ======================================================================
 
 void
-greedyRouteCacheTimer::handle(Event*) {
-	agent->nb_purge();
-	Scheduler::instance().schedule(this, &intr, ROUTE_PURGE_FREQUENCY);
+GREEDYAgent::recv(Packet *p, Handler *h){
+  struct hdr_cmn *cmh = HDR_CMN(p);
+  struct hdr_ip *iph = HDR_IP(p);
+
+  if(iph->saddr() == my_id_){//a packet generated by myself
+    if(cmh->num_forwards() == 0){
+      struct hdr_greedy_data *gdh = HDR_GREEDY_DATA(p);
+      cmh->size() += IP_HDR_LEN + gdh->size();
+
+      gdh->type_ = GREEDYTYPE_DATA;
+      gdh->mode_ = GREEDY_MODE_GF;
+      gdh->sx_ = (float)my_x_;
+      gdh->sy_ = (float)my_y_;
+      double tempx, tempy;
+      int hops;
+      sink_list_->getLocbyID(iph->daddr(), tempx, tempy, hops);
+      if(tempx >= 0.0){
+	gdh->dx_ = (float)tempx;
+	gdh->dy_ = (float)tempy;
+      }
+      else {
+	drop(p, "NoSink");
+	return;
+      }
+      gdh->ts_ = (float)GREEDY_CURRENT;
+    }
+    else if(cmh->num_forwards() > 0){ //routing loop
+      if(cmh->ptype() != PT_GREEDY)
+	drop(p, DROP_RTR_ROUTE_LOOP);
+      else Packet::free(p);
+      return;
+    }
+  }
+
+  if(cmh->ptype() == PT_GREEDY){
+    struct hdr_greedy *gh = HDR_GREEDY(p);
+    switch(gh->type_){
+    case GREEDYTYPE_HELLO:
+      recvHello(p);
+      break;
+    case GREEDYTYPE_QUERY:
+      recvQuery(p);
+      break;
+    default:
+      printf("Error with gf packet type.\n");
+      exit(1);
+    }
+  } else {
+    iph->ttl_--;
+    if(iph->ttl_ == 0){
+      drop(p, DROP_RTR_TTL);
+      return;
+    }
+    forwardData(p);
+  }
+
 }
-
-void
-greedyBeaconTimer::handle(Event*) {
-	agent->send_beacon();
-	Scheduler::instance().schedule(this, &intr, DEFAULT_BEACON_INTERVAL);
-}
-
-// ======================================================================
-//  Send Beacon Routine
-// ======================================================================
-void
-GREEDY::send_beacon() {
-	Packet *p = Packet::alloc();
-	struct hdr_cmn *ch = HDR_CMN(p);
-	struct hdr_ip *ih = HDR_IP(p);
-	struct hdr_greedy_beacon *bcn = HDR_GREEDY_BEACON(p);
-
-	// Write Channel Header
-	ch->ptype() = PT_GREEDY;
-	ch->size() = IP_HDR_LEN + bcn->size();
-	ch->addr_type() = NS_AF_NONE;
-	ch->prev_hop_ = index;
-
-	// Write IP Header
-	ih->saddr() = index;
-	ih->daddr() = IP_BROADCAST;
-	ih->sport() = RT_PORT;
-	ih->dport() = RT_PORT;
-	ih->ttl_ = NETWORK_DIAMETER;
-
-	// Write Beacon Header
-	bcn->pkt_type = GREEDY_BEACON;
-	bcn->beacon_hops = 1;
-	bcn->beacon_id = seqno;
-	bcn->beacon_src = index;
-	
-	// update the node position before putting it in the packet
-	update_position();
-
-	bcn->beacon_posx = posx;
-	bcn->beacon_posy = posy;
-
-	bcn->timestamp = CURRENT_TIME;
-
-	// increase sequence number for next beacon
-	seqno += 1;
-
-#ifdef DEBUG
-	printf("S (%.6f): send beacon by %d  \n", CURRENT_TIME, index);
-#endif 
-	Scheduler::instance().schedule(target_, p, 0.0);
-
-}
-
-// ======================================================================
-//  Send Error Routine
-// ======================================================================
-void 
-GREEDY::send_error(nsaddr_t unreachable_destination) {
-	// TODO : code should be update;
-}
-
-
-
-// ======================================================================
-//  Forward Routine
-// ======================================================================
 
 void 
-GREEDY::forward(Packet *p, nsaddr_t nexthop, double delay) {
-	struct hdr_cmn *ch = HDR_CMN(p);
-	struct hdr_ip *ih = HDR_IP(p);
-
-	if (ih->ttl_ == 0) {
-		drop(p, DROP_RTR_TTL);
-	}
-	
-	if (nexthop != (nsaddr_t) IP_BROADCAST) {
-		ch->next_hop_ = nexthop;
-		ch->prev_hop_ = index;
-		ch->addr_type() = NS_AF_INET;
-		ch->direction() = hdr_cmn::DOWN;
-	}
-	else {
-		assert(ih->daddr() == (nsaddr_t) IP_BROADCAST);
-		ch->prev_hop_ = index;
-		ch->addr_type() = NS_AF_NONE;
-		ch->direction() = hdr_cmn::DOWN; 
-	}
-	
-	Scheduler::instance().schedule(target_, p, delay);
-
+GREEDYAgent::trace(char *fmt, ...){
+  va_list ap;
+  if(!tracetarget)
+    return;
+  va_start(ap, fmt);
+  vsprintf(tracetarget->pt_->buffer(), fmt, ap);
+  tracetarget->pt_->dump();
+  va_end(ap);
 }
 
+int
+GREEDYAgent::command(int argc, const char*const* argv){
+  if(argc==2){
+    if(strcasecmp(argv[1], "getloc")==0){
+      getLoc();
+      return TCL_OK;
+    }
 
-// ======================================================================
-//  Recv Packet
-// ======================================================================
+    if(strcasecmp(argv[1], "turnon")==0){
+      turnon();
+      return TCL_OK;
+    }
+    
+    if(strcasecmp(argv[1], "turnoff")==0){
+      turnoff();
+      return TCL_OK;
+    }
 
-void
-GREEDY::recv(Packet *p, Handler*) {
-struct hdr_cmn *ch = HDR_CMN(p);
-struct hdr_ip *ih = HDR_IP(p);
+    if(strcasecmp(argv[1], "startSink")==0){
+      startSink();
+      return TCL_OK;
+    }
 
-	// if the packet is routing protocol control packet, give the packet to agent
-	if(ch->ptype() == PT_GREEDY) {
-		ih->ttl_ -= 1;
-		recv_greedy(p);
-		return;
-	}
-
-	//  Must be a packet I'm originating
-	if((ih->saddr() == index) && (ch->num_forwards() == 0)) {
- 	
-		// Add the IP Header. TCP adds the IP header too, so to avoid setting it twice, 
-		// we check if  this packet is not a TCP or ACK segment.
-
-		if (ch->ptype() != PT_TCP && ch->ptype() != PT_ACK) {
-			ch->size() += IP_HDR_LEN;
-		}
-
-	}
-
-	// I received a packet that I sent.  Probably routing loop.
-	else if(ih->saddr() == index) {
-   		drop(p, DROP_RTR_ROUTE_LOOP);
-		return;
-	}
-
-	//  Packet I'm forwarding...
-	else {
-		if(--ih->ttl_ == 0) {
-			drop(p, DROP_RTR_TTL);
-			return;
-   		}
-	}
-
-	// This is data packet, find route and forward packet
-	recv_data(p);
-}
+    if(strcasecmp(argv[1], "neighborlist")==0){
+      nblist_->dump();
+      return TCL_OK;
+    }
+    if(strcasecmp(argv[1], "sinklist")==0){
+      sink_list_->dump();
+      return TCL_OK;
+    }
+  }
 
 
-// ======================================================================
-//  Recv Data Packet
-// ======================================================================
+  if(argc==3){
+    if(strcasecmp(argv[1], "startSink")==0){
+      startSink(atof(argv[2]));
+      return TCL_OK;
+    }
 
-void 
-GREEDY::recv_data(Packet *p) {
-	struct hdr_ip *ih = HDR_IP(p);
-	Neighbor *rt;
-	
-	// if route fails at link layer, (link layer could not find next hop node) it will cal rt_failed_callback function
-	//ch->xmit_failure_ = rt_failed_callback;
-	//ch->xmit_failure_data_ = (void*) this;
+    if(strcasecmp(argv[1], "addr")==0){
+      my_id_ = Address::instance().str2addr(argv[2]);
+      return TCL_OK;
+    } 
 
-#ifdef DEBUG
-	printf("R (%.6f): recv data by %d  \n", CURRENT_TIME, index);
-#endif 
+    TclObject *obj;
+    if ((obj = TclObject::lookup (argv[2])) == 0){
+      fprintf (stderr, "%s: %s lookup of %s failed\n", __FILE__, argv[1],
+	       argv[2]);
+      return (TCL_ERROR);
+    }
+    if (strcasecmp (argv[1], "node") == 0) {
+      node_ = (MobileNode*) obj;
+      return (TCL_OK);
+    }
+    else if (strcasecmp (argv[1], "port-dmux") == 0) {
+      port_dmux_ = (PortClassifier*) obj; //(NsObject *) obj;
+      return (TCL_OK);
+    } else if(strcasecmp(argv[1], "tracetarget")==0){
+      tracetarget = (Trace *)obj;
+      return TCL_OK;
+    }
 
-	rt = nb_lookup(ih->daddr());
+  }// if argc == 3
 
-	// There is no route for the destination
-	if (rt == NULL) {
-	// TODO: queue the packet and wait for the route construction
-		return ;
-	}
-
-	// if the route is not failed forward it;
-	else if (rt->nb_state != ROUTE_FAILED) {
-	  // Find next legal state
-	}
-	
-	// if the route has failed, wait to be updated;
-	else {
-		//TODO: queue the packet and wait for the route construction;
-		return;
-	}
-
-}
-
-// ======================================================================
-//  Recv GREEDY Packet
-// ======================================================================
-void
-GREEDY::recv_greedy(Packet *p) {
-	struct hdr_greedy *wh = HDR_GREEDY(p);
-
-	assert(HDR_IP (p)->sport() == RT_PORT);
-	assert(HDR_IP (p)->dport() == RT_PORT);
-
-	// What kind of packet is this
-	switch(wh->pkt_type) {
-
-		case GREEDY_BEACON:
-			recv_beacon(p);
-			break;
-
-		case GREEDY_ERROR:
-			recv_error(p);
-			break;
-
-		default:
-			fprintf(stderr, "Invalid packet type (%x)\n", wh->pkt_type);
-			exit(1);
-	}
-}
-
-
-// ======================================================================
-//  Recv Beacon Packet
-// ======================================================================
-void 
-GREEDY::recv_beacon(Packet *p) {
-	struct hdr_ip *ih = HDR_IP(p);
-	struct hdr_greedy_beacon *bcn = HDR_GREEDY_BEACON(p);
-	
-	// I have originated the packet, just drop it
-	if (bcn->beacon_src == index)  {
-		Packet::free(p);
-		return;
-	}
-
-#ifdef DEBUG
-	printf("R (%.6f): recv beacon by %d, src:%d, seqno:%d, hop: %d \n", 
-		CURRENT_TIME, index, bcn->beacon_src, bcn->beacon_id, bcn->beacon_hops);
-#endif 
-	
-	// search for a route 
-	Neighbor	*rt = nb_lookup(bcn->beacon_src);
-	
-	// if there is no route toward this destination, insert the route and forward
- 	if (rt == NULL)  {
-		nb_insert(bcn->beacon_src,bcn->beacon_id, bcn->beacon_posx, bcn->beacon_posy);
-
-		ih->saddr() = index;		
-		bcn->beacon_hops +=1; // increase hop count
-
-		double delay = 0.1 + Random::uniform();
-
-#ifdef DEBUG
-	printf("F (%.6f): NEW ROUTE, forward beacon by %d \n", CURRENT_TIME, index);
-#endif 
-
-	//	forward(p, IP_BROADCAST, delay);
-	}
-	// if the route is newer than I have (i.e. new beacon is received): update the route and forward
-	else if (bcn->beacon_id > rt->nb_seqno) {
-	
-		rt->nb_seqno = bcn->beacon_id;
-		rt->nb_xpos = bcn->beacon_posx;
-		rt->nb_ypos = bcn->beacon_posy;
-		rt->nb_state = ROUTE_FRESH;
-		rt->nb_expire = CURRENT_TIME + DEFAULT_ROUTE_EXPIRE;
-		
-		ih->saddr() = index;
-		bcn->beacon_hops +=1; // increase hop count
-
-		double delay = 0.1 + Random::uniform();
-
-#ifdef DEBUG
-		printf("F (%.6f): UPDATE ROUTE, forward beacon by %d \n", CURRENT_TIME, index);
-#endif 
-		forward(p, IP_BROADCAST, delay);
-	}
-	// if the route is shorter than I have, update it
-	else if ((bcn->beacon_id == rt->nb_seqno)) {
-
-		rt->nb_seqno = bcn->beacon_id;
-		rt->nb_xpos = bcn->beacon_posx;
-		rt->nb_ypos = bcn->beacon_posy;
-		rt->nb_state = ROUTE_FRESH;
-		rt->nb_expire = CURRENT_TIME + DEFAULT_ROUTE_EXPIRE;
-	}
-
-	// TODO : initiate dequeue() routine to send queued packets;
-
-}
-
-
-// ======================================================================
-//  Recv Error Packet
-// ======================================================================
-
-void
-GREEDY::recv_error(Packet *p) {
-	// TODO: code should be update;
-}
-
-
-// ======================================================================
-//  Routing Management
-// ======================================================================
-
-/* static void
-GREEDY::rt_failed_callback(Packet *p, void *arg) {
-
-}*/
-
-void
-GREEDY::nb_insert(nsaddr_t src, u_int32_t id, u_int32_t xpos, u_int32_t ypos) {
-	Neighbor	*rt = new Neighbor(src, id);
-
-	rt->nb_xpos = xpos;
-	rt->nb_ypos = ypos;
-	rt->nb_state = ROUTE_FRESH;
-	rt->nb_expire = CURRENT_TIME + DEFAULT_ROUTE_EXPIRE;
-
-	LIST_INSERT_HEAD(&nbhead, rt, nb_link);
-}
-
-
-
-Neighbor*	
-GREEDY::nb_lookup(nsaddr_t dst) {
-	Neighbor *r = nbhead.lh_first;
-	
-	return NULL;
-	// The greedy lookup code, it is here we must have the comparison
-
-	/*
-  	for( ; r; r = r->nb_link.le_next) {
-		if (r->rt_dst == dst)
-			return r;
- 	}
-	
-	return NULL;
-	*/
-}
-
-void
-GREEDY::nb_purge() {
-	Neighbor *rt= nbhead.lh_first;
-	double now = CURRENT_TIME;
-
-	for(; rt; rt = rt->nb_link.le_next) {
-		if(rt->nb_expire <= now)
-			rt->nb_state = ROUTE_EXPIRED;
- 	}
-}
-
-void
-GREEDY::nb_remove(Neighbor *nb) {
-	LIST_REMOVE(nb,nb_link);
-}
-
-
-void 
-GREEDY::update_position() {
-	//TODO: we have to update node position
+  return (Agent::command(argc, argv));
 }
