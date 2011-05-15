@@ -61,15 +61,14 @@ Once a confirmation message arrives at the sink, the sink will perform \emph{rei
 Since DD is a pull algorithm it might be especially useful in sensor networks.}
 {directed}
 
-\tikfig{greedy-problem}{In this topology a message is sent from \emph{a} to \emph{f}. The nodes that are connected with an edge have an bidirectional link, and the bidirectional links with a gray background are the ones that are routed through.We see that the algorithm first routes the message to node \emph{b}, since node \emph{b} is closer to node \emph{f} than node \emph{c}. However, since neither node \emph{a}, \emph{e} or \emph{d} are closer to node \emph{f} than node \emph{b}, the greedy routing stops, and the routing fails.}
+\tikfig{greedy-problem}{In this topology a message is sent from \emph{a} to \emph{f}. The nodes that are connected with an edge have an bidirectional link, and the bidirectional links with a grey background are the ones that are routed through.We see that the algorithm first routes the message to node \emph{b}, since node \emph{b} is closer to node \emph{f} than node \emph{c}. However, since neither node \emph{a}, \emph{e} or \emph{d} are closer to node \emph{f} than node \emph{b}, the greedy routing stops, and the routing fails. Node \emph{b} is in this situation often called the \emph{local minimum.}
 
 \route{Greedy routing} 
 {\label{greedy}Greedy routing is a simple routing scheme that always chooses to route the message to that path of its neighbours that is closest to the sink. In the case where the message arrives at a node $n$, where all of $n$'s neighbours are farther away from the sink than $n$, then no action is specified, and the message will not be delivered -- see figure~\ref{fig:greedy-problem} for an illustration. The greedy algorithm thus offers no guarantee in delivering the message, but in practise it improves as the density of the network increases.}
 {gopher, beyondUnit}
-
 \route{Geometrical routing}
 {Geometrical routing uses the location of the current node and the location of the sink. There exist many different kinds of routing algorithms, but common for them is that unlike the greedy routing technique, they will transmit the message to a node that is not necessarily the closer node. This ensures that the message will eventually reach the sink. An example of a Geometrical algorithm could be the OFR \cite{gopher} routing algorithm, which uses the line-segments between the sink and the source to find which faces in the graph it needs to route to eventually arrive at the sink}
-{gopher+, gopher}
+{gopher+, gopher, gpsr}
 
 \route{Shortest path} 
       {The shortest path technique is to use distributed versions of the shortest path algorithms in order to find the shortest path from either one node to another, or from all nodes to all other nodes. As one might imagine, this approach has problems in mobile networks, where the structure of the graph can be in constant flux. Even in static networks the algorithms incur memory problems, since in the all-to-all solution, since for any node with a message for any node in the network must know which neighbour it must send it to get the most efficient route. Examples include Distributed Bellman-Ford}
@@ -99,7 +98,7 @@ Another problem found in Graph routing is that of security. Unless some kind of 
 
 Movement presents us with the following problems:
 
-\tikfig{shortest_path_change}{The nodes that are connected with an edge have an bidirectional link, and the bidirectional links with a gray background are the ones that are routed through. In \ref{fig:short_path1} we see a path from node $+$ to node $*$. In \ref{fig:short_path2} we clearly see that the movement of node $-$ has caused the routing protocol to find a much longer path to the node $*$ from node $+$.}
+\tikfig{shortest_path_change}{The nodes that are connected with an edge have an bidirectional link, and the bidirectional links with a grey background are the ones that are routed through. In \ref{fig:short_path1} we see a path from node $+$ to node $*$. In \ref{fig:short_path2} we clearly see that the movement of node $-$ has caused the routing protocol to find a much longer path to the node $*$ from node $+$.}
 
 \begin{itemize}
 \item Changes underlying graph -- see figure~\ref{fig:shortest_path_change}.

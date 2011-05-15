@@ -9,22 +9,21 @@ In order to test any algorithm I might implement, I will need a network simulato
 \item[Opnet Modeler:] Opnet is a commercial network simulator. Every layer of the network stack has to be modelled as a finite state machine \cite{MANcom}.
 \end{description}
 
-From \cite{MANcom} it is clear that the Network simulators gives widely different results. Since it is not clear which of the simulators which gives the result that is closest to reality, the parameters I will have to apply to find the best network simulator are: How many other articles use the network simulator\footnote{Since this means I would been able to compare it to more articles}, how flexible is it, how difficult is it to configure scenarios and how difficult is it to write new routing algorithms.
+From \cite{MANcom} it is clear that the Network simulators gives widely different results. Since it is not clear which of the simulators which gives the result that is closest to reality, the parameters I will have to apply to find the best network simulator are: The license and cost of the network simulator. When it was last updated, how configurable any given simulation is (based on a scale where A is the highest, B is medium and C is lowest), whether or not it supports wireless routing, how much memory it consumes while running, which languages are required to implement a new protocol, how may languages are required to implement a new scenario, how many articles cite the simulator \todo{figure out whether or not this should be removed}, and whether new routing protocols can just be plugged in, or if the entire network simulator has to be recompiled.
 
-\begin{tabular}[3]{l|c|c}
-                          & NS-2      & GloMoSim \\
+\begin{tabular}[4]{l|c|c|c}
+                          & ns-2      & ns-3    & GloMoSim  
 \hline
-License:                  & GNU GPL   & Academic \\
-Cost                      & Free      & Free for educational use \\
-Last updated              & 2011-05-1\footnote{See \url{http://sourceforge.net/projects/nsnam/}} & 2001-19-12\footnote{See \url{http://pcl.cs.ucla.edu/projects/glomosim/academic/download.html}}\\
+License:                  & GNU GPL   & GNU GPL & Academic  \\
+Cost                      & Free      & Free    & Free for educational use \\
+Last updated              & 2011-05-1\footnote{See \url{http://sourceforge.net/projects/nsnam/}} & & 2001-19-12\footnote{See \url{http://pcl.cs.ucla.edu/projects/glomosim/academic/download.html}}\\
 Configurability           & Extensive & Sligtly less extensive \\
-Support for wireless      & Yes       & Yes \\
-Memory requirements       & Very high & High \\
-Req for routing protocol  & C++ and OTCL & Parsec \\
-Req for new scenario      & OTCL      & \\
-\# of different citations & & \\
-Plug-in or Recompile      & Recompile & Recompile \\
-
+Support for wireless      & Yes       & Yes    &Yes \\
+Memory requirements       & A & B & B \\
+Req for routing protocol  & C++ and OTCL & C++ & Parsec \\
+Req for new scenario      & OTCL      & Python  & \\
+\# of different citations & & &\\
+Plug-in or Recompile      & Recompile & Recompile  & Recompile \\
 \end{tabular}\\
 
 Most of the articles I have read that have named their network simulator uses NS-2 [Find articles and cite them].
@@ -34,7 +33,5 @@ Both NS-2 and GloMoSim are very configurable, but NS-2 is more flexible than Glo
 From what I have been able to derive from the manuals, and examples from both NS-2 and GloMoSim, GloMoSim is less complicated than NS-2.
 
 Comparing NS-2 and GloMoSim it is clear that NS-2 is both the more complicated program to set up and program for. It is 
-
-Both NS-2 and GloMoSim are free for education, while I will have to pay for Opnet.
 
 Both NS-2 and GloMoSim has simple mobility models for the nodes built in. However, I have chosen a separate program, BonnMotion, which has been produced as a collaboration between the University of Bonn and the Toilers at \url{toilers.mines.edu} \todo{find a date where you last accessed it and write it -- perhaps this should be moved}. The program has multiple mobility methods built in -- such as ``Random Waypoint'', ``Manhatten Grid'' and 2 different
