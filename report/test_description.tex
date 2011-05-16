@@ -66,10 +66,10 @@ F = \sqrt{j^2 - n^2}
 where $F$ is the distance from each forci to the center, $j$ is the semi-major axis (major radius), and $n$ is semi-minor axis (minor radius). So if d($s$, $t$) denotes the distance between node $s$ and node $t$ then
 \eqa{
 F &=& \sqrt{j^2 - n^2}\\
-\frac{d(s,t)}{2} &=& \sqrt{(2 * d(s,t))^2 - n^2}\\
-(\frac{d(s,t)}{2})^2 &=& 4 * d(s,t)^2 - n^2\\
-n^2 &=& 4 * d(s,t)^2 - (\frac{d(s,t)}{2})^2\\
-n &=& \sqrt{4 * d(s,t)^2 - (\frac{d(s,t)}{2})^2}\\
+\frac{d(s,t)}{2} &=& \sqrt{j^2 - n^2}\\
+\left(\frac{d(s,t)}{2}\right)^2 &=& j^2 - n^2\\
+n^2 &=& j^2 - \left(\frac{d(s,t)}{2}\right)^2\\
+n &=& \sqrt{j^2 - \left(\frac{d(s,t)}{2}\right)^2}\\
 }
 which gives us the minor axis. Depending on the execution of GOAFR the major axis of $\epsilon$ might grow, as detailed in the next two paragraphs.
 
@@ -89,7 +89,7 @@ A special action is then taken if
 \begin{enumerate}
 \item If the message arrives at the edge of $\epsilon$ for the first time, then the message turns back and explores the face in the other direction. 
 \item If the message arrives at the edge of $\epsilon$ for the second time, and no nodes have been found to be closer to the sink than $x$, then the major axis of $\epsilon$ is doubled. Otherwise the message is sent to the node closest to the sink and the greedy routing is resumed.
-\item If at any point $p > \ro q$, where $\ro$ is a constant defined before routing starts, then route the message to the node closest to the sink and begin greedy routing again.
+\item If at any point $p > \rho q$, where $\rho$ is a constant defined before routing starts, then route the message to the node closest to the sink and begin greedy routing again.
 \end{enumerate}
 
 Both GOAFR and GOAFR+ has proved to be theoretical asymptotically worst-case optimal and average-case efficient. Due to space demands I will not try to prove these claims here, but will instead refer the interested reader to \cite{gopher} and \cite{gopher+}. \todo{make sure I understand what it means and I am not misusing it} 
