@@ -1,8 +1,12 @@
-\documentclass[letter, 12pt, english, draft]{article}
+\documentclass[A4, 12pt, english, draft]{article}
 \usepackage{mikkel}
-\usepackage[ruled,vlined]{algorithm2e}
+\usepackage[ruled, vlined]{algorithm2e}
+\input comment.sty
+
+\excludecomment{planar-footnote}
+
 \title{Energy Affluent Mobile Ad-Hoc Networks}
-\author{Mikkel Kjær Jensen}
+\author{Mikkel Kj\ae r Jensen}
 \date{\today}
 \begin{document}
 
@@ -12,7 +16,6 @@
 \abstract{
 \todo{Write abstract}
 }
-Version: \input{version}\\
 \listoffixmes
 \tableofcontents
 
@@ -22,8 +25,6 @@ Version: \input{version}\\
 \include{routing}
 \include{network_simulators}
 \include{test_description}
-
-\nocite{toilers} \todo{See if it is possible to include this organicly somewhere}
 
 \bibliographystyle{plain}
 \bibliography{references}{}

@@ -1,33 +1,31 @@
 \section{Network simulators}
 
-In order to test any algorithm I might implement, I will need a network simulator, to check how good it is compared to already existing algorithms. I have been able to identify 4 big network simulators: ns-2, ns-3, GloMoSim and the Opnet Modeler.
+In order to test any algorithm I might implement, I will need a network simulator. I have chosen not to make my own, since it will take too much time, and will make it impossible for me to compare my results. I have been able to identify 4 big network simulators: ns-2, ns-3, GloMoSim and the Opnet Modeler.
 
 \begin{description}
-\item[ns-2:] ns-2 is a discrete event network simulator. The last version I have been able to find is from 2009. ns-2 uses the programming language Otcl for most of its non-core engine files -- such as routing algorithms and the scenario files that configures how the test is to be performed.
-\item[ns-3:] ns-3 is the successor to ns-2 in an attempt to make a clean break from the architecture of ns-2 and its reliance on Otcl in favor for Python (and then only in scenario files) 
-\item[GloMoSim:] GloMoSim is a parallel discrete-event simulator. GloMoSim is an old simulator. I have not been able   . GloMoSim uses the programming language \emph{Parsec}, a dialect of C, to write most of the non-core engine files -- such as routing algorithms. 
+\item[ns-2:] ns-2 is a discrete event network simulator. The latest version I have been able to find is version 2.34 from 2009. ns-2 uses the programming language Otcl for most of its non-core engine files ---  routing algorithms and the scenario files that configures how the test is to be performed. Otherwise everything is written in C++.
+\item[ns-3:] ns-3 is the successor to ns-2 in an attempt to make a clean break from the architecture of ns-2 and its reliance on Otcl in favour for Python.
+\item[GloMoSim:] GloMoSim is a parallel discrete-event simulator. GloMoSim is an old simulator, \todo{version number last updated - when I checked it the last time}. GloMoSim uses the programming language \emph{Parsec}, a dialect of C, to write most of the non-core engine files -- such as routing algorithms. 
 \item[Opnet Modeler:] Opnet is a commercial network simulator. Every layer of the network stack has to be modelled as a finite state machine \cite{MANcom}. 
 \end{description}
 
-From \cite{MANcom} it is clear that the Network simulators gives widely different results. Since it is not clear which of the simulators which gives the result that is closest to reality, the parameters I will have to apply to find the best network simulator are: The license and cost of the network simulator. When it was last updated, how configurable any given simulation is, whether or not it supports wireless routing, how much memory it consumes while running, which languages are required to implement a new protocol, how may languages are required to implement a new scenario, how many articles cite the simulator \todo{figure out whether or not this should be removed}, and whether new routing protocols can just be plugged in, or if the entire network simulator has to be recompiled. For Configurability and memory I will grade them with using A, B and C, where A is the highest and C is the lowest.
+From \cite{MANcom} it is clear that the Network simulators gives widely different results. Since it is not clear which of the simulators which gives the result that is closest to reality, the parameters I will have to apply to find the best network simulator are: The license of the network simulator. When it was last updated, how configurable any given simulation is, whether or not it supports wireless routing, how much memory it consumes while running, which languages are required to implement a new protocol, how many programming languages are required to implement a new scenario, how many articles cite the simulator \todo{figure out whether or not this should be removed}, and whether new routing protocols can just be plugged in, or if the entire network simulator has to be recompiled. For Configurable and memory I will use A, B and C, with A as the highest and C is the lowest, to grade them
 
 \begin{minipage}{15.0cm}
 \begin{tabular}[4]{l|c|c|c}
                           & ns-2      & ns-3    & GloMoSim  \\
 \hline\\
 License:                  & GNU GPL   & GNU GPL & Academic  \\
-Cost                      & Free      & Free    & Free for educational use \\
 Last updated              & 2011-05-1\footnote{See \url{http://sourceforge.net/projects/nsnam/}} & & 2001-19-12\footnote{See \url{http://pcl.cs.ucla.edu/projects/glomosim/academic/download.html}}\\
-Configurability           & Extensive & Sligtly less extensive \\
+Configurability           & Extensive & Slightly less extensive \\
 Support for wireless      & Yes       & Yes    &Yes \\
 Memory requirements       & A & B & B \\
 Req for routing protocol  & C++ and OTCL & C++ & Parsec \\
 Req for new scenario      & OTCL      & Python  & \\
-\# of different citations & & &\\
 Plug-in or Recompile      & Recompile & Recompile  & Recompile
 \end{tabular}
 \end{minipage}\\\\
 
-All of the simulators have simple node mobility models built-in. I have however chosen to use a third-party program, BonnMotion\footnote{BonnMotion has been produced as a collaboration between the University of Bonn and the Toilers at \url{toilers.mines.edu} -- last accessed the 16/5 2011} on the grounds that it supports a far greater range of mobility models -- such as ``Disaster Area'', ``Gauss-Markow'' -- enables me to store the movments to ensure that I can get consistent results, and it can be configured to output both ns-2 and GloMoSim movement traces.
+All of the simulators have simple node mobility models built-in. I have however chosen to use a third-party program, BonnMotion\footnote{BonnMotion has been produced as a collaboration between the University of Bonn and the Toilers at \url{toilers.mines.edu} -- last accessed the 16/5 2011} on the grounds that it supports a far greater range of mobility models\footnote{Such as ``Disaster Area'', which I have not found built in implemented in any of the network simulators}, and it enables me to store, and process, the movement traces.
 
-Based on the above, I have choosen to use the ns-2 simulator, since it is far more customizable than both ns-3 and GloMoSim and still being supported, unlike GloMoSim.
+Based on the above, I have chosen to use the ns-2 simulator, since it is far more customisable than both ns-3 and GloMoSim and still being supported, unlike GloMoSim.

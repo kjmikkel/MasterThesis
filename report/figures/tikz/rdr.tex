@@ -24,11 +24,11 @@
     \fill[filled] \secondradius;
     
      % The real source and sink
-    \foreach \pos/\name in {{(0,0)/a}, {(3, 1)/b}} {   
+    \foreach \pos/\name in {{(0,0)/s}, {(3, 1)/t}} {   
       \node[vertex] (\name) at \pos {$\name$};
     }
    
-    \path[selected edge] (a) -- (b);
+    \path[selected edge] (s) -- (t);
 
     % the extra nodes
     \foreach \pos/\name in {{(0.5,0.5)/c}, {(1,1)/d}, {(0.5, 2.5)/e}, {(1.25, 2.5)/f}, {(1.25, 1.5)/g}, {(1.25, 0.5 )/h}, {(1.75, 0.5)/i}, {(1.80, 1.8)/j}, {(1.20, -1)/k}, {(1.40, -0.6)/l}, {(2.6, 0.7)/m}} {   
@@ -36,7 +36,7 @@
     }
 
     % The connections between them
-    \foreach \source/\sink in {a/c, c/d, d/h, h/i, i/m, m/b, i/l, d/g} {
+    \foreach \source/\sink in {s/c, c/d, d/h, h/i, i/m, m/t, i/l, d/g} {
       \path[real edge] (\source) -- (\sink);
     }
 
@@ -51,7 +51,7 @@
     \fill[filled] \radius;
 
      % The real source and sink
-    \foreach \pos/\name in {{(0,0)/a}, {(3, 1)/b}} {   
+    \foreach \pos/\name in {{(0,0)/s}, {(3, 1)/t}} {   
       \node[vertex] (\name) at \pos {$\name$};
     }
    
@@ -61,7 +61,7 @@
     }
 
     % The connections between them
-   \foreach \source/\sink in {a/c, c/d, d/h, h/i, i/m, m/b, i/l, d/g, g/j, l/k} {
+   \foreach \source/\sink in {s/c, c/d, d/h, h/i, i/m, m/t, i/l, d/g, g/j, l/k} {
       \path[real edge] (\source) -- (\sink);
     }
  
@@ -76,7 +76,7 @@
  
      
     % The real source and sink
-    \foreach \pos/\name in {{(0,0)/a}, {(3, 1)/b}} {   
+    \foreach \pos/\name in {{(0,0)/s}, {(3, 1)/t}} {   
       \node[vertex] (\name) at \pos {$\name$};
     }
    
@@ -86,7 +86,7 @@
     }
 
     % The connections between them
-   \foreach \source/\sink in {a/c, c/d, d/h, h/i, i/m, m/b} {
+   \foreach \source/\sink in {s/c, c/d, d/h, h/i, i/m, m/t} {
       \path[real edge] (\source) -- (\sink);
     }
    

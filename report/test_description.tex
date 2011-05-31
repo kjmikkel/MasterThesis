@@ -5,7 +5,7 @@ In this section I will describe which metrics I am going to use to compare the d
 
 The metrics I will measure in the tests will be 
 \begin{description}
-\item[Number of hops:] The number of hops from the source to the sink. For this I will measure the maximum number of hops, the minimum number of hops, as well as the average. I feel the number of hops is a useful metric, for multiple reasons. Firstly it tells us whether the algorithm might lead the message astray \todo{add more} . Secondly, the more hops a message performs, the more energy has to be expended on routing it, cutting down down on the life-time of the network.
+\item[Number of hops:] The number of hops from the source to the sink. For this I will measure the maximum number of hops, the minimum number of hops, as well as the average. I feel the number of hops is the most important metric, since it both details how many nodes that have to expend energy before the message arrives at the node, how long it takes for the message to arrive at its destination, and how great the risk is that the network topology will make it impossible for the message to arrive (assuming, of course, that the message could arrive when it was sent).
 
 \item[Time:] The amount of time spent sending the message from the source to the sink. I will likewise measure the maximum, minimum and average time spent. It is clear that the faster a message arrives at its sink, the better.
 
@@ -18,20 +18,20 @@ For the number of hops, the amount of time and number of misses I will record th
 
 \subsection{Input parameters}
 \label{input_parameters}
-In order to perform the tests I will need to define the parameters that are going to vary for the different tests.
+In order to perform the tests I will need to define the parameters and their range for the different tests.
 \begin{description}
-\item[Movement model:] The topology is clearly going to be influenced by the way that the nodes move, therefore it would be interesting to test out several models. 
+\item[Movement model:] The topology is clearly going to be influenced by the way that the nodes move, therefore it would be interesting to test out several models, to see the strengths and weaknesses of the different routing algorithms.
 
 \item[Routing Algorithms:] 
 
-\item[Amount and data-transmission type:] In real world situations there will be different levels of traffic on the network, and therefore to test it we must likewise simulate these differences. Directly effecting this is the protocol used to send the data through the network. Applications that uses the UDP protocol is less likely to cause congestion in the network, compare to TCP packages.
+\item[Amount and data-transmission type:] In real world situations there will be different levels of traffic on the network, and therefore to test it we must likewise simulate these differences. The choice of transmission protocol is also important. Applications that uses the UDP protocol are less likely to cause congestion in the network, compared to applications that uses the TCP protocol.
 
 \item[Size of the simulation area:] The size of the simulation area has a direct influence on how far apart the nodes can move and how many nodes are needed for a given node density. Everything else being equal, a larger simulation area will make the network less robust.
 
 \item[Number of nodes:] It is clear that denser node distribution, everything else being equal, will give a more robust network,
 
 \item[Percentage of nodes failing/leaving the network:] Since we are dealing with a \manet, it is clear that a nodes may leave the network or fail (either due to equipment failure or lack of power). 
-\item[Percentage of nodes entering the network:] In \manet nodes can also enter the network, something we need to simulate if we are to get an adequate picture of the algorithms worth.
+\item[Percentage of nodes entering the network:] In a \manet we have to assume that nodes can enter the network.
 \end{description}
 
 
@@ -63,7 +63,7 @@ As an integral part of the algorithm, GOAFR includes $\epsilon$ that that the me
 \eqa{
 F = \sqrt{j^2 - n^2}
 }
-where $F$ is the distance from each forci to the center, $j$ is the semi-major axis (major radius), and $n$ is semi-minor axis (minor radius). So if d($s$, $t$) denotes the distance between node $s$ and node $t$ then
+where $F$ is the distance from each forci to the centre, $j$ is the semi-major axis (major radius), and $n$ is semi-minor axis (minor radius). So if d($s$, $t$) denotes the distance between node $s$ and node $t$ then
 \eqa{
 F &=& \sqrt{j^2 - n^2}\\
 \frac{d(s,t)}{2} &=& \sqrt{j^2 - n^2}\\
@@ -75,16 +75,16 @@ which gives us the minor axis. Depending on the execution of GOAFR the major axi
 
 Greedy routing works as described in section~\ref{greedy}, except that when it arrives at a local minimum, the algorithm begins to apply the Adaptive Face routing. If the greedy algorithm sends the message beyond the bound of $\epsilon$, then the longest axis of $\epsilon$ is doubled.
 
-Adaptive Face routing is based on the idea that if you traverse a face, always choosing the rightmost node, you will eventually come back to where you started (the so-called \emph{right-hand rule}), that lies in the direction of the sink, then you will eventually either encounter the sink, or another face that lies closer to the sink, which you then can traverse, etc. Of course, there is no guarantee that the face you are not traversing the outer-face (the face not being bounded by the nodes) and therefore might be a dead-end or a detour (see figure \todo{make figure}). If the message encounters $\epsilon$ for the first time, then the message reverses direction and tries to traverse the face in the other direction. If the message encounters $\epsilon$ again, then the longest axis of $\epsilon$ is doubled and the algorithm starts over. There exist several different criteria for when the face routing stops -- either when the line-segment $\overline{st}$ is passed by the message, or when the messages arrives back at the initial node, before being routed to the node in the face that was closest to $t$.
+Adaptive Face routing is based on the right-hand rule, introduced in section \ref{right-hand rule} p. \pageref{right-hand rule}, which here is applied to traverse a face, until you either encounter the sink, or another face that lies closer to the sink than the one you are currently traversing. Of course, there is no guarantee that the face you are traversing is not the outer-face (the face not being bounded by the nodes) and therefore might be a dead-end or a detour (see figure \todo{make figure}). If the message encounters $\epsilon$ for the first time, then the message reverses direction and tries to traverse the face in the other direction. If the message encounters $\epsilon$ for the second time, then the longest axis of $\epsilon$ is doubled and the algorithm starts over. There exist several different criteria for when the face routing stops -- either when the line-segment $\overline{st}$ is passed by the message, or when the messages arrives back at the node where the face routing started.
 
-So to surmise GOAFR works by:
+Surmising GOAFR works by:
 \begin{enumerate}
 \item Using Greedy routing until this is no longer feasible or the sink has been found
 \item Using Adaptive Face routing to either find the node closest to the sink and then use greedy routing
 \end{enumerate}
 All the while using $\epsilon$ to limit the spreed of the message, but expanding it cautiously.
 
-GOAFR+ works similarly to GOAFR+, but its main difference is the introduction of 2 variables $p$ and $q$. While doing the adaptive face routing from the local minimum node $x$, the algorithm keeps track of how many nodes that are closer to the sink than $x$ in the variable $p$ and how many are farther away in the variable $q$.
+GOAFR+ works similarly to GOAFR, with th difference being the introduction of 2 variables $p$ and $q$. While doing the adaptive face routing from the local minimum node $x$, the algorithm keeps track of how many nodes encountered that are closer to the sink than $x$ in the variable $p$ and how many are farther away in the variable $q$.
 A special action is then taken if
 \begin{enumerate}
 \item If the message arrives at the edge of $\epsilon$ for the first time, then the message turns back and explores the face in the other direction. 
@@ -92,6 +92,6 @@ A special action is then taken if
 \item If at any point $p > \rho q$, where $\rho$ is a constant defined before routing starts, then route the message to the node closest to the sink and begin greedy routing again.
 \end{enumerate}
 
-Both GOAFR and GOAFR+ has proved to be theoretical asymptotically worst-case optimal and average-case efficient. Due to space demands I will not try to prove these claims here, but will instead refer the interested reader to \cite{gopher} and \cite{gopher+}. \todo{make sure I understand what it means and I am not misusing it} 
+Both GOAFR and GOAFR+ has proved to be theoretical asymptotically worst-case optimal and average-case efficient. Due to space demands I will not try to prove these claims here, but will instead refer the interested reader to \cite{gopher+} and \cite{gopher}.
 
 \subsubsection{Mobility models}

@@ -1,38 +1,31 @@
-%\documentclass[letter, 12pt, english, draft]{article}
-%\usepackage{mikkel}
-%\usepackage[ruled,vlined]{algorithm2e}
-
-%\title{Energy Affluent Mobile Ad-Hoc Networks}
-%\author{Mikkel Kjær Jensen}
-%\date{\today}
-%\begin{document}
-
-%\pagestyle{plain}
-
 \section{Routing graph}
-Having defined our problem in Section~\ref{fundamental}, I will in this section describe some of the different kinds of Routing graphs that can be used for \manet, and will describe the one I have used for this thesis. Furthermore I will give an introduction to single, second, and multi-level routing node organisation. 
+Having defined the problem of routing in Section~\ref{fundamental}, I will in this section describe some of the different kinds of Routing graphs that can be used for \manet, and will describe the one I have used for this thesis. Furthermore I will give an introduction to single, second, and multi-level routing node organisation. 
 
-In the literature I have read, I have not been able to find a consensus on how the optimal graph for \manet should be structured. It is furthermore my experience that the structure of the graph heavily influences the routing algorithm, making the two heavily dependant on each other.
+In the literature I have read, I have not been able to find a consensus on how the optimal graph for \manet should be structured. From what I have read, it is clear that the structure of the graph heavily influences the routing algorithm, making the two heavily dependant on each other.
 
 \subsection{Single-level graphs}
-The first important question to answer should be whether the graph should be planar or not. A planar graph is defined as a graph that can be embedded in the plane. One of the properties of a planar embedding is that no edge will cross another edge. As we saw in figure~\ref{fig:routing_not_planar} and \ref{fig:routing_planar}, that in the non-planar graph, each node can communicate directly with more nodes, compared to the planar graph. However, since it is harder to reason about non-planar graphs, I will chose only to work with planar graphs. \hide{\footnote{For instance if we let $v$ be the number of vertices's, $f$ the number of faces and $e$ the number of edges then $v - e + f = 2$. Thus we can begin to reason about the ratio of the different parts of the graph given at least one of them}, and many routing algorithms makes\todo{see if I can justify this}.}. This of course means that I must now take pains to ensure that the graph will remain planar for its lifetime.
+\label{single_level}
+The first important question to answer should be whether the graph should be planar or not. A planar graph is defined as a graph that can be embedded in the plane. One of the properties of a planar embedding is that no edge will cross another edge. As we saw in figure~\ref{fig:routing_not_planar} and \ref{fig:routing_planar}, that in the non-planar graph, each node can communicate directly with more nodes, compared to the planar graph. However, since it is harder to reason about non-planar graphs, I will chose only to work with planar graphs 
+\begin{planar-footnote}
+\footnote{For instance if we let $v$ be the number of vertices's, $f$ the number of faces and $e$ the number of edges then $v - e + f = 2$. Thus we can begin to reason about the ratio of the different parts of the graph given at least one of them}
+\end{planar-footnote} 
+. This means that care must be taken so that the graph will always be planar.
 
-I have found the following methods for making the planar graphs:
-
+I have found the following general methods for making the planar graphs:
 \begin{description}
-\item[The \gabe:] Two nodes $n_1$ and $n_2$ only share an edge iff the circle that has $\overline{n_1n_2}$ as its diameter does not contain a node $n_3$ \cite{gopher}. 
-\item[The \rng:] Two nodes $n_1$ and $n_2$ share an edge if there is no node $n_3$ such that $|\overline{n_1n_3}|, |\overline{n_2n_3}| \leq |\overline{n_1n_2}|$ (i.e. $n_3$ is closer to both $n_1$ and $n_2$ than $n_1$ and $n_2$ are to each other).
+\item[The \gabe:] Two nodes $n_1$ and $n_2$ only share an edge iff the circle that has $\overline{n_1n_2}$ as its diameter does not contain a node $n_3$ \cite{gopher, GSPR}. 
+\item[The \rng:] Two nodes $n_1$ and $n_2$ share an edge if there is no node $n_3$ such that $|\overline{n_1n_3}|, |\overline{n_2n_3}| \leq |\overline{n_1n_2}|$ (i.e. $n_3$ is closer to both $n_1$ and $n_2$ than $n_1$ and $n_2$ are to each other). \cite{GSPR, RNG}
 \end{description}
 
-Both \gabe and \rng are based on the Unit graph assumption, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}.
-
+Both \gabe and \rng are based on the \uga, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}.
+\label{right-hand rule}
 \begin{description}
 \item[The \cldp:] \cldp works by having each node uses \emph{the right-hand-rule}\footnote{The right-hand-rule states that for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started.} and checks whether or not any of its links crosses/is crossed by another edge. \cldp does is not dependent on the Unit graph assumption \cite{practical}. 
 \end{description}
 
 \tikfig{graph_comparison}{\ref{fig:rng1} and \ref{fig:rng2} are examples of the RNG, while \ref{fig:gg1} and \ref{fig:gg2} are examples of the GG. This figure is inspired by figure~7 in \cite{GeoSpanners}.}
 
-It is not immediately apparent how one would compare the groups created by these three algorithms. \cldp is especially hard to compare to the others given, that it is very much affected by the run-time behaviour of the transmission between the nodes. It is however clear that the \rng is slightly more accepting than the \gabe. See figure~\ref{fig:graph_comparison} for an example of the \rng and the \
+It is not immediately apparent how one would compare the groups created by these three algorithms. \cldp is especially hard to compare to the others given, that it is very much affected by the run-time behaviour of the transmission between the nodes. It is however clear that the \gabe is slightly more accepting than the \rng. See figure~\ref{fig:graph_comparison} for an example of the \rng and the \gabe.
 
 Neither the \manet or the \anet can be said to be entirely static. Even in an \anet, where we assume the nodes remain stationary, every single node will eventually run out of energy or fail. The routing graph must therefore always have a maintenance system that can deal with changes to the underlying graph. 
 
@@ -46,24 +39,30 @@ Likewise it is important to remember that a node in practise might be able to ad
 \label{cluster methods}
 Node Clustering is a hierarchical alternative to the flat graph. Instead of having every node being the same, a number of nodes are made into \ch such that all nodes in the graph has 1 cluster head that they communicate with. Most of the time the nodes that belong to a certain \ch is its one-hop neighbours, but there are also schemes that allows nodes to have a clustered that is farther away, in order to reduce the number of \ch. With \ch a layer specialisation and hierarchy is added to the network, which reduces the complexity of an otherwise entirely flat network, while still retaining some decentralisation.
 
-In order to improve the routing, \ch are almost always accompanied by \emph{gateway nodes}. Gateway nodes are nodes that connect two clusters. \cite{spanners} defines a gateway node as follows:
+In order to improve the routing, \ch are almost always accompanied by \emph{gateway nodes}. Gateway nodes are nodes that connect two clusters\todo{make figure illustrating the gateway nodes}. \cite{spanners} defines a gateway node as follows:
 Let C(p) be the set of nodes that has the cluster p as its \ch (this includes p). Then for a pair of \ch s $c_1, c_2$ if there exists a pair of nodes $p_1 \in C(c_1), p_2 \in C(c_2)$ such that $p_1$ and $p_2$ can communicate with each other in the graph, then $p_1$ and $p_2$ are gateway nodes (and in particular they are the only gateway nodes between $c_1$ and $c_2$.  
 
 Some of the practical advantages are:
 \begin{itemize}
-\item Depending on the implemented location schemes, the \ch can cut down on the number of necessary transmissions needed to check whether nodes are alive or not.
-\item It can make routing simpler, since all transmissions will have to go though the node gateways or up through the chain of \ch s. Only the \ch and gateway nodes needs to have their location database updated. All data will of course till have to be transmitted through regular nodes, but instead of having to route directly from the source to the sink, it will route from \ch to gateway, gateway to \ch and so on until it reaches the sink.
+\item The \ch will cut down on the number of necessary transmissions needed to check whether nodes are alive or not.
+\item \ch makes routing simpler, since all transmissions will have to go though the node gateways or up through the chain of \ch's. Thus only the \ch and gateway nodes will need to update their location database\todo{check whether this has been mentioned before}. Messages will still have to be sent through regular nodes, but instead of having to route directly from the source to the sink, the message will alternating be routed through \ch's and gateways, until it reaches the sink.
 \end{itemize}
 
-\ch is to divide any communication between nodes into 3 stages: 1) From the source to the local \ch, 2) From the local \ch to the \ch closest to the sink and 3) from the \ch closets to the sink to the sink itself\footnote{If either \ch is the sink or the source, and the first or third part is of course eliminated}. This is thus one way to decrease the number of nodes that needs to keep track of other nodes. Furthermore, if gateway nodes are employed, this can ease the routing problem, as a lengthy route is divided into shorter trips.  
+\ch is to divide any communication between nodes into 3 stages:
+\begin{enumerate}
+\item From the source to the local \ch 
+\item From the local \ch to the \ch closest to the sink
+\item From the \ch closets to the sink to the sink itself\footnote{If either \ch is the sink or the source, and the first or third part is of course eliminated}.
+\end{enumerate}
+ \ch thus decreses the number of nodes that needs to keep track of the other nodes, and the gateway nodes divides the routing into multiple smaller trips.  
 
-However, since we are introducing a layer of centralisation, it is also clear that there must be a system in place to detect and replace a \ch should it fail (and to elect it in the first place). An often used system is a voting system, or an selection algorithm (based hash value of the node's id, its MAC value etc.).
+However, since we are introducing a layer of centralisation, we must ensure that we can detect and replace a \ch should it fail (and to elect it in the first place). An often used system is a voting system, or an selection algorithm (based hash value of the node's id, its MAC value etc.).
 
-In the case of \manet where there are some hardware in which some nodes are stationary, it might be preferable to use these stationary nodes as a subset of the \ch, since these nodes status as \ch would never change.
+In the case of \manet in which some nodes are stationary (such as \cite{two-tier}), it might be preferable to give these stationary nodes a permanent status as \ch, as this will at best cut down on the number of elections needed to establish \ch's (since the nodes near them will accept them as their \ch), and at worst not change anything (in the case none of mobile nodes have them within their transmision range).
 
-Since we are dealing with routing between \ch now, we can exploit this in the routing:
+One way of exploiting routing between \ch is to use the Restricted Delaunay Graph:
 \begin{description}
-\item[The \rdg:] The \rdg is a graph scheme that employs \ch (see Section~\ref{cluster methods}) based planar graph solution. After having clustered the nodes, each \ch calculates the local Delaunay edges, and then confers with its one-hop neighbours to check which Delaunay edges are valid. Besides being planar, computable in a distributed manner, the \rdg is also a spanner, which means that using it will only make the route a constant times longer than the optimal route \cite{GeoSpanners}.
+\item[The \rdg:] The \rdg is a graph scheme that employs \ch based planar graph solution. After having found the set $C$ of \ch's, each $ch \in C$ calculates its local Delaunay edges on the set $C$, and then confers with its one-hop \ch neighbours to check which Delaunay edges are valid. Besides being planar and computable in a distributed manner, the \rdg is also a spanner, which means that using it will only make the route a constant times longer than the optimal route \cite{GeoSpanners}.
 \end{description}
 
 \subsection{Multiple-level graphs}
