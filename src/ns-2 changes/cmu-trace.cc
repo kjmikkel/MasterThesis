@@ -1069,7 +1069,7 @@ CMUTrace::format_aomdv(Packet *p, int offset)
 	{
 	    struct hdr_wfrp *wh = HDR_WFRP(p);
 	    struct hdr_wfrp_beacon *wb = HDR_WFRP_BEACON(p);
-	    struct hdr_wfrp_error  *we = HDR_WFRP_ERROR(p);
+	    //    struct hdr_wfrp_error  *we = HDR_WFRP_ERROR(p);
 	 
 	    switch(wh->pkt_type) {
 	        case WFRP_BEACON:
