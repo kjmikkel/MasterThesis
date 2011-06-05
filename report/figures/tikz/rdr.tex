@@ -1,6 +1,8 @@
 \colorlet{circle edge}{black!50}
 \colorlet{circle area}{gray!20}
 
+\def\network{{(0.5,0.5)/c}, {(1,1)/d}, {(0.5, 2.5)/e}, {(1.25, 2.5)/f}, {(1.25, 1.5)/g}, {(1.25, 0.5 )/h}, {(1.75, 0.5)/i}, {(1.80, 1.8)/j}, {(1.20, -1)/k}, {(1.40, -0.6)/l}, {(2.6, 0.7)/m}}
+
 \tikzset{
   filled/.style={fill=circle area, thick},
   outline/.style={draw=circle edge, thick}
@@ -31,14 +33,12 @@
     \path[selected edge] (s) -- (t);
 
     % the extra nodes
-    \foreach \pos/\name in {{(0.5,0.5)/c}, {(1,1)/d}, {(0.5, 2.5)/e}, {(1.25, 2.5)/f}, {(1.25, 1.5)/g}, {(1.25, 0.5 )/h}, {(1.75, 0.5)/i}, {(1.80, 1.8)/j}, {(1.20, -1)/k}, {(1.40, -0.6)/l}, {(2.6, 0.7)/m}} {   
-      \node[vertex] (\name) at \pos {$\name$};
-    }
+    \foreach \pos/\name in \network
+      \node[vertex] (\name) at \pos {};
 
     % The connections between them
-    \foreach \source/\sink in {s/c, c/d, d/h, h/i, i/m, m/t, i/l, d/g} {
+    \foreach \source/\sink in {s/c, c/d, d/h, h/i, i/m, m/t, i/l, d/g}
       \path[real edge] (\source) -- (\sink);
-    }
 
 
 \end{tikzpicture}}
@@ -56,9 +56,8 @@
     }
    
     % the extra nodes
-    \foreach \pos/\name in {{(0.5,0.5)/c}, {(1,1)/d}, {(0.5, 2.5)/e}, {(1.25, 2.5)/f}, {(1.25, 1.5)/g}, {(1.25, 0.5 )/h}, {(1.75, 0.5)/i}, {(1.80, 1.8)/j}, {(1.20, -1)/k}, {(1.40, -0.6)/l}, {(2.6, 0.7)/m}} {   
-      \node[vertex] (\name) at \pos {$\name$};
-    }
+    \foreach \pos/\name in \network   
+      \node[vertex] (\name) at \pos {};
 
     % The connections between them
    \foreach \source/\sink in {s/c, c/d, d/h, h/i, i/m, m/t, i/l, d/g, g/j, l/k} {
@@ -81,9 +80,8 @@
     }
    
     % the extra nodes
-    \foreach \pos/\name in {{(0.5,0.5)/c}, {(1,1)/d}, {(0.5, 2.5)/e}, {(1.25, 2.5)/f}, {(1.25, 1.5)/g}, {(1.25, 0.5 )/h}, {(1.75, 0.5)/i}, {(1.80, 1.8)/j}, {(1.20, -1)/k}, {(1.40, -0.6)/l}, {(2.6, 0.7)/m}} {   
-      \node[vertex] (\name) at \pos {$\name$};
-    }
+    \foreach \pos/\name in \network   
+      \node[vertex] (\name) at \pos {};  
 
     % The connections between them
    \foreach \source/\sink in {s/c, c/d, d/h, h/i, i/m, m/t} {
