@@ -1,7 +1,7 @@
 \colorlet{circle edge}{black!50}
 \colorlet{circle area}{gray!20}
 \def\scale{0.62}
-
+\def\plist{{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}}
 \tikzset{
   filled/.style={fill=circle area, draw=circle edge, thick},
   outline/.style={draw=circle edge, thick}
@@ -17,19 +17,35 @@
 \subfloat[The nodes]{\label{fig:nodes}
 \begin{tikzpicture}[scale=\scale]      
        \draw {(0,2) circle (4cm)};
-       \foreach \pos/\name in {{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}} {
+       \foreach \pos/\name in \plist {
            \node[vertex] (\name) at \pos {$\name$};
        }
-       
-
-
 \end{tikzpicture}}
 \subfloat[Connection graph]{\label{fig:connec}
 \begin{tikzpicture}[scale=\scale]  
-       \foreach \pos/\name in {{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}} {
+       \foreach \pos/\name in \plist {
            \node[vertex] (\name) at \pos {$\name$};
        }    
        \foreach \source/\sink in {a/f, a/g, a/b, a/c, a/d, a/e, a/j, b/g, b/h, b/c, b/h, b/c, b/d, b/e, b/f, c/h, c/d, c/i, c/e, d/i, d/e, d/h, d/j, e/i, e/f, e/j} {
+           \path[real edge] (\source) -- (\sink); 
+       }
+\end{tikzpicture}}
+
+\subfloat[Non-planar routing graph]{\label{fig:routing_not_planar}
+\begin{tikzpicture}[scale=\scale]  
+       \foreach \pos/\name in \plist {
+           \node[vertex] (\name) at \pos {$\name$};
+       }    
+       \foreach \source/\sink in {a/f, a/g, a/c, a/d, a/j, b/g, b/h, b/h, b/c, b/d, b/e, b/f, c/h, c/i, c/e, d/i, d/h, d/j, e/i, e/f, e/j} {
+           \path[real edge] (\source) -- (\sink); 
+       }
+\end{tikzpicture}}
+\subfloat[Planar routing graph]{\label{fig:routing_planar}
+\begin{tikzpicture}[scale=\scale]  
+       \foreach \pos/\name in \plist {
+           \node[vertex] (\name) at \pos {$\name$};
+       }    
+       \foreach \source/\sink in {a/f, a/b, a/c, a/d, a/e, b/g, b/c, b/c, b/d, b/e, c/h, c/d, c/e, d/i, d/e, e/j} {
            \path[real edge] (\source) -- (\sink); 
        }
 \end{tikzpicture}}
