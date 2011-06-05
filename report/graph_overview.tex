@@ -13,8 +13,8 @@ The first important question to answer should be whether the graph should be pla
 
 I have found the following general methods for making the planar graphs:
 \begin{description}
-\item[The \gabe:] Two nodes $n_1$ and $n_2$ only share an edge iff the circle that has $\overline{n_1n_2}$ as its diameter does not contain a node $n_3$ \cite{gopher, GSPR}. 
-\item[The \rng:] Two nodes $n_1$ and $n_2$ share an edge if there is no node $n_3$ such that $|\overline{n_1n_3}|, |\overline{n_2n_3}| \leq |\overline{n_1n_2}|$ (i.e. $n_3$ is closer to both $n_1$ and $n_2$ than $n_1$ and $n_2$ are to each other). \cite{GSPR, RNG}
+\item[The \gabe:] Two nodes $n_1$ and $n_2$ only share an edge iff the circle that has $\overline{n_1n_2}$ as its diameter does not contain a node $n_3$ \cite{gopher, gpsr}. 
+\item[The \rng:] Two nodes $n_1$ and $n_2$ share an edge if there is no node $n_3$ such that $|\overline{n_1n_3}|, |\overline{n_2n_3}| \leq |\overline{n_1n_2}|$ (i.e. $n_3$ is closer to both $n_1$ and $n_2$ than $n_1$ and $n_2$ are to each other). \cite{gpsr, RNG}
 \end{description}
 
 Both \gabe and \rng are based on the \uga, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}.
