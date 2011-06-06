@@ -11,42 +11,41 @@
 \setlength{\parskip}{5mm}
 
 \tikzstyle{edge} = [draw, thick, -]
-\tikzstyle{vertex}=[circle,fill=black!50,minimum size=10pt,inner sep=0pt]
-\tikzstyle{selected edge} = [draw, line width=2cm,-,gray!20] 
-\tikzstyle{real edge} = [draw, line width=2pt,-, gray!70]
+\tikzstyle{vertex}=[circle,fill=black!25,minimum size=10pt,inner sep=0pt]
 
 \subfloat[The nodes]{\label{fig:nodes}
 \begin{tikzpicture}[scale=\scale]      
        \draw {(0,2) circle (4cm)};
        \foreach \pos/\name in \plist {
-           \node[vertex] (\name) at \pos {$\name$};
+           \node[vertex] (\name) at \pos {};
        }
+       \node[vertex] (a) at (0, 2) {$a$};
 \end{tikzpicture}}
 \subfloat[Connection graph]{\label{fig:connec}
 \begin{tikzpicture}[scale=\scale]  
        \foreach \pos/\name in \plist {
-           \node[vertex] (\name) at \pos {$\name$};
+           \node[vertex] (\name) at \pos {};
        }    
        \foreach \source/\sink in {a/f, a/g, a/b, a/c, a/d, a/e, a/j, b/g, b/h, b/c, b/h, b/c, b/d, b/e, b/f, c/h, c/d, c/i, c/e, d/i, d/e, d/h, d/j, e/i, e/f, e/j} {
-           \path[real edge] (\source) -- (\sink); 
+           \path[edge] (\source) -- (\sink); 
        }
 \end{tikzpicture}}
 
 \subfloat[Non-planar routing graph]{\label{fig:routing_not_planar}
 \begin{tikzpicture}[scale=\scale]  
        \foreach \pos/\name in \plist {
-           \node[vertex] (\name) at \pos {$\name$};
+           \node[vertex] (\name) at \pos {};
        }    
        \foreach \source/\sink in {a/f, a/g, a/c, a/d, a/j, b/g, b/h, b/h, b/c, b/d, b/e, b/f, c/h, c/i, c/e, d/i, d/h, d/j, e/i, e/f, e/j} {
-           \path[real edge] (\source) -- (\sink); 
+           \path[edge] (\source) -- (\sink); 
        }
 \end{tikzpicture}}
 \subfloat[Planar routing graph]{\label{fig:routing_planar}
 \begin{tikzpicture}[scale=\scale]  
        \foreach \pos/\name in \plist {
-           \node[vertex] (\name) at \pos {$\name$};
+           \node[vertex] (\name) at \pos {};
        }    
        \foreach \source/\sink in {a/f, a/b, a/c, a/d, a/e, b/g, b/c, b/c, b/d, b/e, c/h, c/d, c/e, d/i, d/e, e/j} {
-           \path[real edge] (\source) -- (\sink); 
+           \path[edge] (\source) -- (\sink); 
        }
 \end{tikzpicture}}
