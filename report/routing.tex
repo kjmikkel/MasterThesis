@@ -1,8 +1,9 @@
 \section{Routing Algorithms}
+\label{section:routing_algorithms}
 
 The biggest conceptual difference for routing/shortest path algorithms in a \manet compared to main-stray routing/shortest path algorithms, is the loss of global overview that these algorithms have --- such as relaxing a specific nodes' edges at a specific time. There exist distributed version of some of the ``classic'' routing algorithms --- such as Bellman-Ford --- but their usefulness is limited in a mobile network, since they will have to be recomputed either each time a node wants to transmit a message, or each time the underlying graph changes.
 
-As mentioned in Section~\ref{fundamental}, the problem of sending a message from the source to the sink  becomes a graph routing problem \footnote{But not necessary a shortest-path routing problem, since factors like fairness or maximisation of the lifetime of the \manet becomes issues in practise}.
+As mentioned in Section~\ref{section:fundamental_graph_routing}, the problem of sending a message from the source to the sink  becomes a graph routing problem \footnote{But not necessary a shortest-path routing problem, since factors like fairness or maximisation of the lifetime of the \manet becomes issues in practise}.
 
 When routing a message from the source to the sink, it is important to distinguish the message that is being transmitted and the nodes that are transmitting. The transmitted message does not only include the information that is intended for the node at the sink, but also extra meta-data needed for routing. This includes time-to-live, position of the source node, position of the sink, message id etc. The nodes are all assumed to use the same routing algorithm, and at the very least knowing who their neighbours are.
 
@@ -94,7 +95,7 @@ A fundamental problem that has to be answered in any geographical routing algori
 
 Another problem found in Graph routing is that of security. Unless some kind of security system is employed, a malicious node can not only impersonate other nodes, but it can also sniff the messages that are transmitted in its area (not only the ones that are directly sent to it). Further a malicious node can spam the network with bogus messages, creating congestion in the network and draining the nodes power. One proposed solution to this problem is to include secure keys that uniquely identify each node. However, without a central key-server (both for distribution and authentication), this is not practical \cite{trustedRouting}.
 
-\section{Problems we have with movement}
+\section{Problems introduced with node movement}
 
 \tikfig{network_patition}{In \ref{fig:network_part1} we see 2 previously unconnected networks being connected by a lone mobile node. The network will now have to exchange location information. In \ref{fig:network_part2} the network has shared their location information, but here the network has been partitioned, and the invalid location has to discarded.}
 
