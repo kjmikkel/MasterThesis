@@ -63,13 +63,13 @@ As an integral part of the algorithm, GOAFR includes $\epsilon$ that that the me
 \eqa{
 F = \sqrt{j^2 - n^2}
 }
-where $F$ is the distance from each forci to the centre, $j$ is the semi-major axis (major radius), and $n$ is semi-minor axis (minor radius). So if d($s$, $t$) denotes the distance between node $s$ and node $t$ then
+where $F$ is the distance from each forci to the centre, $j$ is the semi-major axis (major radius), and $n$ is semi-minor axis (minor radius) so
 \eqa{
 F &=& \sqrt{j^2 - n^2}\\
-\frac{d(s,t)}{2} &=& \sqrt{j^2 - n^2}\\
-\left(\frac{d(s,t)}{2}\right)^2 &=& j^2 - n^2\\
-n^2 &=& j^2 - \left(\frac{d(s,t)}{2}\right)^2\\
-n &=& \sqrt{j^2 - \left(\frac{d(s,t)}{2}\right)^2}\\
+\frac{|\overline{st}|}{2} &=& \sqrt{j^2 - n^2}\\
+\left(\frac{|\overline{st}|}{2}\right)^2 &=& j^2 - n^2\\
+n^2 &=& j^2 - \left(\frac{|\overline{st}|}{2}\right)^2\\
+n &=& \sqrt{j^2 - \left(\frac{|\overline{st}|}{2}\right)^2}\\
 }
 which gives us the minor axis. Depending on the execution of GOAFR the major axis of $\epsilon$ might grow, as detailed in the next two paragraphs.
 

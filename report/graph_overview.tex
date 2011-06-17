@@ -5,27 +5,44 @@ In the literature I have read, I have not been able to find a consensus on how t
 
 \subsection{Single-level graphs}
 \label{single_level}
-The first important question to answer should be whether the graph should be planar or not. A planar graph is defined as a graph that can be embedded in the plane. One of the properties of a planar embedding is that no edge will cross another edge. As we saw in figure~\ref{fig:routing_not_planar} and \ref{fig:routing_planar}, that in the non-planar graph, each node can communicate directly with more nodes, compared to the planar graph. However, since it is harder to reason about non-planar graphs, I will chose only to work with planar graphs 
-\begin{planar-footnote}
-\footnote{For instance if we let $v$ be the number of vertices's, $f$ the number of faces and $e$ the number of edges then $v - e + f = 2$. Thus we can begin to reason about the ratio of the different parts of the graph given at least one of them}
-\end{planar-footnote} 
-. This means that care must be taken so that the graph will always be planar.
+The first important question to answer should be whether the graph should be planar or not. A planar graph is defined as a graph that can be embedded in the plane. One of the properties of a planar embedding is that no edge will cross another edge.
+Curiously I have not been able to find any literature on the topic of Ad-hoc networks, which discuss the whether or not a graph should be planar, but rather they all a priori assume that the network must be planar, and then tried to find the solution based on that. I will however in the following try to debate both cases, hopefully giving the reader better insight why, or why not to use planar graphs.\todo{work on placement}
+
+ As we saw in figure~\ref{fig:routing_not_planar} and \ref{fig:routing_planar}, that in the non-planar graph, each node can communicate directly with more nodes, compared to the planar graph. For an illustration of this see figure\todo{make planar example figure} . The question then becomes whether we should use a planar graph or not. The advantage of having a planar graph is, as mentioned that there might be a faster route from the source to the sink. A non-planar graph, however, is problematic from a graph theoretical and practical perspective.
+
+From a graph theoretical perspective it is clear that we know less about a non-planar graph than that of a planar one. For instance we have Euler's formula, which states that if we let $v$ be the number of vertices's, $f$ the number of faces and $e$ the number of edges then $v - e + f = 2$. Thus we can begin to reason about the ratio of the graph if we are given one of $e$, $f$ or $v$. This also becomes a problem with routing, as it likewise becomes harder to reason about routing with non-planar graphs, and most traditional routing algorithms assume to work on planar graphs. It is also important to remember that a non-planar graph will contain more edges that has to be taken into account.
+
+From a practical perspective working with non-planar graphs will mean that each node will have to keep track of more neighbours (since there is no theoretical upper bound, and in practice greatly increases based on the radius of the node\footnote{Realisticly I would however say that more than 40 neighbours would be unrealistic, even for crowded areas.}). In dense networks the extra neighbours added by having a non-planar graph can be significant --- see figure \todo{make crowded street example} for an illustration of this. The number of neighbours for each node also becomes a problem with routing schemes that uses geometrical information, as more nodes locations have to be inspected, than if we had a planar graph. It should be noted, however, that while more energy has to be used to keep track of neighbors, this does not necesarily mean that there will be a greater transmission overhead, as we are assuming the nodes are transmitting their location and status through radio waves (which propagate within a certain radius), which would have to be sent in any case.
+
+From this I conclude that while a non-planar garph is a viable alternative to planar graphs, I do not feel that the extra flexibility is worth the problems mentioned in the last two paragaphs. I will therefore in this thesis only persue planar graphs.
+ 
+Having chosen to keep our graphs planar we must make sure that we must take care that the routing graphs will always be planar.
 
 I have found the following general methods for making the planar graphs:
 \begin{description}
-\item[The \gabe:] Two nodes $n_1$ and $n_2$ only share an edge iff the circle that has $\overline{n_1n_2}$ as its diameter does not contain a node $n_3$ \cite{gopher, gpsr}. 
-\item[The \rng:] Two nodes $n_1$ and $n_2$ share an edge if there is no node $n_3$ such that $|\overline{n_1n_3}|, |\overline{n_2n_3}| \leq |\overline{n_1n_2}|$ (i.e. $n_3$ is closer to both $n_1$ and $n_2$ than $n_1$ and $n_2$ are to each other). \cite{gpsr, RNG}
+\item[The \gabe:] Two nodes $v$ and $u$ only share an edge iff the circle that has $\overline{vu}$ as its diameter does not contain a node $q$ \cite{gopher, gpsr}. 
+\item[The \rng:] Two nodes $v$ and $u$ share an edge if there is no node $q$ such that $|\overline{vq}|, |\overline{uq}| \leq |\overline{vu}|$ (i.e. $q$ is closer to both $v$ and $u$ than $v$ and $u$ are to each other). \cite{gpsr, RNG}
 \end{description}
 
 Both \gabe and \rng are based on the \uga, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}.
 \label{right-hand rule}
 \begin{description}
-\item[The \cldp:] \cldp works by having each node uses \emph{the right-hand-rule}\footnote{The right-hand-rule states that for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started.} and checks whether or not any of its links crosses/is crossed by another edge. \cldp does is not dependent on the Unit graph assumption \cite{practical}. 
+\item[The \cldp:] \cldp works by having each node uses \emph{the right-hand-rule}\footnote{The right-hand-rule states that for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started.} and checks whether or not any of its links crosses/is crossed by another edge. In other words, \cldp first builds up a graph that may be non-planar, and then in a distrubuted maner finds and removes edges that makes the graph non-planar without disconnecting parts of graph (as the paper accueses both \gabe and \rng of).\cldp does is not dependent on the Unit graph assumption \cite{practical}. 
 \end{description}
 
-\tikfig{graph_comparison}{\ref{fig:rng1} and \ref{fig:rng2} are examples of the RNG, while \ref{fig:gg1} and \ref{fig:gg2} are examples of the GG. This figure is inspired by figure~7 in \cite{GeoSpanners}.}
+\gabe is a subgraph of the Delanay triangulation, and \rng is a subset of \gabe \todo{find and cite}, and as such they are both well described and understood graphs many of the same properties as the Delaunay triangulation. \cldp on the other hand is not a graph, but rather a dynamic algorithm for creating planar graphs that according to \cite{practical} are less discornected than graphs made using \gabe and \rng. It is therefore harder to reason about most probable maximum number of neighbours for \cldp, as it is less of a graph and more of a process that creates a graph. 
 
-It is not immediately apparent how one would compare the groups created by these three algorithms. \cldp is especially hard to compare to the others given, that it is very much affected by the run-time behaviour of the transmission between the nodes. It is however clear that the \gabe is slightly more accepting than the \rng. See figure~\ref{fig:graph_comparison} for an example of the \rng and the \gabe.
+\tikfig{graph_comparison}{\ref{fig:rng1} and \ref{fig:rng2} are examples of the \rng, while \ref{fig:gabe1} and \ref{fig:gabe2} are examples of the \gabe. This figure is inspired by figure~7 in \cite{GeoSpanners}.}
+
+Delaaunay graphs have been found to have an expected maximum degree of $\theta(\log n / \log \log n)$ \cite{delExpected}, and furthermore that that \gabe has a maximum degree of $\theta(\log n / \log \log n)$, or, as the authors put it, there exists a constant $a$ and constant $b$ such that 
+$$
+\lim_{n \rightarrow \infty} Pr{\delta \in [\frac{a\log n}{\log \log n}, \frac{b\log n}{\log \log n}]} = 1
+$$
+and for \gabe $a = 1/12$ and $b = 1$, for uniform destributions \cite{GGExpected}.
+
+It is not immediately apparent how one would compare \gabe and \rng to \cldp, since \cldp is effected on the run-time behaviour of the transmission between the nodes. However, as mentioned before the \rng is a subset of the \gabe, which illustrated in figure~\ref{fig:graph_comparison} and figure~\ref{fig:gg-rng-example-big}.
+
+\tikfig{gg-rng-example-big}{In the following examples all the nodes have the same transmission radius. In figure~\ref{fig:norm_graph} we see the nodes from the Petersen graph make a non-planar graph. In figure~\ref{fig:gg_graph} we see the \gabe for the same set of points, clearly being planar and with far less edges, and in figure~\ref{fig:rng_graph} we see the \rng graph, which is clearly a subset of the \gabe.}
 
 Neither the \manet or the \anet can be said to be entirely static. Even in an \anet, where we assume the nodes remain stationary, every single node will eventually run out of energy or fail. The routing graph must therefore always have a maintenance system that can deal with changes to the underlying graph. 
 
@@ -54,11 +71,11 @@ Some of the practical advantages are:
 \item From the local \ch to the \ch closest to the sink
 \item From the \ch closets to the sink to the sink itself\footnote{If either \ch is the sink or the source, and the first or third part is of course eliminated}.
 \end{enumerate}
- \ch thus decreses the number of nodes that needs to keep track of the other nodes, and the gateway nodes divides the routing into multiple smaller trips.  
+ \ch thus decreases the number of nodes that needs to keep track of the other nodes, and the gateway nodes divides the routing into multiple smaller trips.  
 
 However, since we are introducing a layer of centralisation, we must ensure that we can detect and replace a \ch should it fail (and to elect it in the first place). An often used system is a voting system, or an selection algorithm (based hash value of the node's id, its MAC value etc.).
 
-In the case of \manet in which some nodes are stationary (such as \cite{two-tier}), it might be preferable to give these stationary nodes a permanent status as \ch, as this will at best cut down on the number of elections needed to establish \ch's (since the nodes near them will accept them as their \ch), and at worst not change anything (in the case none of mobile nodes have them within their transmision range).
+In the case of \manet in which some nodes are stationary (such as \cite{two-tier}), it might be preferable to give these stationary nodes a permanent status as \ch, as this will at best cut down on the number of elections needed to establish \ch's (since the nodes near them will accept them as their \ch), and at worst not change anything (in the case none of mobile nodes have them within their transmission range).
 
 One way of exploiting routing between \ch is to use the Restricted Delaunay Graph:
 \begin{description}

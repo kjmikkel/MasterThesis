@@ -47,7 +47,7 @@ Routing algorithms suited for \manet s can be sorted into the following categori
 {The simplest of the routing algorithms. The entire network is flooded with the message, ensuring that the message eventually reaches the sink. We can be sure that the message will not flood the network forever, thanks to the recording system detailed in section \ref{record-recived}. If the sink can be reached from the source, then flooding is  guarantied to work, but will use a lot of the networks bandwidth, and requires many of the nodes to be active.}
 {Sur2, larMANET} 
 
-\tikfig{rdr}{The Grey area is the area in which routing take place. It is clear that the shape of the flooding will have a large effect on the number of nodes that will receive the transmission.}
+\tikfig{rdr}{The grey background area is the area in which routing take place (any message that moves outside will be discarded). The black lines between the nodes represent a bidirectional link, while the grey background between nodes represent the valid bidrectional links inside the grey area. It is clear that the shape of the flooding will have a large effect on the number of nodes that will receive the transmission.}
 
 \route{Restricted Direction Routing (RDR)}
       {Restricted Directed Routing is an algorithm that can be described as a kind of directed flooding. Let G be a geometrical shape. G is now placed such that both the source and the sink are both contained in G (preferably with a non-zero margin, to counter act any movement). The source now floods all nodes inside G with the message, hopefully reaching the sink. Once the first message arrives, a path between the source and sink is established, and any future messages in that pack is sent through this path \todo{clarify}.
@@ -102,13 +102,17 @@ Movement presents us with the following problems:
 
 \tikfig{shortest_path_change}{The nodes that are connected with an edge have an bidirectional link, and the bidirectional links with a grey background are the ones that are routed through. In \ref{fig:short_path1} we see a path from node $s$ to node $t$. In \ref{fig:short_path2} we see that the movement of node $*$ means that we have to chose a longer path to the node $s$ from node $t$.}
 
+\tikfig{better_route}{}
+
+%\tikfig{changed_route}{In figure \ref{fig:changed_route1} we see that the routing algorithm has found a route $r$ (the path with the grey background) from the source $s$ to the sink $t$ through the node $*$, and now sends packages through it. In figure \ref{fig:changed_route2} node $*$ has moved away, and the route $r$ can no longer be used, and the routing algorithm has to find a new route.}
+
 \begin{itemize}
 \item Changes underlying graph -- see figure~\ref{fig:shortest_path_change}.
 \item Can invalidate location information about the node \todo{make figures for all of these}
-\item If the node is part of path from \emph{a} to \emph{b} (and the node is neither), which is stored and which is believed to be used again, then that path may fail, and a longer path may have to be taken. In degenerate cases this may lead to situations where the new optimal path will lead away from the absolute coordinates of the end node.
+\item If the node is part of path from \emph{s} to \emph{t} (and the node is neither), which is stored and which is believed to be used again, then that path may fail, and a longer path may have to be taken. In some cases this may lead to situations where the new optimal path will lead away from the sink --- see figure \ref{fig:shortest_path_change}.
 \item The moving node may create a link between 2 previously separate networks, creating the need for location exchanges for the 2 other disjoint networks -- see figure \ref{fig:network_part1} for an illustration of this.
 \item The moving node may partition a network into 2 separate networks, if the node was the only node the 2 networks could communicate through --- see figure \ref{fig:network_part2} for an illustration of this.
-\item The node may move into a position that creates a better path than the one before it moved --- so the surrounding nodes must be informed about this.
+\item The node may move into a position that creates a better path than the one before it moved --- so the surrounding nodes must be informed about this --- see figure \ref{fig:better_route} for an illustration of this.
 \end{itemize}
 
 The movement creates the need for the following solutions:
