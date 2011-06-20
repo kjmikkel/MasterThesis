@@ -1,52 +1,38 @@
 import svgfig
 from svgfig import *
-import os, math, colorsys, webcolors, copy, re
+import os, sys, math, colorsys, webcolors, copy, re
+
+cmd_folder = os.path.dirname(os.path.abspath(__file__)) + '/../graph_support'
+if cmd_folder not in sys.path:
+  sys.path.insert(0, cmd_folder)
+
+import make_graph
 
 dir_list = ["test_movement"]
 time_point = 6
-cutoff_distance = 50
 modifier = 1
 colour_list = webcolors.css3_names_to_hex.keys()
 
-
-def find_distance(p1, p2):
-    x_distance = abs(p1[0] - p2[0])
-    y_distance = abs(p1[1] - p2[1])
-    
-    euclidian_distance = math.sqrt(x_distance * x_distance + y_distance * y_distance)
-    return euclidian_distance
-
-def find_midpoint(p1, p2):
-    min_x = min(p1[0], p2[0])
-    min_y = min(p1[1], p2[1])
-
-    max_x = max(p1[0], p2[0])
-    max_y = max(p1[1], p2[1])
-
-    mid_x = min_x + (max_x - min_x)/2
-    mid_y = min_y + (max_y - min_y)/2
-
-    return (mid_x, mid_y)
-
 # SVG creation
-def svg_graph(name, points, edges, max_x, max_y, min_x, min_y):
+def svg_graph(name, graph, edge_list, max_x, max_y, min_x, min_y):
     fig = Fig()
     
-    for p in points:
-        x = p[1][0]
-        y = p[1][1]
+    for p in graph:
+        x = p[0]
+        y = p[1]
 
         c = SVG('circle', cx = x, cy = y, r = 2, fill='black')
         fig.d.append(c)
 
-    for e in edges:
-        p1 = e[0][1]
-        p2 = e[1][1]
+    for edge in edge_list:
+        p1 = edge[0]
+        p2 = edge[1]
+        
         start_x = p1[0]
-        end_x = p2[0]
+        end_x   = p2[0]
 
         start_y = p1[1]
-        end_y = p2[1]
+        end_y   = p2[1]
 
         l = Line(start_x, start_y, end_x, end_y, stroke='black')
         fig.d.append(l)
@@ -59,94 +45,39 @@ def svg_graph(name, points, edges, max_x, max_y, min_x, min_y):
     s.append(fig.SVG())
     s.save(name + ".svg")
 
-def tikz_graph(points, edges):
-    s = '\\begin{tikzpicture}[scale=\\scale]\n'
-    s += '\\foreach \\pos/\\name in {'
-    first = True
-    for p in points:
-        if not first:
-            s += ', '
-        first = False
-        x = str(p[1][0] / modifier)
-        y = str(p[1][1] / modifier)
-        s += '{(' + x + ', ' + y + ')' + '/' + p[0] + '}'
-    s += '}{\n\t\\node[vertex] (\\name) at \\pos {};\n'
-  #  s += '\t\draw[outline] {\\pos circle (' + str(cutoff_distance / modifier) +  ')} node {};\n
-    s += '}' 
+def tikz_graph(graph, edge_list, point_to_name):
+  s = '\\begin{tikzpicture}[scale=\\scale]\n'
+  s += '\\foreach \\pos/\\name in {'
+  first = True
+  for point in graph:
+    if not first:
+      s += ', '
+    first = False
+    x = str(point[0] / modifier)
+    y = str(point[1] / modifier)
+    name = point_to_name[point]
+    s += '{(' + x + ', ' + y + ')' + '/' + name + '}'
+  s += '}{\n\t\\node[vertex] (\\name) at \\pos {};\n'
+# s += '\t\draw[outline] {\\pos circle (' + str(cutoff_distance / modifier) +  ')} node {};\n
+  s += '}' 
     
-    first = True
-    s += '\n\\foreach \\source/\\dest in {'
-    for e in edges:
-        if not first:
-            s += ', '
-        first = False
-        p1 = e[0][0]
-        p2 = e[1][0]
-        s += p1 + '/' + p2
-        
-    s += '} {\n '
-    s += '\path[edge] (\\source) -- (\\dest);\n}'
-    s += '\n\\end{tikzpicture}'
-    return s
-
-def add_neighbour(n_dict, main_pt, sec_pt):
-    neighbours = n_dict.get(main_pt)
-                
-    if neighbours == None:
-        n_dict[main_pt] = [sec_pt]
-    else:
-        neighbours.append(sec_pt)
-
-def gabriel_graph(edges, neighbours_dict):
-    print 'All edges:', len(edges)
+  # Now to take care of the edges
+  
+  first = True
+  s += '\n\\foreach \\source/\\dest in {'
+  for edge in edge_list: 
+    if not first:
+      s += ', '
+    first = False
     
-    keys = neighbours_dict.keys()
-    for key in keys:
-        neighbours = neighbours_dict[key]
-        edges_remove = []
-        outer_index = 0
-        for v in neighbours:            
-            mid_point = find_midpoint(key[1], v[1])
-            
-            for w in neighbours:
-                if v == w:
-                    continue
-
-                if find_distance(mid_point, w[1]) < find_distance(key[1], mid_point):
-                    edges_remove.append((key, v))
-                    break
-
-        if len(edges_remove) > 0:
-            for edge in edges_remove:
-                if edge in edges:
-                    edges.remove(edge)
-        
-    print 'Changed edges:', len(edges)
-    return edges
-
-def rng_graph(edges, neighbours_dict):
-    print 'All edges:', len(edges)
-    
-    keys = neighbours_dict.keys()
-    for key in keys:
-        neighbours = neighbours_dict[key]
-        edges_remove = []
-        for v in neighbours:
-            for w in neighbours:
-                if v == w:
-                    continue
-
-                if find_distance(key[1], v[1]) > max(find_distance(key[1], w[1]), find_distance(v[1], w[1])):
-                    edges_remove.append((key, v))
-                    break
-
-        if len(edges_remove) > 0:
-            for edge in edges_remove:
-                if edge in edges:
-                    edges.remove(edge)
-        
-    print 'Changed edges:', len(edges)
-    return edges
+    p1_name = point_to_name[edge[0]]
+    p2_name = point_to_name[edge[1]]
+    s += p1_name + '/' + p2_name  
+  
+  s += '} {\n '
+  s += '\path[edge] (\\source) -- (\\dest);\n}'
+  s += '\n\\end{tikzpicture}'
+  return s
 
 def read_dir(dir_list, name, cutoff_distance):
     for fdir in dir_list:
@@ -174,9 +105,27 @@ def read_dir(dir_list, name, cutoff_distance):
               letter = ord('a')
               subfix += 1
 
-            make_graph(point_list, name + ' ' + filename)        
+            make_and_print_graphs(point_list, name + ' ' + filename)        
 
-def make_graph(point_list, name, cutoff_distance): 
+def make_edge_list(graph):
+  edge_list = []
+  already_made = {}
+
+  for outer_point in graph:
+    edges = graph[outer_point]
+    
+    for inner_point in edges:
+      if already_made.get((inner_point, outer_point)) or outer_point == inner_point:
+        continue
+      
+      already_made[(inner_point, outer_point)] = 1
+      already_made[(outer_point, inner_point)] = 1
+   
+      edge_list.append((outer_point, inner_point))
+  
+  return edge_list    
+      
+def make_and_print_graphs(point_list, name, cutoff_distance): 
     edge_list = []
     neighbour_dict = {}
 
@@ -198,39 +147,29 @@ def make_graph(point_list, name, cutoff_distance):
 
     point_index_outer = 0
     point_index_inner = 0
-    while point_index_outer < len(point_list):
-        outer_point = point_list[point_index_outer]
-        
-        point_index_inner = point_index_outer + 1        
-        while point_index_inner < len(point_list):
-            inner_point = point_list[point_index_inner]
-            
-            euclidian_distance = find_distance(outer_point[1], inner_point[1])
-          
-            if euclidian_distance <= cutoff_distance:
-                
-                add_neighbour(neighbour_dict, outer_point, inner_point)
-                add_neighbour(neighbour_dict, inner_point, outer_point)
 
-                edge_list.append((outer_point, inner_point))
-
-            point_index_inner += 1
-        point_index_outer += 1
-
-    gg_edges = gabriel_graph(copy.deepcopy(edge_list), neighbour_dict)
-
-    rng_edges = rng_graph(copy.deepcopy(edge_list), neighbour_dict)
+    # make directory to turn point into name
+    point_to_name = {}
+    only_points = []
+    for entry in point_list:
+      point_to_name[entry[1]] = entry[0]
+      only_points.append(entry[1])
+     
+    (graph, tree) = make_graph.SciPy_KDTree(only_points, cutoff_distance)
+    gabriel_graph = make_graph.gabriel_graph(copy.deepcopy(graph), tree)
+    rn_graph = make_graph.rn_graph(copy.deepcopy(graph))
 
     start = open('graph-basis.tex', 'r')
     begin = start.read()
     start.close()
 
-    print "***" + str(point_list) + "***"
-    exit
-
-    str_graph = tikz_graph(point_list, edge_list)
-    str_gg_graph = tikz_graph(point_list, gg_edges)
-    str_rng_graph = tikz_graph(point_list, rng_edges)
+    graph_edge_list = make_edge_list(graph)
+    gg_edge_list = make_edge_list(gabriel_graph)
+    rng_edge_list = make_edge_list(rn_graph)
+    
+    str_graph = tikz_graph(graph, graph_edge_list, point_to_name)
+    str_gg_graph = tikz_graph(gabriel_graph, gg_edge_list, point_to_name)
+    str_rng_graph = tikz_graph(rn_graph, rng_edge_list, point_to_name)
     
     begin += '\n\n'
     begin += '\\subfloat[The nomral graph]{\label{fig:norm_graph}\n' + str_graph +'}\n'
@@ -242,15 +181,19 @@ def make_graph(point_list, name, cutoff_distance):
     save.flush()
     save.close()
 
-    svg_graph('svg/Normal-' + name, point_list, edge_list, max_x, max_y, min_x, min_y)
-    svg_graph('svg/Gabriel graph-' + name, point_list, gg_edges, max_x, max_y, min_x, min_y)
-    svg_graph('svg/RNG graph-' + name, point_list, rng_edges, max_x, max_y, min_x, min_y)
+    normal_graph_name = 'svg/Normal-' + name
+    svg_graph(normal_graph_name, graph, graph_edge_list, max_x, max_y, min_x, min_y)
+    
+    gabriel_graph_name = 'svg/Gabriel graph-' + name
+    svg_graph(gabriel_graph_name, gabriel_graph, gg_edge_list, max_x, max_y, min_x, min_y)
+    
+    rn_graph_name = 'svg/RNG graph-' + name
+    svg_graph(rn_graph_name, rn_graph, rng_edge_list, max_x, max_y, min_x, min_y)
 
 
 def make_graph_from_list(str_list, name, cutoff_distance):
   point_list = []
   entries = str_list.split('}')
-  print entries
   number = '([-+\s]*[\d.]+)'
   find = re.compile(',?\s*{\(' + number + ',' + number + '\)/(\w+)' )
   for entry in entries:
@@ -258,7 +201,7 @@ def make_graph_from_list(str_list, name, cutoff_distance):
       result = find.match(entry)
       point_list.append((result.group(3), (float(result.group(1)), float(result.group(2)))))
   
-  make_graph(point_list, name, cutoff_distance)  
+  make_and_print_graphs(point_list, name, cutoff_distance)  
 
 
 make_graph_from_list('{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}', 'peterson', 4)
