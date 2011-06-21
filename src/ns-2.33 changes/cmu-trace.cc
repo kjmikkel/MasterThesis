@@ -64,6 +64,7 @@
 #include "locservices/hdr_locs.h" // locservices
 #include <gpsr/gpsr.h>              // GPSR
 #include <greedy/greedy.h>          // GREEDY
+#include <gopher/gopher.h>          // GOPHER
   // inserted - wk
 #include <hls/hls_basic.h>
 // inserted - to
@@ -1153,6 +1154,84 @@ CMUTrace::format_greedy(Packet *p, int offset)
 	}
 }
 
+// Addition for GOPHER Traces
+void
+CMUTrace::format_gopher(Packet *p, int offset)
+{
+	struct hdr_cmn *cmnh   = HDR_CMN(p);
+	struct hdr_ip *iph     = HDR_IP(p);
+	struct hdr_gopher * gopherh = HDR_GOPHER(p);
+	struct hdr_locs *locsh = HDR_LOCS(p);
+
+	char op = (char) type_;
+
+	int gpath = -1;
+	int spath = -1;
+
+	if (tracetype == TR_ROUTER) {
+		if ((op == DROP)||(op == SEND)){
+			gpath = God::instance()->greedyPathLength(src_,iph->daddr());
+			spath = God::instance()->shortestPathLength(src_,iph->daddr());
+		}
+		if (op == RECV){
+			gpath = God::instance()->greedyPathLength(src_,iph->saddr());
+			spath = God::instance()->shortestPathLength(src_,iph->saddr());
+		}
+		if (gpath == UNREACHABLE) { gpath = -1; }
+		if (spath == UNREACHABLE) { spath = -1; }
+	}
+	
+	switch (op) {
+	    case DROP:
+	    case SEND:
+		    if (locsh->valid_){
+			    if (aggregate_rtr) {
+				    sprintf(pt_->buffer() + offset,
+					    "%d %d [%d %d]",
+					    gopherh->mode_,
+					    cmnh->num_forwards_,
+					    gpath,
+					    spath);
+			    }else{
+				    sprintf(pt_->buffer() + offset,
+					    "%d %d [%d %d] [%.2f/%.2f/%.5f]->[%.2f/%.2f/%.5f]",
+					    gopherh->mode_,
+					    cmnh->num_forwards_,
+					    gpath,
+					    spath,
+					    locsh->src.loc.x,
+					    locsh->src.loc.y,
+					    locsh->src.ts,
+					    locsh->dst.loc.x,
+					    locsh->dst.loc.y,
+					    locsh->dst.ts);
+			    }
+		    }else{
+			    sprintf(pt_->buffer() + offset,
+				    "%d %d [%d %d]",
+				    gopherh->mode_,
+				    cmnh->num_forwards_,
+				    gpath,
+				    spath);
+		    }
+		    break;
+	    case RECV:
+		    sprintf(pt_->buffer() + offset,
+			    "%d %d [%d %d]",
+			    gopherh->mode_,
+			    cmnh->num_forwards_,
+			    gpath,
+			    spath);
+		    break;
+	    default:
+		    sprintf(pt_->buffer() + offset,
+			    "%d %d [%d %d]",
+			    gopherh->mode_,
+			    cmnh->num_forwards_,
+			    0,0);
+	}
+}
+
 // only fields with values in it are traced
 void
 CMUTrace::format_hls(Packet *p, int offset)
@@ -1624,6 +1703,9 @@ void CMUTrace::format(Packet* p, const char *why)
                 case PT_GREEDY: // GREEDY
 			format_greedy(p, offset);
 		        break;
+                case PT_GOPHER: // GOPHER
+                        format_gopher(p, offset);
+                        break;
 		case PT_HLS : // hierarchical location service
 			format_hls(p,offset);
 			break;

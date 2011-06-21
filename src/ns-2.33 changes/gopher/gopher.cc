@@ -28,9 +28,9 @@
   $Id: gpsr.cc,v 1.92 2003/01/24 11:01:07 lochert Exp $
 */
 
-// Modified by Mikkel Kjær Jensen to Greedy
+// Modified by Mikkel Kjær Jensen to Gopher
 
-// GREEDY for ns2 w/wireless extensions
+// GOPHER for ns2 w/wireless extensions
 
 #include <math.h>
 #include <stdlib.h>
@@ -41,7 +41,7 @@
 #include "cmu-trace.h"
 #include "random.h"
 #include "mobilenode.h"
-#include "greedy.h"
+#include "gopher.h"
 
 // Location Services
 #include "../locservices/hdr_locs.h"
@@ -69,10 +69,10 @@
 
 
 /** Cmp-Operator for binsearch */
-static int GREEDYNeighbEntCmp(const void *a, const void *b)
+static int GOPHERNeighbEntCmp(const void *a, const void *b)
 {
-	nsaddr_t ia = ((const GREEDYNeighbEnt *) a)->dst;
-	nsaddr_t ib = (*(const GREEDYNeighbEnt **) b)->dst;
+	nsaddr_t ia = ((const GOPHERNeighbEnt *) a)->dst;
+	nsaddr_t ib = (*(const GOPHERNeighbEnt **) b)->dst;
 	if (ia > ib) return 1;
 	if (ib > ia) return -1;
 	return 0;
@@ -86,7 +86,7 @@ static int coordcmp(const void *c, const void *d){
 	return 0;
 }
 
-GREEDYNeighbTable::GREEDYNeighbTable(GREEDY_Agent *mya)
+GOPHERNeighbTable::GOPHERNeighbTable(GOPHER_Agent *mya)
 {
 	int i;
 
@@ -94,16 +94,16 @@ GREEDYNeighbTable::GREEDYNeighbTable(GREEDY_Agent *mya)
 
 	nents = 0;
 	maxents = 100;
-	tab = new GREEDYNeighbEnt *[100];
+	tab = new GOPHERNeighbEnt *[100];
 	a = mya;
 	for (i = 0; i < 100; i++)
-		tab[i] = new GREEDYNeighbEnt(a);
+		tab[i] = new GOPHERNeighbEnt(a);
   
 	val_item = new DHeapEntry[God::instance()->nodes()];
 	valid = new DHeap(God::instance()->nodes());
 }
 
-GREEDYNeighbTable::~GREEDYNeighbTable()
+GOPHERNeighbTable::~GOPHERNeighbTable()
 {
 	int i;
 
@@ -116,22 +116,22 @@ GREEDYNeighbTable::~GREEDYNeighbTable()
 	delete[] tab;
 }
 
-GREEDYNeighbTableIter GREEDYNeighbTable::InitLoop() {
-	return (GREEDYNeighbTableIter) 0;
+GOPHERNeighbTableIter GOPHERNeighbTable::InitLoop() {
+	return (GOPHERNeighbTableIter) 0;
 }
 
-GREEDYNeighbEnt *
-GREEDYNeighbTable::NextLoop(GREEDYNeighbTableIter *it) {
+GOPHERNeighbEnt *
+GOPHERNeighbTable::NextLoop(GOPHERNeighbTableIter *it) {
 	if (((unsigned int) *it) >= (unsigned int) nents)
 		return 0;
 
 	return tab[(*it)++];
 }
 
-GREEDYNeighbEnt *
-GREEDYNeighbTable::ent_findshortest(MobileNode *mn, double x, double y, double z)
+GOPHERNeighbEnt *
+GOPHERNeighbTable::ent_findshortest(MobileNode *mn, double x, double y, double z)
 {
-	GREEDYNeighbEnt *ne = 0;
+	GOPHERNeighbEnt *ne = 0;
 	double shortest, t, myx, myy, myz;
 	int i;
 
@@ -147,10 +147,10 @@ GREEDYNeighbTable::ent_findshortest(MobileNode *mn, double x, double y, double z
 	return ne;
 }
 
-GREEDYNeighbEnt *
-GREEDYNeighbTable::ent_findshortest_cc(MobileNode *mn, double x, double y, double z, double alpha)
+GOPHERNeighbEnt *
+GOPHERNeighbTable::ent_findshortest_cc(MobileNode *mn, double x, double y, double z, double alpha)
 {
-	GREEDYNeighbEnt *ne = 0;
+	GOPHERNeighbEnt *ne = 0;
 	double dist, t, myx, myy, myz, new_dist, best = 1;
 	int i;
 
@@ -170,12 +170,12 @@ GREEDYNeighbTable::ent_findshortest_cc(MobileNode *mn, double x, double y, doubl
 	return ne;
 }
 
-GREEDYNeighbEnt *
-GREEDYNeighbTable::ent_findshortestXcptLH(MobileNode *mn, 
+GOPHERNeighbEnt *
+GOPHERNeighbTable::ent_findshortestXcptLH(MobileNode *mn, 
 									nsaddr_t lastHopId,
 									double x, double y, double z)
 {
-	GREEDYNeighbEnt *ne = 0;
+	GOPHERNeighbEnt *ne = 0;
 	double shortest, t, myx, myy, myz;
 	int i;
 
@@ -191,8 +191,8 @@ GREEDYNeighbTable::ent_findshortestXcptLH(MobileNode *mn,
 	return ne;
 }
 
-GREEDYNeighbEnt * 
-GREEDYNeighbTable::ent_findnext_onperi(MobileNode *mn, int node, double dx, double dy, double dz, int plan){
+GOPHERNeighbEnt * 
+GOPHERNeighbTable::ent_findnext_onperi(MobileNode *mn, int node, double dx, double dy, double dz, int plan){
 	double myx, myy, myz;
 	double brg, brg_tmp, brg_tmp2, minbrg = 3*M_PI;
 
@@ -202,7 +202,7 @@ GREEDYNeighbTable::ent_findnext_onperi(MobileNode *mn, int node, double dx, doub
 #endif
 	double mindist = 0.0;
 
-	GREEDYNeighbEnt *ne, *minne = NULL;
+	GOPHERNeighbEnt *ne, *minne = NULL;
 
 	mn->getLoc(&myx, &myy, &myz);
 	brg = bearing(myx, myy, dx, dy);
@@ -212,7 +212,7 @@ GREEDYNeighbTable::ent_findnext_onperi(MobileNode *mn, int node, double dx, doub
 #endif
 
 	int counter = 0;
-	GREEDYNeighbTableIter niloo = InitLoop();
+	GOPHERNeighbTableIter niloo = InitLoop();
 	while((bool)(ne = NextLoop(&niloo))){
 #ifdef KARP_PERI
 		if(ne->dst == node){
@@ -288,16 +288,16 @@ GREEDYNeighbTable::ent_findnext_onperi(MobileNode *mn, int node, double dx, doub
 	return minne;
 }
 
-GREEDYNeighbEnt * 
-GREEDYNeighbTable::ent_findnextcloser_onperi(MobileNode *mn, double dx, double dy, double dz){
+GOPHERNeighbEnt * 
+GOPHERNeighbTable::ent_findnextcloser_onperi(MobileNode *mn, double dx, double dy, double dz){
 	double myx, myy, myz;
 	double mydist;
-	GREEDYNeighbEnt *ne, *minne = NULL;
+	GOPHERNeighbEnt *ne, *minne = NULL;
 
 	mn->getLoc(&myx, &myy, &myz);
 	mydist = distance(myx, myy, myz, dx, dy, dz);
   
-	GREEDYNeighbTableIter ni = InitLoop();
+	GOPHERNeighbTableIter ni = InitLoop();
 	while((bool)(ne = NextLoop(&ni))){
 		if(distance(dx, dy, dz, ne->x, ne->y, ne->z) < mydist){
 			minne = ne;
@@ -308,8 +308,8 @@ GREEDYNeighbTable::ent_findnextcloser_onperi(MobileNode *mn, double dx, double d
 	return minne;
 }
 
-GREEDYNeighbEnt *
-GREEDYNeighbTable::ent_findcloser_onperi(MobileNode *mn, double x, double y,
+GOPHERNeighbEnt *
+GOPHERNeighbTable::ent_findcloser_onperi(MobileNode *mn, double x, double y,
 								   double z, int *perihop)
 {
 	double mydist, t, myx, myy, myz;
@@ -328,7 +328,7 @@ GREEDYNeighbTable::ent_findcloser_onperi(MobileNode *mn, double x, double y,
 }
 
 int
-GREEDYNeighbEnt::closer_pt(nsaddr_t myip, double myx, double myy, double myz, // me
+GOPHERNeighbEnt::closer_pt(nsaddr_t myip, double myx, double myy, double myz, // me
 						 double ptx, double pty, // perimeter startpoint
 						 nsaddr_t ptipa, nsaddr_t ptipb, // me?, prev?
 						 double dstx, double dsty, // dst
@@ -352,14 +352,14 @@ GREEDYNeighbEnt::closer_pt(nsaddr_t myip, double myx, double myy, double myz, //
 	return 0;
 }
 
-GREEDYNeighbEnt *
-GREEDYNeighbTable::ent_findcloser_edgept(MobileNode *mn, double ptx, double pty,
+GOPHERNeighbEnt *
+GOPHERNeighbTable::ent_findcloser_edgept(MobileNode *mn, double ptx, double pty,
 								   nsaddr_t ptipa, nsaddr_t ptipb,
 								   double dstx, double dsty,
 								   double *closerx, double *closery)
 {
-	GREEDYNeighbTableIter ni;
-	GREEDYNeighbEnt *minne = NULL, *ne;
+	GOPHERNeighbTableIter ni;
+	GOPHERNeighbEnt *minne = NULL, *ne;
 	double myx, myy, myz;
 
 	mn->getLoc(&myx, &myy, &myz);
@@ -378,8 +378,8 @@ GREEDYNeighbTable::ent_findcloser_edgept(MobileNode *mn, double ptx, double pty,
 	return minne;
 }
 
-GREEDYNeighbEnt *
-GREEDYNeighbTable::ent_findface(MobileNode *mn, double x, double y, double z, int p)
+GOPHERNeighbEnt *
+GOPHERNeighbTable::ent_findface(MobileNode *mn, double x, double y, double z, int p)
 {
 	double myx, myy, myz;
 	double brg;
@@ -391,12 +391,12 @@ GREEDYNeighbTable::ent_findface(MobileNode *mn, double x, double y, double z, in
 	return ent_next_ccw(brg, myx, myy, p);
 }
 
-GREEDYNeighbEnt *
-GREEDYNeighbTable::ent_next_ccw(double basebrg, double x, double y, int p,
-						  GREEDYNeighbEnt *inne /*= 0*/)
+GOPHERNeighbEnt *
+GOPHERNeighbTable::ent_next_ccw(double basebrg, double x, double y, int p,
+						  GOPHERNeighbEnt *inne /*= 0*/)
 {
-	GREEDYNeighbEnt *minne = NULL, *ne;
-	GREEDYNeighbTableIter nil;
+	GOPHERNeighbEnt *minne = NULL, *ne;
+	GOPHERNeighbTableIter nil;
 	double brg, minbrg = 3*M_PI;
 
 	nil = InitLoop();
@@ -418,12 +418,12 @@ GREEDYNeighbTable::ent_next_ccw(double basebrg, double x, double y, int p,
 	return minne;
 }
 
-GREEDYNeighbEnt *
-GREEDYNeighbTable::ent_next_ccw(MobileNode *mn, GREEDYNeighbEnt *inne, int p)
+GOPHERNeighbEnt *
+GOPHERNeighbTable::ent_next_ccw(MobileNode *mn, GOPHERNeighbEnt *inne, int p)
 {
 	double myx, myy, myz;
 	double brg;
-	GREEDYNeighbEnt *ne;
+	GOPHERNeighbEnt *ne;
 
 	// find bearing from mn to (x, y, z)
 	mn->getLoc(&myx, &myy, &myz);
@@ -435,13 +435,13 @@ GREEDYNeighbTable::ent_next_ccw(MobileNode *mn, GREEDYNeighbEnt *inne, int p)
 		return ne;
 }
 
-GREEDYNeighbEnt *GREEDYNeighbTable::ent_finddst(nsaddr_t dst)
+GOPHERNeighbEnt *GOPHERNeighbTable::ent_finddst(nsaddr_t dst)
 {
-	GREEDYNeighbEnt ne(NULL), **pne;
+	GOPHERNeighbEnt ne(NULL), **pne;
 
 	ne.dst = dst;
-	pne = ((GREEDYNeighbEnt **) bsearch(&ne, tab, nents,
-								  sizeof(GREEDYNeighbEnt *), GREEDYNeighbEntCmp));
+	pne = ((GOPHERNeighbEnt **) bsearch(&ne, tab, nents,
+								  sizeof(GOPHERNeighbEnt *), GOPHERNeighbEntCmp));
 	if (pne)
 		return *pne;
 	else
@@ -449,14 +449,14 @@ GREEDYNeighbEnt *GREEDYNeighbTable::ent_finddst(nsaddr_t dst)
 }
 
 void
-GREEDYNeighbTable::ent_delete(const GREEDYNeighbEnt *ent)
+GOPHERNeighbTable::ent_delete(const GOPHERNeighbEnt *ent)
 {
-	GREEDYNeighbEnt **pne;
-	GREEDYNeighbEnt *owslot=NULL;
+	GOPHERNeighbEnt **pne;
+	GOPHERNeighbEnt *owslot=NULL;
 	int i, j;
 
-	if ((pne = (GREEDYNeighbEnt **) bsearch(ent, tab, nents,
-									  sizeof(GREEDYNeighbEnt *), GREEDYNeighbEntCmp))) {
+	if ((pne = (GOPHERNeighbEnt **) bsearch(ent, tab, nents,
+									  sizeof(GOPHERNeighbEnt *), GOPHERNeighbEntCmp))) {
 		i = pne - tab;
 		// make sure no timers scheduled for this neighbor
 		(*pne)->dnt.force_cancel();
@@ -472,15 +472,15 @@ GREEDYNeighbTable::ent_delete(const GREEDYNeighbEnt *ent)
 	}
 }
 
-GREEDYNeighbEnt * 
-GREEDYNeighbTable::ent_add(const GREEDYNeighbEnt *ent)
+GOPHERNeighbEnt * 
+GOPHERNeighbTable::ent_add(const GOPHERNeighbEnt *ent)
 {
-	GREEDYNeighbEnt **pne;
-	GREEDYNeighbEnt *owslot = NULL;
+	GOPHERNeighbEnt **pne;
+	GOPHERNeighbEnt *owslot = NULL;
 	int i, j, r, l;
 
-	if ((pne = (GREEDYNeighbEnt **) bsearch(ent, tab, nents,
-									  sizeof(GREEDYNeighbEnt *), GREEDYNeighbEntCmp))) {
+	if ((pne = (GOPHERNeighbEnt **) bsearch(ent, tab, nents,
+									  sizeof(GOPHERNeighbEnt *), GOPHERNeighbEntCmp))) {
 		// already in table; overwrite
 		// make sure there is no pending timer
 		i = pne - tab;
@@ -499,12 +499,12 @@ GREEDYNeighbTable::ent_add(const GREEDYNeighbEnt *ent)
 
 	// may have to grow table
 	if (nents == maxents) {
-		GREEDYNeighbEnt **tmp = tab;
+		GOPHERNeighbEnt **tmp = tab;
 		maxents *= 2;
-		tab = new GREEDYNeighbEnt *[maxents];
-		bcopy(tmp, tab, nents*sizeof(GREEDYNeighbEnt *));
+		tab = new GOPHERNeighbEnt *[maxents];
+		bcopy(tmp, tab, nents*sizeof(GOPHERNeighbEnt *));
 		for (i = nents; i < maxents; i++)
-			tab[i] = new GREEDYNeighbEnt(a);
+			tab[i] = new GOPHERNeighbEnt(a);
 		delete[] tmp;
 	}
 
@@ -554,7 +554,7 @@ GREEDYNeighbTable::ent_add(const GREEDYNeighbEnt *ent)
 }
 
 int
-GREEDYNeighbTable::meanLoad() {
+GOPHERNeighbTable::meanLoad() {
     int i;
     int sum = 0;
       
@@ -568,10 +568,10 @@ GREEDYNeighbTable::meanLoad() {
 }
 
 void
-GREEDYNeighbEnt::planarize(GREEDYNeighbTable *nt, int algo,
+GOPHERNeighbEnt::planarize(GOPHERNeighbTable *nt, int algo,
 						  double x, double y, double z) {
-	GREEDYNeighbEnt *ne;
-	GREEDYNeighbTableIter niplent;
+	GOPHERNeighbEnt *ne;
+	GOPHERNeighbTableIter niplent;
 	double uvdist, canddist, midx=0.0, midy=0.0;
 
 	uvdist = distance(x, y, z, this->x, this->y, this->z);
@@ -639,10 +639,10 @@ GREEDYNeighbEnt::planarize(GREEDYNeighbTable *nt, int algo,
 
 
 void
-GREEDYNeighbTable::planarize(int algo, int addr, double x, double y, double z)
+GOPHERNeighbTable::planarize(int algo, int addr, double x, double y, double z)
 {
-	GREEDYNeighbEnt *ne;
-	GREEDYNeighbTableIter nipl;
+	GOPHERNeighbEnt *ne;
+	GOPHERNeighbTableIter nipl;
 
 	valid->clean();
 	nipl = InitLoop();
@@ -660,40 +660,40 @@ GREEDYNeighbTable::planarize(int algo, int addr, double x, double y, double z)
 	assert(!valid->empty());
 }
 
-int hdr_greedy::offset_;
+int hdr_gopher::offset_;
 
-class GREEDYHeaderClass : public PacketHeaderClass {
+class GOPHERHeaderClass : public PacketHeaderClass {
 public: 
-	GREEDYHeaderClass() : PacketHeaderClass("PacketHeader/GREEDY", sizeof(hdr_greedy)) {
-		bind_offset(&hdr_greedy::offset_);
+	GOPHERHeaderClass() : PacketHeaderClass("PacketHeader/GOPHER", sizeof(hdr_gopher)) {
+		bind_offset(&hdr_gopher::offset_);
 	}
-} class_greedyhdr;
+} class_gopherhdr;
 
-static class GREEDYClass:public TclClass
+static class GOPHERClass:public TclClass
 {
 public:
-	GREEDYClass():TclClass ("Agent/GREEDY")
+	GOPHERClass():TclClass ("Agent/GOPHER")
 	{
 	}
 	TclObject *create (int, const char *const *)
 	{
-		return (new GREEDY_Agent ());
+		return (new GOPHER_Agent ());
 	}
-} class_greedy;
+} class_gopher;
 
-GREEDY_Agent::GREEDY_Agent(void) : Agent(PT_GREEDY), use_mac_(0),
+GOPHER_Agent::GOPHER_Agent(void) : Agent(PT_GOPHER), use_mac_(0),
 							   use_peri_(0), verbose_(1), active_(1), drop_debug_(0), peri_proact_(1),
 							   use_implicit_beacon_(0), use_planar_(0), use_loop_detect_(0),
 							   use_timed_plnrz_(0), use_beacon_(0), use_congestion_control_(0), 
 							   use_reactive_beacon_(0), locservice_type_(0), use_span_(1), 
-							   bint_(GREEDY_ALIVE_INT), bdesync_(GREEDY_ALIVE_DESYNC),
-							   bexp_(GREEDY_ALIVE_EXP), pint_(GREEDY_PPROBE_INT), pdesync_(GREEDY_PPROBE_DESYNC),
-							   lpexp_(GREEDY_PPROBE_EXP), /*ldb_(0),*/ mn_(0), 
+							   bint_(GOPHER_ALIVE_INT), bdesync_(GOPHER_ALIVE_DESYNC),
+							   bexp_(GOPHER_ALIVE_EXP), pint_(GOPHER_PPROBE_INT), pdesync_(GOPHER_PPROBE_DESYNC),
+							   lpexp_(GOPHER_PPROBE_EXP), /*ldb_(0),*/ mn_(0), 
 							   ifq_(0), locservice_(0), 
 				
 			   beacon_timer_(0), lastperi_timer_(0), send_buf_timer(this)
 {
-    ntab_ = new GREEDYNeighbTable(this);
+    ntab_ = new GOPHERNeighbTable(this);
 
     ifq_ = 0;
 
@@ -704,7 +704,7 @@ GREEDY_Agent::GREEDY_Agent(void) : Agent(PT_GREEDY), use_mac_(0),
     }
 
     // Init SendPermissions
-    for (unsigned int i=0;i<GREEDY_PKT_TYPES;i++) {
+    for (unsigned int i=0;i<GOPHER_PKT_TYPES;i++) {
 		send_allowed[i] = true;
     }
 
@@ -733,19 +733,19 @@ GREEDY_Agent::GREEDY_Agent(void) : Agent(PT_GREEDY), use_mac_(0),
 
     // Timer
     if ((use_beacon_)&&(!use_reactive_beacon_)) {
-		beacon_timer_ = new GREEDY_BeaconTimer(this);
+		beacon_timer_ = new GOPHER_BeaconTimer(this);
     }
     if (!peri_proact_) { 
-		lastperi_timer_ = new GREEDY_LastPeriTimer(this);
+		lastperi_timer_ = new GOPHER_LastPeriTimer(this);
     }
     if (use_timed_plnrz_) {
-		planar_timer_ = new GREEDY_PlanarTimer(this);
+		planar_timer_ = new GOPHER_PlanarTimer(this);
     }
-    pd_timer = new GREEDYPacketDelayTimer(this,16);
+    pd_timer = new GOPHERPacketDelayTimer(this,16);
 
     if (use_reactive_beacon_) {
-		beacon_delay_ = new GREEDYBeaconDelayTimer(this);
-		beaconreq_delay_ = new GREEDYBeaconReqDelayTimer(this);
+		beacon_delay_ = new GOPHERBeaconDelayTimer(this);
+		beaconreq_delay_ = new GOPHERBeaconReqDelayTimer(this);
     }
     
     // What LocationService to use
@@ -759,7 +759,7 @@ GREEDY_Agent::GREEDY_Agent(void) : Agent(PT_GREEDY), use_mac_(0),
 }
 
 void
-GREEDY_Agent::trace(char *fmt,...)
+GOPHER_Agent::trace(char *fmt,...)
 {
     va_list ap;
 
@@ -773,17 +773,17 @@ GREEDY_Agent::trace(char *fmt,...)
 }
 
 void
-GREEDY_Agent::tracepkt(Packet *p, double now, int me, const char *type)
+GOPHER_Agent::tracepkt(Packet *p, double now, int me, const char *type)
 {
 	char buf[1024];
 
-	struct hdr_greedy *greedyh = HDR_GREEDY(p);
+	struct hdr_gopher *gopherh = HDR_GOPHER(p);
 
 	snprintf (buf, 1024, "V%s %.5f _%d_:", type, now, me);
 
-	if (greedyh->mode_ == GREEDYH_BEACON) {
-		snprintf (buf, 1024, "%s (%f,%f,%f)", buf, greedyh->hops_[0].x,
-				  greedyh->hops_[0].y, greedyh->hops_[0].z);
+	if (gopherh->mode_ == GOPHERH_BEACON) {
+		snprintf (buf, 1024, "%s (%f,%f,%f)", buf, gopherh->hops_[0].x,
+				  gopherh->hops_[0].y, gopherh->hops_[0].z);
 		if (verbose_)
 			trace("%s", buf);
 	}
@@ -791,13 +791,13 @@ GREEDY_Agent::tracepkt(Packet *p, double now, int me, const char *type)
 
 // don't drop or modify the packet--it's not a copy!
 void
-GREEDY_Agent::tap(const Packet *p)
+GOPHER_Agent::tap(const Packet *p)
 {
     if(!active_){ return; }
 
     hdr_cmn *hdrc = HDR_CMN(p);
 
-    struct hdr_greedy *greedyh = HDR_GREEDY(p);
+    struct hdr_gopher *gopherh = HDR_GOPHER(p);
     
     /* ignore non-IP packets.
        ignore beacons; we process those on regular receive.
@@ -807,31 +807,31 @@ GREEDY_Agent::tap(const Packet *p)
 		(hdrc->addr_type_ == NS_AF_INET) &&
 		(hdrc->next_hop_ != (nsaddr_t) IP_BROADCAST)) {
 		// snoop it as proof of its sender's existence.
-		switch (greedyh->mode_) {
-	    case GREEDYH_DATA_GREEDY:
+		switch (gopherh->mode_) {
+	    case GOPHERH_DATA_GREEDY:
 			// prev hop position lives in hops_[0]
-			beacon_proc(greedyh->hops_[0].ip, greedyh->hops_[0].x, greedyh->hops_[0].y,
-						greedyh->hops_[0].z, greedyh->load);
+			beacon_proc(gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y,
+						gopherh->hops_[0].z, gopherh->load);
 			break;
-	    case GREEDYH_PPROBE:
+	    case GOPHERH_PPROBE:
 			// prev hop position lives in hops_[nhops_-1]
-			beacon_proc(greedyh->hops_[greedyh->nhops_-1].ip,
-						greedyh->hops_[greedyh->nhops_-1].x,
-						greedyh->hops_[greedyh->nhops_-1].y,
-						greedyh->hops_[greedyh->nhops_-1].z,
-						greedyh->load);
+			beacon_proc(gopherh->hops_[gopherh->nhops_-1].ip,
+						gopherh->hops_[gopherh->nhops_-1].x,
+						gopherh->hops_[gopherh->nhops_-1].y,
+						gopherh->hops_[gopherh->nhops_-1].z,
+						gopherh->load);
 			break;
-	    case GREEDYH_DATA_PERI:
-			// XXX was hops_[greedyh->currhop_-1]
+	    case GOPHERH_DATA_PERI:
+			// XXX was hops_[gopherh->currhop_-1]
 			// prev hop position lives in hops_[0]
-			beacon_proc(greedyh->hops_[0].ip,
-						greedyh->hops_[0].x,
-						greedyh->hops_[0].y,
-						greedyh->hops_[0].z,
-						greedyh->load);
+			beacon_proc(gopherh->hops_[0].ip,
+						gopherh->hops_[0].x,
+						gopherh->hops_[0].y,
+						gopherh->hops_[0].z,
+						gopherh->load);
 			break;
 	    default:
-			fprintf(stderr, "Yow! tap got packet of unk type %d!\n", greedyh->mode_);
+			fprintf(stderr, "Yow! tap got packet of unk type %d!\n", gopherh->mode_);
 			abort();
 			break;
 		}
@@ -839,7 +839,7 @@ GREEDY_Agent::tap(const Packet *p)
 
     // Reactive Beaconing needs to take a look at pkts
     if (use_reactive_beacon_) {
-		checkGreedyCondition(p);
+		checkGopherCondition(p);
     }
 
     /*
@@ -853,7 +853,7 @@ GREEDY_Agent::tap(const Packet *p)
     if (locservice_type_ == _REACTIVE_) {
 		// Use LocSRequest Packets for implicit beaconing
 		// ReaLocService Requests are Broadcast Pakets, thus needing
-		//  extra handling. Unicast Pakets are covered by GREEDY
+		//  extra handling. Unicast Pakets are covered by GOPHER
 		struct hdr_locs *locsh = HDR_LOCS(p);
 		if (use_implicit_beacon_ && locsh->valid_ && (locsh->type_ == LOCS_REQUEST)) {
 			beacon_proc(locsh->lasthop.id,
@@ -870,13 +870,13 @@ GREEDY_Agent::tap(const Packet *p)
 		locservice_->evaluatePacket(p);
 	}
     
-#if GREEDY_ROUTE_VERBOSE >= 1
+#if GOPHER_ROUTE_VERBOSE >= 1
     // Each DATA arrival has to trigger a connectivity
     // trace for evaluation
 	struct hdr_ip *iph = HDR_IP(p);
-	bool arrival = ( ((greedyh->mode_ == GREEDYH_DATA_GREEDY) ||
-					  (greedyh->mode_ == GREEDYH_DATA_PERI)) &&
-					 (greedyh->port_ == hdr_greedy::GREEDY) &&
+	bool arrival = ( ((gopherh->mode_ == GOPHERH_DATA_GREEDY) ||
+					  (gopherh->mode_ == GOPHERH_DATA_PERI)) &&
+					 (gopherh->port_ == hdr_gopher::GOPHER) &&
 					 (iph->daddr() == addr()) );
     if (arrival) {
       int analysis = God::instance()->path_analysis_;
@@ -900,16 +900,16 @@ GREEDY_Agent::tap(const Packet *p)
 }
 
 void
-GREEDY_Agent::lost_link(Packet *p)
+GOPHER_Agent::lost_link(Packet *p)
 {
     // Give Locservice the chance to evaluate callbacks
     locservice_->callback(p);
     if (p==NULL) { return; }
 
     struct hdr_cmn *hdrc = HDR_CMN(p);
-    struct hdr_greedy *greedyh = HDR_GREEDY(p);
+    struct hdr_gopher *gopherh = HDR_GOPHER(p);
 
-    GREEDYNeighbEnt *ne;
+    GOPHERNeighbEnt *ne;
     
     if (use_mac_ == 0) {
 		drop(p, DROP_RTR_MAC_CALLBACK);
@@ -1023,7 +1023,7 @@ GREEDY_Agent::lost_link(Packet *p)
 				  iphdr->daddr(),
 				  hdrc->xmit_reason_);
 		}
-		greedyh = HDR_GREEDY(rt);
+		gopherh = HDR_GOPHER(rt);
       
 		if (hdrc->addr_type_ != NS_AF_INET) {
 			drop(rt, DROP_RTR_MAC_CALLBACK);
@@ -1033,13 +1033,13 @@ GREEDY_Agent::lost_link(Packet *p)
 		/*
 		  Unfortunately we have no choice but to handle LocService Packets with
 		  this extra code, because we have to use the Routing Port but don't
-		  want GREEDY to handle the (and discard) the Packets
+		  want GOPHER to handle the (and discard) the Packets
 		*/
-		if (greedyh->port_ == hdr_greedy::LOCS) {
+		if (gopherh->port_ == hdr_gopher::LOCS) {
 			int tmp = use_planar_;
-			switch (greedyh->mode_) {
-			case GREEDYH_DATA_GREEDY: { forwardPacket(rt); break; }
-			case GREEDYH_DATA_PERI:
+			switch (gopherh->mode_) {
+			case GOPHERH_DATA_GREEDY: { forwardPacket(rt); break; }
+			case GOPHERH_DATA_PERI:
 				use_planar_ = 1;
 				if (use_planar_) { forwardPacket(rt, 1); }
 				else { drop(rt, DROP_RTR_NEXT_SRCRT_HOP); }
@@ -1053,11 +1053,11 @@ GREEDY_Agent::lost_link(Packet *p)
 			continue;
 		}
 
-		// for GREEDY perimeter probes, chop off our own perimeter entry before
+		// for GOPHER perimeter probes, chop off our own perimeter entry before
 		// passing the probe back into the agent for reforwarding
 		if (HDR_IP(rt)->dport() == RT_PORT) {
-			if (greedyh->mode_ == GREEDYH_PPROBE) {
-				if (greedyh->nhops_ == 1) {
+			if (gopherh->mode_ == GOPHERH_PPROBE) {
+				if (gopherh->nhops_ == 1) {
 					/* we originated it. the neighbor is gone, according to the MAC
 					   layer. drop the probe--it was *only* meant for that neighbor. */
 					drop(rt, DROP_RTR_NEXT_SRCRT_HOP);
@@ -1065,17 +1065,17 @@ GREEDY_Agent::lost_link(Packet *p)
 				}
 				/* we were forwarding the probe, so instead try to recover by
 				   forwarding it to a remaining appropriate next hop */
-				greedyh->nhops_--;
-				periIn(rt, greedyh, GREEDY_PPROBE_RTX);
+				gopherh->nhops_--;
+				periIn(rt, gopherh, GOPHER_PPROBE_RTX);
 			}
 		} else {
 			int tmp = use_planar_;
-			switch (greedyh->mode_) {
-			case GREEDYH_DATA_GREEDY:
-				// give the packet another chance--exercise greedy's good recovery
+			switch (gopherh->mode_) {
+			case GOPHERH_DATA_GREEDY:
+				// give the packet another chance--exercise gopher's good recovery
 				forwardPacket(rt);
 				break;
-			case GREEDYH_DATA_PERI:
+			case GOPHERH_DATA_PERI:
 				use_planar_ = 1;
 				if (use_planar_)
 					// not src-routed; give it another chance via another neighbor
@@ -1087,7 +1087,7 @@ GREEDY_Agent::lost_link(Packet *p)
 				break;
 			default:
 				fprintf(stderr,
-						"yow! non-data packet for non-GREEDY port bounced by MAC!\n");
+						"yow! non-data packet for non-GOPHER port bounced by MAC!\n");
 				abort();
 				break;
 			}
@@ -1099,11 +1099,11 @@ GREEDY_Agent::lost_link(Packet *p)
 static void
 mac_callback(Packet * p, void *arg)
 {
-	((GREEDY_Agent *) arg)->lost_link(p);
+	((GOPHER_Agent *) arg)->lost_link(p);
 }
 
 void
-GREEDY_Agent::planar_callback(void)
+GOPHER_Agent::planar_callback(void)
 {
 	// re-planarize graph
 	if (use_planar_) {
@@ -1118,10 +1118,10 @@ GREEDY_Agent::planar_callback(void)
 }
 
 void
-GREEDY_Agent::lastperi_callback(void)
+GOPHER_Agent::lastperi_callback(void)
 {
-	GREEDYNeighbEnt *ne;
-	GREEDYNeighbTableIter ni;
+	GOPHERNeighbEnt *ne;
+	GOPHERNeighbTableIter ni;
 
 	// don't probe perimeters proactively anymore
 	peri_proact_ = 0;
@@ -1132,7 +1132,7 @@ GREEDY_Agent::lastperi_callback(void)
 }
 
 void
-GREEDY_Agent::beacon_callback(void)
+GOPHER_Agent::beacon_callback(void)
 {
     
     sendBeacon();
@@ -1142,7 +1142,7 @@ GREEDY_Agent::beacon_callback(void)
 }
 
 void
-GREEDY_Agent::deadneighb_callback(GREEDYNeighbEnt *ne)
+GOPHER_Agent::deadneighb_callback(GOPHERNeighbEnt *ne)
 {
 	Scheduler &s = Scheduler::instance();
 	double now = s.clock ();
@@ -1162,29 +1162,29 @@ GREEDY_Agent::deadneighb_callback(GREEDYNeighbEnt *ne)
 }
 
 void
-GREEDY_Agent::periprobe_callback(GREEDYNeighbEnt *ne)
+GOPHER_Agent::periprobe_callback(GOPHERNeighbEnt *ne)
 {
 	Packet *p = allocpkt();
 	struct hdr_ip *iph = HDR_IP(p);
-	struct hdr_greedy *greedyh = HDR_GREEDY(p);
+	struct hdr_gopher *gopherh = HDR_GOPHER(p);
 	struct hdr_cmn *ch = HDR_CMN(p);
 
 	ch->next_hop_ = ne->dst;
 	ch->addr_type_ = NS_AF_INET;
 	iph->daddr() = Address::instance().create_ipaddr(ne->dst, RT_PORT);
 	iph->dport() = RT_PORT;
-	ch->ptype_ = PT_GREEDY;
+	ch->ptype_ = PT_GOPHER;
 	iph->ttl() = 128;
 #ifdef PING_TTL
 	iph->ttl() = PING_TTL;
 #endif
-	greedyh->hops_[0].ip = Address::instance().get_nodeaddr(addr());
-	greedyh->nhops_ = 1;
-	greedyh->mode_ = GREEDYH_PPROBE;
+	gopherh->hops_[0].ip = Address::instance().get_nodeaddr(addr());
+	gopherh->nhops_ = 1;
+	gopherh->mode_ = GOPHERH_PPROBE;
 	if (use_congestion_control_)
-		greedyh->load = getLoad();
+		gopherh->load = getLoad();
 	ch->size() = hdr_size(p);
-	mn_->getLoc(&greedyh->hops_[0].x, &greedyh->hops_[0].y, &greedyh->hops_[0].z);
+	mn_->getLoc(&gopherh->hops_[0].x, &gopherh->hops_[0].y, &gopherh->hops_[0].z);
 
 	// schedule probe transmission
 	ch->xmit_failure_ = mac_callback;
@@ -1235,20 +1235,20 @@ cross_segment(double x1, double y1, double x2, double y2,
 }
 
 int
-GREEDY_Agent::crosses(GREEDYNeighbEnt *ne, hdr_greedy *greedyh)
+GOPHER_Agent::crosses(GOPHERNeighbEnt *ne, hdr_gopher *gopherh)
 {
 	int i;
 
 	// check all neighboring hops in perimeter thus far (through self)
-	for (i = 0; i < (greedyh->nhops_ - 1); i++) {
-		if ((greedyh->hops_[i].ip != ne->dst) &&
-			(greedyh->hops_[i+1].ip != ne->dst) &&
-			(greedyh->hops_[i].ip != greedyh->hops_[greedyh->nhops_-1].ip) &&
-			(greedyh->hops_[i+1].ip != greedyh->hops_[greedyh->nhops_-1].ip) &&
-			cross_segment(greedyh->hops_[i].x, greedyh->hops_[i].y,
-						  greedyh->hops_[i+1].x, greedyh->hops_[i+1].y,
-						  greedyh->hops_[greedyh->nhops_-1].x,
-						  greedyh->hops_[greedyh->nhops_-1].y,
+	for (i = 0; i < (gopherh->nhops_ - 1); i++) {
+		if ((gopherh->hops_[i].ip != ne->dst) &&
+			(gopherh->hops_[i+1].ip != ne->dst) &&
+			(gopherh->hops_[i].ip != gopherh->hops_[gopherh->nhops_-1].ip) &&
+			(gopherh->hops_[i+1].ip != gopherh->hops_[gopherh->nhops_-1].ip) &&
+			cross_segment(gopherh->hops_[i].x, gopherh->hops_[i].y,
+						  gopherh->hops_[i+1].x, gopherh->hops_[i+1].y,
+						  gopherh->hops_[gopherh->nhops_-1].x,
+						  gopherh->hops_[gopherh->nhops_-1].y,
 						  ne->x, ne->y))
 			return 1;
 	}
@@ -1256,69 +1256,69 @@ GREEDY_Agent::crosses(GREEDYNeighbEnt *ne, hdr_greedy *greedyh)
 }
 
 void
-GREEDY_Agent::periIn(Packet *p, hdr_greedy *greedyh, int rtxflag /*= 0*/)
+GOPHER_Agent::periIn(Packet *p, hdr_gopher *gopherh, int rtxflag /*= 0*/)
 {
 	double myx, myy, myz;
-	GREEDYNeighbEnt *ne, *inne;
+	GOPHERNeighbEnt *ne, *inne;
 
 	// update neighbor record for previous hop
   
 	// did I originate it?
-	if (greedyh->hops_[0].ip == Address::instance().get_nodeaddr(addr())) {
+	if (gopherh->hops_[0].ip == Address::instance().get_nodeaddr(addr())) {
 		// cache the perimeter
-		ne = ntab_->ent_finddst(greedyh->hops_[1].ip);
+		ne = ntab_->ent_finddst(gopherh->hops_[1].ip);
 		if (!ne) {
 			// apparently, neighbor we launched probe via is now gone
 			Packet::free(p);
 			return;
 		}
-#ifdef HDR_GREEDY_DYNAMIC
-		if (ne->peri && (ne->maxlen < greedyh->maxhops_)) {
-			// need to allocate more GreedyPeriEnt slots in ne
+#ifdef HDR_GOPHER_DYNAMIC
+		if (ne->peri && (ne->maxlen < gopherh->maxhops_)) {
+			// need to allocate more GopherPeriEnt slots in ne
 			delete[] ne->peri;
 			ne->maxlen = ne->perilen = 0;
 			ne->peri = NULL;
 		}
 #endif
 		if (!ne->peri) {
-#ifdef HDR_GREEDY_DYNAMIC
-			ne->peri = new struct PeriEnt[greedyh->maxhops_];
-			ne->maxlen = greedyh->maxhops_;
+#ifdef HDR_GOPHER_DYNAMIC
+			ne->peri = new struct PeriEnt[gopherh->maxhops_];
+			ne->maxlen = gopherh->maxhops_;
 #else
 			ne->peri = new struct PeriEnt[MAX_PERI_HOPS_STATIC];
 			ne->maxlen = MAX_PERI_HOPS_STATIC;
 #endif
 		}
-		bcopy(&greedyh->hops_[1], ne->peri,
-			  (greedyh->nhops_ - 1) * sizeof(struct PeriEnt));
-		ne->perilen = greedyh->nhops_ - 1;
+		bcopy(&gopherh->hops_[1], ne->peri,
+			  (gopherh->nhops_ - 1) * sizeof(struct PeriEnt));
+		ne->perilen = gopherh->nhops_ - 1;
 		/* no timer work to do--perimeter probe timer is governed by
 		   beacons/absence of beacons from a neighbor */
 		// we consumed the packet; free it!
 		Packet::free(p);
 		return;
 	}
-	// add self to GREEDY header perimeter
+	// add self to GOPHER header perimeter
 	mn_->getLoc(&myx, &myy, &myz);
-	greedyh->add_hop(Address::instance().get_nodeaddr(addr()), myx, myy, myz);
+	gopherh->add_hop(Address::instance().get_nodeaddr(addr()), myx, myy, myz);
 	if (use_congestion_control_)
-		greedyh->load = getLoad();
+		gopherh->load = getLoad();
 	// compute candidate next hop: sweep ccw about self from ingress hop
-	ne = inne = ntab_->ent_finddst(greedyh->hops_[greedyh->nhops_-2].ip);
+	ne = inne = ntab_->ent_finddst(gopherh->hops_[gopherh->nhops_-2].ip);
 	/* in theory, a perimeter probe received from an unknown neighbor should
 	   serve as a beacon from that neighbor... */
 	/* BUT, don't add the previous hop more than once when we retransmit a
 	   peri probe--the prev hop information is stale in that case */
 	if (!rtxflag && (ne == NULL)) {
-		GREEDYNeighbEnt nne(this);
+		GOPHERNeighbEnt nne(this);
 
-		nne.dst = greedyh->hops_[greedyh->nhops_-2].ip;
-		nne.x = greedyh->hops_[greedyh->nhops_-2].x;
-		nne.y = greedyh->hops_[greedyh->nhops_-2].y;
-		nne.z = greedyh->hops_[greedyh->nhops_-2].z;
+		nne.dst = gopherh->hops_[gopherh->nhops_-2].ip;
+		nne.x = gopherh->hops_[gopherh->nhops_-2].x;
+		nne.y = gopherh->hops_[gopherh->nhops_-2].y;
+		nne.z = gopherh->hops_[gopherh->nhops_-2].z;
 
 		if (use_congestion_control_)
-			nne.load = greedyh->load;
+			nne.load = gopherh->load;
 		inne = ne = ntab_->ent_add(&nne);
 
 		ne->dnt.sched(bexp_);
@@ -1337,14 +1337,14 @@ GREEDY_Agent::periIn(Packet *p, hdr_greedy *greedyh, int rtxflag /*= 0*/)
 	while ((ne = ntab_->ent_next_ccw(mn_, ne, use_planar_)) != inne) {
 #else
 		double fromx, fromy, fromz;
-	while((ne = ntab_->ent_findnext_onperi(mn_, greedyh->hops_[0].ip,
-										   greedyh->hops_[0].x, greedyh->hops_[0].y, greedyh->hops_[0].z,
+	while((ne = ntab_->ent_findnext_onperi(mn_, gopherh->hops_[0].ip,
+										   gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z,
 										   use_planar_)) != inne){
 		printf("ne->dst %d\n", ne->dst);
 		
 #endif
 			// verify no crossing
-			if (!crosses(ne, greedyh))
+			if (!crosses(ne, gopherh))
 				break;			
 	}
 	// forward probe to ne
@@ -1366,7 +1366,7 @@ GREEDY_Agent::periIn(Packet *p, hdr_greedy *greedyh, int rtxflag /*= 0*/)
 }
 
 int
-GREEDY_Agent::getLoad() {
+GOPHER_Agent::getLoad() {
 	return (2 * ((Mac802_11 *)m)->getLoad() + ntab_->meanLoad()) / 3;
 }
 
@@ -1375,19 +1375,19 @@ GREEDY_Agent::getLoad() {
 /***************************************************/
 
 void
-GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
+GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 
 	struct hdr_ip *iph = HDR_IP(p);
     struct hdr_cmn *cmh = HDR_CMN(p);
-    struct hdr_greedy *greedyh = HDR_GREEDY(p);
+    struct hdr_gopher *gopherh = HDR_GOPHER(p);
     
-    GREEDYNeighbEnt *ne=NULL;
-    GREEDYNeighbEnt *logne;
+    GOPHERNeighbEnt *ne=NULL;
+    GOPHERNeighbEnt *logne;
     Scheduler &s = Scheduler::instance();
     double now = s.clock();
 
-    switch(greedyh->mode_) {
-	case GREEDYH_DATA_GREEDY: 
+    switch(gopherh->mode_) {
+	case GOPHERH_DATA_GREEDY: 
     
 	    // first of all, look if we're neighbor to dst
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
@@ -1407,7 +1407,7 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
  			// (wk: possibly problematic because if a newly born packet with next hop 0
 			// arrives here, a possible ping-pong will be detected (ne->dst == 0 and ..hops[0]
 			// is initialized with 0)
-			if (ne->dst == greedyh->hops_[0].ip)			
+			if (ne->dst == gopherh->hops_[0].ip)			
 					trace("VPPP %f _%d_ %d [%d -> %d]", now, mn_->address(), cmh->uid(), mn_->address(), ne->dst);
 
 			// set next hop to best neighbor
@@ -1419,19 +1419,19 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
         
 		else {
 	        /*
-			// there seems to be no greedy neighbor
+			// there seems to be no gopher neighbor
 			// we send a beacon request and delay the pkt the first time
 			// should the new info be of no use, we'll process it further
 			if (use_reactive_beacon_) {
-				if (greedyh->retry < GREEDY_RBEACON_RETRIES) {
-					greedyh->retry++;
+				if (gopherh->retry < GOPHER_RBEACON_RETRIES) {
+					gopherh->retry++;
 					sendBeaconRequest();
-					double delay = 2*GREEDY_RBEACON_JITTER;
+					double delay = 2*GOPHER_RBEACON_JITTER;
 					pd_timer->add(cmh->uid(), delay, (void*)p);
 					return;
 				}else{
 					pd_timer->remove(cmh->uid()); // precaution
-					greedyh->retry = 0;
+					gopherh->retry = 0;
 				}
 			}
 
@@ -1455,7 +1455,7 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					// no proactive probes, so no peri_proact_ to worry about
 					ne = ntab_->ent_findnext_onperi(mn_, iph->daddr(), iph->dx_, iph->dy_, iph->dz_, use_planar_);
 					if (!ne) { // no face toward the destination
-						if(greedyh->geoanycast)
+						if(gopherh->geoanycast)
 							{
 								// wk: forwardPacket: no better neigbhor on peri
 								locservice_->dropPacketCallback(p);
@@ -1470,25 +1470,25 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			  
 					// put packet in peri data mode, forward
 					cmh->size() -= hdr_size(p); // strip data header
-					greedyh->mode_ = GREEDYH_DATA_PERI;
+					gopherh->mode_ = GOPHERH_DATA_PERI;
 					cmh->size() += hdr_size(p); // add peri header
 			
 					// mark point of entry into peri data mode
-					mn_->getLoc(&greedyh->peript_.x, &greedyh->peript_.y, &greedyh->peript_.z);
-					greedyh->perips_.x = greedyh->peript_.x;
-					greedyh->perips_.y = greedyh->peript_.y;
-					greedyh->perips_.z = greedyh->peript_.z;
+					mn_->getLoc(&gopherh->peript_.x, &gopherh->peript_.y, &gopherh->peript_.z);
+					gopherh->perips_.x = gopherh->peript_.x;
+					gopherh->perips_.y = gopherh->peript_.y;
+					gopherh->perips_.z = gopherh->peript_.z;
 
 					// mark ips of edge endpoints
-					greedyh->periptip_[0] = greedyh->hops_[0].ip;        // prev edge on peri
-					greedyh->periptip_[1] = mn_->address(); // myself
-					greedyh->periptip_[2] = ne->dst;        // next edge on peri
+					gopherh->periptip_[0] = gopherh->hops_[0].ip;        // prev edge on peri
+					gopherh->periptip_[1] = mn_->address(); // myself
+					gopherh->periptip_[2] = ne->dst;        // next edge on peri
 
 					// N.B. first dst hop is hops_[1]
 					// (leave room for hop-by-hop ip, position in hops_[0])!!
-					greedyh->nhops_ = 1;
-					greedyh->currhop_ = 1;
-					greedyh->add_hop(mn_->address(), greedyh->peript_.x, greedyh->peript_.y, greedyh->peript_.z);
+					gopherh->nhops_ = 1;
+					gopherh->currhop_ = 1;
+					gopherh->add_hop(mn_->address(), gopherh->peript_.x, gopherh->peript_.y, gopherh->peript_.z);
 					cmh->next_hop_ = ne->dst;
 					break;
 				}
@@ -1500,14 +1500,14 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 
 					double fromx, fromy, fromz;
 					ne = ntab_->ent_findnext_onperi(mn_,
-													greedyh->hops_[0].ip, greedyh->hops_[0].x, greedyh->hops_[0].y, greedyh->hops_[0].z,
+													gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z,
 													use_planar_);
 
 					if (!ne) {
 
 						// we're well and truly hung; nothing closer on a peri, either
 						if (drop_debug_ && (cmh->opt_num_forwards_ != 16777215)) {
-							GREEDYNeighbTableIter ni;
+							GOPHERNeighbTableIter ni;
 							ni = ntab_->InitLoop();
 							while ((logne = ntab_->NextLoop(&ni))) {
 								trace("VPER _%d_ (%.5f, %.5f):", logne->dst, logne->x, logne->y);
@@ -1517,7 +1517,7 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 								}
 							}
 						}
- 						if(greedyh->geoanycast)
+ 						if(gopherh->geoanycast)
 							{
 								// wk forwardPacket: we're hung
 								locservice_->dropPacketCallback(p);
@@ -1531,15 +1531,15 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					}else{
 			    
 						cmh->size() -= hdr_size(p); // strip data header 
-						greedyh->mode_ = GREEDYH_DATA_PERI; // put packet in peri mode
+						gopherh->mode_ = GOPHERH_DATA_PERI; // put packet in peri mode
 						cmh->size() += hdr_size(p); // add peri header
 
 						// N.B. first dst hop is hops_[1]
 						// (leave room for hop-by-hop ip, position in hops_[0])!! 
-						greedyh->nhops_ = 1;
-						greedyh->currhop_ = 1;
-						greedyh->hops_[1].ip = ne->dst;
-						cmh->next_hop_ = greedyh->hops_[1].ip;
+						gopherh->nhops_ = 1;
+						gopherh->currhop_ = 1;
+						gopherh->hops_[1].ip = ne->dst;
+						cmh->next_hop_ = gopherh->hops_[1].ip;
 						trace("VSM->P %f _%d_ [%d -> %d]", now, mn_->address(), iph->saddr(), iph->daddr());
 						break;
 					}
@@ -1558,7 +1558,7 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			// we could have used a perimeter here--turn them on
 			peri_proact_ = 1;
 
-			if(greedyh->geoanycast)
+			if(gopherh->geoanycast)
 				{
 					// wk forwardPacket no closer  neighbor
 					locservice_->dropPacketCallback(p);
@@ -1577,19 +1577,19 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 		}
 	    break;
 	    /********************************************
-	     *end greedy
+	     *end gopher
 	     *******************************************/
 
-	case GREEDYH_DATA_PERI:
+	case GOPHERH_DATA_PERI:
 
 	    // first of all, look if we're neighbor to dst
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
 			cmh->size() -= hdr_size(p); // strip data peri header
-			greedyh->mode_ = GREEDYH_DATA_GREEDY;
-			cmh->size() += hdr_size(p); // strip data greedy header
-			greedyh->nhops_ = 1;
-			greedyh->currhop_ = 1;
-			greedyh->hops_[1].ip = ne->dst;
+			gopherh->mode_ = GOPHERH_DATA_GREEDY;
+			cmh->size() += hdr_size(p); // strip data gopher header
+			gopherh->nhops_ = 1;
+			gopherh->currhop_ = 1;
+			gopherh->hops_[1].ip = ne->dst;
 			cmh->next_hop_ = ne->dst;
 			break;
 	    }
@@ -1597,29 +1597,29 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 	    if (use_peri_) {
 	      
 			double myx, myy, myz, closerx, closery;
-		    closerx = greedyh->perips_.x;
-			closery = greedyh->perips_.y;
+		    closerx = gopherh->perips_.x;
+			closery = gopherh->perips_.y;
 
 			// non-source-routed perimeter forwarding rule
-			/** to resume greedy forwarding, this *node* must be closer than
+			/** to resume gopher forwarding, this *node* must be closer than
 				the point where the packet entered peri mode. */
 			mn_->getLoc(&myx, &myy, &myz);
-			double difference = distance(greedyh->peript_.x, greedyh->peript_.y, greedyh->peript_.z,
+			double difference = distance(gopherh->peript_.x, gopherh->peript_.y, gopherh->peript_.z,
 										 iph->dx_, iph->dy_, iph->dz_) - 
 				distance(myx, myy, myz, iph->dx_, iph->dy_, iph->dz_);
 
 			if ((distance(myx, myy, myz, iph->dx_, iph->dy_, iph->dz_) <
-				distance(greedyh->peript_.x, greedyh->peript_.y, greedyh->peript_.z,
+				distance(gopherh->peript_.x, gopherh->peript_.y, gopherh->peript_.z,
 						 iph->dx_, iph->dy_, iph->dz_)) && difference > 0.5) 
 				{
 				cmh->size() -= hdr_size(p); // strip data peri header
-				greedyh->mode_ = GREEDYH_DATA_GREEDY;
-				cmh->size() += hdr_size(p); // add data greedy header
+				gopherh->mode_ = GOPHERH_DATA_GREEDY;
+				cmh->size() += hdr_size(p); // add data gopher header
 				/* always add back (- - is +) 12 bytes: if use_implicit_beacon_,
 				   src added 12 to size, don't re-add hops_[0]; otherwise,
 				   still don't want to count hops_[0]. */
-				greedyh->currhop_ = 0;
-				greedyh->nhops_ = 0;
+				gopherh->currhop_ = 0;
+				gopherh->nhops_ = 0;
 				// recursive, but must call target_->recv in callee frame
 				trace("VSM->G %f _%d_ [%d -> %d]", now, mn_->address(), iph->saddr(), iph->daddr());
 		
@@ -1631,22 +1631,22 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				// forward along current face, or change faces where appropriate
 				/* don't choose *any* edge--only consider edges on the
 				   face we're forwarding on at the moment. */
-				for(int i=0; i<greedyh->nhops_; i++)
-					trace("Vne %.8f _%d_ <- %d", CURRTIME, mn_->address(), greedyh->hops_[i].ip);
+				for(int i=0; i<gopherh->nhops_; i++)
+					trace("Vne %.8f _%d_ <- %d", CURRTIME, mn_->address(), gopherh->hops_[i].ip);
 
-				ne = ntab_->ent_finddst(greedyh->hops_[greedyh->nhops_-1].ip);
+				ne = ntab_->ent_finddst(gopherh->hops_[gopherh->nhops_-1].ip);
 				if(ne){
 					double fromx, fromy, fromz;
 					ne = ntab_->ent_findnext_onperi(mn_,
-													greedyh->hops_[0].ip, greedyh->hops_[0].x, greedyh->hops_[0].y, greedyh->hops_[0].z,
+													gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z,
 													use_planar_);
 
 					/** drop if we've looped on this perimeter:
 						are about to revisit the first edge we took on it */
-					if ((greedyh->periptip_[1] == mn_->address()) &&
-						(greedyh->periptip_[2] == ne->dst)) {
+					if ((gopherh->periptip_[1] == mn_->address()) &&
+						(gopherh->periptip_[2] == ne->dst)) {
 
-						if(greedyh->geoanycast)
+						if(gopherh->geoanycast)
 							{
 								// wk forwardPacket, finished perimeter 
 								// without finding target
@@ -1662,7 +1662,7 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					// does the candidate next edge have a closer pt?
 					if (!ne) {
 						// no face toward the destination
-						if(greedyh->geoanycast)
+						if(gopherh->geoanycast)
 							{
 								// wk forwardPaket
 								locservice_->dropPacketCallback(p);
@@ -1675,8 +1675,8 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 
 					/** face-change(p,t) */
 					if (ne->closer_pt(mn_->address(), myx, myy, myz,
-									  greedyh->peript_.x, greedyh->peript_.y,
-									  greedyh->periptip_[1], greedyh->periptip_[0],
+									  gopherh->peript_.x, gopherh->peript_.y,
+									  gopherh->periptip_[1], gopherh->periptip_[0],
 									  iph->dx_, iph->dy_, &closerx, &closery)) {
 						/* yes. choose a new next hop on the peri pierced by the line
 						   to the destination. */
@@ -1684,24 +1684,24 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						   choose that cut at the point closest to destination */
 						int counter = 0;
 						while (ne->closer_pt(mn_->address(), myx, myy, myz,
-											 greedyh->peript_.x, greedyh->peript_.y,
-											 greedyh->periptip_[1], greedyh->periptip_[0],
+											 gopherh->peript_.x, gopherh->peript_.y,
+											 gopherh->periptip_[1], gopherh->periptip_[0],
 											 iph->dx_, iph->dy_, &closerx, &closery)) {
 							// fake that ingress edge was edge from ne
 							
 							
 							// re-use single-hop history
-							greedyh->hops_[greedyh->nhops_-1].ip = ne->dst;
-							greedyh->hops_[greedyh->nhops_-1].x = ne->x;
-							greedyh->hops_[greedyh->nhops_-1].y = ne->y;
-							greedyh->hops_[greedyh->nhops_-1].z = ne->z;
+							gopherh->hops_[gopherh->nhops_-1].ip = ne->dst;
+							gopherh->hops_[gopherh->nhops_-1].x = ne->x;
+							gopherh->hops_[gopherh->nhops_-1].y = ne->y;
+							gopherh->hops_[gopherh->nhops_-1].z = ne->z;
 							
 							// record closest point on edge to ne
-							greedyh->perips_.x = closerx;
-							greedyh->perips_.y = closery;
-							greedyh->perips_.z = 0.0;
+							gopherh->perips_.x = closerx;
+							gopherh->perips_.y = closery;
+							gopherh->perips_.z = 0.0;
 							
-							GREEDYNeighbEnt *ne_temp = ntab_->ent_findnext_onperi(mn_, ne->dst, ne->x, ne->y, ne->z, use_planar_);
+							GOPHERNeighbEnt *ne_temp = ntab_->ent_findnext_onperi(mn_, ne->dst, ne->x, ne->y, ne->z, use_planar_);
 							if((ne_temp == NULL) || (ne_temp->dst == ne->dst))
 								break;
 							ne = ne_temp;
@@ -1709,9 +1709,9 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						}
 
 						// record edge endpt ips
-						greedyh->periptip_[0] = ne->dst; // prev hop
-						greedyh->periptip_[1] = mn_->address(); // self
-						greedyh->periptip_[2] = ne->dst; // next hop
+						gopherh->periptip_[0] = ne->dst; // prev hop
+						gopherh->periptip_[1] = mn_->address(); // self
+						gopherh->periptip_[2] = ne->dst; // next hop
 
 						cmh->next_hop_ = ne->dst;
 						goto finish_pkt;
@@ -1729,43 +1729,43 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					/* we're trying to retransmit a packet, but the ingress hop is
 					   gone. drop it. */
 					// a drop due to MAC_CALLBACK. For the moment, inform it
-					if(greedyh->geoanycast)
+					if(gopherh->geoanycast)
 						{
 							// wk forwardPaket
 							locservice_->dropPacketCallback(p);
 							if (p==NULL) { return; }
 						}
 					// a drop due to MAC_CALLBACK. For the moment,don't inform it
-					trace("VneNULL %.8f _%d_ <- %d", CURRTIME, mn_->address(), greedyh->hops_[greedyh->nhops_-1].ip);
+					trace("VneNULL %.8f _%d_ <- %d", CURRTIME, mn_->address(), gopherh->hops_[gopherh->nhops_-1].ip);
 					drop(p, DROP_RTR_MAC_CALLBACK);
 					return;
 				}
 				cmh->next_hop_ = ne->dst;
 				if (use_loop_detect_) {
-					greedyh->add_hop(mn_->address(), myx, myy, myz);
+					gopherh->add_hop(mn_->address(), myx, myy, myz);
 					printf("Warning: This size change has not been modified, yet!\n");
 					cmh->size() += 12;
 				}
 				else {
-					greedyh->hops_[greedyh->nhops_-1].ip = mn_->address();
-					greedyh->hops_[greedyh->nhops_-1].x = myx;
-					greedyh->hops_[greedyh->nhops_-1].y = myy;
-					greedyh->hops_[greedyh->nhops_-1].z = myz;
+					gopherh->hops_[gopherh->nhops_-1].ip = mn_->address();
+					gopherh->hops_[gopherh->nhops_-1].x = myx;
+					gopherh->hops_[gopherh->nhops_-1].y = myy;
+					gopherh->hops_[gopherh->nhops_-1].z = myz;
 				}
 			} // end if(use_planar_)
 			else {
 		
 				// am I the right waypoint?
-				if (greedyh->hops_[greedyh->currhop_].ip == mn_->address()) {
+				if (gopherh->hops_[gopherh->currhop_].ip == mn_->address()) {
 					// am I the final waypoint?
-					if (greedyh->currhop_ == (greedyh->nhops_-1)) {
-						// yes! return packet to greedy mode
+					if (gopherh->currhop_ == (gopherh->nhops_-1)) {
+						// yes! return packet to gopher mode
 						ntab_->counter_clock = true; // next peri -> route counterclockwise
 						cmh->size() -= hdr_size(p); // strip data peri header
-						greedyh->mode_ = GREEDYH_DATA_GREEDY;
-						cmh->size() += hdr_size(p); // strip data greedy header
-						greedyh->currhop_ = 0;
-						greedyh->nhops_ = 0;
+						gopherh->mode_ = GOPHERH_DATA_GREEDY;
+						cmh->size() += hdr_size(p); // strip data gopher header
+						gopherh->currhop_ = 0;
+						gopherh->nhops_ = 0;
 						forwardPacket(p);
 						return;
 					}
@@ -1773,11 +1773,11 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						// forward using source route...
 						double fromx, fromy, fromz;
 						ne = ntab_->ent_findnext_onperi(mn_,
-														greedyh->hops_[0].ip, greedyh->hops_[0].x, greedyh->hops_[0].y, greedyh->hops_[0].z,
+														gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z,
 														use_planar_);
 
 						if(!ne){
-							if(greedyh->geoanycast)
+							if(gopherh->geoanycast)
 							{
 								// wk forwardPacket 
 								locservice_->dropPacketCallback(p);
@@ -1788,14 +1788,14 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 							return;
 						}
 
-						greedyh->currhop_++;
-						greedyh->hops_[greedyh->currhop_].ip = ne->dst;
-						cmh->next_hop_ = greedyh->hops_[greedyh->currhop_].ip;
+						gopherh->currhop_++;
+						gopherh->hops_[gopherh->currhop_].ip = ne->dst;
+						cmh->next_hop_ = gopherh->hops_[gopherh->currhop_].ip;
 			    
 					}
 				}
 				else {
-					if(greedyh->geoanycast)
+					if(gopherh->geoanycast)
 							{
 								// wk forwardPacket
 								locservice_->dropPacketCallback(p);
@@ -1837,18 +1837,18 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
     mn_->getLoc(&myx, &myy, &myz);
     /* the packet may *already* have hops stored; don't allocate with
        add_hop()! */
-    greedyh->hops_[0].ip = mn_->address();
-    greedyh->hops_[0].x = myx;
-    greedyh->hops_[0].y = myy;
-    greedyh->hops_[0].z = myz;
+    gopherh->hops_[0].ip = mn_->address();
+    gopherh->hops_[0].x = myx;
+    gopherh->hops_[0].y = myy;
+    gopherh->hops_[0].z = myz;
 
     // reactive beaconing requires, that a retried pkt
     // is marked as clean again, so it can be retried
     // at the next node
-    if (use_reactive_beacon_) { greedyh->retry = 0; }
+    if (use_reactive_beacon_) { gopherh->retry = 0; }
     
     if (use_congestion_control_)
-		greedyh->load = getLoad();
+		gopherh->load = getLoad();
 
     if (verbose_)
 		trace ("VFP %.5f _%d -> %d_ %d:%d -> %d:%d", now, mn_->address(),
@@ -1870,7 +1870,7 @@ GREEDY_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 /***********/
 
 void
-GREEDY_Agent::recv(Packet *p, Handler *) {
+GOPHER_Agent::recv(Packet *p, Handler *) {
 
     // Check if this node is awake
     if (!active_) {
@@ -1883,12 +1883,12 @@ GREEDY_Agent::recv(Packet *p, Handler *) {
     locservice_->recv(p);
     if (p==NULL) { return; }
     /*
-      Check if GREEDY is interested in this pkt
+      Check if GOPHER is interested in this pkt
     */
 
     struct hdr_ip *iph = HDR_IP(p);
     struct hdr_cmn *cmh = HDR_CMN(p);
-    struct hdr_greedy *greedyh = HDR_GREEDY(p);
+    struct hdr_gopher *gopherh = HDR_GOPHER(p);
 
     int src = Address::instance().get_nodeaddr(iph->saddr());
 
@@ -1899,10 +1899,10 @@ GREEDY_Agent::recv(Packet *p, Handler *) {
 	    
             // Fresh pkt that needs setting up
 			if (iph->dport() != RT_PORT) { 
-				greedyh->mode_ = GREEDYH_DATA_GREEDY; 
+				gopherh->mode_ = GOPHERH_DATA_GREEDY; 
 			} // non-route pkts
-			greedyh->geoanycast = true;
-			if (greedyh->port_ != hdr_greedy::LOCS) { cmh->size() += IP_HDR_LEN; }   // non-ls pkts
+			gopherh->geoanycast = true;
+			if (gopherh->port_ != hdr_gopher::LOCS) { cmh->size() += IP_HDR_LEN; }   // non-ls pkts
 			cmh->size() += hdr_size(p);
 			// HLS packets do their own TTL management
 			if(cmh->ptype() != PT_HLS)
@@ -1921,7 +1921,7 @@ GREEDY_Agent::recv(Packet *p, Handler *) {
 
 		}else{
 
-			if ((greedyh->port_ != hdr_greedy::LOCS) && (greedyh->mode_ == GREEDYH_DATA_GREEDY)) {
+			if ((gopherh->port_ != hdr_gopher::LOCS) && (gopherh->mode_ == GOPHERH_DATA_GREEDY)) {
 				// No real data pkt should visit its source twice 
 				drop(p, DROP_RTR_ROUTE_LOOP);
 				return;
@@ -1940,7 +1940,7 @@ GREEDY_Agent::recv(Packet *p, Handler *) {
 			// expiration is likely to occur) we can assume that there 
 			// exists no route.
 			
-			if(greedyh->geoanycast)
+			if(gopherh->geoanycast)
 				{
 					// if there is a TTL problem, we treat at least the
 					// requests 
@@ -1959,38 +1959,38 @@ GREEDY_Agent::recv(Packet *p, Handler *) {
     */
     
     // LOCS Packets
-    if (greedyh->port_ == hdr_greedy::LOCS) {
+    if (gopherh->port_ == hdr_gopher::LOCS) {
 		forwardPacket(p); 
 		return; 
     }
     
-    // GREEDY Packets (Routing Packets)
+    // GOPHER Packets (Routing Packets)
     if (iph->dport() == RT_PORT) {
 		char *as;
 
-		switch (greedyh->mode_) {
-	    case GREEDYH_BEACON:
+		switch (gopherh->mode_) {
+	    case GOPHERH_BEACON:
 			if (src != mn_->address()) { recvBeacon(p); }
 			break;
-	    case GREEDYH_BEACON_REQ:
+	    case GOPHERH_BEACON_REQ:
 			if (src != mn_->address()) { recvBeaconReq(p); }
 			break;
-	    case GREEDYH_PPROBE:
-			periIn(p, greedyh);
+	    case GOPHERH_PPROBE:
+			periIn(p, gopherh);
 			break;
-	    case GREEDYH_DATA_GREEDY:
+	    case GOPHERH_DATA_GREEDY:
 			as = Address::instance().print_nodeaddr(addr());
-			fprintf(stderr, "greedy data pkt @ %s:RT_PORT!\n",as); fflush(stderr);
+			fprintf(stderr, "gopher data pkt @ %s:RT_PORT!\n",as); fflush(stderr);
 			delete[] as;
 			break;
-	    case GREEDYH_DATA_PERI:
+	    case GOPHERH_DATA_PERI:
 			as = Address::instance().print_nodeaddr(addr());
 			fprintf(stderr, "peri data pkt @ %s:RT_PORT!\n",as); fflush(stderr);
 			delete[] as;
 			break;
 	    default:
 			as = Address::instance().print_nodeaddr(addr());
-			fprintf(stderr, "unk pkt type %d @ %s:RT_PORT!\n", greedyh->mode_,as); fflush(stderr);
+			fprintf(stderr, "unk pkt type %d @ %s:RT_PORT!\n", gopherh->mode_,as); fflush(stderr);
 			delete[] as;
 			break;
 		}
@@ -2006,10 +2006,10 @@ GREEDY_Agent::recv(Packet *p, Handler *) {
 /****************************/
 
 int
-GREEDY_Agent::command(int argc, const char *const *argv) {
+GOPHER_Agent::command(int argc, const char *const *argv) {
     
     if (argc == 2) {
-		if (strcmp(argv[1], "start-greedy") == 0) {
+		if (strcmp(argv[1], "start-gopher") == 0) {
 			init();
 			return TCL_OK;
 		}
@@ -2107,7 +2107,7 @@ GREEDY_Agent::command(int argc, const char *const *argv) {
 }
 
 void
-GREEDY_Agent::init(void) {
+GOPHER_Agent::init(void) {
 
     // Init LocService
     locservice_->init();
@@ -2115,7 +2115,7 @@ GREEDY_Agent::init(void) {
   
     if (active_) {
 		God::instance()->signOn(addr());
-#ifdef GREEDY_TRACE_WAKESLEEP
+#ifdef GOPHER_TRACE_WAKESLEEP
 		trace("VGI: %f %d", Scheduler::instance().clock(), mn_->address());
 #endif
 
@@ -2126,7 +2126,7 @@ GREEDY_Agent::init(void) {
 		if (use_timed_plnrz_) { planar_timer_->sched(1.0); }
     
 		// Init SendPermissions
-		for (unsigned int i=0;i<GREEDY_PKT_TYPES;i++) {
+		for (unsigned int i=0;i<GOPHER_PKT_TYPES;i++) {
 			send_allowed[i] = true;
 		}
 	
@@ -2135,7 +2135,7 @@ GREEDY_Agent::init(void) {
 }
 
 void
-GREEDY_Agent::sleep() {
+GOPHER_Agent::sleep() {
     
     assert(active_);
     
@@ -2143,12 +2143,12 @@ GREEDY_Agent::sleep() {
     m->sleep();
     if (ifq_) { ((PriQueue *)ifq_)->clear(); }
     
-#ifdef GREEDY_TRACE_WAKESLEEP
+#ifdef GOPHER_TRACE_WAKESLEEP
     trace("VGSLEEP %f _%d_ ", Scheduler::instance().clock(), mn_->address());
 #endif
 
     // Stop SendPermissions
-    for (unsigned int i=0;i<GREEDY_PKT_TYPES;i++) {
+    for (unsigned int i=0;i<GOPHER_PKT_TYPES;i++) {
 		send_allowed[i] = false;
     } 
 
@@ -2178,7 +2178,7 @@ GREEDY_Agent::sleep() {
 }
 
 void
-GREEDY_Agent::wake() {
+GOPHER_Agent::wake() {
 
     assert(!active_);
 
@@ -2193,11 +2193,11 @@ GREEDY_Agent::wake() {
     send_buf_timer.sched(sendbuf_interval());
 
     // Init SendPermissions
-    for (unsigned int i=0;i<GREEDY_PKT_TYPES;i++) {
+    for (unsigned int i=0;i<GOPHER_PKT_TYPES;i++) {
 		send_allowed[i] = true;
     }
 
-#ifdef GREEDY_TRACE_WAKESLEEP    
+#ifdef GOPHER_TRACE_WAKESLEEP    
     trace("VGWAKE %f _%d_", Scheduler::instance().clock(), mn_->address());
 #endif
 
@@ -2216,10 +2216,10 @@ GREEDY_Agent::wake() {
 /***********************/
 
 void
-GREEDY_Agent::beacon_proc(int src, double x, double y, double z, int load)
+GOPHER_Agent::beacon_proc(int src, double x, double y, double z, int load)
 {
-	GREEDYNeighbEnt *ne;
-	GREEDYNeighbEnt nne(this);
+	GOPHERNeighbEnt *ne;
+	GOPHERNeighbEnt nne(this);
 
 	double now = Scheduler::instance().clock();
 	nne.dst = src;
@@ -2247,29 +2247,29 @@ GREEDY_Agent::beacon_proc(int src, double x, double y, double z, int load)
 }
 
 void
-GREEDY_Agent::recvBeacon(Packet *p) {
+GOPHER_Agent::recvBeacon(Packet *p) {
 
     struct hdr_ip *iph = HDR_IP(p);
-    struct hdr_greedy *greedyh = HDR_GREEDY(p);
+    struct hdr_gopher *gopherh = HDR_GOPHER(p);
 
     int src = Address::instance().get_nodeaddr(iph->saddr());
 
-    beacon_proc(src, greedyh->hops_[0].x, greedyh->hops_[0].y, greedyh->hops_[0].z, greedyh->load);
+    beacon_proc(src, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z, gopherh->load);
     Packet::free(p);
 }
 
 void
-GREEDY_Agent::recvBeaconReq(Packet *p) {
+GOPHER_Agent::recvBeaconReq(Packet *p) {
 
     struct hdr_ip *iph = HDR_IP(p);
-    struct hdr_greedy *greedyh = HDR_GREEDY(p);
+    struct hdr_gopher *gopherh = HDR_GOPHER(p);
 
     // Evaluate Beacon Req Information
     int src = Address::instance().get_nodeaddr(iph->saddr());
-    beacon_proc(src, greedyh->hops_[0].x, greedyh->hops_[0].y, greedyh->hops_[0].z, greedyh->load);
+    beacon_proc(src, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z, gopherh->load);
 
     // Answer Request with a Beacon
-    double delay = Random::uniform(GREEDY_RBEACON_JITTER);
+    double delay = Random::uniform(GOPHER_RBEACON_JITTER);
     sendBeacon(delay);
 
     // Discard Request
@@ -2277,24 +2277,24 @@ GREEDY_Agent::recvBeaconReq(Packet *p) {
 }
 
 void
-GREEDY_Agent::sendBeaconRequest() {
+GOPHER_Agent::sendBeaconRequest() {
     
     assert(active_);
 
-    if (!allowedToSend(GREEDYH_BEACON_REQ)) { return; }
+    if (!allowedToSend(GOPHERH_BEACON_REQ)) { return; }
 
     Packet *p = allocpkt();
 
     struct hdr_cmn *hdrc = HDR_CMN(p);
     struct hdr_ip *iph = HDR_IP(p);
-    struct hdr_greedy *greedyh = HDR_GREEDY(p);
+    struct hdr_gopher *gopherh = HDR_GOPHER(p);
   
     // Set up Beacon Headers
-    greedyh->mode_ = GREEDYH_BEACON_REQ;
-    greedyh->nhops_ = 1;
-    mn_->getLoc(&greedyh->hops_[0].x, &greedyh->hops_[0].y, &greedyh->hops_[0].z);
+    gopherh->mode_ = GOPHERH_BEACON_REQ;
+    gopherh->nhops_ = 1;
+    mn_->getLoc(&gopherh->hops_[0].x, &gopherh->hops_[0].y, &gopherh->hops_[0].z);
 
-    hdrc->ptype_ = PT_GREEDY;
+    hdrc->ptype_ = PT_GOPHER;
     hdrc->next_hop_ = IP_BROADCAST;
     hdrc->addr_type_ = NS_AF_INET;
     hdrc->size() = hdr_size(p);
@@ -2303,49 +2303,49 @@ GREEDY_Agent::sendBeaconRequest() {
     iph->dport() = RT_PORT;
 
     if (use_congestion_control_) {
-		greedyh->load = getLoad();
+		gopherh->load = getLoad();
     }
     
-    beaconreq_delay_->resched(GREEDY_BEACON_REQ_DELAY);
-    block(GREEDYH_BEACON_REQ);
+    beaconreq_delay_->resched(GOPHER_BEACON_REQ_DELAY);
+    block(GOPHERH_BEACON_REQ);
 
     Scheduler::instance().schedule(target_, p, 0.0);
 }
 
 void
-GREEDY_Agent::checkGreedyCondition(const Packet *p) {
+GOPHER_Agent::checkGopherCondition(const Packet *p) {
 
     // If we announced ourselves not long ago, we
     //  don't need to do it again
-    if (!allowedToSend(GREEDYH_BEACON)) { return; }
+    if (!allowedToSend(GOPHERH_BEACON)) { return; }
 
     struct hdr_ip *iph = HDR_IP(p);
-    struct hdr_greedy *greedyh = HDR_GREEDY(p);
+    struct hdr_gopher *gopherh = HDR_GOPHER(p);
 
-    // Data Greedy Packets should be checked, to see
-    //  if i'm on their greedy path. if so, we'll 
+    // Data Gopher Packets should be checked, to see
+    //  if i'm on their gopher path. if so, we'll 
     //  send a beacon to announce our position
 
-    if (greedyh->mode_ == GREEDYH_DATA_GREEDY) {
+    if (gopherh->mode_ == GOPHERH_DATA_GREEDY) {
 	
 		double mydist, shortest, myx, myy, myz;
 
 		mn_->getLoc(&myx, &myy, &myz);
-		shortest = distance(greedyh->hops_[0].x, greedyh->hops_[0].y, greedyh->hops_[0].z, 
+		shortest = distance(gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z, 
 							iph->dx_, iph->dy_, iph->dz_);
-		mydist   = distance(greedyh->hops_[0].x, greedyh->hops_[0].y, greedyh->hops_[0].z, 
+		mydist   = distance(gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z, 
 							myx, myy, myz);
 		if (mydist < shortest) {
-			double delay = Random::uniform(GREEDY_RBEACON_JITTER);
+			double delay = Random::uniform(GOPHER_RBEACON_JITTER);
 			sendBeacon(delay);
-			beacon_delay_->resched(GREEDY_BEACON_DELAY);
-			block(GREEDYH_BEACON);
+			beacon_delay_->resched(GOPHER_BEACON_DELAY);
+			block(GOPHERH_BEACON);
 		}
     }
 }
 
 void
-GREEDY_Agent::sendBeacon(double delay) {
+GOPHER_Agent::sendBeacon(double delay) {
 
 	assert(active_);
 
@@ -2353,13 +2353,13 @@ GREEDY_Agent::sendBeacon(double delay) {
 
 	struct hdr_cmn *hdrc = HDR_CMN(p);
 	struct hdr_ip *iph = HDR_IP(p);
-	struct hdr_greedy *greedyh = HDR_GREEDY(p);
+	struct hdr_gopher *gopherh = HDR_GOPHER(p);
 	// Set up Beacon Headers
-	greedyh->mode_ = GREEDYH_BEACON;
-	greedyh->nhops_ = 1;
-	mn_->getLoc(&greedyh->hops_[0].x, &greedyh->hops_[0].y, &greedyh->hops_[0].z);
+	gopherh->mode_ = GOPHERH_BEACON;
+	gopherh->nhops_ = 1;
+	mn_->getLoc(&gopherh->hops_[0].x, &gopherh->hops_[0].y, &gopherh->hops_[0].z);
 
-	hdrc->ptype_ = PT_GREEDY;
+	hdrc->ptype_ = PT_GOPHER;
 	hdrc->next_hop_ = IP_BROADCAST;
 	hdrc->addr_type_ = NS_AF_INET;
 	hdrc->size() = hdr_size(p);
@@ -2368,7 +2368,7 @@ GREEDY_Agent::sendBeacon(double delay) {
 	iph->dport() = RT_PORT;
 
 	if (use_congestion_control_) {
-		greedyh->load = getLoad();
+		gopherh->load = getLoad();
 	}
 
 	Scheduler::instance().schedule(target_, p, delay);
@@ -2379,12 +2379,12 @@ GREEDY_Agent::sendBeacon(double delay) {
 /********************/
 
 void
-GREEDYPacketDelayTimer::handle() {
+GOPHERPacketDelayTimer::handle() {
     a->forwardPacket((Packet*)local_info);
 }
 
 void
-GREEDYPacketDelayTimer::deleteInfo(void* info) {
+GOPHERPacketDelayTimer::deleteInfo(void* info) {
     Packet::free((Packet*)info);
 }
 
@@ -2393,7 +2393,7 @@ GREEDYPacketDelayTimer::deleteInfo(void* info) {
 /**************************************/
 
 void
-GREEDY_Agent::Terminate()
+GOPHER_Agent::Terminate()
 {
     for (int c=0; c<SEND_BUF_SIZE; c++) {
 		if (send_buf[c].p) {
@@ -2404,7 +2404,7 @@ GREEDY_Agent::Terminate()
 }
 
 void
-GREEDY_Agent::notifyPos(nsaddr_t id)
+GOPHER_Agent::notifyPos(nsaddr_t id)
 {
     struct hdr_ip *iph;
     struct hdr_cmn *cmnh;
@@ -2439,7 +2439,7 @@ GREEDY_Agent::notifyPos(nsaddr_t id)
 }
 
 void
-GREEDY_Agent::stickPacketInSendBuffer(Packet *p)
+GOPHER_Agent::stickPacketInSendBuffer(Packet *p)
 {
 	double min = 99999.0; //initialize min to some big enough number
 	int min_index = 0;
@@ -2477,7 +2477,7 @@ GREEDY_Agent::stickPacketInSendBuffer(Packet *p)
 }
 
 void
-GREEDY_Agent::dropSendBuff(Packet *&p, const char* reason)
+GOPHER_Agent::dropSendBuff(Packet *&p, const char* reason)
 {
     struct hdr_ip *iph = HDR_IP(p);
 
@@ -2494,7 +2494,7 @@ GREEDY_Agent::dropSendBuff(Packet *&p, const char* reason)
 }
 
 void
-GREEDY_Agent::sendBufferCheck()
+GOPHER_Agent::sendBufferCheck()
 {
 
     for (int c=0; c <SEND_BUF_SIZE; c++) {
@@ -2515,7 +2515,7 @@ GREEDY_Agent::sendBufferCheck()
 }
 
 void
-GREEDYSendBufferTimer::expire(Event *e)
+GOPHERSendBufferTimer::expire(Event *e)
 {
 	a_->sendBufferCheck();
 	resched(a_->sendbuf_interval());
@@ -2526,10 +2526,10 @@ GREEDYSendBufferTimer::expire(Event *e)
 /*********************************************/
 
 int
-GREEDY_Agent::hdr_size(Packet* p)
+GOPHER_Agent::hdr_size(Packet* p)
 {
     struct hdr_cmn *cmnh = HDR_CMN(p);
-    struct hdr_greedy *greedyh = HDR_GREEDY(p);
+    struct hdr_gopher *gopherh = HDR_GOPHER(p);
 
     unsigned int size = 0;
 
@@ -2547,17 +2547,17 @@ GREEDY_Agent::hdr_size(Packet* p)
     if (!use_implicit_beacon_)
 		imp_beacon = 0;
 
-    if (cmnh->ptype() == PT_GREEDY) { // GREEDY Packet
+    if (cmnh->ptype() == PT_GOPHER) { // GOPHER Packet
 
-		switch (greedyh->mode_) {
-	    case GREEDYH_PPROBE:
+		switch (gopherh->mode_) {
+	    case GOPHERH_PPROBE:
 			return (packetType + 2*id + 2*position + position + imp_beacon);
-	    case GREEDYH_BEACON:
+	    case GOPHERH_BEACON:
 			return (packetType + imp_beacon); 
-	    case GREEDYH_BEACON_REQ:
+	    case GOPHERH_BEACON_REQ:
 			return (packetType + imp_beacon); 
 	    default:
-			printf("Invalid GREEDY Packet wants to know it's size !\n");
+			printf("Invalid GOPHER Packet wants to know it's size !\n");
 			abort();
 		}
     }
@@ -2569,13 +2569,13 @@ GREEDY_Agent::hdr_size(Packet* p)
 		size = packetType + imp_beacon;
     }
     
-    if ((cmnh->ptype() != PT_GREEDY) && (cmnh->ptype() != PT_LOCS)) { // Data Packet
+    if ((cmnh->ptype() != PT_GOPHER) && (cmnh->ptype() != PT_LOCS)) { // Data Packet
 
-		switch (greedyh->mode_) {
-	    case GREEDYH_DATA_GREEDY: 
+		switch (gopherh->mode_) {
+	    case GOPHERH_DATA_GREEDY: 
 			size = (packetType + position + imp_beacon);
 			break;
-	    case GREEDYH_DATA_PERI:
+	    case GOPHERH_DATA_PERI:
 			size = (packetType + position + 2*id + 2*position + position + imp_beacon); // last position for intersecting line
 			break;
 	    default:
@@ -2592,12 +2592,12 @@ GREEDY_Agent::hdr_size(Packet* p)
 /* Timer Functions */
 /*******************/
 
-void GREEDY_DeadNeighbTimer::expire(Event *) { if (a->isActive()) a->deadneighb_callback(ne); }
-void GREEDY_PeriProbeTimer::expire(Event *) { if (a->isActive()) a->periprobe_callback(ne); }
-void GREEDY_BeaconTimer::expire(Event *) { if (a->isActive()) a->beacon_callback(); }
-void GREEDY_LastPeriTimer::expire(Event *) { if (a->isActive()) a->lastperi_callback(); }
-void GREEDY_PlanarTimer::expire(Event *) { if (a->isActive()) a->planar_callback(); }
+void GOPHER_DeadNeighbTimer::expire(Event *) { if (a->isActive()) a->deadneighb_callback(ne); }
+void GOPHER_PeriProbeTimer::expire(Event *) { if (a->isActive()) a->periprobe_callback(ne); }
+void GOPHER_BeaconTimer::expire(Event *) { if (a->isActive()) a->beacon_callback(); }
+void GOPHER_LastPeriTimer::expire(Event *) { if (a->isActive()) a->lastperi_callback(); }
+void GOPHER_PlanarTimer::expire(Event *) { if (a->isActive()) a->planar_callback(); }
 
-void GREEDYBeaconReqDelayTimer::expire(Event *) { if (a->isActive()) a->allow(GREEDYH_BEACON_REQ); }
-void GREEDYBeaconDelayTimer::expire(Event *) { if (a->isActive()) a->allow(GREEDYH_BEACON); }
+void GOPHERBeaconReqDelayTimer::expire(Event *) { if (a->isActive()) a->allow(GOPHERH_BEACON_REQ); }
+void GOPHERBeaconDelayTimer::expire(Event *) { if (a->isActive()) a->allow(GOPHERH_BEACON); }
 

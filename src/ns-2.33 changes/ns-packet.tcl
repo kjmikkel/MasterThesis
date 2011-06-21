@@ -175,6 +175,7 @@ foreach prot {
 	LOCS 	# Location Services
 	GPSR 	# Greedy Permineter Stateless Routing (Routing Protocol)
 	GREEDY  # Greedy routing
+        GOPHER  # Gopher routing
 # inserted - to
 } {
 	add-packet-header $prot

@@ -1,0 +1,99 @@
+Binary file gpsr/gpsr.o matches
+gpsr/gpsr.cc:	GPSRClass():TclClass ("Agent/GPSR")
+gpsr.tcl:Agent/GPSR set sport_        0
+gpsr.tcl:Agent/GPSR set dport_        0
+gpsr.tcl:Agent/GPSR set bint_         0.5 ;# beacon interval
+gpsr.tcl:Agent/GPSR set bdesync_      0.5 ;# beacon desync random component
+gpsr.tcl:Agent/GPSR set bexp_         [expr 3*([Agent/GPSR set bint_]+[Agent/GPSR set bdesync_]*[Agent/GPSR set bint_])] ;# beacon timeout interval
+gpsr.tcl:Agent/GPSR set pint_         1.5 ;# peri probe interval
+gpsr.tcl:Agent/GPSR set pdesync_      0.5 ;# peri probe desync random component
+gpsr.tcl:Agent/GPSR set lpexp_        8.0 ;# peris unused timeout interval
+gpsr.tcl:Agent/GPSR set use_mac_      0        ;# use link breakage feedback from MAC
+gpsr.tcl:Agent/GPSR set use_peri_     0	      ;# probe and use perimeters
+gpsr.tcl:Agent/GPSR set verbose_      0        ;# 
+gpsr.tcl:Agent/GPSR set drop_debug_   0        ;#
+gpsr.tcl:Agent/GPSR set peri_proact_  1	      ;# proactively generate peri probes
+gpsr.tcl:Agent/GPSR set use_implicit_beacon_ 0 ;# all packets act as beacons; promisc.
+gpsr.tcl:Agent/GPSR set use_planar_   0        ;# planarize graph
+gpsr.tcl:Agent/GPSR set use_loop_detect_ 0     ;# look for unexpected loops in peris
+gpsr.tcl:Agent/GPSR set use_timed_plnrz_ 0     ;# replanarize periodically
+gpsr.tcl:set opt(ragent)         Agent/GPSR
+gpsr.tcl:Agent/GPSR instproc init args {
+hls.tcl:Agent/GPSR set bdesync_                0.5 ;# beacon desync random component
+hls.tcl:Agent/GPSR set bexp_                   [expr 3*([Agent/GPSR set bint_]+[Agent/GPSR set bdesync_]*[Agent/GPSR set bint_])] ;# beacon timeout interval
+hls.tcl:Agent/GPSR set pint_                   1.5 ;# peri probe interval
+hls.tcl:Agent/GPSR set pdesync_                0.5 ;# peri probe desync random component
+hls.tcl:Agent/GPSR set lpexp_                  8.0 ;# peris unused timeout interval
+hls.tcl:Agent/GPSR set drop_debug_             1   ;#
+hls.tcl:Agent/GPSR set peri_proact_            1 	 ;# proactively generate peri probes
+hls.tcl:Agent/GPSR set use_implicit_beacon_    1   ;# all packets act as beacons; promisc.
+hls.tcl:Agent/GPSR set use_timed_plnrz_        0   ;# replanarize periodically
+hls.tcl:Agent/GPSR set use_congestion_control_ 0
+hls.tcl:Agent/GPSR set use_reactive_beacon_    0   ;# only use reactive beaconing
+hls.tcl:Agent/GPSR set locservice_type_ 3
+hls.tcl:Agent/GPSR set bint_                  $val(bint)
+hls.tcl:Agent/GPSR set bexp_                 [expr 3*([Agent/GPSR set bint_]+[Agent/GPSR set bdesync_]*[Agent/GPSR set bint_])] ;# beacon timeout interval
+hls.tcl:Agent/GPSR set use_peri_              $val(use_peri)
+hls.tcl:Agent/GPSR set use_planar_            $val(use_planar)
+hls.tcl:Agent/GPSR set use_mac_               $val(use_mac)
+hls.tcl:Agent/GPSR set use_beacon_            $val(use_beacon)
+hls.tcl:Agent/GPSR set verbose_               $val(verbose)
+hls.tcl:Agent/GPSR set use_reactive_beacon_   $val(use_reactive)
+hls.tcl:Agent/GPSR set use_loop_detect_       $val(use_loop)
+ns-default.tcl:Agent/GPSR set active_ 1
+ns-default.tcl:Agent/GPSR set cc_alpha_ 0
+ns-default.tcl:Agent/GPSR set use_beacon_ 0
+ns-default.tcl:Agent/GPSR set use_congestion_control_ 0
+ns-default.tcl:Agent/GPSR set use_reactive_beacon_ 0
+ns-default.tcl:Agent/GPSR set locservice_type_ 3
+ns-lib.tcl:	set ragent [new Agent/GPSR]
+ns_tcl.cc:Agent/GPSR set sport_        0\n\
+ns_tcl.cc:Agent/GPSR set dport_        0\n\
+ns_tcl.cc:Agent/GPSR set bint_         0.5 ;# beacon interval\n\
+ns_tcl.cc:Agent/GPSR set bdesync_      0.5 ;# beacon desync random component\n\
+ns_tcl.cc:Agent/GPSR set bexp_         [expr 3*([Agent/GPSR set bint_]+[Agent/GPSR set bdesync_]*[Agent/GPSR set bint_])] ;# beacon timeout interval\n\
+ns_tcl.cc:Agent/GPSR set pint_         1.5 ;# peri probe interval\n\
+ns_tcl.cc:Agent/GPSR set pdesync_      0.5 ;# peri probe desync random component\n\
+ns_tcl.cc:Agent/GPSR set lpexp_        8.0 ;# peris unused timeout interval\n\
+ns_tcl.cc:Agent/GPSR set use_mac_      0        ;# use link breakage feedback from MAC\n\
+ns_tcl.cc:Agent/GPSR set use_peri_     0	      ;# probe and use perimeters\n\
+ns_tcl.cc:Agent/GPSR set verbose_      0        ;# \n\
+ns_tcl.cc:Agent/GPSR set drop_debug_   0        ;#\n\
+ns_tcl.cc:Agent/GPSR set peri_proact_  1	      ;# proactively generate peri probes\n\
+ns_tcl.cc:Agent/GPSR set use_implicit_beacon_ 0 ;# all packets act as beacons; promisc.\n\
+ns_tcl.cc:Agent/GPSR set use_planar_   0        ;# planarize graph\n\
+ns_tcl.cc:Agent/GPSR set use_loop_detect_ 0     ;# look for unexpected loops in peris\n\
+ns_tcl.cc:Agent/GPSR set use_timed_plnrz_ 0     ;# replanarize periodically\n\
+ns_tcl.cc:set opt(ragent)         Agent/GPSR\n\
+ns_tcl.cc:Agent/GPSR instproc init args {\n\
+ns_tcl.cc:Agent/GPSR set active_ 1\n\
+ns_tcl.cc:Agent/GPSR set cc_alpha_ 0\n\
+ns_tcl.cc:Agent/GPSR set use_beacon_ 0\n\
+ns_tcl.cc:Agent/GPSR set use_congestion_control_ 0\n\
+ns_tcl.cc:Agent/GPSR set use_reactive_beacon_ 0\n\
+ns_tcl.cc:Agent/GPSR set locservice_type_ 3\n\
+ns_tcl.cc:set ragent [new Agent/GPSR]\n\
+run.tcl:Agent/GPSR set bdesync_                0.5 ;# beacon desync random component
+run.tcl:Agent/GPSR set bexp_                   [expr 3*([Agent/GPSR set bint_]+[Agent/GPSR set bdesync_]*[Agent/GPSR set bint_])] ;# beacon timeout interval
+run.tcl:Agent/GPSR set pint_                   1.5 ;# peri probe interval
+run.tcl:Agent/GPSR set pdesync_                0.5 ;# peri probe desync random component
+run.tcl:Agent/GPSR set lpexp_                  8.0 ;# peris unused timeout interval
+run.tcl:Agent/GPSR set drop_debug_             1   ;#
+run.tcl:Agent/GPSR set peri_proact_            1 	 ;# proactively generate peri probes
+run.tcl:Agent/GPSR set use_implicit_beacon_    1   ;# all packets act as beacons; promisc.
+run.tcl:Agent/GPSR set use_timed_plnrz_        0   ;# replanarize periodically
+run.tcl:Agent/GPSR set use_congestion_control_ 0
+run.tcl:Agent/GPSR set use_reactive_beacon_    0   ;# only use reactive beaconing
+run.tcl:    Agent/GPSR set locservice_type_ $val(locs)
+run.tcl:    Agent/GPSR set use_congestion_control_ 1
+run.tcl:    Agent/GPSR set cc_alpha_ $val(cc)
+run.tcl:    Agent/GPSR set cc_alpha_ 0
+run.tcl:Agent/GPSR set bint_                  $val(bint)
+run.tcl:Agent/GPSR set bexp_                 [expr 3*([Agent/GPSR set bint_]+[Agent/GPSR set bdesync_]*[Agent/GPSR set bint_])] ;# beacon timeout interval
+run.tcl:Agent/GPSR set use_peri_              $val(use_peri)
+run.tcl:Agent/GPSR set use_planar_            $val(use_planar)
+run.tcl:Agent/GPSR set use_mac_               $val(use_mac)
+run.tcl:Agent/GPSR set use_beacon_            $val(use_beacon)
+run.tcl:Agent/GPSR set verbose_               $val(verbose)
+run.tcl:Agent/GPSR set use_reactive_beacon_   $val(use_reactive)
+run.tcl:Agent/GPSR set use_loop_detect_       $val(use_loop)

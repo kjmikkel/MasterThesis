@@ -21,6 +21,7 @@
 #include "gridlocservice.h"
 #include "../gpsr/gpsr.h"
 #include "../greedy/greedy.h"
+#include "../gopher/gopher.h"
 #include <math.h>
 #include <random.h>
 #include <cmu-trace.h>
@@ -249,6 +250,7 @@ void GridLocService::evaluateLocation(Packet *p) {
     struct hdr_locs *locsh = HDR_LOCS(p);
     struct hdr_gpsr *gpsrh = HDR_GPSR(p);
     struct hdr_greedy *greedyh = HDR_GREEDY(p);
+    struct hdr_gopher *gopherh = HDR_GOPHER(p);
     struct hdr_cmn *cmnh = HDR_CMN(p);
     struct hdr_ip *iph = HDR_IP(p);
 
@@ -279,6 +281,24 @@ void GridLocService::evaluateLocation(Packet *p) {
 	neighb.loc.x = greedyh->hops_[0].x;
 	neighb.loc.y = greedyh->hops_[0].y;
 	neighb.loc.z = greedyh->hops_[0].z;
+	// Reverse lookup of Grid Info
+	neighb.sqr = getGrid(neighb.loc.x,neighb.loc.y);
+
+	loccache->add(&neighb);
+	loctable->update(&neighb);
+
+	return;
+    }
+
+      if ((cmnh->ptype()==PT_GOPHER)&&(gopherh->mode_ == GOPHERH_BEACON)) {
+	// Direct Neighbor Information from GPSR Beacons
+	struct nodelocation neighb;
+
+	neighb.id = iph->saddr(); 
+	neighb.ts = Scheduler::instance().clock(); // Off by a few because Beacons don't have a TS
+	neighb.loc.x = gopherh->hops_[0].x;
+	neighb.loc.y = gopherh->hops_[0].y;
+	neighb.loc.z = gopherh->hops_[0].z;
 	// Reverse lookup of Grid Info
 	neighb.sqr = getGrid(neighb.loc.x,neighb.loc.y);
 
@@ -766,6 +786,7 @@ Packet* GridLocService::newReply(Packet* req, struct nodelocation* infosrc) {
     struct hdr_cmn *cmnh = HDR_CMN(pkt);
     struct hdr_gpsr *gpsrh = HDR_GPSR(pkt);
     struct hdr_greedy *greedyh = HDR_GREEDY(pkt);
+    struct hdr_gopher *gopherh = HDR_GOPHER(pkt);
 
     locsh->init();
     locsh->type_ = LOCS_REPLY;
@@ -805,6 +826,9 @@ Packet* GridLocService::newReply(Packet* req, struct nodelocation* infosrc) {
     greedyh->mode_ = GREEDYH_DATA_GREEDY;
     greedyh->port_ = hdr_greedy::LOCS;
 
+    gopherh->mode_ = GOPHERH_DATA_GREEDY;
+    gopherh->port_ = hdr_gopher::LOCS;
+
     return pkt;
 } 
 
@@ -817,6 +841,7 @@ Packet* GridLocService::newRequest(nsaddr_t dst_) {
     struct hdr_cmn *cmnh = HDR_CMN(pkt);
     struct hdr_gpsr *gpsrh = HDR_GPSR(pkt);
     struct hdr_greedy *greedyh = HDR_GREEDY(pkt);
+    struct hdr_gopher *gopherh = HDR_GOPHER(pkt);
 
     locsh->init();
     locsh->type_ = LOCS_REQUEST;
@@ -844,6 +869,9 @@ Packet* GridLocService::newRequest(nsaddr_t dst_) {
     
     greedyh->mode_ = GREEDYH_DATA_GREEDY;
     greedyh->port_ = hdr_greedy::LOCS;
+ 
+    gopherh->mode_ = GOPHERH_DATA_GREEDY;
+    gopherh->port_ = hdr_gopher::LOCS; 
 
     return pkt;
 } 
@@ -857,6 +885,7 @@ Packet* GridLocService::newUpdate(struct nodelocation* dst_) {
     struct hdr_cmn *cmnh = HDR_CMN(pkt);
     struct hdr_gpsr *gpsrh = HDR_GPSR(pkt);
     struct hdr_greedy *greedyh = HDR_GREEDY(pkt);
+    struct hdr_gopher *gopherh = HDR_GOPHER(pkt);
 
     locsh->init();
     locsh->type_ = LOCS_UPDATE;
@@ -906,6 +935,9 @@ Packet* GridLocService::newUpdate(struct nodelocation* dst_) {
     greedyh->mode_ = GREEDYH_DATA_GREEDY;
     greedyh->port_ = hdr_greedy::LOCS;
 
+    gopherh->mode_ = GOPHERH_DATA_GREEDY;
+    gopherh->port_ = hdr_gopher::LOCS;
+
     return pkt;
 } 
 
@@ -921,6 +953,7 @@ Packet* GridLocService::newUpdAck(Packet* upd, struct nodelocation* infosrc) {
     struct hdr_cmn *cmnh = HDR_CMN(pkt);
     struct hdr_gpsr *gpsrh = HDR_GPSR(pkt);
     struct hdr_greedy *greedyh = HDR_GREEDY(pkt);
+    struct hdr_gopher *gopherh = HDR_GOPHER(pkt);
 
     locsh->init();
     locsh->type_ = LOCS_UPDATE_ACK;
@@ -962,6 +995,9 @@ Packet* GridLocService::newUpdAck(Packet* upd, struct nodelocation* infosrc) {
     greedyh->mode_ = GREEDYH_DATA_GREEDY;
     greedyh->port_ = hdr_greedy::LOCS;
 
+    gopherh->mode_ = GOPHERH_DATA_GREEDY;
+    gopherh->port_ = hdr_gopher::LOCS;
+
     return pkt;
 } 
 
@@ -974,6 +1010,7 @@ Packet* GridLocService::newNotify(struct nodelocation* dst_) {
     struct hdr_cmn *cmnh = HDR_CMN(pkt);
     struct hdr_gpsr *gpsrh = HDR_GPSR(pkt);
     struct hdr_greedy *greedyh = HDR_GREEDY(pkt);
+    struct hdr_gopher *gopherh = HDR_GOPHER(pkt);
 
     locsh->init();
     locsh->type_ = LOCS_NOTIFY;
@@ -1015,6 +1052,9 @@ Packet* GridLocService::newNotify(struct nodelocation* dst_) {
 
     greedyh->mode_ = GREEDYH_DATA_GREEDY;
     greedyh->port_ = hdr_greedy::LOCS;
+
+    gopherh->mode_ = GOPHERH_DATA_GREEDY;
+    gopherh->port_ = hdr_gopher::LOCS;
     
     return pkt;
 } 
@@ -1424,6 +1464,7 @@ int GridLocService::hdr_size(Packet* p) {
     // All LS based routing agents must be listed here - mk
     if (cmnh->ptype() == PT_GPSR) { return 0; } // GPSR Packet
     if (cmnh->ptype() == PT_GREEDY) { return 0; } // GREEDY Packet
+    if (cmnh->ptype() == PT_GOPHER) { return 0;} // GOPHER Packer
     if (cmnh->ptype() == PT_LOCS) { // LOCS Packet
 	switch (locsh->type_) {
 	    case LOCS_UPDATE:

@@ -1139,6 +1139,13 @@ if {$greedyonly != -1 } {\n\
 \n\
 }\n\
 \n\
+set gopheronly [string first \"GOPHER\" [[$self set ragent_] info class]] \n\
+if {$gopheronly != -1 } {\n\
+[$self set ragent_] resetSB\n\
+}\n\
+\n\
+}\n\
+\n\
 Node/MobileNode instproc add-target { agent port } {\n\
 $self instvar dmux_ imep_ toraDebug_ \n\
 \n\

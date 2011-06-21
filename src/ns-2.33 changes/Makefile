@@ -338,6 +338,7 @@ OBJ_CC = \
 	\
 	gpsr/gpsr.o \
 	greedy/greedy.o\
+        gopher/gopher.o\
 	\
 	$(OBJ_STL)
 

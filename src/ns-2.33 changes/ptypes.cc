@@ -132,6 +132,8 @@ set ptype(hls) 63\n\
 set pvals(63) HLS\n\
 set ptype(greedy) 64\n\
 set pvals(64) GREEDY\n\
+set ptype(gopher) 65\n\
+set pvals(65) GOPHER\n\
 proc ptype2val {str} {\n\
 global ptype\n\
 set str [string tolower $str]\n\

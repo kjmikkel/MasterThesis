@@ -8,14 +8,15 @@ cp packet.h $NS_ROOT"/common/."
 
 cp -rf gpsr $NS_ROOT
 cp -rf greedy $NS_ROOT
+cp -rf gopher $NS_ROOT
 
 cp cmu-trace.h $NS_ROOT"/trace/."
 cp cmu-trace.cc $NS_ROOT"/trace/."
 
 cp gls_evaluate.pl $NS_ROOT"/hls/utils/."
 cp run.tcl $NS_ROOT"/hls/utils/."
-cp wired_0.tcl $NS_ROOT"/hls/utils/."
-#cp evaluate.pl $NS_ROOT"/hls/utils/."
+cp greedy_test.tcl $NS_ROOT"/hls/utils/."
+cp gopher_test.tcl $NS_ROOT"/hls/utils/."
 cp hls.tcl $NS_ROOT"/hls/utils/."
 
 cp hls.cc $NS_ROOT"/hls/."
@@ -36,6 +37,10 @@ cp ns-mobilenode.tcl $NS_ROOT"/tcl/lib/."
 
 cp gridlocservice.cc $NS_ROOT"/locservices/."
 cp realocservice.cc $NS_ROOT"/locservices/."
+
+# copy the tcl parameters to the right folder
+cp greedy.tcl $NS_ROOT"/tcl/mobility/."
+cp gopher.tcl $NS_ROOT"/tcl/mobility/."
 
 cp commen_routing.h $NS_ROOT"/."
 

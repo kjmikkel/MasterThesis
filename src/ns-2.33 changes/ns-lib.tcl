@@ -199,6 +199,8 @@ source ../mobility/com.tcl
 source ../mobility/gpsr.tcl
 # GREEDY
 source ../mobility/greedy.tcl
+# GOPHER
+source ../mobility/gopher.tcl
 
 # inserted - 2.11.05 - to
 

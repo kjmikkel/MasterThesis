@@ -1376,6 +1376,16 @@ Agent/GREEDY set use_reactive_beacon_ 0
 Agent/GREEDY set locservice_type_ 3
 ### END GREEDY
 
+### Start GOPHER
+Agent/GOPHER set active_ 1
+
+Agent/GOPHER set cc_alpha_ 0
+Agent/GOPHER set use_beacon_ 0
+Agent/GOPHER set use_congestion_control_ 0
+Agent/GOPHER set use_reactive_beacon_ 0
+Agent/GOPHER set locservice_type_ 3
+### END GOPHER
+
 Agent/MIPBS set adSize_ 48
 Agent/MIPBS set shift_ 0
 Agent/MIPBS set mask_ [AddrParams set ALL_BITS_SET]

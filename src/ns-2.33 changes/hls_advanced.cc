@@ -1,7 +1,7 @@
 #include "hls_basic.h"
 #include "../gpsr/gpsr.h"
 #include "../greedy/greedy.h"
-
+#include "../gopher/gopher.h"
 
 // AHM AdvancedHandoverManager //////////////////////////////////////
 AdvancedHandoverManager::AdvancedHandoverManager(HLSLocationCache* activeEntries, 
@@ -229,7 +229,8 @@ void AdvancedHandoverManager::handoverInformation(nodeposition* info, int number
   
   struct hdr_gpsr *gpsrh = HDR_GPSR(pkt);
   struct hdr_greedy *greedyh = HDR_GREEDY(pkt);
-  
+  struct hdr_gopher *gopherh = HDR_GOPHER(pkt);  
+
   struct hdr_hls *hlsh = HDR_HLS(pkt);
 
   
@@ -259,10 +260,15 @@ void AdvancedHandoverManager::handoverInformation(nodeposition* info, int number
   gpsrh->port_ = hdr_gpsr::LOCS;
   gpsrh->geoanycast = true;
 
-  // GREEDY - subject to change
+  // GREEDY setup
   greedyh->mode_ = GREEDYH_DATA_GREEDY;
   greedyh->port_ = hdr_greedy::LOCS;
   greedyh->geoanycast = true;
+
+  // GOPHER setup
+  gopherh->mode_ = GOPHERH_DATA_GREEDY;
+  gopherh->port_ = hdr_gopher::LOCS;
+  gopherh->geoanycast = true;
 
   // init my own header
   hlsh->init();

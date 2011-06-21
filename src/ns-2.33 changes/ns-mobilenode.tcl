@@ -172,6 +172,12 @@ Node/MobileNode instproc reset {} {
 	if {$greedyonly != -1 } {
 		[$self set ragent_] resetSB
 	}
+
+	# Special processing for GOPHER
+	set gopheronly [string first "GOPHER" [[$self set ragent_] info class]] 
+	if {$gopheronly != -1 } {
+		[$self set ragent_] resetSB
+	}
 # inserted - to
 
 }
@@ -218,6 +224,12 @@ Node/MobileNode instproc add-target { agent port } {
 	if {$greedyonly != -1 } {
 		$agent if-queue [$self set ifq_(0)]   ;# ifq between LL and MAC
 	}
+
+	# Special processing for GOPHER
+	set gopheronly [string first "GOPHER" [$agent info class]] 
+	if {$gopheronly != -1 } {
+		$agent if-queue [$self set ifq_(0)]   ;# ifq between LL and MAC
+	}
 	#<zheng: add>
 	# Special processing for ZBR
 	#set zbronly [string first "ZBR" [$agent info class]] 
@@ -242,6 +254,12 @@ Node/MobileNode instproc add-target { agent port } {
 	# Special processing for GREEDY
 	set greedyonly [string first "GREEDY" [$agent info class]] 
 	if {$greedyonly != -1 } {
+		$agent if-queue [$self set ifq_(0)]   ;# ifq between LL and MAC
+	}
+
+	# Special processing for GOPHER
+	set gopheronly [string first "GOPHER" [$agent info class]] 
+	if {$gopheronly != -1 } {
 		$agent if-queue [$self set ifq_(0)]   ;# ifq between LL and MAC
 	}
 # inserted - to

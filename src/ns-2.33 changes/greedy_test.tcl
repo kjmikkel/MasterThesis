@@ -1,5 +1,5 @@
 # author: Thomas Ogilvie
-# sample tcl script showing the use of GPSR and HLS (hierarchical location service)
+# sample tcl script showing the use of GREEDY and HLS (hierarchical location service)
 
 
 ## GREEDY Options
@@ -42,7 +42,7 @@ set val(y)		2000      ;# Y dimension of the topography
 set val(ifqlen)		512       ;# max packet in ifq
 set val(seed)		1.0
 set val(adhocRouting)	GREEDY      ;# AdHoc Routing Protocol
-set val(nn)		10       ;# how many nodes are simulated
+set val(nn)		40       ;# how many nodes are simulated
 set val(stop)		40.0     ;# simulation time
 set val(use_gk)		0	  ;# > 0: use GridKeeper with this radius
 set val(zip)		0         ;# should trace files be zipped
@@ -57,7 +57,7 @@ set val(lt)		""
 set val(cp)		"cp-n40-a40-t40-c4-m0"
 set val(sc)		"sc-x2000-y2000-n40-s25-t40"
 
-set val(out)            "mikkel_test.tr"
+set val(out)            "greedy_trace.tr"
 
 Agent/GREEDY set locservice_type_ 3
 
@@ -88,7 +88,7 @@ set ns_		[new Simulator]
 $ns_ use-newtrace
 
 # Outputs nam traces
-set nf [open out.nam w]
+set nf [open greedy.nam w]
 $ns_ namtrace-all $nf
 
 set loadTrace  $val(lt)
@@ -170,7 +170,7 @@ proc finish {} {
         close $nf
 
         puts "running nam..."
-        exec nam out.nam &
+        exec nam greedy.nam &
         exit 0
 }
 

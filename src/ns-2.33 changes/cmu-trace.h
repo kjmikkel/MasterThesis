@@ -175,6 +175,7 @@ private:
 	void    format_hls(Packet *p, int offset);
 	void    format_gpsr(Packet *p, int offset);
 	void    format_greedy(Packet *p, int offset);
+        void    format_gopher(Packet *p, int offset);
 
 	int aggregate_mac;
 	int aggregate_rtr;
