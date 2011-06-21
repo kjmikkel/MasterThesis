@@ -1,5 +1,6 @@
 from scipy.spatial import KDTree
 import math, copy
+from priodict import priorityDictionary
 
 # DO NOT USE
 def brute_force(data, cut_off):
@@ -151,6 +152,58 @@ def rn_graph(old_graph):
     graph[u] = local_graph
             
   return graph
+
+
+"""
+An implementation of Kruskal and prim's algorithm
+"""
+def MST_Kruskal(graph):
+  result_graph = {}
+  set_container = {}
+
+  # Initially the nodes only know themselves
+  for node in graph:
+    set_container[node] = [node]
+    result_graph[node] = {}
+  
+  # we make the priority queue
+  Q = priorityDictionary()
+  # We make sure the edge is only there once
+  already_there = {}
+  for outer_node in graph:
+    inner_nodes = graph[outer_node]
+    
+    for inner_node in inner_nodes:
+      if already_there.get((inner_node, outer_node)):
+        continue
+     
+      already_there[(inner_node, outer_node)] = 1
+      already_there[(outer_node, inner_node)] = 1
+
+      Q[(outer_node, inner_node)] = inner_nodes[inner_node]
+          
+
+  for edge in Q:
+    p1 = edge[0]
+    p2 = edge[1]
+    
+    if set_container[p1] != set_container[p2]:
+      result_graph[p1][p2] = Q[edge]
+      result_graph[p2][p1] = Q[edge]
+      
+      set1 = set_container[p1]
+      set2 = set_container[p2]
+
+      for node in set2:
+        if not node in set1:
+          set1.append(node)
+
+      for node in set1:
+        set_container[node] = set1
+
+  return result_graph 
+
+
 
 def SciPy_KDTree(data, cutoff_distance):
   result = {}

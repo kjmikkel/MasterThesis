@@ -156,8 +156,13 @@ def make_and_print_graphs(point_list, name, cutoff_distance):
       only_points.append(entry[1])
      
     (graph, tree) = make_graph.SciPy_KDTree(only_points, cutoff_distance)
+    
     gabriel_graph = make_graph.gabriel_graph(copy.deepcopy(graph), tree)
+    
     rn_graph = make_graph.rn_graph(copy.deepcopy(graph))
+    
+    mst = make_graph.MST_Kruskal(copy.deepcopy(graph))
+
 
     start = open('graph-basis.tex', 'r')
     begin = start.read()
@@ -166,15 +171,18 @@ def make_and_print_graphs(point_list, name, cutoff_distance):
     graph_edge_list = make_edge_list(graph)
     gg_edge_list = make_edge_list(gabriel_graph)
     rng_edge_list = make_edge_list(rn_graph)
+    mst_edge_list = make_edge_list(mst)
     
     str_graph = tikz_graph(graph, graph_edge_list, point_to_name)
     str_gg_graph = tikz_graph(gabriel_graph, gg_edge_list, point_to_name)
     str_rng_graph = tikz_graph(rn_graph, rng_edge_list, point_to_name)
-    
+    str_mst = tikz_graph(mst, mst_edge_list, point_to_name)    
+
     begin += '\n\n'
     begin += '\\subfloat[The nomral graph]{\label{fig:norm_graph}\n' + str_graph +'}\n'
     begin += '\\subfloat[The Gabriel graph]{\label{fig:gg_graph}\n' + str_gg_graph + '}\n\n'
-    begin += '\\subfloat[The RNG graph]{\label{rng_graph}\n' + str_rng_graph + '}'
+    begin += '\\subfloat[The RNG graph]{\label{fig:rng_graph}\n' + str_rng_graph + '}'
+    begin += '\\subfloat[The MST]{\label{fig:mst}\n' + str_mst + '}'
 
     save = open('test.tex', 'w')
     save.write(begin)
@@ -189,6 +197,9 @@ def make_and_print_graphs(point_list, name, cutoff_distance):
     
     rn_graph_name = 'svg/RNG graph-' + name
     svg_graph(rn_graph_name, rn_graph, rng_edge_list, max_x, max_y, min_x, min_y)
+
+    mst_name = 'svg/MST-' + name
+    svg_graph(mst_name, mst, mst_edge_list, max_x, max_y, min_x, min_y) 
 
 
 def make_graph_from_list(str_list, name, cutoff_distance):
