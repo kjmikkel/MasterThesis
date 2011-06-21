@@ -642,6 +642,10 @@ Simulator instproc create-wireless-node args {
 	    GREEDY {
 		    set ragent [$self create-greedy-agent $node]
 	    }
+	    # GOPHER
+	    GOPHER {
+		    set ragent [$self create-gopher-agent $node]
+	    }
 	# insterted - to 
 		    DSR {
 			    $self at 0.0 "$node start-dsr"
@@ -866,6 +870,25 @@ Simulator instproc create-greedy-agent { node } {
 	$node addr $addr
 	$node set ragent_ $ragent
 	$self at 0.0 "$ragent start-greedy"    ;# start updates
+	return $ragent
+}
+# inserted - to
+
+# GOPHER
+Simulator instproc create-gopher-agent { node } {
+	# Create a greedy routing agent for this node
+	set ragent [new Agent/GOPHER]
+	# Setup address (supports hier-addr) for greedy agent
+	# and mobilenode
+	set addr [$node node-addr]
+	#$ragent addr $addr
+	$ragent node $node
+	if [Simulator set mobile_ip_] {
+		$ragent port-dmux [$node demux]
+	}
+	$node addr $addr
+	$node set ragent_ $ragent
+	$self at 0.0 "$ragent start-gopher"    ;# start updates
 	return $ragent
 }
 # inserted - to
