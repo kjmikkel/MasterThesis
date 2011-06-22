@@ -6,9 +6,13 @@ cp Makefile $NS_ROOT"/."
 
 cp packet.h $NS_ROOT"/common/."
 
+# routing folders are copied
 cp -rf gpsr $NS_ROOT
 cp -rf greedy $NS_ROOT
 cp -rf gopher $NS_ROOT
+
+# support folder is copied
+cp -rf support $NS_ROOT
 
 cp cmu-trace.h $NS_ROOT"/trace/."
 cp cmu-trace.cc $NS_ROOT"/trace/."

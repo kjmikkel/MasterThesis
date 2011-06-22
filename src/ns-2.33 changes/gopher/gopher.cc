@@ -1415,10 +1415,10 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			break;
 
 	    }
-		//// perhaps start here
+		
         
 		else {
-	        /*
+	        
 			// there seems to be no gopher neighbor
 			// we send a beacon request and delay the pkt the first time
 			// should the new info be of no use, we'll process it further
@@ -1547,7 +1547,7 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			} // if(use_peri)
 		
 			// no closer neighbor ! unforwardable; drop it.
-			*/
+			
 			/* 
 			   someday, we may want to queue up packets for 
 			   currently unforwardable destinations 

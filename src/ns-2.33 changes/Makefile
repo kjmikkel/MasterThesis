@@ -340,6 +340,9 @@ OBJ_CC = \
 	greedy/greedy.o\
         gopher/gopher.o\
 	\
+        support/point.o\
+        support/ellipsis.o\
+        \
 	$(OBJ_STL)
 
 

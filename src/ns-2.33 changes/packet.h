@@ -46,6 +46,7 @@
 #include "lib/bsd-list.h"
 #include "packet-stamp.h"
 #include "ns-process.h"
+#include "support/ellipsis.h"
 
 // Used by wireless routing code to attach routing agent
 #define RT_PORT		255	/* port that all route msgs are sent to */
@@ -263,7 +264,10 @@ public:
 		if (type == PT_DSR || 
 		    type == PT_MESSAGE || 
 		    type == PT_TORA || 
-		    type == PT_AODV)
+		    type == PT_AODV ||
+                    type == PT_GPSR ||
+                    type == PT_GREEDY ||
+                    type == PT_GOPHER)
 			return ROUTING;		
 		if (type == PT_TCP || 
 		    type == PT_TELNET || 
@@ -492,6 +496,8 @@ protected:
 public:
 	Packet* next_;		// for queues and the free list
 	static int hdrlen_;
+
+        static Ellipsis ellipse;      // The ellipsis that the packet has to keep inside
 
 	Packet() : bits_(0), data_(0), ref_count_(0), next_(0) { }
 	inline unsigned char* const bits() { return (bits_); }
