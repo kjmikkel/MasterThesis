@@ -7,7 +7,7 @@ if cmd_folder not in sys.path:
 import make_graph, dijkstra
 
 max_values = 500
-number_of_points = 10000
+number_of_points = 1000
 cutoff_distance = 20
 num_graphs = 500
 pr_graph_test = 100
@@ -57,10 +57,26 @@ def generate_point_sets(num_pointset):
   random.seed()
 	
   for num in range(0, num_pointset):
+    # We must ensure that all points are uniqe
+    used_points = {}
+
+    if num % 10 == 0 and num > 0:
+      print 'Made ' + str(num) + ' pointsets' 
     	  	   
     for i in range(0, number_of_points):
-      entry = (random.randint(0, max_values), random.randint(0, max_values))
-      data.append(entry)
+
+      not_used = False
+      while not not_used:
+        x = random.randint(0, max_values)
+	y = random.randint(0, max_values)
+        
+        if used_points.get((x, y)) == None:
+          used_points[(x, y)] = 1
+          
+          not_used = True
+
+          entry = (x, y)
+          data.append(entry)
     
     file_name = point_set_location + str(num + 1)
     save_pickle_file(file_name, data)
@@ -71,6 +87,9 @@ def profiling():
 
 def generate_graphs(num):
   for graph_index in range(0, num):
+    
+    if graph_index % 10 == 0 and graph_index > 0:
+      print 'Made ' + str(graph_index) + ' graphs' 
     
     file_name = point_set_location + str(graph_index + 1)
     new_data = load_pickle_file(file_name)
@@ -131,8 +150,11 @@ def do_actual_test(graph, node_pairs):
   
   return results
 
-
 generate_point_sets(num_graphs)
+print "Generated Pointsets"
+
 generate_graphs(num_graphs)
+print "Made graphs"
+
 perform_test(num_graphs, pr_graph_test)
 os.system('pm-hibernate')
