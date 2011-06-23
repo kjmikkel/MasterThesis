@@ -2,19 +2,22 @@
 \usepackage{mikkel}
 \usepackage[ruled, vlined]{algorithm2e}
 \input comment.sty
-
 \excludecomment{planar-footnote}
 
 \title{Energy Affluent Mobile Ad-Hoc Networks}
 \author{Mikkel Kj\ae r Jensen}
 \date{\today}
 \begin{document}
-
 \pagestyle{fancy}
 
 \maketitle
 \abstract{
-\todo{Write abstract}
+A \manet is a network of moving nodes that without intervention of humans can route messages between nodes, given that the nodes are in proximity of each other, or there is a path of nodes in proximity of each other. 
+
+In this thesis I will give an overview of the basic requirements for implementing a \manet and suggest many already existing solutions that forfills these requirements. 
+
+Furthermore I will give a performence evaluation of several routing algorithms using the ns-2.33 network simulator and the \hls.
+\todo{Improve abstract}
 }
 \listoffixmes
 \tableofcontents
@@ -23,11 +26,13 @@
 \include{fundamentals}
 \include{graph_overview}
 \include{routing}
-\include{network_simulators}
-\include{test_description}
+%\include{network_simulators}
+%\include{test_description}
+%\include{test_results}
+%\include{discussion}
+%\include{conclusion}
 
 \bibliographystyle{plain}
 \bibliography{references}{}
-
 
 \end{document}
