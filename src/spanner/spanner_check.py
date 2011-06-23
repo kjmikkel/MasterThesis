@@ -6,15 +6,26 @@ if cmd_folder not in sys.path:
 
 import make_graph, dijkstra
 
-max_values = 50
-number_of_points = 1000
-cutoff_distance = 5
-num_graphs = 10
-pr_graph_test = 10
+max_values = 500
+number_of_points = 10000
+cutoff_distance = 20
+num_graphs = 500
+pr_graph_test = 100
 
-non_planar_f = 'Graphs/Non-planar/graph_'
-gabriel_graph_f = 'Graphs/Gabriel graphs/gg_graph_' 
-rng_f = 'Graphs/RNG graphs/rng_graph_'
+
+point_set_location = "Pointsets/pointset_"
+
+non_planar_placement = 'Non-planar/graph_'
+gg_placement = 'Gabriel graphs/gg_graph_'
+rng_placement = 'RNG graphs/rng_graph_'
+
+non_planar_f = 'Graphs/' + non_planar_placement
+gabriel_graph_f = 'Graphs/' + gg_placement 
+rng_f = 'Graphs/' + rng_placement
+
+results_non_location = 'Results/' + non_planar_placement
+results_gg_location = 'Results/' + gg_placement
+results_rng_location = 'Results/' + rng_placement
 
 def load_pickle_file(file_name):
   result = None
@@ -51,7 +62,7 @@ def generate_point_sets(num_pointset):
       entry = (random.randint(0, max_values), random.randint(0, max_values))
       data.append(entry)
     
-    file_name = "Pointsets/pointset_" + str(num + 1)
+    file_name = point_set_location + str(num + 1)
     save_pickle_file(file_name, data)
 
 def profiling():
@@ -61,7 +72,7 @@ def profiling():
 def generate_graphs(num):
   for graph_index in range(0, num):
     
-    file_name = "Pointsets/pointset_" + str(graph_index + 1)
+    file_name = point_set_location + str(graph_index + 1)
     new_data = load_pickle_file(file_name)
     #new_data = [(old_entry[0], old_entry[1]) for old_entry in data]
  
@@ -76,7 +87,11 @@ def generate_graphs(num):
 
 def perform_test(num, number_tests):
   for graph_index in range(0, num):
-    non_planar_graph = load_pickle_file(non_planar_f + str(graph_index + 1))
+    node_pairs_to_check = []
+
+    index_str = str(graph_index + 1)
+    non_planar_graph = load_pickle_file(non_planar_f + index_str)
+
     nodes = non_planar_graph.keys()
 
     random.seed()
@@ -90,14 +105,34 @@ def perform_test(num, number_tests):
 
       start_node = nodes[from_index]
       end_node = nodes[to_index]
+      node_pairs_to_check.append((start_node, end_node))
+    
+    # We perform the actual tests
+    non_planar_results = do_actual_test(non_planar_graph, copy.deepcopy(node_pairs_to_check))
+    save_pickle_file(results_non_location + index_str, non_planar_results)
 
-      (D, P, Path) = Dijkstra.shortestPath(non_planar_graph, start_node, end_node)
-      print Path, D[end_node]
+    gabriel_graph = load_pickle_file(gabriel_graph_f + index_str)    
+    gabriel_graph_results = do_actual_test(non_planar_graph, copy.deepcopy(node_pairs_to_check))
+    save_pickle_file(results_gg_location + index_str, gabriel_graph_results)
 
-      (D, P, Path) = Dijkstra.shortestUnitPath(non_planar_graph, start_node, end_node)
-      print Path, D[end_node]
+    rn_graph = load_pickle_file(rng_f + index_str)
+    rn_graph_results = do_actual_test(rn_graph, copy.deepcopy(node_pairs_to_check))
+    save_pickle_file(results_rng_location + index_str, rn_graph_results)
+    
+def do_actual_test(graph, node_pairs):
+  results = []
+  for pair in node_pairs:
+    (start_node, end_node) = pair 
+    
+    (D, P, Path) = dijkstra.shortestPath(graph, start_node, end_node)  
+    (D_unit, P_unit, Path_unit) = dijkstra.shortestUnitPath(graph, start_node, end_node)
+
+    results.append((D, P, Path, D_unit, P_unit, Path_unit))
+  
+  return results
 
 
-#generate_point_sets(1)
-#generate_graphs(1)
-perform_test(1, 1) #pr_graph_test)
+generate_point_sets(num_graphs)
+generate_graphs(num_graphs)
+perform_test(num_graphs, pr_graph_test)
+os.system('pm-hibernate')
