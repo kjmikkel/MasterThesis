@@ -1,0 +1,37 @@
+This folder contains the support files needed for both the visualisation and the spanner comparison
+
+==================
+Requirements:
+==================
+In order to run any of the python scripts in this folder you must have Python 2.6.5 (or compatible) installed.
+
+If you want to run make_graph.py you will also have to have  installed SciPy 0.9 and NumPy 1.0.4 or at least a compatible version that supports kDTrees.
+
+==================
+make_graph.py: 
+==================
+
+The Python script used to create graphs from lists of 2-dimensional points. In order to simulate the limited range of mobile nodes, each node will only be able to connect to a node if it is within a certain distance (which is one of the call parameters).
+
+In the follwoing let d_max be the maximum distance and let |vu| be the distance between v and u.
+
+The three graphs the script can create are:
+* Non-planar graphs: In this instance there is an edge between two nodes v and u iff |vu| < d_max. This is the closest a mobile ad-hoc networks comes to the complete graph.
+
+* Gabriel Graph: Two points v and u share an edge iff there is no point q that lies within the disc formed by their midpoint m with the radius |vu|/2, or in other words iff  . The Gabriel Graph is a subset of of the Non-planar graph above
+
+* Relative Neighbourhood Graph: Two points v and u share an edge iff there is no point q such that |vq|, |uq| <= |vu|. The Relative Neighbourhood graph is a subset the Gabriel Graph.
+
+==================
+dijkstra.py: 
+==================
+
+dijkstra.py contains an implementation of Dijkstra's shortest path algorithm. It is origionally implemented by David Eppstein and the origional can be found at http://code.activestate.com/recipes/119466-dijkstras-algorithm-for-shortest-paths/?in=user-218935
+
+The file has been modified in order to support unit weights graphs, without having to copy or modify the graph, and to make the shortest path function more modular.
+
+==================
+priodict.py: 
+==================
+
+priodict.py is a implementation of the Priority Dictionary. It was origionally implemented by David Eppstein, and can be found http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/117228 . It has not been modified.

@@ -2,8 +2,11 @@ from scipy.spatial import KDTree
 import math, copy
 from priodict import priorityDictionary
 
-# DO NOT USE
 def brute_force(data, cut_off):
+  """
+  !DO NOT USE! - The brute-force method is way to slow for larger pointsets
+  Find the list of lists of points that are equal or less than cut_off distance away from each other
+  """
   result = {}
   for point in data:
     local_result = []
@@ -19,60 +22,67 @@ def brute_force(data, cut_off):
   return result
 
 def find_distance(p1, p2):
-    x_distance = abs(p1[0] - p2[0])
-    y_distance = abs(p1[1] - p2[1])
+  """
+  Find the distance between points in the euclidean space - nothing revolutionary
+  """
+  x_distance = abs(p1[0] - p2[0])
+  y_distance = abs(p1[1] - p2[1])
     
-    euclidian_distance = math.sqrt(x_distance * x_distance + y_distance * y_distance)
-    return euclidian_distance
+  euclidian_distance = math.sqrt(x_distance * x_distance + y_distance * y_distance)
+  return euclidian_distance
+
 
 def find_midpoint(p1, p2):
-    min_x = min(p1[0], p2[0])
-    min_y = min(p1[1], p2[1])
+  """
+  Returns the point that are placed half-way between p1 and p2 on their line-segment
+  """
+  min_x = min(p1[0], p2[0])
+  min_y = min(p1[1], p2[1])
 
-    max_x = max(p1[0], p2[0])
-    max_y = max(p1[1], p2[1])
+  max_x = max(p1[0], p2[0])
+  max_y = max(p1[1], p2[1])
 
-    mid_x = min_x + (max_x - min_x)/2
-    mid_y = min_y + (max_y - min_y)/2
+  mid_x = min_x + (max_x - min_x)/2
+  mid_y = min_y + (max_y - min_y)/2
 
-    return (mid_x, mid_y)
+  return (mid_x, mid_y)
 
-def add_neighbour(n_dict, main_pt, sec_pt):
-    neighbours = n_dict.get(main_pt)
-                
-    if neighbours == None:
-        n_dict[main_pt] = [sec_pt]
-    else:
-        neighbours.append(sec_pt)
 
 def gabriel_graph_old(edges, neighbours_dict):
-    print 'All edges:', len(edges)
+  """
+  The old version of the gabriel graph code - this version does not use the kDTree code, but rather uses an already existing graph and then eliminates the edges where a node exist in the disc
+  """
+  print 'All edges:', len(edges)
     
-    keys = neighbours_dict.keys()
-    for key in keys:
-        neighbours = neighbours_dict[key]
-        edges_remove = []
-        outer_index = 0
-        for v in neighbours:            
-            mid_point = find_midpoint(key[1], v[1])
+  keys = neighbours_dict.keys()
+  for key in keys:
+    neighbours = neighbours_dict[key]
+    edges_remove = []
+    outer_index = 0
+    for v in neighbours:            
+      mid_point = find_midpoint(key[1], v[1])
             
-            for w in neighbours:
-                if v == w:
-                    continue
+      for w in neighbours:
+        if v == w:
+          continue
 
-                if find_distance(mid_point, w[1]) < find_distance(key[1], mid_point):
-                    edges_remove.append((key, v))
-                    break
+        if find_distance(mid_point, w[1]) < find_distance(key[1], mid_point):
+          edges_remove.append((key, v))
+          break
 
-        if len(edges_remove) > 0:
-            for edge in edges_remove:
-                if edge in edges:
-                    edges.remove(edge)
+  if len(edges_remove) > 0:
+    for edge in edges_remove:
+      if edge in edges:
+        edges.remove(edge)
         
-    print 'Changed edges:', len(edges)
-    return edges
+  print 'Changed edges:', len(edges)
+  return edges
 
 def gabriel_graph(old_graph, kd_tree):
+  """
+  The new version of the Gabriel Graph algorithm which uses the kd-tree to create the edges, instead of removing them
+  """
+
   graph = {}
     
   nodes = old_graph.keys()
@@ -96,30 +106,36 @@ def gabriel_graph(old_graph, kd_tree):
   return graph
 
 def rng_graph_old(edges, neighbours_dict):
-    print 'All edges:', len(edges)
+  """
+  The old version of the Relative Neighbourhood graph, which removes edges that should not be in the neighbourhood graph - 
+  """
+  print 'All edges:', len(edges)
     
-    keys = neighbours_dict.keys()
-    for key in keys:
-        neighbours = neighbours_dict[key]
-        edges_remove = []
-        for v in neighbours:
-            for w in neighbours:
-                if v == w:
-                    continue
+  keys = neighbours_dict.keys()
+  for key in keys:
+    neighbours = neighbours_dict[key]
+    edges_remove = []
+    for v in neighbours:
+      for w in neighbours:
+        if v == w:
+          continue
 
-                if find_distance(key[1], v[1]) > max(find_distance(key[1], w[1]), find_distance(v[1], w[1])):
-                    edges_remove.append((key, v))
-                    break
+        if find_distance(key[1], v[1]) > max(find_distance(key[1], w[1]), find_distance(v[1], w[1])):
+          edges_remove.append((key, v))
+          break
 
-        if len(edges_remove) > 0:
-            for edge in edges_remove:
-                if edge in edges:
-                    edges.remove(edge)
+  if len(edges_remove) > 0:
+    for edge in edges_remove:
+      if edge in edges:
+        edges.remove(edge)
         
-    print 'Changed edges:', len(edges)
-    return edges
+  print 'Changed edges:', len(edges)
+  return edges
 
 def rn_graph(old_graph):
+  """
+  Current implementation of the Relative Neighbourhood Graph, still based on the old graph, but this version should be faster
+  """
   graph = {}    
   for u in old_graph:
     local_graph = {}	
@@ -141,12 +157,10 @@ def rn_graph(old_graph):
           continue
         
         if distance_to_v > max(find_distance(u, w), find_distance(v, w)):
-#neighbours_to_v.get(w):
           add_edge = False
           break
       
       if add_edge:
-        print 'add edge: ' + str(u) + ' ' + str(v) 
         local_graph[v] = distance_to_v
     
     graph[u] = local_graph
@@ -154,10 +168,12 @@ def rn_graph(old_graph):
   return graph
 
 
-"""
-An implementation of Kruskal and prim's algorithm
-"""
+
 def MST_Kruskal(graph):
+  """
+  An implementation of Kruskal and Prim's Minimum Spanning tree algorithm - implemented after the description in Cormen
+  """
+
   result_graph = {}
   set_container = {}
 
@@ -182,7 +198,6 @@ def MST_Kruskal(graph):
 
       Q[(outer_node, inner_node)] = inner_nodes[inner_node]
           
-
   for edge in Q:
     p1 = edge[0]
     p2 = edge[1]
@@ -206,11 +221,15 @@ def MST_Kruskal(graph):
 
 
 def SciPy_KDTree(data, cutoff_distance):
+  """
+  The kDTree is used to create the "complete"-moblie ad-hoc graph
+  """
   result = {}
   tree = KDTree(data)
 
   # Now we make the actuall graph
   neighbors = tree.query_ball_point(data, cutoff_distance)
+ 
   for entry_num in range(0, len(data)):
     point = data[entry_num]
     local_neighbors = neighbors[entry_num]
