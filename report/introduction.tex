@@ -22,31 +22,23 @@ Preferably we would like to have these \manet connected to the Internet, but thi
 \todo{finish this section and tighten it up}
 
 \subsection{Expectations to the Reader}
-I expect the reader to have a university level understanding of Computer Networking\footnote{For instance having read \cite{ComNet} or similar}, especially when it comes to understanding the building blocks of the network stack, as well as the most common problems with wireless networks. I also expect the reader to have a university level understanding of Algorithms\footnote{Having read \cite{algo} or similar}. \todo{Give this a few extra passes}
+I expect the reader to have a university level understanding of Computer Networking\footnote{For instance having read \cite{ComNet} or similar}, especially when it comes to understanding the building blocks of the network stack, as well as the most common problems with wireless networks. I also expect the reader to have an university level understanding of Algorithms\footnote{Having read \cite{algo} or similar} and graph theory.
 
 \subsection{Scope and Limitations}
-While important in a real world application, I will in this thesis not concern myself with security, neither in the form of the authentication, anonymity of the sender or [something about rooting I think it might be possible]. For a treatment of this subject see \cite{trustedRouting}. Furthermore, if there does not exist a path between two nodes, I will not make any guarantee that the message will ever arrive at the sink. I will furthermore assume that all nodes have the same broadcast radius. \todo{finish this}
+While important in a real world application, I will in this thesis not concern myself with security, neither in the form of the authentication, anonymity of the sender or ensuring that the individual nodes are not misbehaving, or behaving maliciously. For a treatment of security see \cite{trustedRouting}. Furthermore, if there does not exist a path between two nodes, I will not make any guarantee that the message will ever arrive at the sink. I will furthermore assume that all nodes have the same broadcast radius unless otherwise mentioned.
 
-\hide{
-\subsection{Node specifications}
-It is clear that the properties of the mobile nodes in the system are going to influence the nature of the solution, I will therefore in this section define the specifications of the nodes I will work on in this project. The factors that I deem to be important are: 
+\subsection{Anatomy of the solution}
+A real-life implementation of a Mobile Ad-Hoc Network will need the following elements:
 \begin{description}
-\item[Power:] How much does each node have? Can their supply be recharged?
-\item[Mobility:] How mobile are the nodes? How fast can they move, and what can we expect their movement pattern to be? Can the nodes only realistically be integrated in a vehicles, or can a person be expected to carry them around on their person?
-\item[(something - forgot what)]
-\item[Amount of data to transmit\todo{Find better name than amount of data to transmit}:] 
+\item[Routing protocol:] The routing from of a message from a source to the sink.
+\item[Routing graph:] The logical graph that the messages are routed through.
+\item[Connectivity graph:] The underlying graph that the routing graph is a subset of.
+\item[Transport protocol:] TCP, UDP or custom protocol.
 \end{description}
 
-As noted in section~\todo{find section where I mention power for the first time}, I would in this project like to look at power affluent devices, i.e. devices that either has access to large amounts of energy, or which has an adequate amount of energy, but which can easily be recharged. In this project I pick latter version, on the ground that such an arrangement is more realistic for a mobile device, and the setting it is going to be used in\footnote{It is unlikely that a Smart Phone will be able to transmit for 10 hours straight, or that the average user is going to transport a large capacity battery.}. In such a situation it is clear that my solution must be able to handle that nodes can suddenly disappear from the network from one moment to the next.
+Some solutions \todo{give example} that requires a specific routing protocol and routing graph to work in tandem.
 
-Concerning mobility I think the most interesting movement pattern would be people moving within streets or within buildings. I can justify this by the fact that 
-}
-
-
-\hide{
-\subsection{Anatomy of the solution}
-
-A real-life implementation of a Mobile Ad-Hoc Network will need the following elements
+More specificly the following questions will have to be answered:
 
 \begin{description}
 \item[Entering and Merging networks:] When a node enters a new network, it needs to inform the network of its presence. Furthermore, when the node is already part of a secondary network (none of which are in the first network), then the networks need to be merged together.  
@@ -59,20 +51,15 @@ Are the nodes going to use their position from a GPS system, or are they going t
 \item[Hierarchy:] Whether or not the nodes are going to route through levels of so-called \emph{cluster nodes} that will service numerous nodes.
 \end{description} 
 
-Furthermore, for the simulation we will have to decide upon a movement model (or find a number of real world traces we find representative) to test the effectiveness of solution. In this thesis I have decided to include \todo{decide upon which of these levels that I am going to implement, and which I will just assume have been solved}
+In order to simulate and asses the worth of any simulation, several question will have to be answered, such as how the radio waves propagate and a movement model (or find a representative movement trace) to test the effectiveness of the solution. 
 
-\subsection{Goals}
-In this section I will state the goals I will work toward in my this project:
-
-\begin{description}
-\item[Fairness:] Although I in this project assume that the devices in the Mesh network has plenty of power, I will still strive to ensure that the communication load across the network is somewhat fairly distributed. There are several reasons for this. Even if we assume that the devices that makes up the network can easily be recharged, extensive use of a node may deplete its current energy stores, and make it fall of the network. On the bandwidth side of the equation, it is likely a user will opt to retract his device from the network if he finds it is unable or slow to transmit even small messages (which might be the case if his device is heavily used by the network). Even with such a fairness system in place, unfair situations might still occur --- like when a single node becomes the bottleneck between 2 node clusters. 
-\item[make more goals] \todo{add more goals or more this}
-\end{description}
+In this thesis I have decided to focus on the routing protocol and the routing graph, and rely on already established standards to take care of the lower parts of the problem.
 
 \subsection{Background Material Used}
 For this project I have read the following articles for background information: ``A Survey on Wireless Mesh Networks'' \cite{martinWirelessSurvey}, ``Mesh networks: commodity multihop ad hoc networks''\cite{martinMeshnetwork} \todo{continue to include the articles you have read and are useful, but that have not been included directly}
 
 \subsection{Source Code and Test Data}
+\label{section:source_code}
 The source code, report and test data can be found in my GitHub repository at \url{https://github.com/kjmikkel/MasterThesis} and is released under the \todo{add license the stuff is released under}.
 
 \subsection{Overview}
@@ -84,8 +71,7 @@ In this section I give a quick overview of what the different sections in report
 \item[Section \ref{section:routing_algorithms}] Description of some of the many types of routing algorithms that exist, as well as the problems we have to solve in order to have a mobile ad-hoc network.
 \item[Section \ref{section:network_simulators}] Discussion of the choice of network simulator that I will perform my tests with. 
 \item[Section \ref{section:test_description}] Discussion of which graph algorithms are to be used and which combinations of parameters are to be tested.
-\item[Section - ] Presentation of the test results
-\item[Section - ] Discussion of the test results
-\item[Section - ] Conclusion and wrap-up.
+\item[Section \ref{section:test_results}] Presentation of the test results
+\item[Section \ref{section:discussion}] Discussion of the test results
+\item[Section \ref{section:conclusion}] Conclusion and wrap-up of the results.
 \end{description}
-}\todo{give it a pass more to see if it can be improved}
