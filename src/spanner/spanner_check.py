@@ -53,12 +53,12 @@ def save_json_file(file_name, data):
     json.dumps(data, f)
 
 def generate_point_sets(num_pointset):
-  data = []
   random.seed()
 	
   for num in range(0, num_pointset):
     # We must ensure that all points are uniqe
     used_points = {}
+    data = []
 
     if num % 10 == 0 and num > 0:
       print 'Made ' + str(num) + ' pointsets' 
@@ -86,7 +86,10 @@ def profiling():
   cProfile.run('SciPy_KDTree(k_data,cutoff_distance)', sort=1)
 
 def generate_graphs(num):
-  for graph_index in range(0, num):
+  generate_graphs(0, num)
+
+def generate_graphs(from_num, num):
+  for graph_index in range(from_num, num):
     
     if graph_index % 10 == 0 and graph_index > 0:
       print 'Made ' + str(graph_index) + ' graphs' 
@@ -94,7 +97,7 @@ def generate_graphs(num):
     file_name = point_set_location + str(graph_index + 1)
     new_data = load_pickle_file(file_name)
     #new_data = [(old_entry[0], old_entry[1]) for old_entry in data]
- 
+
     (normal_graph, tree) = make_graph.SciPy_KDTree(new_data,cutoff_distance)
     save_pickle_file(non_planar_f + str(graph_index + 1), normal_graph)   
 
@@ -150,11 +153,31 @@ def do_actual_test(graph, node_pairs):
   
   return results
 
-generate_point_sets(num_graphs)
+def do_graph_profile():
+
+    cProfile.run('make_graph.gabriel_graph(normal_graph, tree)', sort=1)
+    cProfile.run('make_graph.rn_graph(normal_graph)', sort=1)
+
+#generate_point_sets(num_graphs)
 print "Generated Pointsets"
 
-generate_graphs(num_graphs)
-print "Made graphs"
+#try:
+#  import psyco
+#  psyco.full()
+#except ImportError:
+#  exit
+"""
+file_name = point_set_location + '1'
+new_data = load_pickle_file(file_name)
+
+(normal_graph, tree) = make_graph.SciPy_KDTree(new_data, cutoff_distance)
+print 'Made graph'
+ 
+do_graph_profile()
+"""
+
+#generate_graphs(0, num_graphs)
+#print "Made graphs"
 
 perform_test(num_graphs, pr_graph_test)
 os.system('pm-hibernate')

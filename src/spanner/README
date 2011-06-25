@@ -1,0 +1,28 @@
+pThis README explains the files and folders that lies in this directory.
+
+==================
+check_spanner.py: 
+==================
+check_spanner.py contains the code needed to generate the pointsets, the graphs, generate the results, do the statistics and generate the LaTeX tables. 
+
+Requirements:
+In order to run the check_spanner.py you must have Python 2.6.5 (or compatible) installed, as well as having installed SciPy 0.9 and NumPy 1.0.4
+
+==================
+Pointsets folder:
+==================
+The Pointsets folder contains the files that contains the pointsets that the graphs in the Graphs folder have been constructed from. The files are all binery files made by pickleing an list of 1000 points. Each point are represented as a tuple (x, y). The files are all named in the format 'pointset_x' where 1 <= x <= 500.
+
+==================
+Graphs folder:
+==================
+The Graphs folder contains 3 subfolders: 'Non-planar', 'Gabriel graphs' and 'RNG graphs'. Each of these folders contains the binery pickled versions of the respective graphs. Each graph is represented as a directory with the format {first_node: {second_node: distance}} where first_node and second_node are neighbors (i.e. shares an edge) in the graph, and distance being the distance between the nodes.
+
+The files are all named in the format 'graph_x', 'gg_graph_x' 'rng_graph_x', where 1 <= x <= 500
+
+==================
+Results folder:
+==================
+The Results folder contains 3 subfolders: 'Non-planar', 'Gabriel graphs' and 'RNG graphs'. Each of these folders contains the binery pickled versions of the results from the respective graphs. Each result contains a list of shortest path computed using Dijkstra's algorithm and each entry uses the following scheme: (dw, pw, Pathw, du, pu, Pathu), where dw and du are the distance matrices, pw and pu are the predecesor matricies and Pathw and Pathu are the actual nodes the path passes through. The first half of the entry (the ones with a 'w' at the end) are from the weighted graph (based on the euclidian distance between the two points in the ege), while the last half of the entry (the ones with the 'u' at the end) are from the unit graph. 
+
+The files are all named in the format 'graph_x', 'gg_graph_x' 'rng_graph_x', where 1 <= x <= 500
