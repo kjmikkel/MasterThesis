@@ -42,8 +42,8 @@ def find_midpoint(p1, p2):
   max_x = max(p1[0], p2[0])
   max_y = max(p1[1], p2[1])
 
-  mid_x = min_x + (max_x - min_x)/2
-  mid_y = min_y + (max_y - min_y)/2
+  mid_x = min_x + (abs(max_x - min_x) * 1.0) / 2.0
+  mid_y = min_y + (abs(max_y - min_y) * 1.0) / 2.0
 
   return (mid_x, mid_y)
 
@@ -95,12 +95,12 @@ def gabriel_graph(old_graph, kd_tree):
         continue            
       mid_point = find_midpoint(u, v)
       distance_to_v = old_graph[u][v]
-      mid_point_radius = distance_to_v / 2            
-
+      mid_point_radius = (distance_to_v * 1.0)  / 2.0
+    
       close_nodes = kd_tree.query_ball_point(mid_point, mid_point_radius)      
-     
-      if len(close_nodes) <= 2:
-        local_edges[v] = distance_to_v            
+         
+      if len(close_nodes) == 2:
+        local_edges[v] = distance_to_v   
     
     graph[u] = local_edges    
   return graph
