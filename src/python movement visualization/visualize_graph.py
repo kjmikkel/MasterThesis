@@ -190,7 +190,7 @@ def make_and_print_graphs(point_list, name, cutoff_distance):
   str_mst = tikz_graph(mst, mst_edge_list, point_to_name)    
 
   begin += '\n\n'
-  begin += '\\subfloat[The nomral graph]{\label{fig:norm_graph}\n' + str_graph +'}\n'
+  begin += '\\subfloat[The normal graph]{\label{fig:norm_graph}\n' + str_graph +'}\n'
   begin += '\\subfloat[The Gabriel graph]{\label{fig:gg_graph}\n' + str_gg_graph + '}\n\n'
   begin += '\\subfloat[The RNG graph]{\label{fig:rng_graph}\n' + str_rng_graph + '}'
   begin += '\\subfloat[The MST]{\label{fig:mst}\n' + str_mst + '}'
@@ -232,14 +232,49 @@ def load_pickle_file(file_name):
     result = pickle.load(f)
   return result
 
-#make_graph_from_list('{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}', 'peterson', 4)
+def graph_examples():
+  point_list = []
+  random.seed()
+  num_points = 75
+  max_size = 75
+  
+  point_dict = {}
 
+  for index in range(0, num_points):
+    new_point = False
+   
+    while not new_point:
+      x = random.randint(0, max_size)
+      y = random.randint(0, max_size)
+      point = (x, y)
+      if not point_dict.get(point):
+        point_dict[point] = 1
+        point_list.append(point)
+        new_point = True
+  
+  point_list = give_points_names(point_list)
+  make_and_print_graphs(point_list, 'example', 20)
+
+def gateway_graphs():
+  point_list = [0.75]
+    
+
+"""
+make_graph_from_list('{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}', 'peterson', 4)
+"""
+
+"""
 points = load_pickle_file('/home/mikkel/Documents/MasterThesis/src/spanner/Pointsets/pointset_1')
-
 point_list = give_points_names(points)
-#print point_list
 make_and_print_graphs(point_list, 'check', 20)
+"""
 
-#cutoff_distance = 20
-#read_dir(dir_list, 'test', cutoff_distance)
+"""
+cutoff_distance = 20
+read_dir(dir_list, 'test', cutoff_distance)
+"""
+
+"""
+graph_examples()
+"""
 

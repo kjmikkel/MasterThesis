@@ -1,4 +1,4 @@
-import os, sys, cProfile, pstats, random, copy, math, json, pickle
+import os, sys, cProfile, pstats, random, copy, math, json, pickle, psyco
 
 cmd_folder = os.path.dirname(os.path.abspath(__file__)) + '/../graph_support'
 if cmd_folder not in sys.path:
@@ -158,19 +158,20 @@ def generate_graphs(from_num, num):
     if graph_index % 10 == 0 and graph_index > 0:
       print 'Made ' + str(graph_index) + ' graphs' 
     
-    file_name = point_set_location + str(graph_index + 1)
+    index_str = str(graph_index + 1)
+
+    file_name = point_set_location + index_str
     new_data = load_pickle_file(file_name)
-    #new_data = [(old_entry[0], old_entry[1]) for old_entry in data]
 
     (normal_graph, tree) = make_graph.SciPy_KDTree(new_data,cutoff_distance)
-    save_pickle_file(non_planar_f + str(graph_index + 1), normal_graph)   
+    save_pickle_file(non_planar_f + index_str, normal_graph)   
 
     gabriel_graph = make_graph.gabriel_graph(copy.deepcopy(normal_graph), tree)
-    save_pickle_file(gabriel_graph_f + str(graph_index + 1), gabriel_graph)
+    save_pickle_file(gabriel_graph_f + index_str, gabriel_graph)
 
     rng_graph = make_graph.rn_graph(copy.deepcopy(normal_graph))
-    save_pickle_file(rng_f + str(graph_index + 1), rng_graph)
-
+    save_pickle_file(rng_f + index_str, rng_graph)
+        
 def perform_test(num, number_tests):
   for graph_index in range(0, num):
     
@@ -333,16 +334,13 @@ generate_point_sets(num_graphs)
 print "Generated Pointsets"
 """
 
-"""
 generate_graphs(0, num_graphs)
 print "Made graphs"
-"""
 
 perform_test(num_graphs, pr_graph_test)
 print 'Done results'
 
-
-analyse_results(10)
+analyse_results(num_graphs)
 print 'Analysed results'
 
 
