@@ -55,7 +55,7 @@ To complicate matter further different nodes can have different communications r
 Likewise it is important to remember that a node in practise might be able to adjust its communications range (at a higher energy cost). See figure~\ref{fig:different_radius}\todo{improve this}.
 
 \subsection{Two-Level graphs}
-\tikfig{gateway-node}{Node $s$ and $t$ are the source and the sink respectively, the rectangular nodes with $CH$ are the Cluster heads and the diamond nodes are the gateway nodes. From the image we can see that the message travels from the  }
+\tikfig{gateway-node}{Node $s$ and $t$ are the source and the sink respectively, the rectangular nodes with $CH$ are the Cluster heads and the diamond nodes are the gateway nodes. From the image we can see that the message travels from the source to the header, between the gateways and then to the second header and then lastly to the sink. It is also clear that it would have been faster to go from the gateway and then to the sink, but since the gateway in this model does not know the location of the different nodes, this is impossible in this model.}
 
 \label{cluster methods}
 Node Clustering is a hierarchical alternative to the flat graph. Instead of having every node being the same, a number of nodes are made into \ch such that all nodes in the graph has 1 cluster head that they communicate with. Most of the time the nodes that belong to a certain \ch is its one-hop neighbours, but there are also schemes that allows nodes to have a clustered that is farther away, in order to reduce the number of \ch. With \ch a layer specialisation and hierarchy is added to the network, which reduces the complexity of an otherwise entirely flat network, while still retaining some decentralisation.
@@ -100,7 +100,6 @@ When trying to apply spanners to \manet we have to remember that each node has a
 
 \todo{make figure of limited-range spanner}
 
-
 Due to lack of empirical data I have tested the   500 point-sets with 1000 nodes in a 500 by 500 plane and a transmission range of 20. I have tested the spanner by producing 3 different graphs: The non-planar maximum graph \todo{define this before this point}, the \gabe and the \rng. For each point-set I have generated 10 different pairs of nodes, and then checked the distance and number of nodes between them (both having the weight of the edges being proportional to their length, but also where each edge costs the same --- the unit graph) for all three graphs. 
 
 I will use the non-planar maximum graphs as the benchmark that I will hold the other two graph types up against. I will record shortest, longest and average number of nodes the message has to be transported through, and the number of lost paths (i.e. paths that existed in the more complete graph of the point-set, but isn't present in this graph). 
@@ -109,4 +108,15 @@ Since there is no guarantee that two nodes will be connected in any of the graph
 
 If there is no path between a pair in the non-planar graph, then there cannot be a path between the pair in either the \gabe or the \rng, as these are sub-graphs of the non-planar graph, I will ignore it. However, if there is a path in the path between a pair in the non-planar graph, but none in either the \gabe or the \rng, then I will record a miss for that graph, since it is an obvious detriment. 
 
-The python scrips I used to generate and tests the graphs can be found in the \texttt{src/spanner/spanner\_check.py} along with the data (see the README for explanation) and \texttt{src/spanner/graph\_support} in the GitHub repository refereed to in section~\ref{section:source_code} on p.~\pageref{section:source_code}. All requirements in the code is mentioned in the README file.
+The python scrips I used to generate and tests the graphs can be found in the \texttt{src/spanner/spanner\_check.py} along with the data (see the README for explanation) and \texttt{src/spanner/graph\_support} in the GitHub repository refereed to in section~\ref{section:source_code} on p.~\pageref{section:source_code}. All requirements in the code is mentioned in the README file.\\
+
+The non-planar maximum graph:
+\input{results/spanner/graph_results.tex}\\
+
+The Gabriel Graph:
+\input{results/spanner/gg_results.tex}\\
+
+The RNG:
+\input{results/spanner/rng_results.tex}
+
+It is very curios to note that all the reults are exactly the same. Unless we are dealing with an error in the scripts making it, we must conclude that we in we practice does not have a longer route if we use a planar graph instead of a non-planar maximum graph.
