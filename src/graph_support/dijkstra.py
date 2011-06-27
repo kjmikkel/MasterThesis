@@ -54,7 +54,7 @@ def Dijkstra(G,start,end=None):
   	
   for v in Q:
     D[v] = Q[v]
-    if v == end: break
+   # if v == end: break
 		
     for w in G[v]:
       vwLength = D[v] + G[v][w]
@@ -78,7 +78,7 @@ def UnitDijkstra(G,start,end=None):
 	
   for v in Q:
     D[v] = Q[v]
-    if v == end: break
+#    if v == end: break
 		
     for w in G[v]:
       vwLength = D[v] + 1
