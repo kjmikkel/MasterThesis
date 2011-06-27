@@ -1,0 +1,57 @@
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\colorlet{circle edge}{black!50}
+\colorlet{circle area}{gray!20}
+
+\def\sourceSink{{(0.75, 2.5)/s}, {(5, 3)/t}}
+\def\blankNodes{{(1.3, 2.3)/a}, {(3, 1.5)/c}, {(5, 2.5)/f}, {(5.5, 1.5)/g}, {(5.6, 2.6)/i}}
+\def\clusterHeads{{(2, 2)/CHb}, {(6.1, 2)/CHh}}
+\def\gatewayNodes{{(3.7, 2)/Gd}, {(4.3, 2)/Ge}}
+
+\def\radius{2cm}
+
+\def\connect{s/a, a/CHb, CHb/c, c/Gd, Gd/Ge, Ge/f, f/g, g/CHh, CHh/i, i/t}
+
+\tikzset{
+  filled/.style={fill=circle area, draw=circle edge, thick},
+  outline/.style={draw=circle edge, thick}
+  }
+
+\setlength{\parskip}{5mm}
+
+\tikzstyle{edge} = [draw, thick, -]
+\tikzstyle{vertex}=[circle,fill=black!25,minimum size=10pt,inner sep=0pt]
+\tikzstyle{blank}=[circle,fill=white!25,minimum size=10pt,inner sep=0pt]
+\tikzstyle{clusterHead}=[rectangle,fill=gray!25,minimum size=10pt,inner sep=0pt]
+\tikzstyle{gateway}=[diamond,fill=black!50,minimum size=10pt,inner sep=0pt]
+
+\tikzstyle{selected edge} = [draw, line width=5pt,-,gray!50]
+\tikzstyle{edge} = [draw, thick, -]
+
+\begin{tikzpicture} 
+       % The source and the sink
+       \foreach \pos/\name in \sourceSink
+         \node[vertex] (\name) at \pos {$\name$};
+         
+       % The rest of the nodes
+       \foreach \pos/\name in \blankNodes {
+         \draw[outline] \pos circle (5pt);
+         \node[blank] (\name) at \pos {};
+         }
+
+         % The cluster heads
+       \foreach \pos/\name in \clusterHeads {
+         \node[clusterHead] (\name) at \pos {CH};
+         \draw[outline] \pos circle (\radius);
+         }
+
+         % The gateway nodes
+       \foreach \pos/\name in \gatewayNodes
+         \node[gateway] (\name) at \pos {};
+
+       % All the connections
+       \foreach \source/\sink in \connect
+         \path[edge] (\source) -- (\sink);
+       
+ \end{tikzpicture}
