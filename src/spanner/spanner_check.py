@@ -32,25 +32,25 @@ latex_location = '../../report/results/spanner/'
 Container class to have a bit more structured data transference from the results
 """
 class results_container:
-  min_distance = []
-  max_distance = []
-  distance = []
-  distance_value = 0
-  average_distance = 0
 
-  min_unit_distance = []
-  max_unit_distance = []
-  unit_distance = []
-  unit_distance_value = 0
-  average_unit_distance = 0
+  def __init__(self, name):
+    self.name = name
+    self.distance = []
+    self.distance_value = 0
+    self.average_distance = 0
 
-  min_value = 0
-  max_value = 0
+    self.unit_distance = []
+    self.unit_distance_value = 0
+    self.average_unit_distance = 0
 
-  min_unit_value = 0
-  max_unit_value = 0
+    self.min_value = 0
+    self.max_value = 0
 
-  num_errors = 0
+    self.min_unit_value = 0
+    self.max_unit_value = 0
+
+    self.num_errors = 0
+    self.legal_empty = 0
 
   def get_min_internal(self, min_dist):
     return min(min_dist)
@@ -59,16 +59,16 @@ class results_container:
     return max(max_dist)
 
   def get_min(self):
-    return self.get_min_internal(self.min_distance)
+    return self.get_min_internal(self.distance)
 
   def get_max(self):
-    return self.get_max_internal(self.max_distance)
+    return self.get_max_internal(self.distance)
 
   def get_unit_min(self):
-    return self.get_min_internal(self.min_unit_distance)
+    return self.get_min_internal(self.unit_distance)
 
   def get_unit_max(self):
-    return self.get_max_internal(self.max_unit_distance)
+    return self.get_max_internal(self.unit_distance)
 
   def get_distance(self):
     return sum(self.distance)
@@ -77,14 +77,17 @@ class results_container:
     return sum(self.unit_distance)
 
   def finalize(self, divide_value):
-    divide_value -= self.num_errors
-    
+    print 'Finalize:', str(self.get_unit_distance()), str(divide_value), str(self.legal_empty), str(len(self.unit_distance))
+    divide_value -= self.legal_empty
+    divide_value *= 1.0    
+
     self.distance_value = self.get_distance()
-    print self.distance_value
+    print 'Unit distance array:', self.unit_distance
     self.unit_distance_value = self.get_unit_distance() 
 
-    self.average_distance = (self.distance_value * 1.0) / (divide_value * 1.0)
-    self.average_unit_distance = (self.unit_distance_value * 1.0) / (divide_value * 1.0)
+    self.average_distance = (self.distance_value * 1.0) / divide_value
+
+    self.average_unit_distance = (self.unit_distance_value * 1.0) / divide_value
 
     self.min_value = self.get_min()
     self.max_value = self.get_max()
@@ -108,7 +111,8 @@ class results_container:
     return string 
 
   def __str__(self):
-    string = 'Total distance: ' + str(self.distance_value) + '\n'
+    string =  'Name: ' + self.name + '\n'
+    string += 'Total distance: ' + str(self.distance_value) + '\n'
     string += 'Average distance: ' + str(self.average_distance) + '\n' 
     string += 'Min: ' + str(self.min_value) + ', Max: ' + str(self.max_value) + '\n\n'
     
@@ -199,6 +203,17 @@ def generate_graphs(number_of_points, number_of_graphs, cutoff_distance):
     rng_graph = make_graph.rn_graph(copy.deepcopy(normal_graph))
     filename = rng_f + point_str + rng_placement + rng_filename + index_str
     save_pickle_file(filename, rng_graph)
+
+    print normal_graph
+    print gabriel_graph
+    print rng_graph
+
+"""
+    print normal_graph == gabriel_graph
+    print normal_graph == rng_graph
+    print gabriel_graph == rng_graph
+    print '***'
+"""
         
 def perform_test(number_of_points, num, number_tests):
   point_str = str(number_of_points) + '/'
@@ -228,7 +243,18 @@ def perform_test(number_of_points, num, number_tests):
       start_node = nodes[from_index]
       end_node = nodes[to_index]
       node_pairs_to_check.append((start_node, end_node))
-    
+   
+    save_pickle_file("node_pair_" + str(graph_index + 1), node_pairs_to_check)
+
+def do_test(number_of_points, num, number_tests):
+  point_str = str(number_of_points) + '/'
+  for graph_index in range(0, num):
+    index_str = str(graph_index + 1)   
+    filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
+    non_planar_graph = load_pickle_file(filename)
+
+    node_pairs_to_check = load_pickle_file('node_pair_' + str(graph_index + 1))
+
     # We perform the actual tests
     non_nodepairs = copy.deepcopy(node_pairs_to_check)
     non_planar_results = do_actual_test(non_planar_graph, non_nodepairs) 
@@ -274,14 +300,17 @@ def analyse_individual_results(results, old_missing_path, container):
   unit_distance = 0
   
   empty = 0
-
+  legal_empty = 0
+  """
   min_value = sys.maxint
   max_value = -1  
 
   min_unit_value = sys.maxint
   max_unit_value = -1
-
+  """
   missing_path = []
+
+  print 'Length:', len(results)
 
   for result_index in range(0, len(results)):
     result = results[result_index]
@@ -296,45 +325,37 @@ def analyse_individual_results(results, old_missing_path, container):
       
       # Regardless of what happened above, we need to mention that there is a missing path here
       missing_path.append(True)
-      continue
+      # And we note that there is an empty path
+      legal_empty += 1
+      print legal_empty
     elif len(path) == 0 and len(unit_path) > 0:
       print 'Error 1'
-      raise 'Path error, Unit path not the same as path. Unit path: ' + len(unit_path) + ', path: ' + len(path)
+   #   raise 'Path error, Unit path not the same as path. Unit path: ' + len(unit_path) + ', path: ' + len(path)
     elif len(path) > 0 and len(unit_path) == 0:
       print 'Error 2'
-      raise 'Path error, Path not the same as unit path. Unit path: ' + len(unit_path) + ', path: ' + len(path)
+    #  raise 'Path error, Path not the same as unit path. Unit path: ' + len(unit_path) + ', path: ' + len(path)
     else:
       # We record that we can reach the point - so no there is no missing path
       missing_path.append(False)
   
-      distance      += local_distance
-      unit_distance += local_unit_distance
-
-      min_value = min(min_value, local_distance)
-      max_value = max(max_value, local_distance)
-
-      min_unit_value = min(min_unit_value, local_unit_distance)
-      max_unit_value = max(max_unit_value, local_unit_distance)
+      container.distance.append(local_distance)
+      container.unit_distance.append(local_unit_distance)
   
   # Append the results to the container
-  
-  container.min_distance.append(min_value)
-  container.max_distance.append(max_value)
-  container.distance.append(distance)
-
-  container.min_unit_distance.append(min_unit_value)
-  container.max_unit_distance.append(max_unit_value)
-  container.unit_distance.append(unit_distance)
 
   container.num_errors += empty
-
+  print 'Legal empty:', str(legal_empty)
+  container.legal_empty += legal_empty
+  print container.legal_empty
+  print 'Empty: ' + str(empty) + ' ' + str(len(container.unit_distance))
+  print container.unit_distance
   return (missing_path, container)
 
 def analyse_results(number_of_points, num_results, pr_graph_test):
   
-  non_planar_container = results_container()
-  gg_container         = results_container()
-  rng_container        = results_container()
+  non_planar_container = results_container('Non-planar')
+  gg_container         = results_container('Gabriel Graph')
+  rng_container        = results_container('Relative Neighbourhood Graph')
 
   point_str = str(number_of_points) + '/'
   
@@ -345,20 +366,29 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
 
     if result_index % 10 == 0 and result_index > 0:
       print 'Collected ' + str(result_index) + ' of the results'
-#: ' + str(non_planar_container.get_min()) + ', ' + str(gg_container.get_min()) + ', ' + str(rng_container.get_min()) 
 
     filename = results_non_location + point_str + non_planar_placement + non_planar_filename + index_str
     graph_results = load_pickle_file(filename)  
-    (empty_index, non_planar_container) = analyse_individual_results(graph_results, init_missing_paths, non_planar_container)
+    (empty_index, _) = analyse_individual_results(graph_results, init_missing_paths, non_planar_container)
 
     filename = results_gg_location + point_str + gg_placement + gg_filename + index_str    
     gg_results = load_pickle_file(filename)
-    (gg_empty_index, gg_container)  = analyse_individual_results(gg_results, copy.deepcopy(empty_index), gg_container)
+    gg_index = copy.deepcopy(empty_index)
+    (_, _)  = analyse_individual_results(gg_results, gg_index, gg_container)
     
     filename = results_rng_location + point_str + rng_placement + rng_filename + index_str
     rng_results = load_pickle_file(filename)
-    (rng_empty_index, rng_container)  = analyse_individual_results(rng_results, copy.deepcopy(empty_index), rng_container)
+    rng_index = copy.deepcopy(empty_index)
+    (_, _)  = analyse_individual_results(rng_results, rng_index, rng_container)
   
+    """
+    print '***'
+    print rng_container == gg_container
+    print rng_container == non_planar_container
+    print gg_container == non_planar_container
+    print '***' 
+    """
+ 
   # I save the results so they are independent of LaTeX code we are going to generate
   total_number_of_tests = num_results * pr_graph_test
 
@@ -366,7 +396,7 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
   gg_container.finalize(total_number_of_tests)
   rng_container.finalize(total_number_of_tests)
   
-  filename = results_non_location + point_str + 'graph_results' 
+  filename = results_non_location + point_str + 'graph_results'
   save_pickle_file(filename, non_planar_container)
   
   filename = results_gg_location + point_str + 'gg_results'
@@ -413,22 +443,29 @@ def print_latex_results(number_of_points):
 
 def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off):
 
-#  generate_point_sets(point_num, num_graphs, max_values)
+  generate_point_sets(point_num, num_graphs, max_values)
   print "Generated Pointsets"
 
-#x  generate_graphs(point_num, num_graphs, cut_off)
+  generate_graphs(point_num, num_graphs, cut_off)
   print 'Made graphs'
   
- # perform_test(point_num, num_graphs, pr_graph_test)
+  perform_test(point_num, num_graphs, pr_graph_test)
+  
+  do_test(point_num, num_graphs, pr_graph_test)
+
   print 'Done results'
 
-#  analyse_results(point_num, num_graphs, pr_graph_test)
+  
+
+  print num_graphs, pr_graph_test
+  analyse_results(point_num, num_graphs, pr_graph_test)
   print 'Analysed results'
 
-  print_latex_results(point_num)
+ # print_latex_results(point_num)
   print 'Printed LaTeX file'
 
 
+do_suite(10, 2, 30, 70, 15) 
 #do_suite(100, 50, 100, 250, 10)
 """
 max_values = 500
