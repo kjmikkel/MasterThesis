@@ -184,6 +184,7 @@ def MST_Kruskal(graph):
   
   # we make the priority queue
   Q = priorityDictionary()
+
   # We make sure the edge is only there once
   already_there = {}
   for outer_node in graph:
@@ -216,7 +217,7 @@ def MST_Kruskal(graph):
       for node in set1:
         set_container[node] = set1
 
-  return result_graph 
+  return (result_graph, set_container) 
 
 
 
