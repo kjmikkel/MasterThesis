@@ -1,4 +1,7 @@
 import os, sys, random, copy, math, json, pickle
+from decimal import *
+# I define the precision of the decimal numbers
+getcontext().prec = 5
 
 cmd_folder = os.path.dirname(os.path.abspath(__file__)) + '/../graph_support'
 if cmd_folder not in sys.path:
@@ -83,7 +86,7 @@ class results_container:
     divide_value = len(self.distance) * 1.0
 
     self.distance_value = self.get_distance()
-    self.unit_distance_value = self.get_unit_distance() 
+    self.unit_distance_value = self.get_unit_distance()
 
     self.average_distance = (self.distance_value * 1.0) / divide_value
 
@@ -100,10 +103,10 @@ class results_container:
     newline = '\\\\\n'
     string  = '\\begin{tabular}{lll}\n'
     string += ' & Distance & Unit Distance' + newline
-    string += 'Total: & ' + str(self.distance_value) + ' & ' + str(self.unit_distance_value) +  newline
-    string += 'Average: & ' + str(self.average_distance) + ' & ' + str(self.average_unit_distance) + newline
-    string += 'Min value: & ' + str(self.min_value) + ' & ' + str(self.min_unit_value) + newline
-    string += 'Max value: & ' + str(self.max_value) + ' & ' + str(self.max_unit_value) + newline
+    string += 'Total: & ' + c_round(self.distance_value) + ' & ' + str(self.unit_distance_value) +  newline
+    string += 'Average: & ' + c_round(self.average_distance) + ' & ' + c_round(self.average_unit_distance) + newline
+    string += 'Min value: & ' + c_round(self.min_value) + ' & ' + str(self.min_unit_value) + newline
+    string += 'Max value: & ' + c_round(self.max_value) + ' & ' + str(self.max_unit_value) + newline
     string += '\\hline\n'
     string += 'Number of missing paths: & ' + str(self.num_errors) + ' & \n' 
     string += '\\end{tabular}'
@@ -112,17 +115,23 @@ class results_container:
 
   def __str__(self):
     string =  'Name: ' + self.name + '\n'
-    string += 'Total distance: ' + str(self.distance_value) + '\n'
-    string += 'Average distance: ' + str(self.average_distance) + '\n' 
-    string += 'Min: ' + str(self.min_value) + ', Max: ' + str(self.max_value) + '\n\n'
+    string += 'Total distance: ' + c_round(self.distance_value) + '\n'
+    string += 'Average distance: ' + c_round(self.average_distance) + '\n' 
+    string += 'Min: ' + c_round(self.min_value) + ', Max: ' + c_round(self.max_value) + '\n\n'
     
     string += 'Unit distance: ' + str(self.unit_distance_value) + '\n'
-    string += 'Average Unit distance: ' + str(self.average_unit_distance) + '\n'
+    string += 'Average Unit distance: ' + c_round(self.average_unit_distance) + '\n'
     string += 'Min: ' + str(self.min_unit_value) + ', Max: ' + str(self.max_unit_value) + '\n\n'
 
     string += 'Number of missing paths: ' + str(self.num_errors)
 
     return string
+
+def ftd(num):
+  return Decimal(str(num))
+
+def c_round(num):
+  return "%.4f" % num
 
 def load_pickle_file(file_name):
   result = None
@@ -312,6 +321,9 @@ def do_test(number_of_points, num, number_tests):
     rn_graph_results = do_actual_test(rn_graph, rng_nodepairs)
     filename = results_rng_location + point_str + rng_placement + rng_filename + index_str
     save_pickle_file(filename, rn_graph_results)
+
+    print len(non_planar_graph), len(gabriel_graph), len(rn_graph)
+    return
     
 def do_actual_test(graph, node_pairs):
   results = []
@@ -328,7 +340,6 @@ def do_actual_test(graph, node_pairs):
       distance = -1 
       unit_distance = -1
     
-
     results.append((distance, Path, unit_distance, Path_unit))
   
   return results
@@ -348,9 +359,10 @@ def analyse_individual_results(results, old_missing_path, container):
     (local_distance, path, local_unit_distance, unit_path) = result
 
     if len(path) == 0 and len(unit_path) == 0:
- 
-     # if there was not an error in the graphs before this one, then we up the number of empty paths       
+
+      # if there was not an error in the graphs before this one, then we up the number of empty paths       
       if not old_missing_path[result_index]:
+        print result
         empty += 1
       
       # Regardless of what happened above, we need to mention that there is a missing path here
@@ -384,8 +396,6 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
 
   point_str = str(number_of_points) + '/'
   
-  init_missing_paths = [True for i in range(0, pr_graph_test)]
- 
   for result_index in range(0, num_results):
     index_str = str(result_index + 1)
 
@@ -393,7 +403,8 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
       print 'Collected ' + str(result_index) + ' of the results'
 
     filename = results_non_location + point_str + non_planar_placement + non_planar_filename + index_str
-    graph_results = load_pickle_file(filename)  
+    graph_results = load_pickle_file(filename)      
+    init_missing_paths = [True for i in range(0, len(graph_results))]
     (empty_index, _) = analyse_individual_results(graph_results, init_missing_paths, non_planar_container)
 
     filename = results_gg_location + point_str + gg_placement + gg_filename + index_str    
@@ -405,7 +416,7 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
     rng_results = load_pickle_file(filename)
     rng_index = copy.deepcopy(empty_index)
     (_, _)  = analyse_individual_results(rng_results, rng_index, rng_container)
-   
+
   # I save the results so they are independent of LaTeX code we are going to generate
   non_planar_container.finalize()
   gg_container.finalize()
@@ -457,6 +468,33 @@ def print_latex_results(number_of_points):
   rng_latex = rng_results.print_latex()
   save_file(latex_location + 'rng_results_' + point_str[0:-1], rng_latex)
 
+  print 'Total results'
+  graph_distance = graph_results.distance_value * 1.0
+  gg_distance    = gg_results.distance_value * 1.0
+  rng_distance   = rng_results.distance_value * 1.0
+
+  graph_gg =  gg_distance / graph_distance
+  graph_rng = rng_distance / graph_distance
+
+  graph_unit_distance = graph_results.unit_distance_value * 1.0
+  gg_unit_distance = gg_results.unit_distance_value * 1.0
+  rng_unit_distance = rng_results.unit_distance_value * 1.0
+
+  graph_gg_unit  = gg_unit_distance  / graph_unit_distance
+  graph_rng_unit = rng_unit_distance / graph_unit_distance
+
+  newline = '\\\\\n'
+  line   = '\\hline\n'
+  string = '\\begin{tabular}{l|c|c|}' + '\n'
+  string += ' & Gabriel Graph & RNG' + newline
+  string += line
+  string += 'Distance: & ' + c_round(graph_gg) + ' & ' + c_round(graph_rng) + newline
+  string += 'Unit Distance: & ' + c_round(graph_gg_unit) + ' & ' + c_round(graph_rng_unit) + newline
+  string += '\\end{tabular}'  
+
+  save_file(latex_location + 'spanner_' + point_str[0:-1], string)
+  
+
 def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, state):
   """
   A single function call to tie the entire test stack together and to make it easier to parameterise
@@ -490,7 +528,7 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, state):
   if state <= 3:
     do_test(point_num, num_graphs, pr_graph_test)
     print 'Done results'
-  
+    
   if state <= 4:
     analyse_results(point_num, num_graphs, pr_graph_test)
     print 'Analysed results'
@@ -529,8 +567,8 @@ def do_integrity_test(point_list, node_pairs):
     print '***'
     print rng_container
 
-#do_suite(10, 2, 30, 20, 15, 0) 
-do_suite(100, 500, 100, 200, 10, 5)
+#do_suite(10, 2, 30, 20, 15, 0)
+do_suite(100, 200, 100, 200, 10, 3)
 
 """
 point_list = [(0,0), (20, 0), (4, -5), (15, -5)]
