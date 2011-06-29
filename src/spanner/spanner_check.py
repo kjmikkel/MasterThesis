@@ -58,6 +58,11 @@ class results_container:
     self.num_errors = 0
     self.legal_empty = 0
 
+    # Statistics about edges - implement this!
+    self.edges = []
+    self.edge_number = 0
+    self.average_neighbours
+
   def get_min_internal(self, min_dist):
     return min(min_dist)
 
@@ -108,7 +113,9 @@ class results_container:
     string += 'Min value: & ' + c_round(self.min_value) + ' & ' + str(self.min_unit_value) + newline
     string += 'Max value: & ' + c_round(self.max_value) + ' & ' + str(self.max_unit_value) + newline
     string += '\\hline\n'
-    string += 'Number of missing paths: & ' + str(self.num_errors) + ' & \n' 
+    string += 'Number of missing paths: & ' + str(self.num_errors) + ' &' + newline
+    string += 'Number of edges: & ' + str(self.edge_numbers / 2) + ' &  ' + newline
+    stirng += 'Average numbers of neighbours: & ' + str(self.average_neighbours) + ' & \n'
     string += '\\end{tabular}'
     
     return string 
@@ -121,9 +128,10 @@ class results_container:
     
     string += 'Unit distance: ' + str(self.unit_distance_value) + '\n'
     string += 'Average Unit distance: ' + c_round(self.average_unit_distance) + '\n'
-    string += 'Min: ' + str(self.min_unit_value) + ', Max: ' + str(self.max_unit_value) + '\n\n'
-
+    string += 'Min: ' + str(self.min_unit_value) + ', Max: ' + str(self.max_unit_value) + '\n'
     string += 'Number of missing paths: ' + str(self.num_errors)
+    string += 'Number of edges: ' + str(self.edge_numbers / 2) + '\n'
+    stirng += 'Average numbers of neighbours: ' + str(self.average_neighbours) + '\n'  
 
     return string
 
