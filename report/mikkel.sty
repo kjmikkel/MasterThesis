@@ -136,27 +136,3 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \label{code:#1}
 \lstinputlisting{../src/C++/#1.cpp}
 }
-
-%%
-% Define a command for a given term. This will create a command which gives
-% the long name, with a parenthesised acronym, on the first call.
-% Additionally it will redefine itself to call the acronym function instead
-% on subsequent executions.
-%
-% Takes:
-%	1, command name
-%	2, long name
-%	3, acronym
-%\newcommand{\acroterm}[3]{%
-%	\expandafter\newcommand\expandafter{\csname #1\endcsname}{%
-%		\emph{#2} (#3)%
-%		\expandafter\renewcommand\expandafter{\csname #1\endcsname}{%
-%#3\xspace%
-%}\xspace%
-%}%
-%}
-
-%\newcommand\ps@Standard{
-%\renewcommand\@oddhead{Mikkel Kjær Jensen, CPR: 2501851747}
-%\renewcommand\@evenhead{\@oddhead}
-%}
