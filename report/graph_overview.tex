@@ -1,9 +1,9 @@
 \section{Routing graph}
 \label{section:routing_graph}
 
-Having defined the problem of routing in Section~\ref{section:fundamental_graph_routing}, I will in this section describe some of the different kinds of Routing graphs that can be used for \manet, and will describe the one I have used for this thesis. Furthermore I will give an introduction to single, second, and multi-level routing node organisation. 
+Having defined the problem of routing in Section~\ref{section:fundamental_graph_routing}, I will in this section describe some of the different kinds of Routing graphs that can be used for \acp{manet}, and will describe the one I have used for this thesis. Furthermore I will give an introduction to single, second, and multi-level routing node organisation. 
 
-In the literature I have read, I have not been able to find a consensus on how the optimal graph for \manet should be structured. From what I have read, it is clear that the structure of the graph heavily influences the routing algorithm, making the two heavily dependant on each other. 
+In the literature I have read, I have not been able to find a consensus on how the optimal graph for \ac{manet} should be structured. From what I have read, it is clear that the structure of the graph heavily influences the routing algorithm, making the two heavily dependant on each other. 
 
 \subsection{Single-level graphs}
 \label{single_level}
@@ -22,31 +22,31 @@ Having chosen to keep our graphs planar we must make sure that we must take care
 
 I have found the following general methods for making the planar graphs:
 \begin{description}
-\item[The \gabe:] Two nodes $v$ and $u$ only share an edge iff the circle that has $\overline{vu}$ as its diameter does not contain a node $q$ \cite{gopher, gpsr}. 
-\item[The \rng:] Two nodes $v$ and $u$ share an edge if there is no node $q$ such that $|\overline{vq}|, |\overline{uq}| \leq |\overline{vu}|$ (i.e. $q$ is closer to both $v$ and $u$ than $v$ and $u$ are to each other). \cite{gpsr, RNG}
+\item[The \ac{gabe}:] Two nodes $v$ and $u$ only share an edge iff the circle that has $\overline{vu}$ as its diameter does not contain a node $q$ \cite{gopher, gpsr}. 
+\item[The \ac{rng}:] Two nodes $v$ and $u$ share an edge if there is no node $q$ such that $|\overline{vq}|, |\overline{uq}| \leq |\overline{vu}|$ (i.e. $q$ is closer to both $v$ and $u$ than $v$ and $u$ are to each other). \cite{gpsr, RNG}
 \end{description}
 
-Both \gabe and \rng are based on the \uga, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}.
+Both \ac{gabe} and \ac{rng} are based on the \ac{uga}, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}.
 \label{right-hand rule}
 \begin{description}
-\item[The \cldp:] \cldp works by having each node uses \emph{the right-hand-rule}\footnote{The right-hand-rule states that for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started.} and checks whether or not any of its links crosses/is crossed by another edge. In other words, \cldp first builds up a graph that may be non-planar, and then in a distributed manner finds and removes edges that makes the graph non-planar without disconnecting parts of graph (as the paper accuses both \gabe and \rng of).\cldp does is not dependent on the Unit graph assumption \cite{practical}. 
+\item[The \\ac{cldp}:] \ac{cldp} works by having each node uses \emph{the right-hand-rule}\footnote{The right-hand-rule states that for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started.} and checks whether or not any of its links crosses/is crossed by another edge. In other words, \ac{cldp} first builds up a graph that may be non-planar, and then in a distributed manner finds and removes edges that makes the graph non-planar without disconnecting parts of graph (as the paper accuses both \ac{gabe} and \ac{rng} of).\ac{cldp} does is not dependent on the Unit graph assumption \cite{practical}. 
 \end{description}
 
-\gabe is a sub-graph of the Delanay triangulation, and \rng is a subset of \gabe \todo{find and cite}, and as such they are both well described and understood graphs many of the same properties as the Delaunay triangulation. \cldp on the other hand is not a graph, but rather a dynamic algorithm for creating planar graphs that according to \cite{practical} are less disconnected than graphs made using \gabe and \rng. It is therefore harder to reason about most probable maximum number of neighbours for \cldp, as it is less of a graph and more of a process that creates a graph. 
+The \ac{gabe} is a sub-graph of the Delanay triangulation, and \ac{rng} is a subset of \ac{gabe} \todo{find and cite}, and as such they are both well described and understood graphs many of the same properties as the Delaunay triangulation. \ac{cldp} on the other hand is not a graph, but rather a dynamic algorithm for creating planar graphs that according to \cite{practical} are less disconnected than graphs made using \ac{gabe} and \ac{rng}. It is therefore harder to reason about most probable maximum number of neighbours for \ac{cldp}, as it is less of a graph and more of a process that creates a graph. 
 
-\tikfig{graph_comparison}{\ref{fig:rng1} and \ref{fig:rng2} are examples of the \rng, while \ref{fig:gabe1} and \ref{fig:gabe2} are examples of the \gabe. This figure is inspired by figure~7 in \cite{GeoSpanners}.}
+\tikfig{graph_comparison}{\ref{fig:rng1} and \ref{fig:rng2} are examples of the \ac{rng}, while \ref{fig:gabe1} and \ref{fig:gabe2} are examples of the \ac{gabe}. This figure is inspired by figure~7 in \cite{GeoSpanners}.}
 
-Delaunay graphs have been found to have an expected maximum degree of $\theta(\log n / \log \log n)$ \cite{delExpected}, and furthermore that that \gabe has a maximum degree of $\theta(\log n / \log \log n)$, or, as the authors put it, there exists a constant $a$ and constant $b$ such that 
+Delaunay graphs have been found to have an expected maximum degree of $\theta(\log n / \log \log n)$ \cite{delExpected}, and furthermore that that \ac{gabe} has a maximum degree of $\theta(\log n / \log \log n)$, or, as the authors put it, there exists a constant $a$ and constant $b$ such that 
 $$
 \lim_{n \rightarrow \infty} Pr{\delta \in [\frac{a\log n}{\log \log n}, \frac{b\log n}{\log \log n}]} = 1
 $$
-and for \gabe $a = 1/12$ and $b = 1$, for uniform distributions \cite{GGExpected}.
+and for \ac{gabe} $a = 1/12$ and $b = 1$, for uniform distributions \cite{GGExpected}.
 
-It is not immediately apparent how one would compare \gabe and \rng to \cldp, since \cldp is effected on the run-time behaviour of the transmission between the nodes. However, as mentioned before the \rng is a subset of the \gabe, which illustrated in figure~\ref{fig:graph_comparison} and figure~\ref{fig:gg-rng-example-big}.
+It is not immediately apparent how one would compare \ac{gabe} and \ac{rng} to \ac{cldp}, since \ac{cldp} is effected on the run-time behaviour of the transmission between the nodes. However, as mentioned before the \ac{rng} is a subset of the \ac{gabe}, which illustrated in figure~\ref{fig:graph_comparison} and figure~\ref{fig:gg-rng-example-big}.
 
-\tikfig{gg-rng-example-big}{In the following examples all the nodes have the same transmission radius. In figure~\ref{fig:norm_graph} we see the nodes from the Petersen graph make a non-planar graph. In figure~\ref{fig:gg_graph} we see the \gabe for the same set of points, clearly being planar and with far less edges, and in figure~\ref{fig:rng_graph} we see the \rng graph, which is clearly a subset of the \gabe.}
+\tikfig{gg-rng-example-big}{In the following examples all the nodes have the same transmission radius. In figure~\ref{fig:norm_graph} we see the nodes from the Petersen graph make a non-planar graph. In figure~\ref{fig:gg_graph} we see the \ac{gabe} for the same set of points, clearly being planar and with far less edges, and in figure~\ref{fig:rng_graph} we see the \ac{rng} graph, which is clearly a subset of the \ac{gabe}.}
 
-Neither the \manet or the \anet can be said to be entirely static. Even in an \anet, where we assume the nodes remain stationary, every single node will eventually run out of energy or fail. The routing graph must therefore always have a maintenance system that can deal with changes to the underlying graph. 
+Neither the \ac{manet} or the \ac{anet} can be said to be entirely static. Even in an \ac{anet}, where we assume the nodes remain stationary, every single node will eventually run out of energy or fail. The routing graph must therefore always have a maintenance system that can deal with changes to the underlying graph. 
 
 To complicate matter further different nodes can have different communications radius as exemplified in figure~\ref{fig:node_different_radius}, which shows us that a node needs to confirm that it indeed has a bidirectional link to each of its adjacent nodes, and cannot take it for granted.
 
@@ -58,32 +58,32 @@ Likewise it is important to remember that a node in practise might be able to ad
 \tikfig{gateway-node}{Node $s$ and $t$ are the source and the sink respectively, the rectangular nodes with $CH$ are the Cluster heads and the diamond nodes are the gateway nodes. From the image we can see that the message travels from the source to the header, between the gateways and then to the second header and then lastly to the sink. It is also clear that it would have been faster to go from the gateway and then to the sink, but since the gateway in this model does not know the location of the different nodes, this is impossible in this model.}
 
 \label{cluster methods}
-Node Clustering is a hierarchical alternative to the flat graph. Instead of having every node being the same, a number of nodes are made into \ch such that all nodes in the graph has 1 cluster head that they communicate with. Most of the time the nodes that belong to a certain \ch is its one-hop neighbours, but there are also schemes that allows nodes to have a clustered that is farther away, in order to reduce the number of \ch. With \ch a layer specialisation and hierarchy is added to the network, which reduces the complexity of an otherwise entirely flat network, while still retaining some decentralisation.
+Node Clustering is a hierarchical alternative to the flat graph. Instead of having every node being the same, a number of nodes are made into \acp{ch} such that all nodes in the graph has 1 cluster head that they communicate with. Most of the time the nodes that belong to a certain \ac{ch} is its one-hop neighbours, but there are also schemes that allows nodes to have a clustered that is farther away, in order to reduce the number of \acp{ch}. With \acp{ch} a layer specialisation and hierarchy is added to the network, which reduces the complexity of an otherwise entirely flat network, while still retaining some decentralisation.
 
-In order to improve the routing, \ch are almost always accompanied by \emph{gateway nodes}. Gateway nodes are nodes that connect two clusters --- see figure~\ref{fig:gateway-node} for an illustration. \cite{spanners} defines a gateway node as follows:
-Let C(p) be the set of nodes that has the cluster p as its \ch (this includes p). Then for a pair of \ch s $c_1, c_2$ if there exists a pair of nodes $p_1 \in C(c_1), p_2 \in C(c_2)$ such that $p_1$ and $p_2$ can communicate with each other in the graph, then $p_1$ and $p_2$ are gateway nodes (and in particular they are the only gateway nodes between $c_1$ and $c_2$.  
+In order to improve the routing, \acp{ch} are almost always accompanied by \emph{gateway nodes}. Gateway nodes are nodes that connect two clusters --- see figure~\ref{fig:gateway-node} for an illustration. \cite{spanners} defines a gateway node as follows:
+Let C(p) be the set of nodes that has the cluster p as its \ac{ch} (this includes p). Then for a pair of \ac{ch} s $c_1, c_2$ if there exists a pair of nodes $p_1 \in C(c_1), p_2 \in C(c_2)$ such that $p_1$ and $p_2$ can communicate with each other in the graph, then $p_1$ and $p_2$ are gateway nodes (and in particular they are the only gateway nodes between $c_1$ and $c_2$.  
 
 Some of the practical advantages are:
 \begin{itemize}
-\item The \ch will cut down on the number of necessary transmissions needed to check whether nodes are alive or not.
-\item \ch makes routing simpler, since all transmissions will have to go though the node gateways or up through the chain of \ch's. Thus only the \ch and gateway nodes will need to update their location database. Messages will still have to be sent through regular nodes (as illustrated in figure~\ref{fig:gateway-node}), but instead of having to route directly from the source to the sink, the message will alternating be routed through \ch's and gateways, until it reaches the sink.
+\item The \ac{ch} will cut down on the number of necessary transmissions needed to check whether nodes are alive or not.
+\item \acp{ch} makes routing simpler, since all transmissions will have to go though the node gateways or up through the chain of \acp{ch}. Thus only the \acp{ch} and gateway nodes will need to update their location database. Messages will still have to be sent through regular nodes (as illustrated in figure~\ref{fig:gateway-node}), but instead of having to route directly from the source to the sink, the message will alternating be routed through \acp{ch} and gateways, until it reaches the sink.
 \end{itemize}
 
-\ch is to divide any communication between nodes into 3 stages:
+Using \acp{ch} we divide the communication between nodes into 3 stages:
 \begin{enumerate}
-\item From the source to the local \ch 
-\item From the local \ch to the \ch closest to the sink
-\item From the \ch closets to the sink to the sink itself\footnote{If either \ch is the sink or the source, and the first or third part is of course eliminated}.
-\end{enumerate}
- \ch thus decreases the number of nodes that needs to keep track of the other nodes, and the gateway nodes divides the routing into multiple smaller trips.  
+\item From the source to the local \ac{ch} 
+\item From the local \ac{ch} to the \ac{ch} closest to the sink
+\item From the \ac{ch} closets to the sink to the sink itself\footnote{If either \ac{ch} is the sink or the source, and the first or third part is of course eliminated}.
+\end{enumerate}\todo{refernce the figure of this}
+ \acp{ch} thus decreases the number of nodes that needs to keep track of the other nodes, and the gateway nodes divides the routing into multiple smaller trips.  
 
-However, since we are introducing a layer of centralisation, we must ensure that we can detect and replace a \ch should it fail (and to elect it in the first place). An often used system is a voting system, or an selection algorithm (based hash value of the node's id, its MAC value etc.).
+However, since we are introducing a layer of centralisation, we must ensure that we can detect and replace a \ac{ch} should it fail (and to elect it in the first place). An often used system is a voting system, or an selection algorithm (based hash value of the node's id, its MAC value etc.).
 
-In the case of \manet in which some nodes are stationary (such as \cite{two-tier}), it might be preferable to give these stationary nodes a permanent status as \ch, as this will at best cut down on the number of elections needed to establish \ch's (since the nodes near them will accept them as their \ch), and at worst not change anything (in the case none of mobile nodes have them within their transmission range).
+In the case of \acp{manet} in which some nodes are stationary (such as \cite{two-tier}), it might be preferable to give these stationary nodes a permanent status as \ac{ch}, as this will at best cut down on the number of elections needed to establish \acp{ch} (since the nodes near them will accept them as their \ac{ch}), and at worst not change anything (in the case none of mobile nodes have them within their transmission range).
 
-One way of exploiting routing between \ch is to use the Restricted Delaunay Graph:
+One way of exploiting routing between \acp{ch} is to use the \ac{rdg}:
 \begin{description}
-\item[The \rdg:] The \rdg is a graph scheme that employs \ch based planar graph solution. After having found the set $C$ of \ch's, each $ch \in C$ calculates its local Delaunay edges on the set $C$, and then confers with its one-hop \ch neighbours to check which Delaunay edges are valid. Besides being planar and computable in a distributed manner, the \rdg is also a spanner, which means that using it will only make the route a constant times longer than the optimal route \cite{GeoSpanners}.
+\item[The \ac{rdg}:] The \ac{rdg} is a graph scheme that employs \acp{ch} based planar graph solution. After having found the set $C$ of \acp{ch}, each $ch \in C$ calculates its local Delaunay edges on the set $C$, and then confers with its one-hop \ac{ch} neighbours to check which Delaunay edges are valid. Besides being planar and computable in a distributed manner, the \ac{rdg} is also a spanner, which means that using it will only make the route a constant times longer than the optimal route \cite{GeoSpanners}.
 \end{description}
 
 \subsection{Multiple-level graphs}
@@ -92,31 +92,31 @@ A logical extension to the Two-level graph is the multiple-level graph. In the m
 
 \subsection{Spanners}
 \label{section:spanners}
-As mentioned in \ref{section:graph_concepts} it would be very nice if we could get a guarantee on how effective a given graph building algorithm would be. However, before looking further into this we must first decide what a spanner means for a \manet.
+As mentioned in \ref{section:graph_concepts} it would be very nice if we could get a guarantee on how effective a given graph building algorithm would be. However, before looking further into this we must first decide what a spanner means for a \ac{manet}.
 
 When dealing with pure graph theory, as long as the space is well-defined, it is always clear what the shortest path between two nodes in the graph. For instance, with a non-planar graph on the planer under the euclidean metric, the shortest path will always be a straight line, so the graph with the lest distance will be the complete graph. Using the complete graph is of course inefficient, and multiple algorithms and graph types have been invented to find an acceptable trade-off between the number of edges, extra auxiliary nodes, and the distance between any two nodes.
 
-When trying to apply spanners to \manet we have to remember that each node has a limited broadcast range, creating an upper bound on the length of an edge. Depending on the scheme and the hardware of the node, each node may cost same, no matter the length of the edge (since each message is not directed, but rather transmitted omni-directionally). I will therefore in the following use the term limited-range spanner when dealing with spanners for \manet. 
+When trying to apply spanners to \acp{manet} we have to remember that each node has a limited broadcast range, creating an upper bound on the length of an edge. Depending on the scheme and the hardware of the node, each node may cost same, no matter the length of the edge (since each message is not directed, but rather transmitted omni-directionally). I will therefore in the following use the term limited-range spanner when dealing with spanners for \acp{manet}. 
 
 \todo{make figure of limited-range spanner}
 
-Due to lack of empirical data I have tested the   500 point-sets with 1000 nodes in a 500 by 500 plane and a transmission range of 20. I have tested the spanner by producing 3 different graphs: The non-planar maximum graph \todo{define this before this point}, the \gabe and the \rng. For each point-set I have generated 10 different pairs of nodes, and then checked the distance and number of nodes between them (both having the weight of the edges being proportional to their length, but also where each edge costs the same --- the unit graph) for all three graphs. 
+Due to lack of empirical data I have tested the   500 point-sets with 1000 nodes in a 500 by 500 plane and a transmission range of 20. I have tested the spanner by producing 3 different graphs: The non-planar maximum graph \todo{define this before this point}, the \ac{gabe} and the \ac{rng}. For each point-set I have generated 10 different pairs of nodes, and then checked the distance and number of nodes between them (both having the weight of the edges being proportional to their length, but also where each edge costs the same --- the unit graph) for all three graphs. 
 
 I will use the non-planar maximum graphs as the benchmark that I will hold the other two graph types up against. I will record shortest, longest and average number of nodes the message has to be transported through, and the number of lost paths (i.e. paths that existed in the more complete graph of the point-set, but isn't present in this graph). 
 
 Since there is no guarantee that two nodes will be connected in any of the graphs, I will have to deal with such cases.
 
-If there is no path between a pair in the non-planar graph, then there cannot be a path between the pair in either the \gabe or the \rng, as these are sub-graphs of the non-planar graph, I will ignore it. However, if there is a path in the path between a pair in the non-planar graph, but none in either the \gabe or the \rng, then I will record a miss for that graph, since it is an obvious detriment. 
+If there is no path between a pair in the non-planar graph, then there cannot be a path between the pair in either the \ac{gabe} or the \ac{rng}, as these are sub-graphs of the non-planar graph, I will ignore it. However, if there is a path in the path between a pair in the non-planar graph, but none in either the \ac{gabe} or the \ac{rng}, then I will record a miss for that graph, since it is an obvious detriment. 
 
 The python scrips I used to generate and tests the graphs can be found in the \texttt{src/spanner/spanner\_check.py} along with the data (see the README for explanation) and \texttt{src/spanner/graph\_support} in the GitHub repository refereed to in section~\ref{section:source_code} on p.~\pageref{section:source_code}. All requirements in the code is mentioned in the README file.\\
 
 The non-planar maximum graph:
-\input{results/spanner/graph_results.tex}\\
+\input{results/spanner/graph_results_100.tex}\\
 
 The Gabriel Graph:
-\input{results/spanner/gg_results.tex}\\
+\input{results/spanner/gg_results_100.tex}\\
 
 The RNG:
-\input{results/spanner/rng_results.tex}
+\input{results/spanner/rng_results_100.tex}
 
 It is very curios to note that all the reults are exactly the same. Unless we are dealing with an error in the scripts making it, we must conclude that we in we practice does not have a longer route if we use a planar graph instead of a non-planar maximum graph.

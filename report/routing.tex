@@ -1,9 +1,9 @@
 \section{Routing Algorithms}
 \label{section:routing_algorithms}
 
-The biggest conceptual difference for routing/shortest path algorithms in a \manet compared to main-stray routing/shortest path algorithms, is the loss of global overview that these algorithms have --- such as relaxing a specific nodes' edges at a specific time. There exist distributed version of some of the ``classic'' routing algorithms --- such as Bellman-Ford --- but their usefulness is limited in a mobile network, since they will have to be recomputed either each time a node wants to transmit a message, or each time the underlying graph changes.
+The biggest conceptual difference for routing/shortest path algorithms in a \ac{manet} compared to main-stray routing/shortest path algorithms, is the loss of global overview that these algorithms have --- such as relaxing a specific nodes' edges at a specific time. There exist distributed version of some of the ``classic'' routing algorithms --- such as Bellman-Ford --- but their usefulness is limited in a mobile network, since they will have to be recomputed either each time a node wants to transmit a message, or each time the underlying graph changes.
 
-As mentioned in Section~\ref{section:fundamental_graph_routing}, the problem of sending a message from the source to the sink  becomes a graph routing problem \footnote{But not necessary a shortest-path routing problem, since factors like fairness or maximisation of the lifetime of the \manet becomes issues in practise}.
+As mentioned in Section~\ref{section:fundamental_graph_routing}, the problem of sending a message from the source to the sink  becomes a graph routing problem \footnote{But not necessary a shortest-path routing problem, since factors like fairness or maximisation of the lifetime of the \ac{manet} becomes issues in practise}.
 
 When routing a message from the source to the sink, it is important to distinguish the message that is being transmitted and the nodes that are transmitting. The transmitted message does not only include the information that is intended for the node at the sink, but also extra meta-data needed for routing. This includes time-to-live, position of the source node, position of the sink, message id etc. The nodes are all assumed to use the same routing algorithm, and at the very least knowing who their neighbours are.
 
@@ -26,7 +26,7 @@ When a routing algorithm wants to send a message or a number of messages from a 
 If the algorithm requires and already established path, then there are two fundamentally different principles that can be applied.
 \begin{description}
 \route{Destination Sequential Distance Vector (DSDV)}
-{With the DSDV, every node tries to remember as many as possible paths to the other nodes in the graph. The mapping from nodes to paths can either just be the next neighbour that a message needs to be routed to, or the entire path. In pure implementations of DSDV, each node knows a path to all other nodes. The advantage of DSDV is that when the information is correct it gives an efficient path, while the disadvantage is that it is memory and bandwidth intensive, since each node has to contain a full routing table, and thus has problems scaling to large \manet. Depending on how much the nodes move, it could also be prone to contain outdated information.
+{With the DSDV, every node tries to remember as many as possible paths to the other nodes in the graph. The mapping from nodes to paths can either just be the next neighbour that a message needs to be routed to, or the entire path. In pure implementations of DSDV, each node knows a path to all other nodes. The advantage of DSDV is that when the information is correct it gives an efficient path, while the disadvantage is that it is memory and bandwidth intensive, since each node has to contain a full routing table, and thus has problems scaling to large \ac{manet}. Depending on how much the nodes move, it could also be prone to contain outdated information.
 %In order to find a path DSDV uses a distributed version of Bell
 }
 {DSDV}
@@ -42,7 +42,7 @@ AODV does not describe any specific routing algorithm to establish a route.}
 
 \tikfig{greedy-problem}{In this topology we attempt greedy routing from node \emph{s} to node \emph{t}. The edges between the nodes define a bidirectional link. The grey background indicates the chosen path. We see that the greedy algorithm first routes the message to node \emph{a}, since node \emph{a} is closer to node \emph{t} than node \emph{d}. However, since neither node \emph{b} or node \emph{c} are closer to node \emph{t} than node \emph{a} (as illustrated by the radius centred on node \emph{t}), the greedy routing does not continue. Node \emph{a} is in this situation often called the \emph{local minimum}. In this context, the face created by node \emph{a}, \emph{b}, \emph{c} and node \emph{t} a \emph{void}}
 
-Routing algorithms suited for \manet s can be sorted into the following categories:
+Routing algorithms suited for \acp{manet} can be sorted into the following categories:
 \begin{description}
 \route{Flooding}
 {The simplest of the routing algorithms. The entire network is flooded with the message, ensuring that the message eventually reaches the sink. We can be sure that the message will not flood the network forever, thanks to the recording system detailed in section \ref{record-recived}. If the sink can be reached from the source, then flooding is  guarantied to work, but will use a lot of the networks bandwidth, and requires many of the nodes to be active.}
@@ -89,7 +89,7 @@ A fundamental problem that has to be answered in any geographical routing algori
 
 \begin{itemize}
 \item Once the sink has moved a certain distance away from its neighbours, it could inform them of its current position, and then tells its local neighbours. Effectively this solution creates an area of way-points that can be used to find the sink \cite{adaptive}.
-\item If we are dealing with a cluster method (see Section~\ref{cluster methods} for explanation of clusters), then the sink only needs to inform its old \ch that it has moved to a new \ch, and in the same way as before, the message will catch up with the sink.
+\item If we are dealing with a cluster method (see Section~\ref{cluster methods} for explanation of clusters), then the sink only needs to inform its old \ac{ch} that it has moved to a new \ac{ch}, and in the same way as before, the message will catch up with the sink.
 \item Instead of getting the exact location of the sink at the beginning and then routing blindly towards that location, layers of node location ``servers'', really just a normal node that knows the location of several nodes in the network, can be established. A server may not know where any given node is, but it may know where a closer server that either knows the location of the sink, or knows a server closer to the sink \ldots and so on until we find a server that knows where the sink is. Thus the sink will eventually be found \cite{scaleLocation}.
 \end{itemize}
 

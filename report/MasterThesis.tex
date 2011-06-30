@@ -10,27 +10,43 @@
 \begin{document}
 \pagestyle{fancy}
 
+% My acronyms
+\acrodef{ch}[CH]{Cluster Head}
+\acrodef{gabe}[GG]{Gabriel Graph}
+\acrodef{udg}[UDG]{Unit Disk Graph}
+\acrodef{manet}[MANET]{Mobile Ad-Hoc Network}
+\acrodef{anet}[ANET]{Ad-Hoc Network}
+\acrodef{rng}[RNG]{Relative Neighbourhood Graph}
+\acrodef{rdg}[RDG]{Restricted Delaunay Graph}
+\acrodef{cldp}[CLDP]{Cross-Link Detection Potocol}
+\acrodef{wbs}[WBS]{Wireless Base-Station}
+\acrodef{wfs}[WFS]{Wireless Forwarding-Station }
+\acrodef{uga}[UGA]{Unit Graph Assumption}
+\acrodef{hls}[HLS]{Homezone Location Service}
+
+
 \maketitle
+
+
 \abstract{
-A \manet is a network of moving nodes that without intervention of humans can route messages between nodes, given that the nodes are in proximity of each other, or there is a path of nodes in proximity of each other. 
+A \ac{manet} is a network of moving nodes that without intervention of humans can route messages between nodes, given that the nodes are in proximity of each other, or there is a path of nodes in proximity of each other. 
 
-In this thesis I will give an overview of the basic requirements for implementing a \manet and suggest many already existing solutions that forfills these requirements. 
+In this thesis I will give an overview of the basic requirements for implementing a \ac{manet} and suggest many already existing solutions that forfills these requirements. 
 
-Furthermore I will give a performence evaluation of several routing algorithms using the ns-2.33 network simulator and the \hls.
+Furthermore I will give a performence evaluation of several routing algorithms using the ns-2.33 network simulator and the \ac{hls}.
 \todo{Improve abstract}
 }
 \listoffixmes
 \tableofcontents
-
-\include{introduction}
-\include{fundamentals}
-\include{graph_overview}
-\include{routing}
-%\include{network_simulators}
-%\include{test_description}
-%\include{test_results}
-%\include{discussion}
-%\include{conclusion}
+\cinclude{introduction} 
+%\cinclude{fundamentals}
+%\cinclude{graph_overview}
+%\cinclude{routing}
+%\cinclude{network_simulators} 
+%\cinclude{test_description} 
+%\cinclude{test_results} 
+%\cinclude{discussion} 
+%\cinclude{conclusion}
 
 \bibliographystyle{plain}
 \bibliography{references}{}

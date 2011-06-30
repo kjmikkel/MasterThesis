@@ -26,6 +26,7 @@
 \usepackage{afterpage}
 \usepackage{fancyhdr}
 \usepackage{subfig}
+\usepackage{acronym}
 
 \usepackage[section]{placeins}
 
@@ -78,7 +79,10 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \newcommand{\todo}[1]{\fxfatal{#1}}
 \newcommand{\todoNote}[2]{\fxnote{#1}{#2}}
 \newcommand{\justify}[1]{\texttt{Write a justification for this}\fxfatal{Write a justification for this: #1}}
-
+\newcommand{\cinclude}[1]{
+\acresetall
+\include{#1}
+}
 \usepackage{url}
 %% Define a new 'leo' style for the package that will use a smaller font.
 \makeatletter
@@ -143,28 +147,16 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 %	1, command name
 %	2, long name
 %	3, acronym
-\newcommand{\acroterm}[3]{%
-	\expandafter\newcommand\expandafter{\csname #1\endcsname}{%
-		\emph{#2} (#3)%
-		\expandafter\renewcommand\expandafter{\csname #1\endcsname}{%
-#3\xspace%
-}\xspace%
-}%
-}
+%\newcommand{\acroterm}[3]{%
+%	\expandafter\newcommand\expandafter{\csname #1\endcsname}{%
+%		\emph{#2} (#3)%
+%		\expandafter\renewcommand\expandafter{\csname #1\endcsname}{%
+%#3\xspace%
+%}\xspace%
+%}%
+%}
 
 %\newcommand\ps@Standard{
 %\renewcommand\@oddhead{Mikkel Kjær Jensen, CPR: 2501851747}
 %\renewcommand\@evenhead{\@oddhead}
 %}
-
-\acroterm{ch}{Cluster Heads}{CH}
-\acroterm{gabe}{Gabriel Graph}{GG}
-\acroterm{udg}{Unit Disk Graph}{UDG}
-\acroterm{manet}{Mobile Ad-Hoc Network}{MANET}
-\acroterm{anet}{Ad-Hoc Network}{ANET}
-\acroterm{rng}{Relative Neighbourhood Graph}{RNG}
-\acroterm{rdg}{Restricted Delaunay Graph}{RDG}
-\acroterm{cldp}{Cross-Link Detection Potocol}{CLDP}
-\acroterm{wbs}{Wireles Base-Station}{WBS}
-\acroterm{uga}{Unit Graph Assumption}{UGA}
-\acroterm{hls}{Homezone Location Service}{HLS}
