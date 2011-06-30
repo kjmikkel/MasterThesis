@@ -48,37 +48,29 @@ def find_midpoint(p1, p2):
   return (mid_x, mid_y)
 
 
-def gabriel_graph_old(edges, neighbours_dict):
+def gabriel_graph_old(old_graph, kd_tree):
   """
   The old version of the gabriel graph code - this version does not use the kDTree code, but rather uses an already existing graph and then eliminates the edges where a node exist in the disc
-  """
-  print 'All edges:', len(edges)
-    
-  keys = neighbours_dict.keys()
-  for key in keys:
-    neighbours = neighbours_dict[key]
-    edges_remove = []
-    outer_index = 0
+  """   
+  new_graph = copy.deepcopy(old_graph) 
+  nodes = new_graph.keys()
+  for u in nodes:
+    neighbours = old_graph[u]
+
     for v in neighbours:            
-      mid_point = find_midpoint(key[1], v[1])
+      mid_point = find_midpoint(u, v)
             
       for w in neighbours:
         if v == w:
           continue
 
-        if find_distance(mid_point, w[1]) < find_distance(key[1], mid_point):
-          edges_remove.append((key, v))
+        if find_distance(mid_point, w) < find_distance(v, mid_point):
+          del neighbours[v]
           break
-
-  if len(edges_remove) > 0:
-    for edge in edges_remove:
-      if edge in edges:
-        edges.remove(edge)
         
-  print 'Changed edges:', len(edges)
-  return edges
+  return new_graph
 
-def gabriel_graph(old_graph, kd_tree):
+def gabriel_graph(old_graph, kd_tree, data):
   """
   The new version of the Gabriel Graph algorithm which uses the kd-tree to create the edges, instead of removing them
   """
@@ -90,15 +82,18 @@ def gabriel_graph(old_graph, kd_tree):
     neighbours = old_graph[u].keys()
     local_edges = {}
 
-    for v in neighbours:
-      if v == u:
-        continue            
+    for v in neighbours:          
       mid_point = find_midpoint(u, v)
       distance_to_v = old_graph[u][v]
-      mid_point_radius = (distance_to_v * 1.0)  / 2.0
+      mid_point_radius = ((distance_to_v * 1.0)  / 2.0) + 0.000000001 # This last bit is due to rounding errors
     
       close_nodes = kd_tree.query_ball_point(mid_point, mid_point_radius)      
-         
+      """  
+      if len(close_nodes) < 2:
+          print mid_point, u, v
+          print distance_to_v, find_distance(v, u), mid_point_radius 
+          print close_nodes, data[close_nodes[0]]
+      """   
       if len(close_nodes) == 2:
         local_edges[v] = distance_to_v   
     
@@ -147,7 +142,7 @@ def rn_graph(old_graph):
       add_edge = True
       distance_to_v = neighbours_to_u[v]
       
-      # We have to check throgh one of the arrays, and therefore it is best if we do it with the shortest array
+      # We have to check through one of the arrays, and therefore it is best if we do it with the shortest array
       fewest_neighours = neighbours_to_u
       if len(neighbours_to_v) > len(neighbours_to_u):
         fewest_neighours = neighbours_to_v
