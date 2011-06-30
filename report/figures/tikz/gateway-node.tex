@@ -25,19 +25,22 @@
 \tikzstyle{blank}=[circle,fill=white!25,minimum size=10pt,inner sep=0pt]
 \tikzstyle{clusterHead}=[rectangle,fill=gray!25,minimum size=10pt,inner sep=0pt]
 \tikzstyle{gateway}=[diamond,fill=black!50,minimum size=10pt,inner sep=0pt]
+\tikzstyle{invis-vertex}=[circle,fill=white!100,minimum size=0pt, inner sep=0pt]
 
 \tikzstyle{selected edge} = [draw, line width=5pt,-,gray!50]
 \tikzstyle{edge} = [draw, thick, -]
 
 \begin{tikzpicture} 
        % The source and the sink
-       \foreach \pos/\name in \sourceSink
+       \foreach \pos/\name in \sourceSink {
          \node[vertex] (\name) at \pos {$\name$};
-         
+         }
+
        % The rest of the nodes
        \foreach \pos/\name in \blankNodes {
+         \node[invis-vertex] (\name) at \pos {};
          \draw[outline] \pos circle (5pt);
-         \node[blank] (\name) at \pos {};
+         \node[blank] () at \pos {};
          }
 
          % The cluster heads
@@ -47,8 +50,10 @@
          }
 
          % The gateway nodes
-       \foreach \pos/\name in \gatewayNodes
-         \node[gateway] (\name) at \pos {};
+       \foreach \pos/\name in \gatewayNodes {
+         \node[invis-vertex] (\name) at \pos {};
+         \node[gateway] () at \pos {};
+         }
 
        % All the connections
        \foreach \source/\sink in \connect

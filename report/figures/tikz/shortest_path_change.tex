@@ -5,6 +5,7 @@
 \def\baseConnect{s/a, a/b, b/*, t/c, c/d, d/e, e/f, f/h, h/i, i/j, j/k, k/l, l/m, m/s}
 
 \tikzstyle{vertex}=[circle,fill=black!25,minimum size=10pt,inner sep=0pt]
+\tikzstyle{invis-vertex}=[circle,fill=white!100,minimum size=0pt, inner sep=0pt]
 \tikzstyle{edge} = [draw,thick,-]
 \tikzstyle{weight} = [font=\small]
 
@@ -22,8 +23,10 @@
         \node[vertex] (\name) at \pos {$\name$};
     
       % First we draw the rest of the vertices
-    \foreach \pos/\name in \network
-        \node[vertex] (\name) at \pos {};
+    \foreach \pos/\name in \network {
+        \node[invis-vertex] (\name) at \pos {};
+        \node[vertex] () at \pos {};
+        }
    
      % Connect vertices with edges and draw weights
     \foreach \source/ \dest in \baseConnect
@@ -45,8 +48,10 @@
             \node[vertex] (\name) at \pos {$\name$};
 
     % First we draw the vertices
-    \foreach \pos/\name in \network
-        \node[vertex] (\name) at \pos {};
+    \foreach \pos/\name in \network {
+        \node[invis-vertex] (\name) at \pos {};
+        \node[vertex] () at \pos {};
+        }
 
         % Connect vertices with edges and draw weights
     \foreach \source/ \dest in \baseConnect

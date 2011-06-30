@@ -17,6 +17,7 @@
 
 \tikzstyle{edge} = [draw, thick, -]
 \tikzstyle{vertex}=[circle,fill=black!25,minimum size=10pt,inner sep=0pt]
+\tikzstyle{invis-vertex}=[circle,fill=white!100,minimum size=0pt, inner sep=0pt]
 
 \tikzstyle{selected edge} = [draw, line width=5pt,-,gray!50]
 \tikzstyle{edge} = [draw, thick, -]
@@ -24,12 +25,15 @@
 \subfloat[Initial deployment]{\label{fig:better_route1}
 \begin{tikzpicture} 
        % The source and the sink, and the new node
-       \foreach \pos/\name in {{(0,0)/s}, {(3, 0)/t}}
+       \foreach \pos/\name in {{(0,0)/s}, {(3, 0)/t}} {
          \node[vertex] (\name) at \pos {$\name$};
+         }
          
        % The rest of the nodes
-       \foreach \pos/\name in \network
-         \node[vertex] (\name) at \pos {};
+       \foreach \pos/\name in \network {
+         \node[invis-vertex] (\name) at \pos {};
+         \node[vertex] () at \pos {};
+       }
 
        \begin{pgfonlayer}{background}
         \foreach \source/ \dest in \connect
@@ -47,12 +51,15 @@
 \subfloat[New node added]{\label{fig:better_route2}
 \begin{tikzpicture} 
        % The source and the sink, and the new node
-       \foreach \pos/\name in {{(0,0)/s}, {(3, 0)/t}, {(1.5, -0.4)/*}}
+       \foreach \pos/\name in {{(0,0)/s}, {(3, 0)/t}, {(1.5, -0.4)/*}} {
          \node[vertex] (\name) at \pos {$\name$};
+         }
          
        % The rest of the nodes
-       \foreach \pos/\name in \network
-         \node[vertex] (\name) at \pos {};
+       \foreach \pos/\name in \network {
+         \node[invis-vertex] (\name) at \pos {};
+         \node[vertex] () at \pos {};
+         }
 
        \begin{pgfonlayer}{background}
         \foreach \source/ \dest in {s/-, -/i, i/*, */j, j/h, h/t}
