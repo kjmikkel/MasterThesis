@@ -61,7 +61,9 @@ class results_container:
     # Statistics about edges - implement this!
     self.edges = []
     self.edge_number = 0
-    self.average_neighbours
+    self.average_neighbours = 0
+    self.max_neighbours = 0
+    self.min_neighbours = 0
 
   def get_min_internal(self, min_dist):
     return min(min_dist)
@@ -90,6 +92,7 @@ class results_container:
   def finalize(self):
     divide_value = len(self.distance) * 1.0
 
+    # Distance
     self.distance_value = self.get_distance()
     self.unit_distance_value = self.get_unit_distance()
 
@@ -102,10 +105,17 @@ class results_container:
 
     self.min_unit_value = self.get_unit_min()
     self.max_unit_value = self.get_unit_max()
+    
+    # Edges:
+    self.edge_number = sum(self.edges) / 2
+    self.average_neighbours = (self.edge_number * 1.0) / len(self.edges) * 1.0
+    self.max_neighbours = max(self.edges)
+    self.min_neighbours = min(self.edges)
 
   def print_latex(self):
 
     newline = '\\\\\n'
+    
     string  = '\\begin{tabular}{lll}\n'
     string += ' & Distance & Unit Distance' + newline
     string += 'Total: & ' + c_round(self.distance_value) + ' & ' + str(self.unit_distance_value) +  newline
@@ -114,9 +124,12 @@ class results_container:
     string += 'Max value: & ' + c_round(self.max_value) + ' & ' + str(self.max_unit_value) + newline
     string += '\\hline\n'
     string += 'Number of missing paths: & ' + str(self.num_errors) + ' &' + newline
-    string += 'Number of edges: & ' + str(self.edge_numbers / 2) + ' &  ' + newline
-    stirng += 'Average numbers of neighbours: & ' + str(self.average_neighbours) + ' & \n'
-    string += '\\end{tabular}'
+    string += '\\end{tabular}' + newline
+    string += 'Number of edges: ' + str(self.edge_number / 2) + newline
+    string += 'Average numbers of neighbours: ' + str(self.average_neighbours) + newline
+    string += 'Minimum number of neighbours: ' + str(self.max_neighbours) + newline
+    string += 'Maximum number of neighbours: ' + str(self.min_neighbours) + newline
+
     
     return string 
 
@@ -129,10 +142,11 @@ class results_container:
     string += 'Unit distance: ' + str(self.unit_distance_value) + '\n'
     string += 'Average Unit distance: ' + c_round(self.average_unit_distance) + '\n'
     string += 'Min: ' + str(self.min_unit_value) + ', Max: ' + str(self.max_unit_value) + '\n'
-    string += 'Number of missing paths: ' + str(self.num_errors)
-    string += 'Number of edges: ' + str(self.edge_numbers / 2) + '\n'
-    stirng += 'Average numbers of neighbours: ' + str(self.average_neighbours) + '\n'  
-
+    string += 'Number of missing paths: ' + str(self.num_errors) + '\n\n'
+    string += 'Number of edges: ' + str(self.edge_number / 2) + '\n'
+    string += 'Average numbers of neighbours: ' + str(self.average_neighbours) + '\n'  
+    string += 'Max Neighbours: ' + str(self.max_neighbours) + ', Min: ' + str(self.min_neighbours)
+    
     return string
 
 def ftd(num):
@@ -198,7 +212,6 @@ def generate_point_sets(number_of_points, num_pointset, max_values):
 
 def generate_graphs(number_of_points, number_of_graphs, cutoff_distance):
   for graph_index in range(0, number_of_graphs):
-    
     point_str = str(number_of_points) + '/'
 
     if graph_index % 10 == 0 and graph_index > 0:
@@ -213,7 +226,7 @@ def generate_graphs(number_of_points, number_of_graphs, cutoff_distance):
     filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
     save_pickle_file(filename, normal_graph)   
     
-    gabriel_graph = make_graph.gabriel_graph(copy.deepcopy(normal_graph), tree)
+    gabriel_graph = make_graph.gabriel_graph(copy.deepcopy(normal_graph), tree, new_data)
     filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
     save_pickle_file(filename, gabriel_graph)
 
@@ -297,6 +310,16 @@ def make_node_pairs(number_of_points, num, number_tests):
 
     save_pickle_file(node_pair_location + point_str + "node_pair_" + str(graph_index + 1), node_pairs_to_check)
 
+def get_edge_data(graph):
+    return_dict = {}
+    nodes = graph.keys()
+    
+    neigh_list = []
+    for node in nodes:
+        neigh_list.append(len(graph[node]))
+        
+    return neigh_list
+
 def do_test(number_of_points, num, number_tests):
   point_str = str(number_of_points) + '/'
   for graph_index in range(0, num):
@@ -305,34 +328,47 @@ def do_test(number_of_points, num, number_tests):
       print 'Made ' + str(graph_index) + ' tests.'
 
     index_str = str(graph_index + 1)   
+
+    node_pairs_to_check = load_pickle_file(node_pair_location + point_str + 'node_pair_' + str(graph_index + 1))
+    non_nodepairs = copy.deepcopy(node_pairs_to_check)
+
+    # We perform the actual tests
+    
+    # Start Non-planar
     filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
     non_planar_graph = load_pickle_file(filename)
 
-    node_pairs_to_check = load_pickle_file(node_pair_location + point_str + 'node_pair_' + str(graph_index + 1))
-
-    # We perform the actual tests
-    non_nodepairs = copy.deepcopy(node_pairs_to_check)
     non_planar_results = do_actual_test(non_planar_graph, non_nodepairs) 
+    non_planar_neigh   = get_edge_data(non_planar_graph)
+    
     filename = results_non_location + point_str + non_planar_placement + non_planar_filename + index_str
-    save_pickle_file(filename, non_planar_results)
+    save_pickle_file(filename, (non_planar_results, non_planar_neigh))
+    # End non-planar
 
+    # Start Gabriel Graph
     filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
     gabriel_graph = load_pickle_file(filename)
     gg_nodepairs = copy.deepcopy(node_pairs_to_check)
-    gabriel_graph_results = do_actual_test(gabriel_graph, gg_nodepairs)
+    
+    gabriel_graph_results = do_actual_test(gabriel_graph, gg_nodepairs)    
+    gabriel_graph_neigh   = get_edge_data(gabriel_graph)
+    
     filename = results_gg_location + point_str + gg_placement + gg_filename + index_str
-    save_pickle_file(filename, gabriel_graph_results)
+    save_pickle_file(filename, (gabriel_graph_results, gabriel_graph_neigh))
+    # End Gabriel Graph
 
+    # Start RNG 
     filename = rng_f + point_str + rng_placement + rng_filename + index_str
     rn_graph = load_pickle_file(filename) 
     rng_nodepairs = copy.deepcopy(node_pairs_to_check)
-    rn_graph_results = do_actual_test(rn_graph, rng_nodepairs)
-    filename = results_rng_location + point_str + rng_placement + rng_filename + index_str
-    save_pickle_file(filename, rn_graph_results)
-
-    print len(non_planar_graph), len(gabriel_graph), len(rn_graph)
-    return
     
+    rn_graph_results = do_actual_test(rn_graph, rng_nodepairs)
+    rn_graph_neigh   = get_edge_data(rn_graph)
+    
+    filename = results_rng_location + point_str + rng_placement + rng_filename + index_str
+    save_pickle_file(filename, (rn_graph_results, rn_graph_neigh))
+    # End RNG    
+        
 def do_actual_test(graph, node_pairs):
   results = []
   for pair in node_pairs:
@@ -412,18 +448,27 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
 
     filename = results_non_location + point_str + non_planar_placement + non_planar_filename + index_str
     graph_results = load_pickle_file(filename)      
-    init_missing_paths = [True for i in range(0, len(graph_results))]
-    (empty_index, _) = analyse_individual_results(graph_results, init_missing_paths, non_planar_container)
+    graph_distance = graph_results[0]
+    non_planar_container.edges = graph_results[1] 
+    
+    init_missing_paths = [True for i in range(0, len(graph_distance))]
+    (empty_index, _) = analyse_individual_results(graph_distance, init_missing_paths, non_planar_container)
 
     filename = results_gg_location + point_str + gg_placement + gg_filename + index_str    
     gg_results = load_pickle_file(filename)
+    gg_distance = gg_results[0]
+    gg_container.edges   = gg_results[1]
+    
     gg_index = copy.deepcopy(empty_index)
-    (_, _)  = analyse_individual_results(gg_results, gg_index, gg_container)
+    (_, _)  = analyse_individual_results(gg_distance, gg_index, gg_container)
     
     filename = results_rng_location + point_str + rng_placement + rng_filename + index_str
     rng_results = load_pickle_file(filename)
+    rng_distance = rng_results[0]
+    rng_container.edges    = rng_results[1]
+    
     rng_index = copy.deepcopy(empty_index)
-    (_, _)  = analyse_individual_results(rng_results, rng_index, rng_container)
+    (_, _)  = analyse_individual_results(rng_distance, rng_index, rng_container)
 
   # I save the results so they are independent of LaTeX code we are going to generate
   non_planar_container.finalize()
@@ -575,8 +620,28 @@ def do_integrity_test(point_list, node_pairs):
     print '***'
     print rng_container
 
+"""
+  Quick reference for state:
+  0 or below: Do everything
+  1: Don't do point generation
+  2: Don't do graph generation
+  3: Don't make node pairs
+  4: Don't find the results
+  5 or above: Don't analyse results - just print the LaTeX code
+"""
+
+# point_num num_graphs pr_graphs_test max_values cut_off state
 #do_suite(10, 2, 30, 20, 15, 0)
-do_suite(100, 200, 100, 200, 10, 3)
+state = 5
+
+do_suite(100, 500, 100, 200, 10, state)
+do_suite(250, 500, 100, 300, 15, state)
+do_suite(500, 500, 100, 400, 17, state)
+do_suite(1000, 500, 100, 500, 20, state)
+#do_suite(2500, 500, 100, 600, 23, state)
+#do_suite(5000, 500, 100, 700, 25, 0)
+#do_suite(7500, 500, 100, 800, 27, 0)
+#do_suite(10000, 500, 100, 900, 30, 0)
 
 """
 point_list = [(0,0), (20, 0), (4, -5), (15, -5)]
