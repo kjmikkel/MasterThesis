@@ -18,61 +18,60 @@
  
 \subfloat[Initial state]{\label{fig:graphTop1}
 \begin{tikzpicture}[scale=\scale]
-   \node[vertex] (a) at (0,0) {a};   
-   \node[vertex] (c) at (2,0) {c};    
+  \node[vertex] (a) at (0,0) {a};   
+  \node[vertex] (c) at (2,0) {c};    
 
-   \begin{scope}
-        \clip \firstradius;
-        \fill[filled] \secondradius;
-    \end{scope}
+  \begin{scope}
+    \clip \firstradius;
+    \fill[filled] \secondradius;
+  \end{scope}
     
-    % Has to be defined here, or it will be overwritten 
-    \node[vertex] (b) at (1,0) {b};   
+  % Has to be defined here, or it will be overwritten 
+  \node[vertex] (b) at (1,0) {b};   
  
-    \draw[outline] \firstradius node {};
-    \draw[outline] \secondradius node {};
+  \draw[outline] \firstradius node {};
+  \draw[outline] \secondradius node {};
     
-    \path[edge] (a) -- (b);
-    \path[edge] (b) -- (c);
+  \path[edge] (a) -- (b);
+  \path[edge] (b) -- (c);
 \end{tikzpicture}}
 % Remove empty line
 \subfloat[Geometrical movement]{\label{fig:graphTop2}
 \begin{tikzpicture}[scale=\scale]
-   \node[vertex] (a) at (0,0) {a};   
-   \node[vertex] (c) at (2,0) {c};    
+  \node[vertex] (a) at (0,0) {a};   
+  \node[vertex] (c) at (2,0) {c};    
 
-   \begin{scope}
-        \clip \firstradius;
-        \fill[filled] \secondradius;
-    \end{scope}
+  \begin{scope}
+    \clip \firstradius;
+    \fill[filled] \secondradius;
+  \end{scope}
     
-    % Has to be defined here, or it will be overwritten 
-    \node[vertex] (b) at (1.2,0.25) {b};   
+  % Has to be defined here, or it will be overwritten 
+  \node[vertex] (b) at (1.2,0.25) {b};   
  
-    \draw[outline] \firstradius node {};
-    \draw[outline] \secondradius node {};
-    
-    \path[edge] (a) -- (b);
-    \path[edge] (b) -- (c);
+  \draw[outline] \firstradius node {};
+  \draw[outline] \secondradius node {};
+   
+  \path[edge] (a) -- (b);
+  \path[edge] (b) -- (c);
 \end{tikzpicture}
 }
 % Remove empty line
 \subfloat[Topological movement]{\label{fig:graphTop3}
 \begin{tikzpicture}[scale=\scale]
-   \node[vertex] (a) at (0,0) {a};   
-   \node[vertex] (c) at (2,0) {c};    
+  \node[vertex] (a) at (0,0) {a};   
+  \node[vertex] (c) at (2,0) {c};    
 
-   \begin{scope}
-        \clip \firstradius;
-        \fill[filled] \secondradius;
-    \end{scope}
+  \begin{scope}
+    \clip \firstradius;
+    \fill[filled] \secondradius;
+  \end{scope}
     
-    % Has to be defined here, or it will be overwritten 
-    \node[vertex] (b) at (1.8,0.5) {b};   
+  % Has to be defined here, or it will be overwritten 
+  \node[vertex] (b) at (1.8,0.5) {b};   
  
-    \draw[outline] \firstradius node {};
-    \draw[outline] \secondradius node {};
+  \draw[outline] \firstradius node {};
+  \draw[outline] \secondradius node {};
     
-    \path[edge] (b) -- (c);
-\end{tikzpicture}
-}
+  \path[edge] (b) -- (c);
+\end{tikzpicture}}

@@ -24,56 +24,56 @@
 
 \subfloat[Initial deployment]{\label{fig:better_route1}
 \begin{tikzpicture} 
-       % The source and the sink, and the new node
-       \foreach \pos/\name in {{(0,0)/s}, {(3, 0)/t}} {
-         \node[vertex] (\name) at \pos {$\name$};
-         }
+  % The source and the sink, and the new node
+  \foreach \pos/\name in {{(0,0)/s}, {(3, 0)/t}} {
+    \node[vertex] (\name) at \pos {$\name$};
+  }
          
-       % The rest of the nodes
-       \foreach \pos/\name in \network {
-         \node[invis-vertex] (\name) at \pos {};
-         \node[vertex] () at \pos {};
-       }
+  % The rest of the nodes
+  \foreach \pos/\name in \network {
+    \node[invis-vertex] (\name) at \pos {};
+    \node[vertex] () at \pos {};
+  }
 
-       \begin{pgfonlayer}{background}
-        \foreach \source/ \dest in \connect
-          \path[selected edge] (\source) -- (\dest);
-       \end{pgfonlayer}
+  \begin{pgfonlayer}{background}
+    \foreach \source/ \dest in \connect
+      \path[selected edge] (\source) -- (\dest);
+  \end{pgfonlayer}
 
-       % All the connections but i and j
-       \foreach \source/\sink in \connect
-         \path[edge] (\source) -- (\sink);
+  % All the connections but i and j
+  \foreach \source/\sink in \connect
+    \path[edge] (\source) -- (\sink);
        
-       \foreach \source/\sink in \connectExtra
-         \path[edge] (\source) -- (\sink);
+  \foreach \source/\sink in \connectExtra
+    \path[edge] (\source) -- (\sink);
 \end{tikzpicture}}
 % Remove empty line
 \subfloat[New node added]{\label{fig:better_route2}
 \begin{tikzpicture} 
-       % The source and the sink, and the new node
-       \foreach \pos/\name in {{(0,0)/s}, {(3, 0)/t}, {(1.5, -0.4)/*}} {
-         \node[vertex] (\name) at \pos {$\name$};
-         }
+  % The source and the sink, and the new node
+  \foreach \pos/\name in {{(0,0)/s}, {(3, 0)/t}, {(1.5, -0.4)/*}} {
+    \node[vertex] (\name) at \pos {$\name$};
+  }
          
-       % The rest of the nodes
-       \foreach \pos/\name in \network {
-         \node[invis-vertex] (\name) at \pos {};
-         \node[vertex] () at \pos {};
-         }
+  % The rest of the nodes
+  \foreach \pos/\name in \network {
+    \node[invis-vertex] (\name) at \pos {};
+    \node[vertex] () at \pos {};
+  }
 
-       \begin{pgfonlayer}{background}
-        \foreach \source/ \dest in {s/-, -/i, i/*, */j, j/h, h/t}
-          \path[selected edge] (\source) -- (\dest);
-       \end{pgfonlayer}
+  \begin{pgfonlayer}{background}
+    \foreach \source/ \dest in {s/-, -/i, i/*, */j, j/h, h/t}
+      \path[selected edge] (\source) -- (\dest);
+  \end{pgfonlayer}
 
-       % All the connections but i and j
-       \foreach \source/\sink in \connect
-         \path[edge] (\source) -- (\sink);
+  % All the connections but i and j
+  \foreach \source/\sink in \connect
+    \path[edge] (\source) -- (\sink);
        
-       \foreach \source/\sink in \connectExtra
-         \path[edge] (\source) -- (\sink);
+  \foreach \source/\sink in \connectExtra
+    \path[edge] (\source) -- (\sink);
        
-       \foreach \source/\sink in {i/*, */j}
-         \path[edge] (\source) -- (\sink);
+  \foreach \source/\sink in {i/*, */j}
+    \path[edge] (\source) -- (\sink);
 
 \end{tikzpicture}}

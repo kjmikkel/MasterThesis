@@ -31,17 +31,17 @@
 {\pgfpointorigin}{\pgfpoint{\ss}{\ss}}
 {\pgfpoint{\ss}{\ss}}
 {
-    \pgfpathmoveto{\pgfpoint{0cm}{0cm}}
-    \pgfpathlineto{\pgfpoint{\ss}{\ss}}
-    \pgfpathlineto{\pgfpoint{\ss}{\ssh}}
-    \pgfpathlineto{\pgfpoint{\ssh}{0cm}}
-    \pgfpathclose%
-    \pgfusepath{fill}
-    \pgfpathmoveto{\pgfpoint{0cm}{\ssh}}
-    \pgfpathlineto{\pgfpoint{0cm}{\ss}}
-    \pgfpathlineto{\pgfpoint{\ssh}{\ss}}
-    \pgfpathclose%
-    \pgfusepath{fill}
+  \pgfpathmoveto{\pgfpoint{0cm}{0cm}}
+  \pgfpathlineto{\pgfpoint{\ss}{\ss}}
+  \pgfpathlineto{\pgfpoint{\ss}{\ssh}}
+  \pgfpathlineto{\pgfpoint{\ssh}{0cm}}
+  \pgfpathclose%
+  \pgfusepath{fill}
+  \pgfpathmoveto{\pgfpoint{0cm}{\ssh}}
+  \pgfpathlineto{\pgfpoint{0cm}{\ss}}
+  \pgfpathlineto{\pgfpoint{\ssh}{\ss}}
+  \pgfpathclose%
+  \pgfusepath{fill}
 }
 \tikzstyle{invis}=[circle,fill=white, minimum size=10pt,inner sep=0pt]
 \tikzstyle{vertex}=[circle,fill=black!25,minimum size=10pt,inner sep=0pt]
@@ -51,105 +51,100 @@
 \tikzstyle{outsideRange}=[diamond, fill=black!100,  minimum size=10pt, inner sep=0pt]
 \tikzstyle{outsideRangeTwo}=[diamond, fill=black!25,  minimum size=10pt, inner sep=0pt]
 
-
 \subfloat[Only WBS]{\label{fig:wbs1}
 \begin{tikzpicture}[scale=\scale]
-   % Rectangles in range
-   \foreach \pos/\name in \insideRange {
-     \node[insideRange] (\name) at \pos {};
-     \draw[outline] \pos circle (\radius);
-   }
+  % Rectangles in range
+  \foreach \pos/\name in \insideRange {
+    \node[insideRange] (\name) at \pos {};
+    \draw[outline] \pos circle (\radius);
+  }
 
-   % Rectangles outside range 
-   \foreach \pos/\name in \outsideRange {
-     \node[outsideRange] (\name) at \pos {};
-     \draw[outline] \pos circle (\radius);
-   }
+  % Rectangles outside range 
+  \foreach \pos/\name in \outsideRange {
+    \node[outsideRange] (\name) at \pos {};
+    \draw[outline] \pos circle (\radius);
+  }
 
-   % Special range cases 
-   \foreach \pos/\name in \specialRange {   
-     \filldraw[pattern=stripes, pattern color=black!60] \pos circle (5pt);
-     \draw[outline] \pos circle (\radius);
-     }
+  % Special range cases 
+  \foreach \pos/\name in \specialRange {   
+    \filldraw[pattern=stripes, pattern color=black!60] \pos circle (5pt);
+    \draw[outline] \pos circle (\radius);
+  }
 
-   % Basestation
-   \foreach \pos/\name in \baseStation {
-     \node[vertex] (\name) at \pos {\scriptsize{${\name}$}};
-     \draw[outline] \pos circle (\largeRadius);
-   }
+  % Basestation
+  \foreach \pos/\name in \baseStation {
+    \node[vertex] (\name) at \pos {\scriptsize{${\name}$}};
+    \draw[outline] \pos circle (\largeRadius);
+  }
 
-   \foreach \start/\end in \connecOne {
-     \path[edge] (\start) -- (\end);
-   }    
+  \foreach \start/\end in \connecOne {
+    \path[edge] (\start) -- (\end);
+  }    
 \end{tikzpicture}}
 % Remove empty line
 \subfloat[WBS with forwarding stations]{\label{fig:wbs2}
 \begin{tikzpicture}[scale=\scale]
-   % Rectangles in range
-   \foreach \pos/\name in \insideRange {
-     \node[insideRange] (\name) at \pos {};
-      %    \draw[outline] \pos circle (\radius);
-   }
+  % Rectangles in range
+  \foreach \pos/\name in \insideRange {
+    \node[insideRange] (\name) at \pos {};
+  % \draw[outline] \pos circle (\radius);
+  }
 
-   % Rectangles outside range 
-   \foreach \pos/\name in \outsideRange {
-     \node[outsideRangeTwo] (\name) at \pos {};
-     %     \draw[outline] \pos circle (\radius);
-   }
+  % Rectangles outside range 
+  \foreach \pos/\name in \outsideRange {
+    \node[outsideRangeTwo] (\name) at \pos {};
+  % \draw[outline] \pos circle (\radius);
+  }
 
-   % Special range cases 
-   \foreach \pos/\name in \specialRange {   
-     %\node[invis] (\name) at \pos {};
+  % Special range cases 
+  \foreach \pos/\name in \specialRange {   
      \node[vertex] (\name) at \pos {};
-%     \filldraw[pattern=stripes, pattern color=black!60] \pos circle (5pt);
-  %        \draw[outline] \pos circle (\radius);
-     }
+  }
 
-   % Basestation
-   \foreach \pos/\name in \baseStation {
-     \node[vertex] (\name) at \pos {\scriptsize{$\name$}};
-     \draw[outline] \pos circle (\largeRadius);
-   }
+  % Basestation
+  \foreach \pos/\name in \baseStation {
+    \node[vertex] (\name) at \pos {\scriptsize{$\name$}};
+    \draw[outline] \pos circle (\largeRadius);
+  }
 
-   \foreach \pos/\name in \forwardStations {
-     \node[vertex] (\name) at \pos {F};
-     \draw[outline] \pos circle (1.5cm);
-   }
+  \foreach \pos/\name in \forwardStations {
+    \node[vertex] (\name) at \pos {F};
+    \draw[outline] \pos circle (1.5cm);
+  }
 
-   \foreach \start/\end in \connecTwo {
-     \path[edge] (\start) -- (\end);
-   }    
+  \foreach \start/\end in \connecTwo {
+    \path[edge] (\start) -- (\end);
+  }    
 \end{tikzpicture}}
 % Remove empty line
 \subfloat[WBS and Ad-Hoc network]{\label{fig:wbs3}
 \begin{tikzpicture}[scale=\scale]
-   % Rectangles in range
-   \foreach \pos/\name in \insideRange {
-     \node[insideRange] (\name) at \pos {};
-     \draw[outline] \pos circle (\radius);
-   }
+  % Rectangles in range
+  \foreach \pos/\name in \insideRange {
+    \node[insideRange] (\name) at \pos {};
+    \draw[outline] \pos circle (\radius);
+  }
 
-   % Rectangles outside range 
-   \foreach \pos/\name in \outsideRange {
-     \node[outsideRangeTwo] (\name) at \pos {};
-     \draw[outline] \pos circle (\radius);
-   }
-   \node[outsideRange] (e) at (0, -2.3) {};
+  % Rectangles outside range 
+  \foreach \pos/\name in \outsideRange {
+    \node[outsideRangeTwo] (\name) at \pos {};
+    \draw[outline] \pos circle (\radius);
+  }
+  \node[outsideRange] (e) at (0, -2.3) {};
 
-   % Special range cases 
-   \foreach \pos/\name in \specialRange {   
-          \node[vertex] (\name) at \pos {};
- %    \filldraw[pattern=stripes, pattern color=black!60] \pos circle (5pt);
-     \draw[outline] \pos circle (\radius);
-     }
+  % Special range cases 
+  \foreach \pos/\name in \specialRange {   
+    \node[vertex] (\name) at \pos {};
+    \draw[outline] \pos circle (\radius);
+  }
 
-   % Basestation
-   \foreach \pos/\name in \baseStation {
-     \node[vertex] (\name) at \pos {\scriptsize{$\name$}};
-     \draw[outline] \pos circle (\largeRadius);
-   }
+  % Basestation
+  \foreach \pos/\name in \baseStation {
+    \node[vertex] (\name) at \pos {\scriptsize{$\name$}};
+    \draw[outline] \pos circle (\largeRadius);
+  }
 
-   \foreach \start/\end in \connecThree {
-     \path[edge] (\start) -- (\end);
-   }    
+  \foreach \start/\end in \connecThree {
+    \path[edge] (\start) -- (\end);
+  }    
 \end{tikzpicture}}

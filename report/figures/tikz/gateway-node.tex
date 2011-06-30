@@ -31,32 +31,32 @@
 \tikzstyle{edge} = [draw, thick, -]
 
 \begin{tikzpicture} 
-       % The source and the sink
-       \foreach \pos/\name in \sourceSink {
-         \node[vertex] (\name) at \pos {$\name$};
-         }
+  % The source and the sink
+  \foreach \pos/\name in \sourceSink {
+    \node[vertex] (\name) at \pos {$\name$};
+  }
 
-       % The rest of the nodes
-       \foreach \pos/\name in \blankNodes {
-         \node[invis-vertex] (\name) at \pos {};
-         \draw[outline] \pos circle (5pt);
-         \node[blank] () at \pos {};
-         }
+  % The rest of the nodes
+  \foreach \pos/\name in \blankNodes {
+    \node[invis-vertex] (\name) at \pos {};
+    \draw[outline] \pos circle (5pt);
+    \node[blank] () at \pos {};
+  }
 
-         % The cluster heads
-       \foreach \pos/\name in \clusterHeads {
-         \node[clusterHead] (\name) at \pos {CH};
-         \draw[outline] \pos circle (\radius);
-         }
+  % The cluster heads
+  \foreach \pos/\name in \clusterHeads {
+    \node[clusterHead] (\name) at \pos {CH};
+    \draw[outline] \pos circle (\radius);
+  }
 
-         % The gateway nodes
-       \foreach \pos/\name in \gatewayNodes {
-         \node[invis-vertex] (\name) at \pos {};
-         \node[gateway] () at \pos {};
-         }
+  % The gateway nodes
+  \foreach \pos/\name in \gatewayNodes {
+    \node[invis-vertex] (\name) at \pos {};
+    \node[gateway] () at \pos {};
+  }
 
-       % All the connections
-       \foreach \source/\sink in \connect
-         \path[edge] (\source) -- (\sink);
+  % All the connections
+  \foreach \source/\sink in \connect
+    \path[edge] (\source) -- (\sink);
        
- \end{tikzpicture}
+\end{tikzpicture}

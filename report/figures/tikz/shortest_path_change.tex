@@ -10,6 +10,7 @@
 \tikzstyle{weight} = [font=\small]
 
 \tikzstyle{selected edge} = [draw,line width=5pt,-,gray!50]
+\tikzstyle{invis-vertex}=[circle,fill=white!100,minimum size=0pt, inner sep=0pt]
 
 \colorlet{circle edge}{black!50}
 \tikzset{
@@ -18,47 +19,50 @@
 
 \subfloat[Initial]{\label{fig:short_path1}
 \begin{tikzpicture}
-    % We draw the source and the sink, and the node that moves around
-    \foreach \pos/\name in {{(1,1.5)/s}, {(4,3)/t}, {(3, 3)/*}} 
-        \node[vertex] (\name) at \pos {$\name$};
+  % We draw the source and the sink, and the node that moves around
+  \foreach \pos/\name in {{(1,1.5)/s}, {(4,3)/t}, {(3, 3)/*}} { 
+    \node[invis-vertex] (\name-) at \pos {};
+    \node[vertex] (\name) at \pos {$\name$};
+  }
     
-      % First we draw the rest of the vertices
-    \foreach \pos/\name in \network {
-        \node[invis-vertex] (\name) at \pos {};
-        \node[vertex] () at \pos {};
-        }
+  % First we draw the rest of the vertices
+  \foreach \pos/\name in \network {
+    \node[invis-vertex] (\name) at \pos {};
+    \node[vertex] () at \pos {};
+  }
    
-     % Connect vertices with edges and draw weights
-    \foreach \source/ \dest in \baseConnect
-        \path[edge] (\source) -- (\dest);
+  % Connect vertices with edges and draw weights
+  \foreach \source/ \dest in \baseConnect
+    \path[edge] (\source) -- (\dest);
     
-    \foreach \source/ \dest in {*/t}
-        \path[edge] (\source) -- (\dest);
+  \foreach \source/ \dest in {*/t}
+    \path[edge] (\source) -- (\dest);
     
-    \begin{pgfonlayer}{background}
-      \foreach \source/ \dest in {s/a, a/b, b/*, */t}
-          \path[selected edge] (\source) -- (\dest);
-    \end{pgfonlayer}
+  \begin{pgfonlayer}{background}
+    \foreach \source/ \dest in {s-/a, a/b, b/*-, *-/t-}
+      \path[selected edge] (\source) -- (\dest);
+  \end{pgfonlayer}
 \end{tikzpicture}}
 % Remove empty line
 \subfloat[Node $*$ has moved]{\label{fig:short_path2}
 \begin{tikzpicture}
-    % We draw the source and the sink
-    \foreach \pos/\name in {{(1,1.5)/s}, {(4,3)/t}, {(2.5, 3)/*}} 
-            \node[vertex] (\name) at \pos {$\name$};
+  % We draw the source and the sink
+  \foreach \pos/\name in {{(1,1.5)/s}, {(4,3)/t}, {(2.5, 3)/*}} {
+    \node[invis-vertex] (\name-) at \pos {};    
+    \node[vertex] (\name) at \pos {$\name$};
+  }
+  % First we draw the vertices
+  \foreach \pos/\name in \network {
+    \node[invis-vertex] (\name) at \pos {};
+    \node[vertex] () at \pos {};
+  }
 
-    % First we draw the vertices
-    \foreach \pos/\name in \network {
-        \node[invis-vertex] (\name) at \pos {};
-        \node[vertex] () at \pos {};
-        }
+  % Connect vertices with edges and draw weights
+  \foreach \source/ \dest in \baseConnect
+    \path[edge] (\source) -- (\dest);
 
-        % Connect vertices with edges and draw weights
-    \foreach \source/ \dest in \baseConnect
-        \path[edge] (\source) -- (\dest);
-
-    \begin{pgfonlayer}{background}
-      \foreach \source/ \dest in {s/m, m/l, l/k, k/j, j/i, i/h, h/f, f/e, e/d, d/c, c/t}
-          \path[selected edge] (\source) -- (\dest);
-    \end{pgfonlayer}
+  \begin{pgfonlayer}{background}
+    \foreach \source/ \dest in {s-/m, m/l, l/k, k/j, j/i, i/h, h/f, f/e, e/d, d/c, c/t-}
+      \path[selected edge] (\source) -- (\dest);
+  \end{pgfonlayer}
 \end{tikzpicture}}
