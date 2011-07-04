@@ -62,37 +62,48 @@ def make_gateway_graph(clasified_nodes, cutoff):
   (graph, tree) = make_graph.SciPy_KDTree(points, cutoff)
   
   # The initial graph has been made, now we must remove all the nodes that are too close to each other
-
+  """
   ignore = {}
-  too_close = 0.5
-  for point in points
+  too_close = 0.3
+  ignore_count = 0
+
+  for point in points:
     # if we have removed this point before, then we just ignore it
     if ignore.get(point):
+      ignore_count += 1
       continue
     
     # Now we must ensure the node is not too close to the other nodes
     close = tree.query_ball_point(point, too_close)
+
     for too_close_node in close:
-      ignore[too_close] = 1
+#      ignore_node = points[too_close_node]
+      ignore_node = 
+      ignore[ignore_node] = 1
 
   # At this point we have found all the points we need to ignore, now we need to remove them from the data we are going to build the new graph from
-
+  print ignore_count
   point_dict = dict([(p, 1) for p in points])
   
+  print len(points), len(ignore.keys())
+
   for del_point in ignore.keys():
     del point_dict[del_point]
 
   points = point_dict.keys()
+  print points
 
   (graph, tree) = make_graph.SciPy_KDTree(points, cutoff)
+  """
   
   gabriel_graph = make_graph.gabriel_graph(graph, tree, points)
 
   save_pickle_file(saved_graphs_name, gabriel_graph)
 
 def find_node_and_gateway(D, node, node_set, node_gateway, unit_cutoff):
-  if D[node] <= unit_cutoff:
-    if D[node] < unit_cutoff:
+  distance = D.get(node)
+  if distance and distance <= unit_cutoff:
+    if distance < unit_cutoff:
       node_set.append(node)
     else:
       node_gateway.append(node)
@@ -104,38 +115,45 @@ def find_usefull_points(clasified_nodes, unit_cutoff):
   node1 = clasified_nodes[0][0:2]
   node2 = clasified_nodes[1][0:2]
 
-  print node1, node2  
+#  print node1, node2  
 
-  (D1, _) = dijkstra.UnitDijkstra(graph, node1)
+  (D1, P1) = dijkstra.UnitDijkstra(graph, node1)
   (D2, _) = dijkstra.UnitDijkstra(graph, node2)
 
   nodes = graph.keys()
+
+  print 'Gateway distance: ' + str(D1[node2]) + ', ' + str(dijkstra.shortestPathCheap(P1, node1, node2))
   
   # Nodes there are less than the cutoff away from one of the nodes
   node1_set = []
   node2_set = []
   
   # Nodes that are exactly the cutoff distance away.
-  node1_gateway = []
-  node2_gateway = []
+  node1_gateways = []
+  node2_gateways = []
 
   for node in nodes:
     if node in (node1, node2):
       continue
 
-    find_node_and_gateway(D1, node, node1_set, node1_gateway, unit_cutoff)
-    find_node_and_gateway(D2, node, node2_set, node2_gateway, unit)_cutoff)
+    find_node_and_gateway(D1, node, node1_set, node1_gateways, unit_cutoff)
+    find_node_and_gateway(D2, node, node2_set, node2_gateways, unit_cutoff)
 
-  print node1_gateway, node2_gateway
+#  print node1_gateway, node2_gateway
 
   node1_gateway_node = None
   node2_gateway_node = None
+  
+  min_dist = 50
 
-  for gateway1 in node1_gateway:
-    (gateway_distance, _) = dijkstra.UnitDijkstra(graph, node1)
+  for gateway1 in node1_gateways:
+    (gateway_distance, _) = dijkstra.UnitDijkstra(graph, gateway1)
+
     break_out = False
-    for gateway2 in node2_gateway:
-      if gateway_distance[gateway2] == 1:
+    for gateway2 in node2_gateways:
+      min_dist = min(min_dist, gateway_distance[gateway2])
+
+      if gateway_distance[gateway2] <= 1:
         node1_gateway_node = gateway1
         node2_gateway_node = gateway2
         break_out = True
@@ -143,22 +161,37 @@ def find_usefull_points(clasified_nodes, unit_cutoff):
     if break_out:
       break
   
-  print node1_gateway_node, node2_gateway_node
-  
   # We add the rest of the node to the node set
-  for node in node1_gateway:
-    if node in (node1_gateway_node, node2_gateway_node):
-      continue
+  node1_gateways.remove(node1_gateway_node)
+  node2_gateways.remove(node2_gateway_node)
+
+  for node in node1_gateways:
     node1_set.append(node)
 
-  for node in node2_gateway:
-    if node in (node1_gateway_node, node2_gateway_node):
-      continue
+  for node in node2_gateways:
     node2_set.append(node)
   
-  data_to_save = (node1_set, node2_set, node1_gateway_node, node2_gateway_node)
-  
+  data_to_save = (node1_set, node2_set, node1_gateway_node, node2_gateway_node)  
   save_pickle_file(save_nodes_name, data_to_save)
+
+def make_latex(clasified_nodes, cutoff):
+  (node1_set, node2_set, node1_gateway_node, node2_gateway_node) = load_pickle_file(save_nodes_name)
+
+  # I make the list that will be used for the final graph
+  points = []
+  points.extend(node1_set)
+  points.extend(node2_set)
+  points.append(node1_gateway_node)
+  points.append(node2_gateway_node)
+
+  (graph, tree) = make_graph.SciPy_KDTree(points, unit_cutoff)
+  
+  gabriel_graph = make_graph.gabriel_graph(graph, tree, points)
+
+  ignore_list = {}
+  for point in points:
+    
+  
 
 def gateway_suite(number_points, max_value, cutoff, unit_cutoff, state):
   if state <= 0:
@@ -170,5 +203,7 @@ def gateway_suite(number_points, max_value, cutoff, unit_cutoff, state):
   if state <= 2:
     find_usefull_points(source_sink, unit_cutoff)
   
+  if state <= 3:
+    make_latex(souce_sink, unit_cutoff)
 
-gateway_suite(250, 100, 1.5, 3, 1)
+gateway_suite(200, 150, 1.5, 3, 3)
