@@ -9,7 +9,7 @@ for cmd_folder in folders:
 
 import make_graph, dijkstra, visualize_graph
 
-source_sink = [(0.75, 2.5, 's'), (5, 3, 't')]
+source_sink = [(0.75, 3, 's'), (5, 3, 't')]
 
 saved_points_name = 'gateway/gateway_points'
 saved_graphs_name = 'gateway/gateway_graph'
@@ -122,7 +122,7 @@ def find_usefull_points(clasified_nodes, unit_cutoff):
 
   nodes = graph.keys()
 
-  print 'Gateway distance: ' + str(D1[node2]) + ', ' + str(dijkstra.shortestPathCheap(P1, node1, node2))
+  print 'Gateway distance: ' + str(D1[node2])
   
   # Nodes there are less than the cutoff away from one of the nodes
   node1_set = []
@@ -170,27 +170,121 @@ def find_usefull_points(clasified_nodes, unit_cutoff):
 
   for node in node2_gateways:
     node2_set.append(node)
-  
+
   data_to_save = (node1_set, node2_set, node1_gateway_node, node2_gateway_node)  
   save_pickle_file(save_nodes_name, data_to_save)
 
+def list_points(avoid_point, work_points, name_dict):
+  points_str = '{'
+  for point in work_points:
+    if point == avoid_point:
+      continue
+    points_str += '{' + print_point(point) + '/' + name_dict[point] + '}, '
+  
+  points_str = points_str[0:-2] + '}'
+  return points_str  
+
+def print_point(point):
+  x_coor = str(point[0])
+  y_coor = str(point[1])
+
+  if len(x_coor) > 4:
+    x_coor = x_coor[0:4]
+
+  if len(y_coor) > 4:
+    y_coor = y_coor[0:4]
+ 
+  return '(' + x_coor + ', ' + y_coor + ')'
+
 def make_latex(clasified_nodes, cutoff):
-  (node1_set, node2_set, node1_gateway_node, node2_gateway_node) = load_pickle_file(save_nodes_name)
+  (node1_set, node2_set, gateway_node1, gateway_node2) = load_pickle_file(save_nodes_name)
+
+  source = clasified_nodes[0][0:2]
+  sink   = clasified_nodes[1][0:2]
 
   # I make the list that will be used for the final graph
   points = []
   points.extend(node1_set)
   points.extend(node2_set)
-  points.append(node1_gateway_node)
-  points.append(node2_gateway_node)
+  points.append(gateway_node1)
+  points.append(gateway_node2)
+  points.append(source)
+  points.append(sink)
 
-  (graph, tree) = make_graph.SciPy_KDTree(points, unit_cutoff)
-  
+  (graph, tree) = make_graph.SciPy_KDTree(points, cutoff)  
   gabriel_graph = make_graph.gabriel_graph(graph, tree, points)
 
-  ignore_list = {}
+  # We name the nodes
+  letter = ord('a')
+  subfix = 1
+  
+  name_dict = {}
+
   for point in points:
     
+    # s and t are reserved letters
+    if chr(letter) == 's' and subfix == 1:
+      letter += 2
+
+    if subfix == 1:
+      name_dict[point] = chr(letter)
+    else:
+      name_dict[point] = chr(letter) + str(subfix)
+
+    letter += 1
+    if letter > ord('z'):
+      letter = ord('a')
+      subfix += 1
+  
+  name_dict[source] = 's'
+  name_dict[sink]   = 't'
+
+  # now we have named the points
+
+  ignore_dict = {}
+  final_edge_dict = {}
+
+  for outer_point in gabriel_graph:
+    outer_name = name_dict[outer_point]
+    local_edges = []
+       
+    for inner_point in gabriel_graph[outer_point]:
+      
+      inner_name = name_dict[inner_point]
+      
+      # If the edge is already in the list then we ignore it
+      if ignore_dict.get((outer_name, inner_name)):
+        continue
+      
+      local_edges.append(inner_name)
+
+      # Belt and suspenders
+      ignore_dict[(outer_name, inner_name)] = 1
+      ignore_dict[(inner_name, outer_name)] = 1
+    
+    final_edge_dict[outer_name] = local_edges  
+  
+  # Now we make the list of points and their locations
+  source_sink = '\\def\\clusterHeads{{' + print_point(source) + '/s}, {' + print_point(sink) + '/t}}'
+  gateway     = '\\def\\gateway{{' + print_point(gateway_node1) + '/' + name_dict[gateway_node1] +'},' + '{' + print_point(gateway_node2) + '/' + name_dict[gateway_node2] + '}}'  
+
+  source_nodes = '\\def\\nodesOne' + list_points([source], node1_set, name_dict)
+  sink_nodes   = '\\def\\nodesTwo' + list_points([sink  ], node2_set, name_dict)
+  
+  print source_sink
+  print gateway
+  print source_nodes
+  print sink_nodes
+  
+  # Now we make the connections of the graph
+  graph_edges = '\\def\\connect{'
+  for outer_name in final_edge_dict.keys():
+    for inner_name in final_edge_dict[outer_name]:
+      graph_edges += outer_name + '/' + inner_name + ', '
+  
+  graph_edges = graph_edges[0:-2] + '}'
+  print graph_edges
+
   
 
 def gateway_suite(number_points, max_value, cutoff, unit_cutoff, state):
@@ -204,6 +298,6 @@ def gateway_suite(number_points, max_value, cutoff, unit_cutoff, state):
     find_usefull_points(source_sink, unit_cutoff)
   
   if state <= 3:
-    make_latex(souce_sink, unit_cutoff)
+    make_latex(source_sink, cutoff)
 
 gateway_suite(200, 150, 1.5, 3, 3)
