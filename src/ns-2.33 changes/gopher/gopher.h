@@ -94,9 +94,10 @@ using namespace std;
 
 #define GOPHERH_DATA_GREEDY 0	/* gopher mode data packet */
 #define GOPHERH_DATA_PERI   1	/* perimeter mode data packet */
-#define GOPHERH_PPROBE      2	/* perimeter probe packet */
-#define GOPHERH_BEACON      3     /* liveness beacon packet */
-#define GOPHERH_BEACON_REQ  4     /* neighbor request */
+#define GOAFR_DATA_ADVANCE  2   /* advance to the node closest to the sink*/
+#define GOPHERH_PPROBE      3	/* perimeter probe packet */
+#define GOPHERH_BEACON      4     /* liveness beacon packet */
+#define GOPHERH_BEACON_REQ  5     /* neighbor request */
 
 #define GOPHER_ROUTE_VERBOSE 1   /* should shortest route be aquired and */
 
@@ -129,6 +130,7 @@ struct hdr_gopher {
     struct PeriEnt hops_[MAX_PERI_HOPS_STATIC];
     struct PeriEnt peript_; // starting point
     struct PeriEnt perips_; // intersection point
+ 
     nsaddr_t periptip_[3];
     int nhops_;
     int currhop_;

@@ -28,9 +28,9 @@
   $Id: gpsr.cc,v 1.92 2003/01/24 11:01:07 lochert Exp $
 */
 
-// Modified by Mikkel Kjær Jensen to Gopher
+// Modified by Mikkel Kjær Jensen to GOAFR
 
-// GOPHER for ns2 w/wireless extensions
+// GOAFR for ns2 w/wireless extensions
 
 #include <math.h>
 #include <stdlib.h>
@@ -575,6 +575,7 @@ GOPHERNeighbEnt::planarize(GOPHERNeighbTable *nt, int algo,
 	double uvdist, canddist, midx=0.0, midy=0.0;
 
 	uvdist = distance(x, y, z, this->x, this->y, this->z);
+	// This switch is just here for initial setup, and to weed out weird planar requests
 	switch(algo) {
 	case PLANARIZE_RNG:
 		break;
@@ -1395,6 +1396,23 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			break;
 	    }
 	    
+        /* Added to GOAFR */
+		// we find the current location 
+		double myx, myy, myz;
+        mn_->getLoc(&myx, &myy, &myz);
+        
+        if (!p->ellipse->point_in_ellipsis(myx, myy)) {
+		  trace("Hit the bounds of the ellipse at %f and %f", myx, myy);
+          // If we are already doing a counter clockwise we should stop, and otherwise we should begin
+		  ntab_->counter_clock = !ntab_->counter_clock;
+		  
+          if(p->ellipse->hit_edge()) {
+			  // If this is the second time we hit the edge, then we should expand the ellipses
+			  double major = p->ellipse->get_major();
+			  p->ellipse->change_major(2 * major);
+		  }
+        }
+        /*Stop added to GOAFR*/
 	    // try to find the next best neighbor
 	    if (use_congestion_control_)
 			ne = ntab_->ent_findshortest_cc(mn_, iph->dx_, iph->dy_, iph->dz_, cc_alpha_);
@@ -1419,7 +1437,7 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
         
 		else {
 	        
-			// there seems to be no gopher neighbor
+			// there seems to be no greedy neighbor
 			// we send a beacon request and delay the pkt the first time
 			// should the new info be of no use, we'll process it further
 			if (use_reactive_beacon_) {
@@ -1478,6 +1496,8 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					gopherh->perips_.x = gopherh->peript_.x;
 					gopherh->perips_.y = gopherh->peript_.y;
 					gopherh->perips_.z = gopherh->peript_.z;
+					// Add the ip adress
+					gopherh->perips_.ip = mn_->address();
 
 					// mark ips of edge endpoints
 					gopherh->periptip_[0] = gopherh->hops_[0].ip;        // prev edge on peri
@@ -1577,7 +1597,7 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 		}
 	    break;
 	    /********************************************
-	     *end gopher
+	     *end greedy
 	     *******************************************/
 
 	case GOPHERH_DATA_PERI:
@@ -1604,27 +1624,43 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			/** to resume gopher forwarding, this *node* must be closer than
 				the point where the packet entered peri mode. */
 			mn_->getLoc(&myx, &myy, &myz);
-			double difference = distance(gopherh->peript_.x, gopherh->peript_.y, gopherh->peript_.z,
+/*			
+            double difference = distance(gopherh->peript_.x, gopherh->peript_.y, gopherh->peript_.z,
 										 iph->dx_, iph->dy_, iph->dz_) - 
 				distance(myx, myy, myz, iph->dx_, iph->dy_, iph->dz_);
-
+*/
+			// We record when we arrive at a node that is closer to the destination
 			if ((distance(myx, myy, myz, iph->dx_, iph->dy_, iph->dz_) <
 				distance(gopherh->peript_.x, gopherh->peript_.y, gopherh->peript_.z,
-						 iph->dx_, iph->dy_, iph->dz_)) && difference > 0.5) 
+						 iph->dx_, iph->dy_, iph->dz_))) 
 				{
+
+				gopherh->perips_.ip = mn_->address();
+				gopherh->perips_.x = myx;
+				gopherh->perips_.y = myy;
+				gopherh->perips_.z = myz;
+                
+
+				/*
+				  Add this stuff in when we arrive
+					
 				cmh->size() -= hdr_size(p); // strip data peri header
 				gopherh->mode_ = GOPHERH_DATA_GREEDY;
 				cmh->size() += hdr_size(p); // add data gopher header
-				/* always add back (- - is +) 12 bytes: if use_implicit_beacon_,
+				
+				 always add back (- - is +) 12 bytes: if use_implicit_beacon_,
 				   src added 12 to size, don't re-add hops_[0]; otherwise,
-				   still don't want to count hops_[0]. */
+				   still don't want to count hops_[0]. 
+				
 				gopherh->currhop_ = 0;
 				gopherh->nhops_ = 0;
+				
 				// recursive, but must call target_->recv in callee frame
 				trace("VSM->G %f _%d_ [%d -> %d]", now, mn_->address(), iph->saddr(), iph->daddr());
 		
 				forwardPacket(p);
 				return;
+				*/
 			}
 
 			if(use_planar_){
@@ -1643,17 +1679,21 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 
 					/** drop if we've looped on this perimeter:
 						are about to revisit the first edge we took on it */
+					// WE HAVE RETUREND TO THE START POINT! -- GOAFR
 					if ((gopherh->periptip_[1] == mn_->address()) &&
 						(gopherh->periptip_[2] == ne->dst)) {
 
 						if(gopherh->geoanycast)
 							{
 								// wk forwardPacket, finished perimeter 
-								// without finding target
+								// Now we find the node closest to the destination
+								gopherh->mode_ = GOAFR_DATA_ADVANCE; // put packet in advance mode
+
 								locservice_->dropPacketCallback(p);
 								if (p==NULL) { return; }
 							}
 
+						// The graph has changed
 						TRACE_CONN(p,addr(),addr(),HDR_IP(p)->daddr());
 						drop(p, DROP_RTR_NO_ROUTE);
 						return;
@@ -1816,10 +1856,251 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			abort();
 	    }
 	    break;
+	case GOAFR_DATA_ADVANCE:
+		// The node will now advance to the node that I found to be the closest to the sink
+
+		// first of all, look if we're neighbor to dst - just in case
+	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
+			cmh->size() -= hdr_size(p); // strip data peri header
+			gopherh->mode_ = GOPHERH_DATA_GREEDY;
+			cmh->size() += hdr_size(p); // strip data gopher header
+			gopherh->nhops_ = 1;
+			gopherh->currhop_ = 1;
+			gopherh->hops_[1].ip = ne->dst;
+			cmh->next_hop_ = ne->dst;
+			break;
+	    }
+
+	    if (use_peri_) {
+	      
+			double myx, myy, myz, closerx, closery;
+		    closerx = gopherh->perips_.x;
+			closery = gopherh->perips_.y;
+
+			// non-source-routed perimeter forwarding rule
+			/** to resume gopher forwarding, this *node* must be closer than
+				the point where the packet entered peri mode. */
+			mn_->getLoc(&myx, &myy, &myz);
+			// Cutoff function, when arrive at the closest node
+			if (mn_->address() == gopherh->perips_.ip) {
+				cmh->size() -= hdr_size(p); // strip data peri header
+				gopherh->mode_ = GOPHERH_DATA_GREEDY;
+				cmh->size() += hdr_size(p); // add data gopher header
+				/*
+				 always add back (- - is +) 12 bytes: if use_implicit_beacon_,
+				   src added 12 to size, don't re-add hops_[0]; otherwise,
+				   still don't want to count hops_[0]. 
+				*/
+				gopherh->currhop_ = 0;
+				gopherh->nhops_ = 0;
+				
+				// recursive, but must call target_->recv in callee frame
+				trace("VSM->G %f _%d_ [%d -> %d]", now, mn_->address(), iph->saddr(), iph->daddr());
+		
+				forwardPacket(p);
+				return;
+				
+			}
+
+			if(use_planar_){
+				// forward along current face, or change faces where appropriate
+				/* don't choose *any* edge--only consider edges on the
+				   face we're forwarding on at the moment. */
+				for(int i=0; i<gopherh->nhops_; i++)
+					trace("Vne %.8f _%d_ <- %d", CURRTIME, mn_->address(), gopherh->hops_[i].ip);
+
+				ne = ntab_->ent_finddst(gopherh->hops_[gopherh->nhops_-1].ip);
+				if(ne){
+					double fromx, fromy, fromz;
+					ne = ntab_->ent_findnext_onperi(mn_,
+													gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z,
+													use_planar_);
+
+					/** drop if we've looped on this perimeter:
+						are about to revisit the first edge we took on it */
+					// WE HAVE RETUREND TO THE START POINT! -- GOAFR
+					if ((gopherh->periptip_[1] == mn_->address()) &&
+						(gopherh->periptip_[2] == ne->dst)) {
+
+						if(gopherh->geoanycast)
+							{
+								// wk forwardPacket, finished perimeter 
+								// without finding target
+								// NO! NOW WE FIND THE ASCEND!
+								gopherh->mode_ = GOAFR_DATA_ADVANCE; // put packet in peri mode
+
+								locservice_->dropPacketCallback(p);
+								if (p==NULL) { return; }
+							}
+
+						// The graph has changed
+						TRACE_CONN(p,addr(),addr(),HDR_IP(p)->daddr());
+						drop(p, DROP_RTR_NO_ROUTE);
+						return;
+					}
+			
+					// does the candidate next edge have a closer pt?
+					if (!ne) {
+						// no face toward the destination
+						if(gopherh->geoanycast)
+							{
+								// wk forwardPaket
+								locservice_->dropPacketCallback(p);
+								if (p==NULL) { return; }
+							}
+
+						drop(p, DROP_RTR_NO_ROUTE);
+						return;
+					}
+
+					/** face-change(p,t) */
+					if (ne->closer_pt(mn_->address(), myx, myy, myz,
+									  gopherh->peript_.x, gopherh->peript_.y,
+									  gopherh->periptip_[1], gopherh->periptip_[0],
+									  iph->dx_, iph->dy_, &closerx, &closery)) {
+						/* yes. choose a new next hop on the peri pierced by the line
+						   to the destination. */
+						/* several neighboring edges may be cut by line to destination;
+						   choose that cut at the point closest to destination */
+						int counter = 0;
+						while (ne->closer_pt(mn_->address(), myx, myy, myz,
+											 gopherh->peript_.x, gopherh->peript_.y,
+											 gopherh->periptip_[1], gopherh->periptip_[0],
+											 iph->dx_, iph->dy_, &closerx, &closery)) {
+							// fake that ingress edge was edge from ne
+							
+							
+							// re-use single-hop history
+							gopherh->hops_[gopherh->nhops_-1].ip = ne->dst;
+							gopherh->hops_[gopherh->nhops_-1].x = ne->x;
+							gopherh->hops_[gopherh->nhops_-1].y = ne->y;
+							gopherh->hops_[gopherh->nhops_-1].z = ne->z;
+							
+							// record closest point on edge to ne
+							gopherh->perips_.x = closerx;
+							gopherh->perips_.y = closery;
+							gopherh->perips_.z = 0.0;
+							
+							GOPHERNeighbEnt *ne_temp = ntab_->ent_findnext_onperi(mn_, ne->dst, ne->x, ne->y, ne->z, use_planar_);
+							if((ne_temp == NULL) || (ne_temp->dst == ne->dst))
+								break;
+							ne = ne_temp;
+							counter++;
+						}
+
+						// record edge endpt ips
+						gopherh->periptip_[0] = ne->dst; // prev hop
+						gopherh->periptip_[1] = mn_->address(); // self
+						gopherh->periptip_[2] = ne->dst; // next hop
+
+						cmh->next_hop_ = ne->dst;
+						goto finish_pkt;
+					} /* end if(ne->...) */
+				} /*end of if(ne): incoming node isn't in the neighbor-table!!! */
+	    		  
+				// forward to next ccw neighbor from ingress edge
+				/* in theory, a data peri packet received from an unknown neighbor
+				   should serve as a beacon from that neighbor... */
+				/* BUT, don't add the previous hop more than once when we retransmit a
+				   packet--the prev hop information is stale in that case */
+
+				if (ne == NULL) {
+					// XXX might we now be able to forward anyway?? know loc of prev hop.
+					/* we're trying to retransmit a packet,b ut the ingress hop is
+					   gone. drop it. */
+					// a drop due to MAC_CALLBACK. For the moment, inform it
+					if(gopherh->geoanycast)
+						{
+							// wk forwardPaket
+							locservice_->dropPacketCallback(p);
+							if (p==NULL) { return; }
+						}
+					// a drop due to MAC_CALLBACK. For the moment,don't inform it
+					trace("VneNULL %.8f _%d_ <- %d", CURRTIME, mn_->address(), gopherh->hops_[gopherh->nhops_-1].ip);
+					drop(p, DROP_RTR_MAC_CALLBACK);
+					return;
+				}
+				cmh->next_hop_ = ne->dst;
+				if (use_loop_detect_) {
+					gopherh->add_hop(mn_->address(), myx, myy, myz);
+					printf("Warning: This size change has not been modified, yet!\n");
+					cmh->size() += 12;
+				}
+				else {
+					gopherh->hops_[gopherh->nhops_-1].ip = mn_->address();
+					gopherh->hops_[gopherh->nhops_-1].x = myx;
+					gopherh->hops_[gopherh->nhops_-1].y = myy;
+					gopherh->hops_[gopherh->nhops_-1].z = myz;
+				}
+			} // end if(use_planar_)
+			else {
+		
+				// am I the right waypoint?
+				if (gopherh->hops_[gopherh->currhop_].ip == mn_->address()) {
+					// am I the final waypoint?
+					if (gopherh->currhop_ == (gopherh->nhops_-1)) {
+						// yes! return packet to gopher mode
+						ntab_->counter_clock = true; // next peri -> route counterclockwise
+						cmh->size() -= hdr_size(p); // strip data peri header
+						gopherh->mode_ = GOPHERH_DATA_GREEDY;
+						cmh->size() += hdr_size(p); // strip data gopher header
+						gopherh->currhop_ = 0;
+						gopherh->nhops_ = 0;
+						forwardPacket(p);
+						return;
+					}
+					else {
+						// forward using source route...
+						double fromx, fromy, fromz;
+						ne = ntab_->ent_findnext_onperi(mn_,
+														gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z,
+														use_planar_);
+
+						if(!ne){
+							if(gopherh->geoanycast)
+							{
+								// wk forwardPacket 
+								locservice_->dropPacketCallback(p);
+								if (p==NULL) { return; }
+							}
+
+							drop(p, DROP_RTR_NO_ROUTE);
+							return;
+						}
+
+						gopherh->currhop_++;
+						gopherh->hops_[gopherh->currhop_].ip = ne->dst;
+						cmh->next_hop_ = gopherh->hops_[gopherh->currhop_].ip;
+			    
+					}
+				}
+				else {
+					if(gopherh->geoanycast)
+							{
+								// wk forwardPacket
+								locservice_->dropPacketCallback(p);
+								if (p==NULL) { return; }
+							}
+
+					// topology must have changed; I'm not the right hop
+					TRACE_CONN(p,addr(),addr(),HDR_IP(p)->daddr());
+
+					drop(p, DROP_RTR_NO_ROUTE);
+					return;
+				}
+			}
+	    } // end if(use_peri_)
+	    else {
+			fprintf(stderr,
+					"yow! got peri mode packet when not using perimeters!\n");
+			abort();
+	    }
+        break;
 	default:
 	    fprintf(stderr, "yow! got non-data packet in forward_packet()!\n");
 	    abort();
 	    break;
+	
     }
     
  finish_pkt:
@@ -1984,6 +2265,11 @@ GOPHER_Agent::recv(Packet *p, Handler *) {
 			delete[] as;
 			break;
 	    case GOPHERH_DATA_PERI:
+			as = Address::instance().print_nodeaddr(addr());
+			fprintf(stderr, "peri data pkt @ %s:RT_PORT!\n",as); fflush(stderr);
+			delete[] as;
+			break;
+        case GOAFR_DATA_ADVANCE:
 			as = Address::instance().print_nodeaddr(addr());
 			fprintf(stderr, "peri data pkt @ %s:RT_PORT!\n",as); fflush(stderr);
 			delete[] as;
