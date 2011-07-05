@@ -1621,14 +1621,8 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			closery = gopherh->perips_.y;
 
 			// non-source-routed perimeter forwarding rule
-			/** to resume gopher forwarding, this *node* must be closer than
-				the point where the packet entered peri mode. */
 			mn_->getLoc(&myx, &myy, &myz);
-/*			
-            double difference = distance(gopherh->peript_.x, gopherh->peript_.y, gopherh->peript_.z,
-										 iph->dx_, iph->dy_, iph->dz_) - 
-				distance(myx, myy, myz, iph->dx_, iph->dy_, iph->dz_);
-*/
+
 			// We record when we arrive at a node that is closer to the destination
 			if ((distance(myx, myy, myz, iph->dx_, iph->dy_, iph->dz_) <
 				distance(gopherh->peript_.x, gopherh->peript_.y, gopherh->peript_.z,
@@ -1640,27 +1634,6 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				gopherh->perips_.y = myy;
 				gopherh->perips_.z = myz;
                 
-
-				/*
-				  Add this stuff in when we arrive
-					
-				cmh->size() -= hdr_size(p); // strip data peri header
-				gopherh->mode_ = GOPHERH_DATA_GREEDY;
-				cmh->size() += hdr_size(p); // add data gopher header
-				
-				 always add back (- - is +) 12 bytes: if use_implicit_beacon_,
-				   src added 12 to size, don't re-add hops_[0]; otherwise,
-				   still don't want to count hops_[0]. 
-				
-				gopherh->currhop_ = 0;
-				gopherh->nhops_ = 0;
-				
-				// recursive, but must call target_->recv in callee frame
-				trace("VSM->G %f _%d_ [%d -> %d]", now, mn_->address(), iph->saddr(), iph->daddr());
-		
-				forwardPacket(p);
-				return;
-				*/
 			}
 
 			if(use_planar_){
@@ -1677,28 +1650,21 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 													gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z,
 													use_planar_);
 
-					/** drop if we've looped on this perimeter:
-						are about to revisit the first edge we took on it */
-					// WE HAVE RETUREND TO THE START POINT! -- GOAFR
+					// We have returned to the start point, now we go forward -- GOAFR
 					if ((gopherh->periptip_[1] == mn_->address()) &&
 						(gopherh->periptip_[2] == ne->dst)) {
-
-						if(gopherh->geoanycast)
-							{
-								// wk forwardPacket, finished perimeter 
-								// Now we find the node closest to the destination
-								gopherh->mode_ = GOAFR_DATA_ADVANCE; // put packet in advance mode
-
-								locservice_->dropPacketCallback(p);
-								if (p==NULL) { return; }
-							}
-
-						// The graph has changed
-						TRACE_CONN(p,addr(),addr(),HDR_IP(p)->daddr());
-						drop(p, DROP_RTR_NO_ROUTE);
-						return;
+						
+						gopherh->mode_ = GOAFR_DATA_ADVANCE; // put packet in advance mode
+        				
+						// Set the next hop
+						gopherh->nhops_ = 1;
+						gopherh->currhop_ = 1;
+						gopherh->hops_[1].ip = mn_->address();
+						cmh->next_hop_ = gopherh->hops_[1].ip; // we jump to this node and then we advance
+						break; // get out of this and forward the node
 					}
 			
+					// possible error
 					// does the candidate next edge have a closer pt?
 					if (!ne) {
 						// no face toward the destination
@@ -1856,6 +1822,7 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			abort();
 	    }
 	    break;
+
 	case GOAFR_DATA_ADVANCE:
 		// The node will now advance to the node that I found to be the closest to the sink
 
@@ -1881,7 +1848,8 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			/** to resume gopher forwarding, this *node* must be closer than
 				the point where the packet entered peri mode. */
 			mn_->getLoc(&myx, &myy, &myz);
-			// Cutoff function, when arrive at the closest node
+
+			// Cutoff function, when arrive at the closest node, so we go back to business as usual
 			if (mn_->address() == gopherh->perips_.ip) {
 				cmh->size() -= hdr_size(p); // strip data peri header
 				gopherh->mode_ = GOPHERH_DATA_GREEDY;
@@ -1899,7 +1867,6 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 		
 				forwardPacket(p);
 				return;
-				
 			}
 
 			if(use_planar_){
@@ -1912,13 +1879,13 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				ne = ntab_->ent_finddst(gopherh->hops_[gopherh->nhops_-1].ip);
 				if(ne){
 					double fromx, fromy, fromz;
-					ne = ntab_->ent_findnext_onperi(mn_,
-													gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z,
-													use_planar_);
+					ne = ntab_->ent_findnext_onperi(
+                     mn_, gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z, use_planar_);
 
 					/** drop if we've looped on this perimeter:
 						are about to revisit the first edge we took on it */
-					// WE HAVE RETUREND TO THE START POINT! -- GOAFR
+					// If we arrive here, then something has gone wrong, and we drop the message 
+					// Ensure that this does not happen the instant we begin routing
 					if ((gopherh->periptip_[1] == mn_->address()) &&
 						(gopherh->periptip_[2] == ne->dst)) {
 
@@ -1926,9 +1893,6 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 							{
 								// wk forwardPacket, finished perimeter 
 								// without finding target
-								// NO! NOW WE FIND THE ASCEND!
-								gopherh->mode_ = GOAFR_DATA_ADVANCE; // put packet in peri mode
-
 								locservice_->dropPacketCallback(p);
 								if (p==NULL) { return; }
 							}
