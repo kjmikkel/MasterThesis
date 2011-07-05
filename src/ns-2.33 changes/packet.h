@@ -497,7 +497,8 @@ public:
 	Packet* next_;		// for queues and the free list
 	static int hdrlen_;
 
-        static Ellipsis ellipse;      // The ellipsis that the packet has to keep inside
+	// The ellipsis that the packet has to keep inside
+        Ellipsis* ellipse;      
 
 	Packet() : bits_(0), data_(0), ref_count_(0), next_(0) { }
 	inline unsigned char* const bits() { return (bits_); }
@@ -700,6 +701,7 @@ inline Packet* Packet::alloc()
 		p->time_ = 0;
 	} else {
 		p = new Packet;
+		p->ellipse = NULL;
 		p->bits_ = new unsigned char[hdrlen_];
 		if (p == 0 || p->bits_ == 0)
 			abort();
@@ -770,6 +772,11 @@ inline Packet* Packet::copy() const
 	if (data_) 
 		p->data_ = data_->copy();
 	p->txinfo_.init(&txinfo_);
+        
+        // Added to support ellispses
+        if (ellipse != NULL) {
+		p->ellipse = ellipse->copy();
+	}
  
 	return (p);
 }
