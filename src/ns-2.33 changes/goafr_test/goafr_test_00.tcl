@@ -55,8 +55,8 @@ set val(movtrc)         ON ;# Trace Movement
 
 
 set val(lt)		""
-set val(cp)		"test_transmit_00"
-set val(sc)		"test_loc_00"
+set val(cp)		"transmit_test_00"
+set val(sc)		"loc_test_00"
 
 set val(out)            "goafr_test.tr"
 
