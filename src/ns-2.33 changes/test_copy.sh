@@ -10,5 +10,5 @@ cp packet.h $NS_ROOT"/common/."
 cp -rf goafr_test $NS_ROOT
 
 # Move to directory and run test
-cd ../../ns-allinone-2.33/ns-2.33/
-./ns goafr_test/goafr_test_00.tcl
+cd ../../ns-allinone-2.33/ns-2.33/goafr_test/
+../ns goafr_test_00.tcl

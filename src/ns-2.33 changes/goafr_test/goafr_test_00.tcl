@@ -42,7 +42,7 @@ set val(y)		20      ;# Y dimension of the topography
 set val(ifqlen)		512       ;# max packet in ifq
 set val(seed)		1.0
 set val(adhocRouting)	GOPHER      ;# AdHoc Routing Protocol
-set val(nn)		14       ;# how many nodes are simulated
+set val(nn)		15       ;# how many nodes are simulated
 set val(stop)		40.0     ;# simulation time
 set val(use_gk)		0	  ;# > 0: use GridKeeper with this radius
 set val(zip)		0         ;# should trace files be zipped
@@ -54,7 +54,7 @@ set val(movtrc)         ON ;# Trace Movement
 
 
 set val(lt)		""
-set val(cp)		"transmit_test_00"
+set val(cp)	        "transmit_test_00"
 set val(sc)		"loc_test_00"
 
 set val(out)            "goafr_test.tr"
