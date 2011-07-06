@@ -43,7 +43,7 @@ set val(ifqlen)		512       ;# max packet in ifq
 set val(seed)		1.0
 set val(adhocRouting)	GOPHER      ;# AdHoc Routing Protocol
 set val(nn)		15       ;# how many nodes are simulated
-set val(stop)		40.0     ;# simulation time
+set val(stop)		1.0     ;# simulation time
 set val(use_gk)		0	  ;# > 0: use GridKeeper with this radius
 set val(zip)		0         ;# should trace files be zipped
 
@@ -165,8 +165,8 @@ $ns_ at  $val(stop).0002 "puts \"NS EXITING... $val(out)\" ; $ns_ halt"
 
 # A finish proc to flush traces and out call nam
 proc finish {} {
-        global ns nf
-        $ns flush-trace
+        global ns_ nf
+        $ns_ flush-trace
         close $nf
 
         puts "running nam..."
@@ -176,3 +176,4 @@ proc finish {} {
 
 puts "Starting Simulation..."
 $ns_ run
+finish
