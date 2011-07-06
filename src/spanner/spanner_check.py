@@ -65,6 +65,11 @@ class results_container:
     self.max_neighbours = 0
     self.min_neighbours = 0
 
+    self.total_length = 0
+
+    self.scc = [] # Strongly connected components
+    self.number_scc = 0
+
   def get_min_internal(self, min_dist):
     return min(min_dist)
 
@@ -112,6 +117,10 @@ class results_container:
     self.max_neighbours = max(self.edges)
     self.min_neighbours = min(self.edges)
 
+    # SCC
+    print self.scc
+    self.number_scc = (sum(self.scc) * 1.0) / len(self.scc) * 1.0 # Strongly connected components
+
   def print_latex(self):
 
     newline = '\\\\\n'
@@ -125,7 +134,9 @@ class results_container:
     string += '\\hline\n'
     string += 'Number of missing paths: & ' + str(self.num_errors) + ' &' + newline
     string += '\\end{tabular}' + newline
-    string += 'Number of edges: ' + str(self.edge_number / 2) + newline
+    string += 'Total number of edges: ' + str(self.edge_number) + newline
+    string += 'Total length of graphs: ' + c_round(self.total_length) + newline
+    string += 'Average number of strongly connected components: ' + c_round(self.number_scc) + newline
     string += 'Average numbers of neighbours: ' + str(self.average_neighbours) + newline
     string += 'Minimum number of neighbours: ' + str(self.max_neighbours) + newline
     string += 'Maximum number of neighbours: ' + str(self.min_neighbours) + newline
@@ -252,73 +263,40 @@ def make_node_pairs(number_of_points, num, number_tests):
     nodes = non_planar_graph.keys()
 
     random.seed()
+
+    # We find all possible combinations of pairs inside the mst
     already_there = {}
-    for test_index in range(0, number_tests):
-      """
-      if test_index % 10 == 0:
-        print 'Made ' + str(test_index) + ' out of ' + str(number_tests)
-      """
-      # We must ensure the pair is not replicated
-      new_pair = False
-      num_failure = 100
-
-      while not new_pair:  
-        # First we make sure we have from node that is not totally isolated in the non-planar graph
-        """       
-        WARNING: Under certian configurations this might make the program enter a infinite loop no (or not enough) nodes are connected to other nodes in the tree. 
-        
-        By our uniqueness demand we cannot ensure termination (we can specify a demand for a greater number of unique pairs than there are), but the current implemention could certianly be improved
-        """
-        social_node = False
-        source_node = None
-        source_node_connections = None
-        
-        sink_node = None
-
-        while not social_node:
-          source_index = random.randint(0, len(nodes) - 1)
-          source_node = nodes[source_index]
-          source_node_connections = set_container[source_node]
-          if len(source_node_connections) > 1:
-            social_node = True   
-
-        # We have now found a from node that has at least one neighbour, and so we try to find a to_node
-        while not sink_node:
-          sink_index = random.randint(0, len(source_node_connections) - 1)
-          temp_node = source_node_connections[sink_index]
-
-          # We only add the sink node if it is different than the source node
-          if temp_node != source_node:
-            sink_node = temp_node
-        
-        can_pair = (source_node, sink_node)
-        aux_pair = (sink_node, source_node)
-
-        # If neither of the above are in the in the dictionary, then we add it 
-        if not (already_there.get(can_pair) or already_there.get(aux_pair)):
-          already_there[can_pair] = 1
-          already_there[aux_pair] = 1
-          node_pairs_to_check.append(can_pair)
-          new_pair = True
-          # reset failure
-          num_failure = 100
-        else:
-          #emergency handbrake 
-          num_failure -= 1
-          if num_failure <= 0:
-            break
-
-    save_pickle_file(node_pair_location + point_str + "node_pair_" + str(graph_index + 1), node_pairs_to_check)
-
-def get_edge_data(graph):
-    return_dict = {}
-    nodes = graph.keys()
+    total_pair_list = []
+    container = None
+    for start_node in set_container.keys():
+      container = set_container[start_node]
+      for end_node in container:
+        if not already_there.get((end_node, start_node)):
+          total_pair_list.append((start_node, end_node))
+          already_there[(end_node, start_node)] = 1
+          already_there[(start_node, end_node)] = 1
+     
+    # we take all the pairs we can
     
-    neigh_list = []
-    for node in nodes:
-        neigh_list.append(len(graph[node]))
-        
-    return neigh_list
+    difference = abs(number_tests - len(total_pair_list))
+
+    if number_tests >= len(total_pair_list):
+      # If we have more or an equal number of tests to all the combinations, then all the combinations are our tests
+      node_pairs_to_check = total_pair_list
+    elif number_tests > difference:
+      # If the difference between the two is less than the number of tests, then we just delete pairs from the total list untill we the two numbers match
+      for i in range(0, difference):
+        ran_index = random.randint(0, len(total_pair_list) - 1)
+        del total_pair_list[ran_index]
+      node_pairs_to_check = total_pair_list
+    else:
+      for i in range(0, difference):
+        ran_index = random.randint(0, len(total_pair_list) - 1)
+        node_pairs_to_check.append(total_pair_list[ran_index])
+        del total_pair_list[ran_index]
+   
+    
+    save_pickle_file(node_pair_location + point_str + "node_pair_" + str(graph_index + 1), node_pairs_to_check)
 
 def do_test(number_of_points, num, number_tests):
   point_str = str(number_of_points) + '/'
@@ -330,44 +308,60 @@ def do_test(number_of_points, num, number_tests):
     index_str = str(graph_index + 1)   
 
     node_pairs_to_check = load_pickle_file(node_pair_location + point_str + 'node_pair_' + str(graph_index + 1))
-    non_nodepairs = copy.deepcopy(node_pairs_to_check)
 
     # We perform the actual tests
     
     # Start Non-planar
-    filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
-    non_planar_graph = load_pickle_file(filename)
-
-    non_planar_results = do_actual_test(non_planar_graph, non_nodepairs) 
-    non_planar_neigh   = get_edge_data(non_planar_graph)
-    
-    filename = results_non_location + point_str + non_planar_placement + non_planar_filename + index_str
-    save_pickle_file(filename, (non_planar_results, non_planar_neigh))
+    load_filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
+    save_filename = results_non_location + point_str + non_planar_placement + non_planar_filename + index_str
+    perform_tests(load_filename, save_filename, node_pairs_to_check)
     # End non-planar
 
     # Start Gabriel Graph
-    filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
-    gabriel_graph = load_pickle_file(filename)
-    gg_nodepairs = copy.deepcopy(node_pairs_to_check)
-    
-    gabriel_graph_results = do_actual_test(gabriel_graph, gg_nodepairs)    
-    gabriel_graph_neigh   = get_edge_data(gabriel_graph)
-    
-    filename = results_gg_location + point_str + gg_placement + gg_filename + index_str
-    save_pickle_file(filename, (gabriel_graph_results, gabriel_graph_neigh))
+    load_filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
+    save_filename = results_gg_location + point_str + gg_placement + gg_filename + index_str
+    perform_tests(load_filename, save_filename, node_pairs_to_check)
     # End Gabriel Graph
 
     # Start RNG 
-    filename = rng_f + point_str + rng_placement + rng_filename + index_str
-    rn_graph = load_pickle_file(filename) 
-    rng_nodepairs = copy.deepcopy(node_pairs_to_check)
-    
-    rn_graph_results = do_actual_test(rn_graph, rng_nodepairs)
-    rn_graph_neigh   = get_edge_data(rn_graph)
-    
-    filename = results_rng_location + point_str + rng_placement + rng_filename + index_str
-    save_pickle_file(filename, (rn_graph_results, rn_graph_neigh))
+    load_filename = rng_f + point_str + rng_placement + rng_filename + index_str
+    save_filename = results_rng_location + point_str + rng_placement + rng_filename + index_str
+    perform_tests(load_filename, save_filename, node_pairs_to_check)
     # End RNG    
+
+def perform_tests(load_graph_name, save_data_name, node_pairs):
+    graph = load_pickle_file(load_graph_name)
+    local_node_pairs = copy.deepcopy(node_pairs)
+
+    results                        = do_actual_test(graph, local_node_pairs) 
+    (neighbours, graph_distance)   = get_edge_data(graph)   
+
+    # We find all the Strongly Connected Components
+    (_ , set_container) = make_graph.MST_Kruskal(graph)
+
+    strong_dict = {}
+    for node in set_container.keys():
+      set_tuple = tuple(set_container[node])
+      strong_dict[set_tuple] = 1
+    
+    num_scc = len(strong_dict.keys())  
+    
+
+    save_pickle_file(save_data_name, (results, neighbours, graph_distance, num_scc))
+
+def get_edge_data(graph):
+    nodes = graph.keys()
+    total_length = 0
+    
+    neigh_list = []
+    for outer_node in nodes:
+      neighbours = graph[outer_node]
+      neigh_list.append(len(neighbours))
+      for inner_node in neighbours:
+        total_length += neighbours[inner_node]
+
+    total_length /= 2
+    return (neigh_list, total_length)
         
 def do_actual_test(graph, node_pairs):
   results = []
@@ -388,7 +382,62 @@ def do_actual_test(graph, node_pairs):
   
   return results
   
-def analyse_individual_results(results, old_missing_path, container):
+def analyse_results(number_of_points, num_results, pr_graph_test):
+  
+  non_planar_container = results_container('Non-planar')
+  gg_container         = results_container('Gabriel Graph')
+  rng_container        = results_container('Relative Neighbourhood Graph')
+
+  point_str = str(number_of_points) + '/'
+  
+  for result_index in range(0, num_results):
+    index_str = str(result_index + 1)
+
+    if result_index % 10 == 0 and result_index > 0:
+      print 'Collected ' + str(result_index) + ' of the results'
+    
+    filename = results_non_location + point_str + non_planar_placement + non_planar_filename + index_str
+    graph_distance = load_pickle_file(filename)[0]      
+    init_missing_paths = [True for i in range(0, len(graph_distance))]
+    new_paths = container_analysis(non_planar_container, filename, init_missing_paths)
+
+    filename = results_gg_location + point_str + gg_placement + gg_filename + index_str    
+    container_analysis(gg_container, filename, new_paths)
+    
+    filename = results_rng_location + point_str + rng_placement + rng_filename + index_str
+    container_analysis(rng_container, filename, new_paths)
+
+  # I save the results so they are independent of LaTeX code we are going to generate
+  non_planar_container.finalize()
+  gg_container.finalize()
+  rng_container.finalize()
+  
+  filename = results_non_location + point_str + 'graph_results'
+  save_pickle_file(filename, non_planar_container)
+  
+  filename = results_gg_location + point_str + 'gg_results'
+  save_pickle_file(filename, gg_container)
+  
+  filename = results_rng_location + point_str + 'rng_results'
+  save_pickle_file(filename, rng_container)
+  
+  if debug:
+    print non_planar_container
+    print '***'
+    print gg_container
+    print '***'
+    print rng_container  
+
+def container_analysis(container, filename, paths):
+  graph_results = load_pickle_file(filename)      
+  
+  results = graph_results[0]
+  container.edges.extend(graph_results[1])
+  container.total_length += graph_results[2]
+  container.scc.append(graph_results[3])
+
+  old_missing_path = copy.deepcopy(paths)  
+  
   distance = 0
   unit_distance = 0
   
@@ -430,66 +479,7 @@ def analyse_individual_results(results, old_missing_path, container):
 
   container.num_errors += empty
   container.legal_empty += legal_empty
-  return (missing_path, container)
-
-def analyse_results(number_of_points, num_results, pr_graph_test):
-  
-  non_planar_container = results_container('Non-planar')
-  gg_container         = results_container('Gabriel Graph')
-  rng_container        = results_container('Relative Neighbourhood Graph')
-
-  point_str = str(number_of_points) + '/'
-  
-  for result_index in range(0, num_results):
-    index_str = str(result_index + 1)
-
-    if result_index % 10 == 0 and result_index > 0:
-      print 'Collected ' + str(result_index) + ' of the results'
-
-    filename = results_non_location + point_str + non_planar_placement + non_planar_filename + index_str
-    graph_results = load_pickle_file(filename)      
-    graph_distance = graph_results[0]
-    non_planar_container.edges = graph_results[1] 
-    
-    init_missing_paths = [True for i in range(0, len(graph_distance))]
-    (empty_index, _) = analyse_individual_results(graph_distance, init_missing_paths, non_planar_container)
-
-    filename = results_gg_location + point_str + gg_placement + gg_filename + index_str    
-    gg_results = load_pickle_file(filename)
-    gg_distance = gg_results[0]
-    gg_container.edges   = gg_results[1]
-    
-    gg_index = copy.deepcopy(empty_index)
-    (_, _)  = analyse_individual_results(gg_distance, gg_index, gg_container)
-    
-    filename = results_rng_location + point_str + rng_placement + rng_filename + index_str
-    rng_results = load_pickle_file(filename)
-    rng_distance = rng_results[0]
-    rng_container.edges    = rng_results[1]
-    
-    rng_index = copy.deepcopy(empty_index)
-    (_, _)  = analyse_individual_results(rng_distance, rng_index, rng_container)
-
-  # I save the results so they are independent of LaTeX code we are going to generate
-  non_planar_container.finalize()
-  gg_container.finalize()
-  rng_container.finalize()
-  
-  filename = results_non_location + point_str + 'graph_results'
-  save_pickle_file(filename, non_planar_container)
-  
-  filename = results_gg_location + point_str + 'gg_results'
-  save_pickle_file(filename, gg_container)
-  
-  filename = results_rng_location + point_str + 'rng_results'
-  save_pickle_file(filename, rng_container)
-  
-  if debug:
-    print non_planar_container
-    print '***'
-    print gg_container
-    print '***'
-    print rng_container  
+  return missing_path
 
 def save_file(file_name, data):
   file_name += '.tex'
@@ -547,8 +537,38 @@ def print_latex_results(number_of_points):
 
   save_file(latex_location + 'spanner_' + point_str[0:-1], string)
   
+def do_integrity_test(point_list, node_pairs):
+  (normal_graph, tree) = make_graph.SciPy_KDTree(point_list, 20)
+    
+  gabriel_graph = make_graph.gabriel_graph(copy.deepcopy(normal_graph), tree)
+  
+  rng_graph = make_graph.rn_graph(copy.deepcopy(normal_graph))
 
-def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, state):
+  non_planar_results = do_actual_test(normal_graph, node_pairs)
+  gg_results         = do_actual_test(gabriel_graph, node_pairs)
+  rng_results        = do_actual_test(rng_graph, node_pairs)
+
+  non_planar_container = results_container('Non-planar')
+  gg_container         = results_container('Gabriel Graph')
+  rng_container        = results_container('Relative Neighbourhood Graph')
+
+  init_missing_paths = [True]
+  empty_index = analyse_individual_results(non_planar_results, init_missing_paths, non_planar_container)
+  analyse_individual_results(gg_results        , empty_index       , gg_container        )
+  analyse_individual_results(rng_results       , empty_index       , rng_container       )
+
+  non_planar_container.finalize()
+  gg_container.finalize()
+  rng_container.finalize()
+  
+  if debug:
+    print non_planar_container
+    print '***'
+    print gg_container
+    print '***'
+    print rng_container
+
+def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state):
   """
   A single function call to tie the entire test stack together and to make it easier to parameterise
   """
@@ -566,59 +586,29 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, state):
   All of the options are culimative, so if state is 3, then you won't generate pointsets, make the graphs or node pairs
   """  
 
-  if state < 1:
+  if start_state < 1:
     generate_point_sets(point_num, num_graphs, max_values)
     print "Generated Pointsets"
 
-  if state <= 1:
+  if start_state <= 1 and end_state >= 1:
     generate_graphs(point_num, num_graphs, cut_off)
     print 'Made graphs'
   
-  if state <= 2:
+  if start_state <= 2 and end_state >= 2:
     make_node_pairs(point_num, num_graphs, pr_graph_test)
     print 'Made node pairs'
 
-  if state <= 3:
+  if start_state <= 3 and end_state >= 3:
     do_test(point_num, num_graphs, pr_graph_test)
     print 'Done results'
     
-  if state <= 4:
+  if start_state <= 4 and end_state >= 4:
     analyse_results(point_num, num_graphs, pr_graph_test)
     print 'Analysed results'
 
   print_latex_results(point_num)
   print 'Printed LaTeX file'
 
-def do_integrity_test(point_list, node_pairs):
-  (normal_graph, tree) = make_graph.SciPy_KDTree(point_list, 20)
-    
-  gabriel_graph = make_graph.gabriel_graph(copy.deepcopy(normal_graph), tree)
-  
-  rng_graph = make_graph.rn_graph(copy.deepcopy(normal_graph))
-
-  non_planar_results = do_actual_test(normal_graph, node_pairs)
-  gg_results         = do_actual_test(gabriel_graph, node_pairs)
-  rng_results        = do_actual_test(rng_graph, node_pairs)
-
-  non_planar_container = results_container('Non-planar')
-  gg_container         = results_container('Gabriel Graph')
-  rng_container        = results_container('Relative Neighbourhood Graph')
-
-  init_missing_paths = [True]
-  (empty_index, _) = analyse_individual_results(non_planar_results, init_missing_paths, non_planar_container)
-  (_, _)           = analyse_individual_results(gg_results        , empty_index       , gg_container        )
-  (_, _)           = analyse_individual_results(rng_results       , empty_index       , rng_container       )
-
-  non_planar_container.finalize()
-  gg_container.finalize()
-  rng_container.finalize()
-  
-  if debug:
-    print non_planar_container
-    print '***'
-    print gg_container
-    print '***'
-    print rng_container
 
 """
   Quick reference for state:
@@ -632,16 +622,21 @@ def do_integrity_test(point_list, node_pairs):
 
 # point_num num_graphs pr_graphs_test max_values cut_off state
 #do_suite(10, 2, 30, 20, 15, 0)
-state = 5
+start_state = 0
+end_state = 6
+number_tests = 20
 
-do_suite(100, 500, 100, 200, 10, state)
-do_suite(250, 500, 100, 300, 15, state)
-do_suite(500, 500, 100, 400, 17, state)
-do_suite(1000, 500, 100, 500, 20, state)
-#do_suite(2500, 500, 100, 600, 23, state)
-#do_suite(5000, 500, 100, 700, 25, 0)
-#do_suite(7500, 500, 100, 800, 27, 0)
-#do_suite(10000, 500, 100, 900, 30, 0)
+do_suite(100, number_tests, 100, 100, 15, start_state, end_state)
+
+"""
+do_suite(250, 500, 100, 300, 15, start_state, end_state)
+do_suite(500, 500, 100, 400, 17, start_state, end_state)
+do_suite(1000, 500, 100, 500, 20, start_state, end_state)
+do_suite(2500, 500, 100, 600, 23, start_state, end_state)
+do_suite(5000, 500, 100, 700, 25, start_state, end_state)
+do_suite(7500, 500, 100, 800, 27, start_state, end_state)
+do_suite(10000, 500, 100, 900, 30, start_state, end_state)
+"""
 
 """
 point_list = [(0,0), (20, 0), (4, -5), (15, -5)]
