@@ -38,12 +38,12 @@ set val(mac)		Mac/802_11
 set val(ifq)		Queue/DropTail/PriQueue
 set val(ll)		LL
 set val(ant)		Antenna/OmniAntenna
-set val(x)		2000      ;# X dimension of the topography
-set val(y)		2000      ;# Y dimension of the topography
+set val(x)		20      ;# X dimension of the topography
+set val(y)		20      ;# Y dimension of the topography
 set val(ifqlen)		512       ;# max packet in ifq
 set val(seed)		1.0
 set val(adhocRouting)	GOPHER      ;# AdHoc Routing Protocol
-set val(nn)		40       ;# how many nodes are simulated
+set val(nn)		14       ;# how many nodes are simulated
 set val(stop)		40.0     ;# simulation time
 set val(use_gk)		0	  ;# > 0: use GridKeeper with this radius
 set val(zip)		0         ;# should trace files be zipped
@@ -55,8 +55,8 @@ set val(movtrc)         ON ;# Trace Movement
 
 
 set val(lt)		""
-set val(cp)		"cp-n40-a40-t40-c4-m0"
-set val(sc)		"sc-x2000-y2000-n40-s25-t40"
+set val(cp)		"test_transmit_00"
+set val(sc)		"test_loc_00"
 
 set val(out)            "goafr_test.tr"
 

@@ -1,0 +1,5 @@
+#
+# nodes: 40, max conn: 4, send rate: 0.100000, seed: 1, active nodes: 40
+#
+
+$ns_ at 0.1 "[$node_(0) set ragent_] test-query 8"
