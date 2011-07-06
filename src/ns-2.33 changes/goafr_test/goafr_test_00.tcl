@@ -2,7 +2,6 @@
 # sample tcl script showing the use of GPSR and HLS (hierarchical location service)
 # Changed by Mikkel Kjaer Jensen to accept GOAFR
 
-
 ## GOPHER Options
 Agent/GOPHER set bdesync_                0.5 ;# beacon desync random component
 Agent/GOPHER set bexp_                   [expr 3*([Agent/GOPHER set bint_]+[Agent/GOPHER set bdesync_]*[Agent/GOPHER set bint_])] ;# beacon timeout interval
@@ -89,7 +88,7 @@ set ns_		[new Simulator]
 $ns_ use-newtrace
 
 # Outputs nam traces
-set nf [open out.nam w]
+set nf [open goafr_00.nam w]
 $ns_ namtrace-all $nf
 
 set loadTrace  $val(lt)
@@ -171,7 +170,7 @@ proc finish {} {
         close $nf
 
         puts "running nam..."
-        exec nam out.nam &
+        exec nam goafr_00.nam &
         exit 0
 }
 

@@ -11,4 +11,4 @@ cp -rf goafr_test $NS_ROOT
 
 # Move to directory and run test
 cd ../../ns-allinone-2.33/ns-2.33/
-ns goafr_test/goafr_test_00.tcl
+./ns goafr_test/goafr_test_00.tcl
