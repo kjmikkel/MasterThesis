@@ -31,4 +31,10 @@ public:
   inline Ellipsis* copy() const;
 };
 
+inline Ellipsis* Ellipsis::copy() const {
+  Ellipsis *e = new Ellipsis(p1, p2);
+  e->change_major(major);
+  return e;
+}
+
 #endif

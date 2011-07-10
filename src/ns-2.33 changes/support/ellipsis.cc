@@ -69,12 +69,6 @@ bool Ellipsis::point_in_ellipsis(double x, double y) {
 
 }
 
-inline Ellipsis* Ellipsis::copy() const {
-  Ellipsis *e = new Ellipsis(p1, p2);
-  e->change_major(major);
-  return e;
-}
-
 /*
 int 
 main ()
