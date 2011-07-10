@@ -754,6 +754,13 @@ inline void Packet::free(Packet* p)
 				delete p->data_;
 				p->data_ = 0;
 			}
+
+			// Added to support GOAFR - delete the ellipse
+			if (p->ellipse != NULL) {
+				delete p->ellipse;
+				p->ellipse = NULL;
+			}
+			
 			init(p);
 			p->next_ = free_;
 			free_ = p;
