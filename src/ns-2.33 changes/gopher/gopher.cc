@@ -1387,6 +1387,21 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
     Scheduler &s = Scheduler::instance();
     double now = s.clock();
 
+	// Added to support GOAFR
+	if (p->ellipse == NULL) {
+		int src_address = iph->saddr();
+		int dst_address = iph->daddr();
+
+		double srcPosX, srcPosY, srcPosZ, dstPosX, dstPosY, dstPosZ;
+		// We find the locations
+		God::instance()->getPosition(src_address, &srcPosX, &srcPosY, &srcPosZ);
+		God::instance()->getPosition(dst_address, &dstPosX, &dstPosY, &dstPosZ);
+		Point src_point = Point(srcPosX, srcPosY);
+		Point dst_point = Point(dstPosX, dstPosY);
+		p->ellipse = new Ellipsis(src_point, dst_point);
+	}
+    // End of what was added to support GOAFR
+
     switch(gopherh->mode_) {
 	case GOPHERH_DATA_GREEDY: 
     
