@@ -1,7 +1,6 @@
 #ifndef POINT_H
 #define POINT_H
 
-#include <iostream>
 #include <math.h>
 
 using namespace std;

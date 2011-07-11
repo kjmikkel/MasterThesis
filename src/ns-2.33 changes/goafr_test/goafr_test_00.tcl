@@ -9,10 +9,10 @@ Agent/GOPHER set pint_                   1.5 ;# peri probe interval
 Agent/GOPHER set pdesync_                0.5 ;# peri probe desync random component
 Agent/GOPHER set lpexp_                  8.0 ;# peris unused timeout interval
 Agent/GOPHER set drop_debug_             1   ;#
-Agent/GOPHER set peri_proact_            1 	 ;# proactively generate peri probes
+Agent/GOPHER set peri_proact_            1   ;# proactively generate peri probes
 Agent/GOPHER set use_implicit_beacon_    1   ;# all packets act as beacons; promisc.
 Agent/GOPHER set use_timed_plnrz_        0   ;# replanarize periodically
-Agent/GOPHER set use_congestion_control_ 0
+Agent/GOPHER set use_congestion_control_ 0   ;
 Agent/GOPHER set use_reactive_beacon_    0   ;# only use reactive beaconing
 
 set val(bint)           0.5  ;# beacon interval
@@ -26,7 +26,7 @@ set val(locs)           0    ;# default to OmniLS
 set val(use_loop)       0    ;# look for unexpected loops in peris
 
 set val(agg_mac)          1 ;# Aggregate MAC Traces
-set val(agg_rtr)          0 ;# Aggregate RTR Traces
+set val(agg_rtr)          1 ;# Aggregate RTR Traces
 set val(agg_trc)          0 ;# Shorten Trace File
 
 
@@ -37,15 +37,15 @@ set val(mac)		Mac/802_11
 set val(ifq)		Queue/DropTail/PriQueue
 set val(ll)		LL
 set val(ant)		Antenna/OmniAntenna
-set val(x)		20      ;# X dimension of the topography
-set val(y)		20      ;# Y dimension of the topography
-set val(ifqlen)		512       ;# max packet in ifq
-set val(seed)		1.0
-set val(adhocRouting)	GOPHER      ;# AdHoc Routing Protocol
-set val(nn)		15       ;# how many nodes are simulated
+set val(x)		450    ;# X dimension of the topography
+set val(y)		450    ;# Y dimension of the topography
+set val(ifqlen)		512     ;# max packet in ifq
+set val(seed)		1.0     ;
+set val(adhocRouting)	GOPHER  ;# AdHoc Routing Protocol
+set val(nn)		15      ;# how many nodes are simulated
 set val(stop)		1.0     ;# simulation time
-set val(use_gk)		0	  ;# > 0: use GridKeeper with this radius
-set val(zip)		0         ;# should trace files be zipped
+set val(use_gk)		0	;# > 0: use GridKeeper with this radius
+set val(zip)		0       ;# should trace files be zipped
 
 set val(agttrc)         ON ;# Trace Agent
 set val(rtrtrc)         ON ;# Trace Routing Agent
@@ -88,8 +88,8 @@ set ns_		[new Simulator]
 $ns_ use-newtrace
 
 # Outputs nam traces
-set nf [open goafr_00.nam w]
-$ns_ namtrace-all $nf
+set nam_f [open goafr_00.nam w]
+$ns_ namtrace-all $nam_f
 
 set loadTrace  $val(lt)
 
@@ -165,12 +165,13 @@ $ns_ at  $val(stop).0002 "puts \"NS EXITING... $val(out)\" ; $ns_ halt"
 
 # A finish proc to flush traces and out call nam
 proc finish {} {
-        global ns_ nf
+        global ns_ nam_f tracefd
         $ns_ flush-trace
-        close $nf
+        close $nam_f
+        close $tracefd
 
-        puts "running nam..."
-        exec nam goafr_00.nam &
+    #    puts "running nam..."
+    #    exec nam goafr_00.nam &
         exit 0
 }
 

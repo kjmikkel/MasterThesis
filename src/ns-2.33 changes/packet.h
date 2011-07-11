@@ -500,7 +500,7 @@ public:
 	// The ellipsis that the packet has to keep inside
         Ellipsis* ellipse;      
 
-	Packet() : bits_(0), data_(0), ref_count_(0), next_(0) { }
+	Packet() : bits_(0), data_(0), ref_count_(0), next_(0), ellipse(0) { }
 	inline unsigned char* const bits() { return (bits_); }
 	inline Packet* copy() const;
 	inline Packet* refcopy() { ++ref_count_; return this; }

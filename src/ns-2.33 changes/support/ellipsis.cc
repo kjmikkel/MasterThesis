@@ -56,17 +56,27 @@ bool Ellipsis::hit_edge() {
 void Ellipsis::find_minor() {
   double distance = p1.dist(p2) / 2.0;
   
+  printf("%f, %f\n", major * major, distance * distance);
   minor = sqrt(major * major - distance * distance);
   printf("Major: %f, Minor: %f\n", major, minor);
 }
 
 bool Ellipsis::point_in_ellipsis(double x, double y) {
+  fprintf(stderr, "enter point_in\n");
   Point p = Point(x, y);
+
+  fprintf(stderr, "made new point\n");
+  fprintf(stderr, "p1: %f", p1.x());
+  fprintf(stderr, "p2: %f", p2.x());
   double distance_to_p1 = p1.dist(p);
   double distance_to_p2 = p2.dist(p);
-  
-  return (distance_to_p1 + distance_to_p2 < major);
+  fprintf(stderr, "got distance\n");
 
+  bool inside = (distance_to_p1 + distance_to_p2 < major);
+
+  fprintf(stderr, "leave point_in");
+
+  return inside;
 }
 
 /*
