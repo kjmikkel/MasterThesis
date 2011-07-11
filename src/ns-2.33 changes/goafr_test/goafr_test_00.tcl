@@ -170,8 +170,8 @@ proc finish {} {
         close $nam_f
         close $tracefd
 
-    #    puts "running nam..."
-    #    exec nam goafr_00.nam &
+        puts "running nam..."
+        exec nam goafr_00.nam &
         exit 0
 }
 
