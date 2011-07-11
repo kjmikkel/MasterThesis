@@ -24,11 +24,11 @@
 #
 
 # Top level hierarchy
-prefix	= /usr/local
+prefix	= @prefix@
 # Pathname of directory to install the binary
-BINDEST	= /usr/local/bin
+BINDEST	= @prefix@/bin
 # Pathname of directory to install the man page
-MANDEST	= /usr/local/man
+MANDEST	= @prefix@/man
 
 BLANK	= # make a blank space.  DO NOT add anything to this line
 
@@ -36,35 +36,35 @@ BLANK	= # make a blank space.  DO NOT add anything to this line
 CC	= gcc-4.3
 CPP	= g++-4.3
 LINK	= $(CPP)
-LINK_SHLIB = gcc -shared
+LINK_SHLIB = @SHLIB_LD@
 MKDEP	= ./conf/mkdep
-TCLSH	= /home/mikkel/Documents/MasterThesis/ns-allinone-2.33/bin/tclsh8.4
-TCL2C	= ../tclcl-1.19/tcl2c++
+TCLSH	= @V_TCLSH@
+TCL2C	= @V_TCL2CPP@
 AR	= ar rc $(BLANK)
 
-RANLIB	= ranlib
-INSTALL	= /usr/bin/install -c
+RANLIB	= @V_RANLIB@
+INSTALL	= @INSTALL@
 LN	= ln
 TEST	= test
 RM	= rm -f
 MV      = mv
-PERL	= /usr/bin/perl
+PERL	= @PERL@
 
 # for diffusion
 #DIFF_INCLUDES = "./diffusion3/main ./diffusion3/lib ./diffusion3/nr ./diffusion3/ns"
 
-CCOPT	=  -Wall 
-STATIC	= 
+CCOPT	= @V_CCOPT@ 
+STATIC	= @V_STATIC@
 #LDFLAGS	= $(STATIC)
-LDFLAGS	=  -Wl,-export-dynamic 
+LDFLAGS	= @LDFLAGS@ 
 LDOUT	= -o $(BLANK)
 
-DEFINE	= -DTCP_DELAY_BIND_ALL -DNO_TK -DTCLCL_CLASSINSTVAR  -DNDEBUG -DLINUX_TCP_HEADER -DUSE_SHM -DHAVE_LIBTCLCL -DHAVE_TCLCL_H -DHAVE_LIBOTCL1_13 -DHAVE_OTCL_H -DHAVE_LIBTK8_4 -DHAVE_TK_H -DHAVE_LIBTCL8_4 -DHAVE_TCL_H  -DHAVE_CONFIG_H -DNS_DIFFUSION -DSMAC_NO_SYNC -DCPP_NAMESPACE=std -DUSE_SINGLE_ADDRESS_SPACE -Drng_test
+DEFINE	= -DTCP_DELAY_BIND_ALL -DNO_TK @V_DEFINE@ @V_DEFINES@ @DEFS@ -DNS_DIFFUSION -DSMAC_NO_SYNC -DCPP_NAMESPACE=@CPP_NAMESPACE@ -DUSE_SINGLE_ADDRESS_SPACE -Drng_test
 
 INCLUDES = \
-	-I.  \
+	-I. @V_INCLUDE_X11@ \
 	-I. \
-	-I/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/tclcl-1.19 -I/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/otcl -I/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/include -I/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/include -I/usr/include/pcap \
+	@V_INCLUDES@ \
 	-I./tcp -I./sctp -I./common -I./link -I./queue \
 	-I./adc -I./apps -I./mac -I./mobile -I./trace \
 	-I./routing -I./tools -I./classifier -I./mcast \
@@ -76,11 +76,11 @@ INCLUDES = \
 
 
 LIB	= \
-	-L/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/tclcl-1.19 -ltclcl -L/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/otcl -lotcl -L/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/lib -ltk8.4 -L/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/lib -ltcl8.4 \
-	-lXext -lX11 \
-	 -lnsl -ldl \
-	-lm -lm 
-#	-L${exec_prefix}/lib \
+	@V_LIBS@ \
+	@V_LIB_X11@ \
+	@V_LIB@ \
+	-lm @LIBS@
+#	-L@libdir@ \
 
 CFLAGS	+= $(CCOPT) $(DEFINE) 
 
@@ -101,7 +101,7 @@ CFLAGS	+= $(CCOPT) $(DEFINE)
 GEN_DIR	= gen/
 LIB_DIR	= lib/
 NS	= ns
-NSLIB   = libns.so
+NSLIB   = @NSLIB@
 NSX	= nsx
 NSE	= nse
 NSTK = nstk
@@ -160,7 +160,7 @@ NS_TCL_LIB_STL = tcl/lib/ns-diffusion.tcl \
 
 OBJ_CC = \
 	tools/random.o tools/rng.o tools/ranvar.o common/misc.o common/timer-handler.o \
-	common/scheduler.o common/object.o common/point.o common/ellipsis.o common/packet.o \
+	common/scheduler.o common/object.o common/packet.o common/point.o common/ellipsis.o\
 	common/ip.o routing/route.o common/connector.o common/ttl.o \
 	trace/trace.o trace/trace-ip.o \
 	classifier/classifier.o classifier/classifier-addr.o \
@@ -340,7 +340,7 @@ OBJ_CC = \
 	greedy/greedy.o\
 	gopher/gopher.o\
 	\
-	$(OBJ_STL)
+	@V_STLOBJ@
 
 
 # don't allow comments to follow continuation lines
@@ -394,7 +394,7 @@ SUBDIRS=\
 	indep-utils/webtrace-conv/nlanr \
 	indep-utils/webtrace-conv/ucb
 
-BUILD_NSE = 
+BUILD_NSE = @build_nse@
 
 all: $(NS) $(BUILD_NSE) $(NSTK) all-recursive Makefile
 
@@ -410,7 +410,7 @@ ifeq ($(NSLIB),libns.dll)
 # This is for cygwin
 
 NS_CPPFLAGS = -DNSLIBNAME=\"$(NSLIB)\" 
-NS_LIBS =  -ldl
+NS_LIBS =  @DL_LIBS@
 
 $(NSLIB): $(OBJ) common/tclAppInit.o 
 	$(LINK) -shared $(LDFLAGS) \
@@ -419,7 +419,7 @@ $(NSLIB): $(OBJ) common/tclAppInit.o
 		-Wl,--enable-auto-import \
 		-Wl,--out-implib=$@.a \
 		-Wl,--whole-archive $^ \
-		-Wl,--no-whole-archive  
+		-Wl,--no-whole-archive @V_IMPORT_LIBS@ 
 
 $(NS): $(NSLIB) common/main-modular.cc 
 	$(LINK) $(NS_CPPFLAGS) $(LDFLAGS) $(LDOUT)$@ common/main-modular.cc $(NS_LIBS)
@@ -524,22 +524,22 @@ NS_TCL_LIB = \
 	tcl/lib/ns-srcrt.tcl \
 	tcl/mcast/ns-lms.tcl \
 	tcl/lib/ns-qsnode.tcl \
-	$(NS_TCL_LIB_STL)
+	@V_NS_TCL_LIB_STL@
 
 $(GEN_DIR)ns_tcl.cc: $(NS_TCL_LIB)
-	$(TCLSH) bin/tcl-expand.tcl tcl/lib/ns-lib.tcl $(NS_TCL_LIB_STL) | $(TCL2C) et_ns_lib > $@
+	$(TCLSH) bin/tcl-expand.tcl tcl/lib/ns-lib.tcl @V_NS_TCL_LIB_STL@ | $(TCL2C) et_ns_lib > $@
 
 $(GEN_DIR)version.c: VERSION
 	$(RM) $@
 	$(TCLSH) bin/string2c.tcl version_string < VERSION > $@
 
-$(GEN_DIR)ptypes.cc: common/ptypes2tcl common/packet.h common/ellipsis.h
+$(GEN_DIR)ptypes.cc: common/ptypes2tcl common/packet.h
 	./common/ptypes2tcl > $@
 
 common/ptypes2tcl: common/ptypes2tcl.o
 	$(LINK) $(LDFLAGS) $(LDOUT)$@ common/ptypes2tcl.o
 
-common/ptypes2tcl.o: common/ptypes2tcl.cc common/packet.h common/ellipsis.h
+common/ptypes2tcl.o: common/ptypes2tcl.cc common/packet.h
 
 dirs:
 	for d in $(DESTDIR)$(MANDEST)/man1; do \
