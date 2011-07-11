@@ -1,9 +1,5 @@
-#ifndef POINT_H
-#define POINT_H
-
-#include <math.h>
-
-using namespace std;
+#ifndef ns_point_h
+#define ns_point_h
 
 // Class to represent points.
 class Point {

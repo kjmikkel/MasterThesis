@@ -1,5 +1,5 @@
-#ifndef ELLIPSIS_H
-#define ELLIPSIS_H
+#ifndef ns_ellipsis_h
+#define ns_ellipsis_h
 
 #include <math.h>
 #include <stdio.h>
@@ -18,7 +18,7 @@ private:
 public:
 // Constructer
   Ellipsis(Point point1, Point point2);
-  
+ 
   void change_major(double new_major);
   bool hit_edge();
   
@@ -27,14 +27,14 @@ public:
   Point get_p2();
 
   bool point_in_ellipsis(double x, double y);
-
+  
   inline Ellipsis* copy() const;
 };
 
 inline Ellipsis* Ellipsis::copy() const {
   Ellipsis *e = new Ellipsis(p1, p2);
-  e->change_major(major);
-  return e;
-}
+    e->change_major(major);
+    return e;
+  };
 
 #endif
