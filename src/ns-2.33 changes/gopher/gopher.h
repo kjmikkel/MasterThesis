@@ -410,6 +410,10 @@ class GOPHER_Agent : public Tap, public Agent {
 
  protected:
 
+    // GOAFR
+    int check_ellipse(Packet *p, int current_address, int to_address); // Check whether the next point is inside the ellipsis 
+    // End GOAFR
+
     bool send_allowed[GOPHER_PKT_TYPES]; //**< array with permission value to send pkttype
 
     int off_gopher_;		 //**< offset of the GOPHER packet header in pkt 

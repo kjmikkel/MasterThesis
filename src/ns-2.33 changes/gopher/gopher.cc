@@ -49,7 +49,7 @@
 #include "../locservices/realocservice.h"
 #include "../locservices/gridlocservice.h"
 #include "../hls/hls.h"
-
+#include "ellipsis.h"
 
 #include "god.h"
 
@@ -1375,6 +1375,28 @@ GOPHER_Agent::getLoad() {
 /* Forwarding Packet Function (or is it Monster ?) */
 /***************************************************/
 
+/* Added to GOAFR */
+ int GOPHER_Agent::check_ellipse(Packet *p, int from_address, int to_address) {
+	// we find the current location 
+	double myx, myy, myz;
+    mn_->getLoc(&myx, &myy, &myz);
+      
+    if (!p->ellipse_->point_in_ellipsis(myx, myy)) {
+	  fprintf(stderr, "entered hit the bounds");
+	  trace("Hit the bounds of the ellipse at %f and %f", myx, myy);
+      // If we are already doing a counter clockwise we should stop, and otherwise we should begin
+	  ntab_->counter_clock = !ntab_->counter_clock;
+		  
+      if(p->ellipse_->hit_edge()) {
+	    // If this is the second time we hit the edge, then we should expand the ellipses
+	    double major = p->ellipse_->get_major();
+	    p->ellipse_->change_major(2 * major);
+	  }
+	}
+	return 0;
+}
+ /*Stop added to GOAFR*/
+
 void
 GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 
@@ -1388,7 +1410,8 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
     double now = s.clock();
 
 	// Added to support GOAFR
-	if (p->ellipse == NULL) {
+	if (p->ellipse_ == NULL) {
+		fprintf(stderr, "*** Added ellipsis ***\n");
 		int src_address = iph->saddr();
 		int dst_address = iph->daddr();
 
@@ -1398,7 +1421,7 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 		God::instance()->getPosition(dst_address, &dstPosX, &dstPosY, &dstPosZ);
 		Point src_point = Point(srcPosX, srcPosY);
 		Point dst_point = Point(dstPosX, dstPosY);
-		p->ellipse = new Ellipsis(src_point, dst_point);
+		p->ellipse_ = new Ellipsis(src_point, dst_point);
 	}
     // End of what was added to support GOAFR
 
@@ -1411,23 +1434,7 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			break;
 	    }
 	    
-        /* Added to GOAFR */
-		// we find the current location 
-		double myx, myy, myz;
-        mn_->getLoc(&myx, &myy, &myz);
         
-        if (!p->ellipse->point_in_ellipsis(myx, myy)) {
-		  trace("Hit the bounds of the ellipse at %f and %f", myx, myy);
-          // If we are already doing a counter clockwise we should stop, and otherwise we should begin
-		  ntab_->counter_clock = !ntab_->counter_clock;
-		  
-          if(p->ellipse->hit_edge()) {
-			  // If this is the second time we hit the edge, then we should expand the ellipses
-			  double major = p->ellipse->get_major();
-			  p->ellipse->change_major(2 * major);
-		  }
-        }
-        /*Stop added to GOAFR*/
 	    // try to find the next best neighbor
 	    if (use_congestion_control_)
 			ne = ntab_->ent_findshortest_cc(mn_, iph->dx_, iph->dy_, iph->dz_, cc_alpha_);
