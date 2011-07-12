@@ -237,11 +237,11 @@ def generate_graphs(number_of_points, number_of_graphs, cutoff_distance):
     filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
     save_pickle_file(filename, normal_graph)   
     
-    gabriel_graph = make_graph.gabriel_graph(copy.deepcopy(normal_graph), tree, new_data)
+    gabriel_graph = make_graph.gabriel_graph(normal_graph, tree, new_data)
     filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
     save_pickle_file(filename, gabriel_graph)
 
-    rng_graph = make_graph.rn_graph(copy.deepcopy(normal_graph))
+    rng_graph = make_graph.rn_graph(gabriel_graph, tree, new_data)
     filename = rng_f + point_str + rng_placement + rng_filename + index_str
     save_pickle_file(filename, rng_graph)
             
@@ -622,18 +622,22 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
 
 # point_num num_graphs pr_graphs_test max_values cut_off state
 #do_suite(10, 2, 30, 20, 15, 0)
-start_state = 0
-end_state = 6
-number_tests = 20
+start_state = 1
+end_state = 1
+number_tests = 500
 
-do_suite(100, number_tests, 100, 100, 15, start_state, end_state)
+#do_suite(100, number_tests, 100, 100, 15, start_state, end_state)
 
 """
 do_suite(250, 500, 100, 300, 15, start_state, end_state)
+"""
 do_suite(500, 500, 100, 400, 17, start_state, end_state)
+"""
 do_suite(1000, 500, 100, 500, 20, start_state, end_state)
 do_suite(2500, 500, 100, 600, 23, start_state, end_state)
-do_suite(5000, 500, 100, 700, 25, start_state, end_state)
+"""
+#do_suite(5000, 500, 100, 700, 25, start_state, end_state)
+"""
 do_suite(7500, 500, 100, 800, 27, start_state, end_state)
 do_suite(10000, 500, 100, 900, 30, start_state, end_state)
 """
