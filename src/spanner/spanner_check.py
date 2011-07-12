@@ -1,5 +1,6 @@
-import os, sys, random, copy, math, json, pickle
+import os, sys, random, copy, math, json, pickle, psyco
 from decimal import *
+from datetime import datetime
 # I define the precision of the decimal numbers
 getcontext().prec = 5
 
@@ -8,6 +9,8 @@ if cmd_folder not in sys.path:
   sys.path.insert(0, cmd_folder)
 
 import make_graph, dijkstra
+
+psyco.full()
 
 point_set_location = 'Pointsets/'
 point_filename = 'pointset_'
@@ -262,16 +265,47 @@ def make_node_pairs(number_of_points, num, number_tests):
     (_ , set_container) = make_graph.MST_Kruskal(non_planar_graph)
     nodes = non_planar_graph.keys()
 
-    random.seed()
+  #  num_time1 = datetime.now()
+    # We find out how many sets we are working with
+    num_sets_dict = {}
+    for node in nodes:
+      num_sets_dict[tuple(set_container[node])] = 1
+    
+ #   num_time2 = datetime.now()
+ #   test_time = num_time2 - num_time1
 
+
+    node_pairs_to_check = []
+    if len(num_sets_dict) < 5:
+  #    num_time1 = datetime.now()
+      node_pairs_to_check = advanced_node_pairs(number_of_points, set_container, nodes)
+  #    num_time2 = datetime.now()
+  #    advanced = num_time2 - num_time1
+    else:
+ #     num_time1 = datetime.now()
+      node_pairs_to_check = brute_force_node_pairs(number_of_points, set_container, nodes)
+ #     num_time2 = datetime.now()
+ #     brute = num_time2 - num_time1
+
+#    print "Test time: \t\t" + str(test_time)
+#    print "Advanced: \t\t" + str(advanced)
+#    print "Bruteforce: \t\t" + str(brute)
+#    print "Test + Advanced: \t" + str(test_time + advanced) + ", less?: " + str((test_time + advanced) < brute)  
+    save_pickle_file(node_pair_location + point_str + "node_pair_" + str(graph_index + 1), node_pairs_to_check)
+    
+
+def brute_force_node_pairs(number_tests, set_container, nodes):
+    random.seed()
+    node_pairs_to_check = []
     # We find all possible combinations of pairs inside the mst
     already_there = {}
     total_pair_list = []
     container = None
+
     for start_node in set_container.keys():
       container = set_container[start_node]
       for end_node in container:
-        if not already_there.get((end_node, start_node)):
+        if (not already_there.get((end_node, start_node))) and start_node != end_node:
           total_pair_list.append((start_node, end_node))
           already_there[(end_node, start_node)] = 1
           already_there[(start_node, end_node)] = 1
@@ -290,13 +324,76 @@ def make_node_pairs(number_of_points, num, number_tests):
         del total_pair_list[ran_index]
       node_pairs_to_check = total_pair_list
     else:
-      for i in range(0, difference):
+      for i in range(0, number_tests):
         ran_index = random.randint(0, len(total_pair_list) - 1)
         node_pairs_to_check.append(total_pair_list[ran_index])
         del total_pair_list[ran_index]
    
-    
-    save_pickle_file(node_pair_location + point_str + "node_pair_" + str(graph_index + 1), node_pairs_to_check)
+    return node_pairs_to_check
+
+def advanced_node_pairs(number_tests, set_container, nodes):
+  random.seed()
+  already_there = {}
+  node_pairs_to_check = []
+
+  for test_index in range(0, number_tests):
+    """
+    if test_index % 10 == 0:
+    print 'Made ' + str(test_index) + ' out of ' + str(number_tests)
+    """
+    # We must ensure the pair is not replicated
+    new_pair = False
+    num_failure = 1000
+
+    while not new_pair:  
+      # First we make sure we have from node that is not totally isolated in the non-planar graph
+      """       
+      WARNING: Under certian configurations this might make the program enter a infinite loop no (or not enough) nodes are connected to other nodes in the tree. 
+        
+      By our uniqueness demand we cannot ensure termination (we can specify a demand for a greater number of unique pairs than there are), but the current implemention could certianly be improved
+      """
+      social_node = False
+      source_node = None
+      source_node_connections = None
+        
+      sink_node = None
+
+      while not social_node:
+        source_index = random.randint(0, len(nodes) - 1)
+        source_node = nodes[source_index]
+        source_node_connections = set_container[source_node]
+        if len(source_node_connections) > 1:
+          social_node = True   
+
+      # We have now found a from node that has at least one neighbour, and so we try to find a to_node
+      while not sink_node:
+        sink_index = random.randint(0, len(source_node_connections) - 1)
+        temp_node = source_node_connections[sink_index]
+
+        # We only add the sink node if it is different than the source node
+        if temp_node != source_node:
+          sink_node = temp_node
+        
+      can_pair = (source_node, sink_node)
+      aux_pair = (sink_node, source_node)
+
+      # If neither of the above are in the in the dictionary, then we add it 
+      if not (already_there.get(can_pair) or already_there.get(aux_pair)):
+        already_there[can_pair] = 1
+        already_there[aux_pair] = 1
+        node_pairs_to_check.append(can_pair)
+        new_pair = True
+        # reset failure
+        num_failure = 1000
+      else:
+        #emergency handbrake 
+        num_failure -= 1
+        if num_failure <= 0:
+          print '***   Failure    ***'
+          break
+  
+  return node_pairs_to_check
+ 
 
 def do_test(number_of_points, num, number_tests):
   point_str = str(number_of_points) + '/'
@@ -585,30 +682,33 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
 
   All of the options are culimative, so if state is 3, then you won't generate pointsets, make the graphs or node pairs
   """  
-
+  print "Working on " + str(point_num)
   if start_state < 1:
     generate_point_sets(point_num, num_graphs, max_values)
     print "Generated Pointsets"
 
-  if start_state <= 1 and end_state >= 1:
+  if (start_state <= 1) and (end_state >= 1):
     generate_graphs(point_num, num_graphs, cut_off)
     print 'Made graphs'
   
-  if start_state <= 2 and end_state >= 2:
+  if (start_state <= 2) and (end_state >= 2):
     make_node_pairs(point_num, num_graphs, pr_graph_test)
     print 'Made node pairs'
 
-  if start_state <= 3 and end_state >= 3:
+  if (start_state <= 3) and (end_state >= 3):
     do_test(point_num, num_graphs, pr_graph_test)
     print 'Done results'
     
-  if start_state <= 4 and end_state >= 4:
+  if (start_state <= 4) and (end_state >= 4):
     analyse_results(point_num, num_graphs, pr_graph_test)
     print 'Analysed results'
 
-  print_latex_results(point_num)
-  print 'Printed LaTeX file'
+  if (start_state <= 5) and (end_state >= 5):
+    print_latex_results(point_num)
+    print 'Printed LaTeX file'
 
+def eq(points):
+  return round(math.sqrt(100 * points))
 
 """
   Quick reference for state:
@@ -622,21 +722,34 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
 
 # point_num num_graphs pr_graphs_test max_values cut_off state
 #do_suite(10, 2, 30, 20, 15, 0)
+
 start_state = 0
-end_state = 6
-number_tests = 20
+end_state = 1
+number_tests = 500
+pr_test = 100
+radio_range = 20
 
-do_suite(100, number_tests, 100, 100, 15, start_state, end_state)
+#do_suite(100, number_tests, 100, 100, radio_range , start_state, end_state)
+#do_suite(250,   number_tests, pr_test, eq(250),   radio_range, start_state, end_state)
+#do_suite(500,   number_tests, pr_test, eq(500),   radio_range, start_state, end_state)
+#do_suite(1000,  number_tests, pr_test, eq(1000),  radio_range, start_state, end_state)
+#do_suite(2500,  number_tests, pr_test, eq(2500),  radio_range, start_state, end_state)
+#do_suite(5000,  number_tests, pr_test, eq(5000),  radio_range, start_state, end_state)
+do_suite(7500,  number_tests, pr_test, eq(7500),  radio_range, start_state, end_state)
+do_suite(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state)
 
-"""
-do_suite(250, 500, 100, 300, 15, start_state, end_state)
-do_suite(500, 500, 100, 400, 17, start_state, end_state)
-do_suite(1000, 500, 100, 500, 20, start_state, end_state)
-do_suite(2500, 500, 100, 600, 23, start_state, end_state)
-do_suite(5000, 500, 100, 700, 25, start_state, end_state)
-do_suite(7500, 500, 100, 800, 27, start_state, end_state)
-do_suite(10000, 500, 100, 900, 30, start_state, end_state)
-"""
+start_state = 2
+end_state = 2
+
+do_suite(100, number_tests, 100, 100, radio_range , start_state, end_state)
+do_suite(250,   number_tests, pr_test, eq(250),   radio_range, start_state, end_state)
+do_suite(500,   number_tests, pr_test, eq(500),   radio_range, start_state, end_state)
+do_suite(1000,  number_tests, pr_test, eq(1000),  radio_range, start_state, end_state)
+do_suite(2500,  number_tests, pr_test, eq(2500),  radio_range, start_state, end_state)
+do_suite(5000,  number_tests, pr_test, eq(5000),  radio_range, start_state, end_state)
+do_suite(7500,  number_tests, pr_test, eq(7500),  radio_range, start_state, end_state)
+do_suite(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state)
+
 
 """
 point_list = [(0,0), (20, 0), (4, -5), (15, -5)]
