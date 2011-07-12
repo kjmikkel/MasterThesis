@@ -78,8 +78,8 @@
 #define HDR_GPSR(p)     (hdr_gpsr::access(p))
 // GREEDY
 #define HDR_GREEDY(p)   (hdr_greedy::access(p))
-// GOPHER
-#define HDR_GOPHER(p) (hdr_gopher::access(p))
+// GOAFR
+#define HDR_GOAFR(p) (hdr_goafr::access(p))
 // inserted - to
 
 /* --------------------------------------------------------------------*/
@@ -197,7 +197,7 @@ static const packet_t PT_LOCS = 61;
 static const packet_t PT_GPSR = 62; // GPSR
 static const packet_t PT_HLS = 63; // HLS - wk
 static const packet_t PT_GREEDY = 64; // GREEDY
-static const packet_t PT_GOPHER = 65; // GOPHER
+static const packet_t PT_GOAFR = 65; // GOAFR
 static packet_t       PT_NTYPE = 66; // This MUST be the LAST one
 // insterted - to
 
@@ -267,7 +267,7 @@ public:
 		    type == PT_AODV ||
                     type == PT_GPSR ||
                     type == PT_GREEDY ||
-                    type == PT_GOPHER)
+                    type == PT_GOAFR)
 			return ROUTING;		
 		if (type == PT_TCP || 
 		    type == PT_TELNET || 
@@ -411,8 +411,8 @@ public:
 		// GREEDY
 		name_[PT_GREEDY]= (char*)"GREEDY";
 
-		// GOPHER
-		name_[PT_GOPHER]= (char*)"GOPHER";
+		// GOAFR
+		name_[PT_GOAFR]= (char*)"GOAFR";
 // insterted - to
 		
 		name_[PT_NTYPE]= (char*)"undefined";

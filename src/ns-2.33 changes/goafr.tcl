@@ -1,4 +1,4 @@
-# GOPHER.tcl -- TCL-world configuration of GOPHER routing for ns-2
+# GOAFR.tcl -- TCL-world configuration of GOAFR routing for ns-2
 
 #
 #
@@ -30,31 +30,31 @@
 # ======================================================================
 # Default Script Options
 # ======================================================================
-Agent/GOPHER set sport_        0
-Agent/GOPHER set dport_        0
-Agent/GOPHER set bint_         0.5 ;# beacon interval
-Agent/GOPHER set bdesync_      0.5 ;# beacon desync random component
-Agent/GOPHER set bexp_         [expr 3*([Agent/GOPHER set bint_]+[Agent/GOPHER set bdesync_]*[Agent/GOPHER set bint_])] ;# beacon timeout interval
-Agent/GOPHER set pint_         1.5 ;# peri probe interval
-Agent/GOPHER set pdesync_      0.5 ;# peri probe desync random component
-Agent/GOPHER set lpexp_        8.0 ;# peris unused timeout interval
-Agent/GOPHER set use_mac_      0        ;# use link breakage feedback from MAC
-Agent/GOPHER set use_peri_     0	      ;# probe and use perimeters
-Agent/GOPHER set verbose_      0        ;# 
-Agent/GOPHER set drop_debug_   0        ;#
-Agent/GOPHER set peri_proact_  1	      ;# proactively generate peri probes
-Agent/GOPHER set use_implicit_beacon_ 0 ;# all packets act as beacons; promisc.
-Agent/GOPHER set use_planar_   0        ;# planarize graph
-Agent/GOPHER set use_loop_detect_ 0     ;# look for unexpected loops in peris
-Agent/GOPHER set use_timed_plnrz_ 0     ;# replanarize periodically
+Agent/GOAFR set sport_        0
+Agent/GOAFR set dport_        0
+Agent/GOAFR set bint_         0.5 ;# beacon interval
+Agent/GOAFR set bdesync_      0.5 ;# beacon desync random component
+Agent/GOAFR set bexp_         [expr 3*([Agent/GOAFR set bint_]+[Agent/GOAFR set bdesync_]*[Agent/GOAFR set bint_])] ;# beacon timeout interval
+Agent/GOAFR set pint_         1.5 ;# peri probe interval
+Agent/GOAFR set pdesync_      0.5 ;# peri probe desync random component
+Agent/GOAFR set lpexp_        8.0 ;# peris unused timeout interval
+Agent/GOAFR set use_mac_      0        ;# use link breakage feedback from MAC
+Agent/GOAFR set use_peri_     0	      ;# probe and use perimeters
+Agent/GOAFR set verbose_      0        ;# 
+Agent/GOAFR set drop_debug_   0        ;#
+Agent/GOAFR set peri_proact_  1	      ;# proactively generate peri probes
+Agent/GOAFR set use_implicit_beacon_ 0 ;# all packets act as beacons; promisc.
+Agent/GOAFR set use_planar_   0        ;# planarize graph
+Agent/GOAFR set use_loop_detect_ 0     ;# look for unexpected loops in peris
+Agent/GOAFR set use_timed_plnrz_ 0     ;# replanarize periodically
 
 # ->
-set opt(ragent)         Agent/GOPHER
+set opt(ragent)         Agent/GOAFR
 # <- inserted - mk
 set opt(pos)		NONE			;# Box or NONE
 
 if { $opt(pos) == "Box" } {
-	puts "*** GOPHER using Box configuration..."
+	puts "*** GOAFR using Box configuration..."
 }
 
 # ======================================================================
@@ -62,7 +62,7 @@ Agent instproc init args {
     eval $self next $args
 }       
 
-Agent/GOPHER instproc init args {
+Agent/GOAFR instproc init args {
     eval $self next $args
 }       
 
@@ -70,7 +70,7 @@ Agent/GOPHER instproc init args {
 
 # ======================================================================
 
-proc create-gopher-routing-agent { node id } {
+proc create-goafr-routing-agent { node id } {
     global ns_ ragent_ tracefd opt
 
     #
@@ -104,7 +104,7 @@ proc create-gopher-routing-agent { node id } {
     # XXX FIX ME XXX
     # Where's the DSR stuff?
     #$ragent ll-queue [$node get-queue 0]    ;# ugly filter-queue hack
-    $ns_ at 0.0 "$ragent_($id) start-gopher"	;# start updates
+    $ns_ at 0.0 "$ragent_($id) start-goafr"	;# start updates
 
     #
     # Drop Target (always on regardless of other tracing)
@@ -126,7 +126,7 @@ proc create-gopher-routing-agent { node id } {
 }
 
 
-proc gopher-create-mobile-node { id args } {
+proc goafr-create-mobile-node { id args } {
     global ns ns_ chan prop topo tracefd opt node_
     
     set ns_ [Simulator instance]

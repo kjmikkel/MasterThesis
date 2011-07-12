@@ -41,7 +41,7 @@
 #include "cmu-trace.h"
 #include "random.h"
 #include "mobilenode.h"
-#include "gopher.h"
+#include "goafr.h"
 
 // Location Services
 #include "../locservices/hdr_locs.h"
@@ -69,10 +69,10 @@
 
 
 /** Cmp-Operator for binsearch */
-static int GOPHERNeighbEntCmp(const void *a, const void *b)
+static int GOAFRNeighbEntCmp(const void *a, const void *b)
 {
-	nsaddr_t ia = ((const GOPHERNeighbEnt *) a)->dst;
-	nsaddr_t ib = (*(const GOPHERNeighbEnt **) b)->dst;
+	nsaddr_t ia = ((const GOAFRNeighbEnt *) a)->dst;
+	nsaddr_t ib = (*(const GOAFRNeighbEnt **) b)->dst;
 	if (ia > ib) return 1;
 	if (ib > ia) return -1;
 	return 0;
@@ -86,7 +86,7 @@ static int coordcmp(const void *c, const void *d){
 	return 0;
 }
 
-GOPHERNeighbTable::GOPHERNeighbTable(GOPHER_Agent *mya)
+GOAFRNeighbTable::GOAFRNeighbTable(GOAFR_Agent *mya)
 {
 	int i;
 
@@ -94,16 +94,16 @@ GOPHERNeighbTable::GOPHERNeighbTable(GOPHER_Agent *mya)
 
 	nents = 0;
 	maxents = 100;
-	tab = new GOPHERNeighbEnt *[100];
+	tab = new GOAFRNeighbEnt *[100];
 	a = mya;
 	for (i = 0; i < 100; i++)
-		tab[i] = new GOPHERNeighbEnt(a);
+		tab[i] = new GOAFRNeighbEnt(a);
   
 	val_item = new DHeapEntry[God::instance()->nodes()];
 	valid = new DHeap(God::instance()->nodes());
 }
 
-GOPHERNeighbTable::~GOPHERNeighbTable()
+GOAFRNeighbTable::~GOAFRNeighbTable()
 {
 	int i;
 
@@ -116,22 +116,22 @@ GOPHERNeighbTable::~GOPHERNeighbTable()
 	delete[] tab;
 }
 
-GOPHERNeighbTableIter GOPHERNeighbTable::InitLoop() {
-	return (GOPHERNeighbTableIter) 0;
+GOAFRNeighbTableIter GOAFRNeighbTable::InitLoop() {
+	return (GOAFRNeighbTableIter) 0;
 }
 
-GOPHERNeighbEnt *
-GOPHERNeighbTable::NextLoop(GOPHERNeighbTableIter *it) {
+GOAFRNeighbEnt *
+GOAFRNeighbTable::NextLoop(GOAFRNeighbTableIter *it) {
 	if (((unsigned int) *it) >= (unsigned int) nents)
 		return 0;
 
 	return tab[(*it)++];
 }
 
-GOPHERNeighbEnt *
-GOPHERNeighbTable::ent_findshortest(MobileNode *mn, double x, double y, double z)
+GOAFRNeighbEnt *
+GOAFRNeighbTable::ent_findshortest(MobileNode *mn, double x, double y, double z)
 {
-	GOPHERNeighbEnt *ne = 0;
+	GOAFRNeighbEnt *ne = 0;
 	double shortest, t, myx, myy, myz;
 	int i;
 
@@ -147,10 +147,10 @@ GOPHERNeighbTable::ent_findshortest(MobileNode *mn, double x, double y, double z
 	return ne;
 }
 
-GOPHERNeighbEnt *
-GOPHERNeighbTable::ent_findshortest_cc(MobileNode *mn, double x, double y, double z, double alpha)
+GOAFRNeighbEnt *
+GOAFRNeighbTable::ent_findshortest_cc(MobileNode *mn, double x, double y, double z, double alpha)
 {
-	GOPHERNeighbEnt *ne = 0;
+	GOAFRNeighbEnt *ne = 0;
 	double dist, t, myx, myy, myz, new_dist, best = 1;
 	int i;
 
@@ -170,12 +170,12 @@ GOPHERNeighbTable::ent_findshortest_cc(MobileNode *mn, double x, double y, doubl
 	return ne;
 }
 
-GOPHERNeighbEnt *
-GOPHERNeighbTable::ent_findshortestXcptLH(MobileNode *mn, 
+GOAFRNeighbEnt *
+GOAFRNeighbTable::ent_findshortestXcptLH(MobileNode *mn, 
 									nsaddr_t lastHopId,
 									double x, double y, double z)
 {
-	GOPHERNeighbEnt *ne = 0;
+	GOAFRNeighbEnt *ne = 0;
 	double shortest, t, myx, myy, myz;
 	int i;
 
@@ -191,8 +191,8 @@ GOPHERNeighbTable::ent_findshortestXcptLH(MobileNode *mn,
 	return ne;
 }
 
-GOPHERNeighbEnt * 
-GOPHERNeighbTable::ent_findnext_onperi(MobileNode *mn, int node, double dx, double dy, double dz, int plan){
+GOAFRNeighbEnt * 
+GOAFRNeighbTable::ent_findnext_onperi(MobileNode *mn, int node, double dx, double dy, double dz, int plan){
 	double myx, myy, myz;
 	double brg, brg_tmp, brg_tmp2, minbrg = 3*M_PI;
 
@@ -202,7 +202,7 @@ GOPHERNeighbTable::ent_findnext_onperi(MobileNode *mn, int node, double dx, doub
 #endif
 	double mindist = 0.0;
 
-	GOPHERNeighbEnt *ne, *minne = NULL;
+	GOAFRNeighbEnt *ne, *minne = NULL;
 
 	mn->getLoc(&myx, &myy, &myz);
 	brg = bearing(myx, myy, dx, dy);
@@ -212,7 +212,7 @@ GOPHERNeighbTable::ent_findnext_onperi(MobileNode *mn, int node, double dx, doub
 #endif
 
 	int counter = 0;
-	GOPHERNeighbTableIter niloo = InitLoop();
+	GOAFRNeighbTableIter niloo = InitLoop();
 	while((bool)(ne = NextLoop(&niloo))){
 #ifdef KARP_PERI
 		if(ne->dst == node){
@@ -288,16 +288,16 @@ GOPHERNeighbTable::ent_findnext_onperi(MobileNode *mn, int node, double dx, doub
 	return minne;
 }
 
-GOPHERNeighbEnt * 
-GOPHERNeighbTable::ent_findnextcloser_onperi(MobileNode *mn, double dx, double dy, double dz){
+GOAFRNeighbEnt * 
+GOAFRNeighbTable::ent_findnextcloser_onperi(MobileNode *mn, double dx, double dy, double dz){
 	double myx, myy, myz;
 	double mydist;
-	GOPHERNeighbEnt *ne, *minne = NULL;
+	GOAFRNeighbEnt *ne, *minne = NULL;
 
 	mn->getLoc(&myx, &myy, &myz);
 	mydist = distance(myx, myy, myz, dx, dy, dz);
   
-	GOPHERNeighbTableIter ni = InitLoop();
+	GOAFRNeighbTableIter ni = InitLoop();
 	while((bool)(ne = NextLoop(&ni))){
 		if(distance(dx, dy, dz, ne->x, ne->y, ne->z) < mydist){
 			minne = ne;
@@ -308,8 +308,8 @@ GOPHERNeighbTable::ent_findnextcloser_onperi(MobileNode *mn, double dx, double d
 	return minne;
 }
 
-GOPHERNeighbEnt *
-GOPHERNeighbTable::ent_findcloser_onperi(MobileNode *mn, double x, double y,
+GOAFRNeighbEnt *
+GOAFRNeighbTable::ent_findcloser_onperi(MobileNode *mn, double x, double y,
 								   double z, int *perihop)
 {
 	double mydist, t, myx, myy, myz;
@@ -328,7 +328,7 @@ GOPHERNeighbTable::ent_findcloser_onperi(MobileNode *mn, double x, double y,
 }
 
 int
-GOPHERNeighbEnt::closer_pt(nsaddr_t myip, double myx, double myy, double myz, // me
+GOAFRNeighbEnt::closer_pt(nsaddr_t myip, double myx, double myy, double myz, // me
 						 double ptx, double pty, // perimeter startpoint
 						 nsaddr_t ptipa, nsaddr_t ptipb, // me?, prev?
 						 double dstx, double dsty, // dst
@@ -352,14 +352,14 @@ GOPHERNeighbEnt::closer_pt(nsaddr_t myip, double myx, double myy, double myz, //
 	return 0;
 }
 
-GOPHERNeighbEnt *
-GOPHERNeighbTable::ent_findcloser_edgept(MobileNode *mn, double ptx, double pty,
+GOAFRNeighbEnt *
+GOAFRNeighbTable::ent_findcloser_edgept(MobileNode *mn, double ptx, double pty,
 								   nsaddr_t ptipa, nsaddr_t ptipb,
 								   double dstx, double dsty,
 								   double *closerx, double *closery)
 {
-	GOPHERNeighbTableIter ni;
-	GOPHERNeighbEnt *minne = NULL, *ne;
+	GOAFRNeighbTableIter ni;
+	GOAFRNeighbEnt *minne = NULL, *ne;
 	double myx, myy, myz;
 
 	mn->getLoc(&myx, &myy, &myz);
@@ -378,8 +378,8 @@ GOPHERNeighbTable::ent_findcloser_edgept(MobileNode *mn, double ptx, double pty,
 	return minne;
 }
 
-GOPHERNeighbEnt *
-GOPHERNeighbTable::ent_findface(MobileNode *mn, double x, double y, double z, int p)
+GOAFRNeighbEnt *
+GOAFRNeighbTable::ent_findface(MobileNode *mn, double x, double y, double z, int p)
 {
 	double myx, myy, myz;
 	double brg;
@@ -391,12 +391,12 @@ GOPHERNeighbTable::ent_findface(MobileNode *mn, double x, double y, double z, in
 	return ent_next_ccw(brg, myx, myy, p);
 }
 
-GOPHERNeighbEnt *
-GOPHERNeighbTable::ent_next_ccw(double basebrg, double x, double y, int p,
-						  GOPHERNeighbEnt *inne /*= 0*/)
+GOAFRNeighbEnt *
+GOAFRNeighbTable::ent_next_ccw(double basebrg, double x, double y, int p,
+						  GOAFRNeighbEnt *inne /*= 0*/)
 {
-	GOPHERNeighbEnt *minne = NULL, *ne;
-	GOPHERNeighbTableIter nil;
+	GOAFRNeighbEnt *minne = NULL, *ne;
+	GOAFRNeighbTableIter nil;
 	double brg, minbrg = 3*M_PI;
 
 	nil = InitLoop();
@@ -418,12 +418,12 @@ GOPHERNeighbTable::ent_next_ccw(double basebrg, double x, double y, int p,
 	return minne;
 }
 
-GOPHERNeighbEnt *
-GOPHERNeighbTable::ent_next_ccw(MobileNode *mn, GOPHERNeighbEnt *inne, int p)
+GOAFRNeighbEnt *
+GOAFRNeighbTable::ent_next_ccw(MobileNode *mn, GOAFRNeighbEnt *inne, int p)
 {
 	double myx, myy, myz;
 	double brg;
-	GOPHERNeighbEnt *ne;
+	GOAFRNeighbEnt *ne;
 
 	// find bearing from mn to (x, y, z)
 	mn->getLoc(&myx, &myy, &myz);
@@ -435,13 +435,13 @@ GOPHERNeighbTable::ent_next_ccw(MobileNode *mn, GOPHERNeighbEnt *inne, int p)
 		return ne;
 }
 
-GOPHERNeighbEnt *GOPHERNeighbTable::ent_finddst(nsaddr_t dst)
+GOAFRNeighbEnt *GOAFRNeighbTable::ent_finddst(nsaddr_t dst)
 {
-	GOPHERNeighbEnt ne(NULL), **pne;
+	GOAFRNeighbEnt ne(NULL), **pne;
 
 	ne.dst = dst;
-	pne = ((GOPHERNeighbEnt **) bsearch(&ne, tab, nents,
-								  sizeof(GOPHERNeighbEnt *), GOPHERNeighbEntCmp));
+	pne = ((GOAFRNeighbEnt **) bsearch(&ne, tab, nents,
+								  sizeof(GOAFRNeighbEnt *), GOAFRNeighbEntCmp));
 	if (pne)
 		return *pne;
 	else
@@ -449,14 +449,14 @@ GOPHERNeighbEnt *GOPHERNeighbTable::ent_finddst(nsaddr_t dst)
 }
 
 void
-GOPHERNeighbTable::ent_delete(const GOPHERNeighbEnt *ent)
+GOAFRNeighbTable::ent_delete(const GOAFRNeighbEnt *ent)
 {
-	GOPHERNeighbEnt **pne;
-	GOPHERNeighbEnt *owslot=NULL;
+	GOAFRNeighbEnt **pne;
+	GOAFRNeighbEnt *owslot=NULL;
 	int i, j;
 
-	if ((pne = (GOPHERNeighbEnt **) bsearch(ent, tab, nents,
-									  sizeof(GOPHERNeighbEnt *), GOPHERNeighbEntCmp))) {
+	if ((pne = (GOAFRNeighbEnt **) bsearch(ent, tab, nents,
+									  sizeof(GOAFRNeighbEnt *), GOAFRNeighbEntCmp))) {
 		i = pne - tab;
 		// make sure no timers scheduled for this neighbor
 		(*pne)->dnt.force_cancel();
@@ -472,15 +472,15 @@ GOPHERNeighbTable::ent_delete(const GOPHERNeighbEnt *ent)
 	}
 }
 
-GOPHERNeighbEnt * 
-GOPHERNeighbTable::ent_add(const GOPHERNeighbEnt *ent)
+GOAFRNeighbEnt * 
+GOAFRNeighbTable::ent_add(const GOAFRNeighbEnt *ent)
 {
-	GOPHERNeighbEnt **pne;
-	GOPHERNeighbEnt *owslot = NULL;
+	GOAFRNeighbEnt **pne;
+	GOAFRNeighbEnt *owslot = NULL;
 	int i, j, r, l;
 
-	if ((pne = (GOPHERNeighbEnt **) bsearch(ent, tab, nents,
-									  sizeof(GOPHERNeighbEnt *), GOPHERNeighbEntCmp))) {
+	if ((pne = (GOAFRNeighbEnt **) bsearch(ent, tab, nents,
+									  sizeof(GOAFRNeighbEnt *), GOAFRNeighbEntCmp))) {
 		// already in table; overwrite
 		// make sure there is no pending timer
 		i = pne - tab;
@@ -499,12 +499,12 @@ GOPHERNeighbTable::ent_add(const GOPHERNeighbEnt *ent)
 
 	// may have to grow table
 	if (nents == maxents) {
-		GOPHERNeighbEnt **tmp = tab;
+		GOAFRNeighbEnt **tmp = tab;
 		maxents *= 2;
-		tab = new GOPHERNeighbEnt *[maxents];
-		bcopy(tmp, tab, nents*sizeof(GOPHERNeighbEnt *));
+		tab = new GOAFRNeighbEnt *[maxents];
+		bcopy(tmp, tab, nents*sizeof(GOAFRNeighbEnt *));
 		for (i = nents; i < maxents; i++)
-			tab[i] = new GOPHERNeighbEnt(a);
+			tab[i] = new GOAFRNeighbEnt(a);
 		delete[] tmp;
 	}
 
@@ -554,7 +554,7 @@ GOPHERNeighbTable::ent_add(const GOPHERNeighbEnt *ent)
 }
 
 int
-GOPHERNeighbTable::meanLoad() {
+GOAFRNeighbTable::meanLoad() {
     int i;
     int sum = 0;
       
@@ -568,10 +568,10 @@ GOPHERNeighbTable::meanLoad() {
 }
 
 void
-GOPHERNeighbEnt::planarize(GOPHERNeighbTable *nt, int algo,
+GOAFRNeighbEnt::planarize(GOAFRNeighbTable *nt, int algo,
 						  double x, double y, double z) {
-	GOPHERNeighbEnt *ne;
-	GOPHERNeighbTableIter niplent;
+	GOAFRNeighbEnt *ne;
+	GOAFRNeighbTableIter niplent;
 	double uvdist, canddist, midx=0.0, midy=0.0;
 
 	uvdist = distance(x, y, z, this->x, this->y, this->z);
@@ -640,10 +640,10 @@ GOPHERNeighbEnt::planarize(GOPHERNeighbTable *nt, int algo,
 
 
 void
-GOPHERNeighbTable::planarize(int algo, int addr, double x, double y, double z)
+GOAFRNeighbTable::planarize(int algo, int addr, double x, double y, double z)
 {
-	GOPHERNeighbEnt *ne;
-	GOPHERNeighbTableIter nipl;
+	GOAFRNeighbEnt *ne;
+	GOAFRNeighbTableIter nipl;
 
 	valid->clean();
 	nipl = InitLoop();
@@ -661,40 +661,40 @@ GOPHERNeighbTable::planarize(int algo, int addr, double x, double y, double z)
 	assert(!valid->empty());
 }
 
-int hdr_gopher::offset_;
+int hdr_goafr::offset_;
 
-class GOPHERHeaderClass : public PacketHeaderClass {
+class GOAFRHeaderClass : public PacketHeaderClass {
 public: 
-	GOPHERHeaderClass() : PacketHeaderClass("PacketHeader/GOPHER", sizeof(hdr_gopher)) {
-		bind_offset(&hdr_gopher::offset_);
+	GOAFRHeaderClass() : PacketHeaderClass("PacketHeader/GOAFR", sizeof(hdr_goafr)) {
+		bind_offset(&hdr_goafr::offset_);
 	}
-} class_gopherhdr;
+} class_goafrhdr;
 
-static class GOPHERClass:public TclClass
+static class GOAFRClass:public TclClass
 {
 public:
-	GOPHERClass():TclClass ("Agent/GOPHER")
+	GOAFRClass():TclClass ("Agent/GOAFR")
 	{
 	}
 	TclObject *create (int, const char *const *)
 	{
-		return (new GOPHER_Agent ());
+		return (new GOAFR_Agent ());
 	}
-} class_gopher;
+} class_goafr;
 
-GOPHER_Agent::GOPHER_Agent(void) : Agent(PT_GOPHER), use_mac_(0),
+GOAFR_Agent::GOAFR_Agent(void) : Agent(PT_GOAFR), use_mac_(0),
 							   use_peri_(0), verbose_(1), active_(1), drop_debug_(0), peri_proact_(1),
 							   use_implicit_beacon_(0), use_planar_(0), use_loop_detect_(0),
 							   use_timed_plnrz_(0), use_beacon_(0), use_congestion_control_(0), 
 							   use_reactive_beacon_(0), locservice_type_(0), use_span_(1), 
-							   bint_(GOPHER_ALIVE_INT), bdesync_(GOPHER_ALIVE_DESYNC),
-							   bexp_(GOPHER_ALIVE_EXP), pint_(GOPHER_PPROBE_INT), pdesync_(GOPHER_PPROBE_DESYNC),
-							   lpexp_(GOPHER_PPROBE_EXP), /*ldb_(0),*/ mn_(0), 
+							   bint_(GOAFR_ALIVE_INT), bdesync_(GOAFR_ALIVE_DESYNC),
+							   bexp_(GOAFR_ALIVE_EXP), pint_(GOAFR_PPROBE_INT), pdesync_(GOAFR_PPROBE_DESYNC),
+							   lpexp_(GOAFR_PPROBE_EXP), /*ldb_(0),*/ mn_(0), 
 							   ifq_(0), locservice_(0), 
 				
 			   beacon_timer_(0), lastperi_timer_(0), send_buf_timer(this)
 {
-    ntab_ = new GOPHERNeighbTable(this);
+    ntab_ = new GOAFRNeighbTable(this);
 
     ifq_ = 0;
 
@@ -705,7 +705,7 @@ GOPHER_Agent::GOPHER_Agent(void) : Agent(PT_GOPHER), use_mac_(0),
     }
 
     // Init SendPermissions
-    for (unsigned int i=0;i<GOPHER_PKT_TYPES;i++) {
+    for (unsigned int i=0;i<GOAFR_PKT_TYPES;i++) {
 		send_allowed[i] = true;
     }
 
@@ -734,19 +734,19 @@ GOPHER_Agent::GOPHER_Agent(void) : Agent(PT_GOPHER), use_mac_(0),
 
     // Timer
     if ((use_beacon_)&&(!use_reactive_beacon_)) {
-		beacon_timer_ = new GOPHER_BeaconTimer(this);
+		beacon_timer_ = new GOAFR_BeaconTimer(this);
     }
     if (!peri_proact_) { 
-		lastperi_timer_ = new GOPHER_LastPeriTimer(this);
+		lastperi_timer_ = new GOAFR_LastPeriTimer(this);
     }
     if (use_timed_plnrz_) {
-		planar_timer_ = new GOPHER_PlanarTimer(this);
+		planar_timer_ = new GOAFR_PlanarTimer(this);
     }
-    pd_timer = new GOPHERPacketDelayTimer(this,16);
+    pd_timer = new GOAFRPacketDelayTimer(this,16);
 
     if (use_reactive_beacon_) {
-		beacon_delay_ = new GOPHERBeaconDelayTimer(this);
-		beaconreq_delay_ = new GOPHERBeaconReqDelayTimer(this);
+		beacon_delay_ = new GOAFRBeaconDelayTimer(this);
+		beaconreq_delay_ = new GOAFRBeaconReqDelayTimer(this);
     }
     
     // What LocationService to use
@@ -760,7 +760,7 @@ GOPHER_Agent::GOPHER_Agent(void) : Agent(PT_GOPHER), use_mac_(0),
 }
 
 void
-GOPHER_Agent::trace(char *fmt,...)
+GOAFR_Agent::trace(char *fmt,...)
 {
     va_list ap;
 
@@ -774,17 +774,17 @@ GOPHER_Agent::trace(char *fmt,...)
 }
 
 void
-GOPHER_Agent::tracepkt(Packet *p, double now, int me, const char *type)
+GOAFR_Agent::tracepkt(Packet *p, double now, int me, const char *type)
 {
 	char buf[1024];
 
-	struct hdr_gopher *gopherh = HDR_GOPHER(p);
+	struct hdr_goafr *goafrh = HDR_GOAFR(p);
 
 	snprintf (buf, 1024, "V%s %.5f _%d_:", type, now, me);
 
-	if (gopherh->mode_ == GOPHERH_BEACON) {
-		snprintf (buf, 1024, "%s (%f,%f,%f)", buf, gopherh->hops_[0].x,
-				  gopherh->hops_[0].y, gopherh->hops_[0].z);
+	if (goafrh->mode_ == GOAFRH_BEACON) {
+		snprintf (buf, 1024, "%s (%f,%f,%f)", buf, goafrh->hops_[0].x,
+				  goafrh->hops_[0].y, goafrh->hops_[0].z);
 		if (verbose_)
 			trace("%s", buf);
 	}
@@ -792,13 +792,13 @@ GOPHER_Agent::tracepkt(Packet *p, double now, int me, const char *type)
 
 // don't drop or modify the packet--it's not a copy!
 void
-GOPHER_Agent::tap(const Packet *p)
+GOAFR_Agent::tap(const Packet *p)
 {
     if(!active_){ return; }
 
     hdr_cmn *hdrc = HDR_CMN(p);
 
-    struct hdr_gopher *gopherh = HDR_GOPHER(p);
+    struct hdr_goafr *goafrh = HDR_GOAFR(p);
     
     /* ignore non-IP packets.
        ignore beacons; we process those on regular receive.
@@ -808,31 +808,31 @@ GOPHER_Agent::tap(const Packet *p)
 		(hdrc->addr_type_ == NS_AF_INET) &&
 		(hdrc->next_hop_ != (nsaddr_t) IP_BROADCAST)) {
 		// snoop it as proof of its sender's existence.
-		switch (gopherh->mode_) {
-	    case GOPHERH_DATA_GREEDY:
+		switch (goafrh->mode_) {
+	    case GOAFRH_DATA_GREEDY:
 			// prev hop position lives in hops_[0]
-			beacon_proc(gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y,
-						gopherh->hops_[0].z, gopherh->load);
+			beacon_proc(goafrh->hops_[0].ip, goafrh->hops_[0].x, goafrh->hops_[0].y,
+						goafrh->hops_[0].z, goafrh->load);
 			break;
-	    case GOPHERH_PPROBE:
+	    case GOAFRH_PPROBE:
 			// prev hop position lives in hops_[nhops_-1]
-			beacon_proc(gopherh->hops_[gopherh->nhops_-1].ip,
-						gopherh->hops_[gopherh->nhops_-1].x,
-						gopherh->hops_[gopherh->nhops_-1].y,
-						gopherh->hops_[gopherh->nhops_-1].z,
-						gopherh->load);
+			beacon_proc(goafrh->hops_[goafrh->nhops_-1].ip,
+						goafrh->hops_[goafrh->nhops_-1].x,
+						goafrh->hops_[goafrh->nhops_-1].y,
+						goafrh->hops_[goafrh->nhops_-1].z,
+						goafrh->load);
 			break;
-	    case GOPHERH_DATA_PERI:
-			// XXX was hops_[gopherh->currhop_-1]
+	    case GOAFRH_DATA_PERI:
+			// XXX was hops_[goafrh->currhop_-1]
 			// prev hop position lives in hops_[0]
-			beacon_proc(gopherh->hops_[0].ip,
-						gopherh->hops_[0].x,
-						gopherh->hops_[0].y,
-						gopherh->hops_[0].z,
-						gopherh->load);
+			beacon_proc(goafrh->hops_[0].ip,
+						goafrh->hops_[0].x,
+						goafrh->hops_[0].y,
+						goafrh->hops_[0].z,
+						goafrh->load);
 			break;
 	    default:
-			fprintf(stderr, "Yow! tap got packet of unk type %d!\n", gopherh->mode_);
+			fprintf(stderr, "Yow! tap got packet of unk type %d!\n", goafrh->mode_);
 			abort();
 			break;
 		}
@@ -840,7 +840,7 @@ GOPHER_Agent::tap(const Packet *p)
 
     // Reactive Beaconing needs to take a look at pkts
     if (use_reactive_beacon_) {
-		checkGopherCondition(p);
+		checkGoafrCondition(p);
     }
 
     /*
@@ -854,7 +854,7 @@ GOPHER_Agent::tap(const Packet *p)
     if (locservice_type_ == _REACTIVE_) {
 		// Use LocSRequest Packets for implicit beaconing
 		// ReaLocService Requests are Broadcast Pakets, thus needing
-		//  extra handling. Unicast Pakets are covered by GOPHER
+		//  extra handling. Unicast Pakets are covered by GOAFR
 		struct hdr_locs *locsh = HDR_LOCS(p);
 		if (use_implicit_beacon_ && locsh->valid_ && (locsh->type_ == LOCS_REQUEST)) {
 			beacon_proc(locsh->lasthop.id,
@@ -871,13 +871,13 @@ GOPHER_Agent::tap(const Packet *p)
 		locservice_->evaluatePacket(p);
 	}
     
-#if GOPHER_ROUTE_VERBOSE >= 1
+#if GOAFR_ROUTE_VERBOSE >= 1
     // Each DATA arrival has to trigger a connectivity
     // trace for evaluation
 	struct hdr_ip *iph = HDR_IP(p);
-	bool arrival = ( ((gopherh->mode_ == GOPHERH_DATA_GREEDY) ||
-					  (gopherh->mode_ == GOPHERH_DATA_PERI)) &&
-					 (gopherh->port_ == hdr_gopher::GOPHER) &&
+	bool arrival = ( ((goafrh->mode_ == GOAFRH_DATA_GREEDY) ||
+					  (goafrh->mode_ == GOAFRH_DATA_PERI)) &&
+					 (goafrh->port_ == hdr_goafr::GOAFR) &&
 					 (iph->daddr() == addr()) );
     if (arrival) {
       int analysis = God::instance()->path_analysis_;
@@ -901,16 +901,16 @@ GOPHER_Agent::tap(const Packet *p)
 }
 
 void
-GOPHER_Agent::lost_link(Packet *p)
+GOAFR_Agent::lost_link(Packet *p)
 {
     // Give Locservice the chance to evaluate callbacks
     locservice_->callback(p);
     if (p==NULL) { return; }
 
     struct hdr_cmn *hdrc = HDR_CMN(p);
-    struct hdr_gopher *gopherh = HDR_GOPHER(p);
+    struct hdr_goafr *goafrh = HDR_GOAFR(p);
 
-    GOPHERNeighbEnt *ne;
+    GOAFRNeighbEnt *ne;
     
     if (use_mac_ == 0) {
 		drop(p, DROP_RTR_MAC_CALLBACK);
@@ -1024,7 +1024,7 @@ GOPHER_Agent::lost_link(Packet *p)
 				  iphdr->daddr(),
 				  hdrc->xmit_reason_);
 		}
-		gopherh = HDR_GOPHER(rt);
+		goafrh = HDR_GOAFR(rt);
       
 		if (hdrc->addr_type_ != NS_AF_INET) {
 			drop(rt, DROP_RTR_MAC_CALLBACK);
@@ -1034,13 +1034,13 @@ GOPHER_Agent::lost_link(Packet *p)
 		/*
 		  Unfortunately we have no choice but to handle LocService Packets with
 		  this extra code, because we have to use the Routing Port but don't
-		  want GOPHER to handle the (and discard) the Packets
+		  want GOAFR to handle the (and discard) the Packets
 		*/
-		if (gopherh->port_ == hdr_gopher::LOCS) {
+		if (goafrh->port_ == hdr_goafr::LOCS) {
 			int tmp = use_planar_;
-			switch (gopherh->mode_) {
-			case GOPHERH_DATA_GREEDY: { forwardPacket(rt); break; }
-			case GOPHERH_DATA_PERI:
+			switch (goafrh->mode_) {
+			case GOAFRH_DATA_GREEDY: { forwardPacket(rt); break; }
+			case GOAFRH_DATA_PERI:
 				use_planar_ = 1;
 				if (use_planar_) { forwardPacket(rt, 1); }
 				else { drop(rt, DROP_RTR_NEXT_SRCRT_HOP); }
@@ -1054,11 +1054,11 @@ GOPHER_Agent::lost_link(Packet *p)
 			continue;
 		}
 
-		// for GOPHER perimeter probes, chop off our own perimeter entry before
+		// for GOAFR perimeter probes, chop off our own perimeter entry before
 		// passing the probe back into the agent for reforwarding
 		if (HDR_IP(rt)->dport() == RT_PORT) {
-			if (gopherh->mode_ == GOPHERH_PPROBE) {
-				if (gopherh->nhops_ == 1) {
+			if (goafrh->mode_ == GOAFRH_PPROBE) {
+				if (goafrh->nhops_ == 1) {
 					/* we originated it. the neighbor is gone, according to the MAC
 					   layer. drop the probe--it was *only* meant for that neighbor. */
 					drop(rt, DROP_RTR_NEXT_SRCRT_HOP);
@@ -1066,17 +1066,17 @@ GOPHER_Agent::lost_link(Packet *p)
 				}
 				/* we were forwarding the probe, so instead try to recover by
 				   forwarding it to a remaining appropriate next hop */
-				gopherh->nhops_--;
-				periIn(rt, gopherh, GOPHER_PPROBE_RTX);
+				goafrh->nhops_--;
+				periIn(rt, goafrh, GOAFR_PPROBE_RTX);
 			}
 		} else {
 			int tmp = use_planar_;
-			switch (gopherh->mode_) {
-			case GOPHERH_DATA_GREEDY:
-				// give the packet another chance--exercise gopher's good recovery
+			switch (goafrh->mode_) {
+			case GOAFRH_DATA_GREEDY:
+				// give the packet another chance--exercise goafr's good recovery
 				forwardPacket(rt);
 				break;
-			case GOPHERH_DATA_PERI:
+			case GOAFRH_DATA_PERI:
 				use_planar_ = 1;
 				if (use_planar_)
 					// not src-routed; give it another chance via another neighbor
@@ -1088,7 +1088,7 @@ GOPHER_Agent::lost_link(Packet *p)
 				break;
 			default:
 				fprintf(stderr,
-						"yow! non-data packet for non-GOPHER port bounced by MAC!\n");
+						"yow! non-data packet for non-GOAFR port bounced by MAC!\n");
 				abort();
 				break;
 			}
@@ -1100,11 +1100,11 @@ GOPHER_Agent::lost_link(Packet *p)
 static void
 mac_callback(Packet * p, void *arg)
 {
-	((GOPHER_Agent *) arg)->lost_link(p);
+	((GOAFR_Agent *) arg)->lost_link(p);
 }
 
 void
-GOPHER_Agent::planar_callback(void)
+GOAFR_Agent::planar_callback(void)
 {
 	// re-planarize graph
 	if (use_planar_) {
@@ -1119,10 +1119,10 @@ GOPHER_Agent::planar_callback(void)
 }
 
 void
-GOPHER_Agent::lastperi_callback(void)
+GOAFR_Agent::lastperi_callback(void)
 {
-	GOPHERNeighbEnt *ne;
-	GOPHERNeighbTableIter ni;
+	GOAFRNeighbEnt *ne;
+	GOAFRNeighbTableIter ni;
 
 	// don't probe perimeters proactively anymore
 	peri_proact_ = 0;
@@ -1133,7 +1133,7 @@ GOPHER_Agent::lastperi_callback(void)
 }
 
 void
-GOPHER_Agent::beacon_callback(void)
+GOAFR_Agent::beacon_callback(void)
 {
     
     sendBeacon();
@@ -1143,7 +1143,7 @@ GOPHER_Agent::beacon_callback(void)
 }
 
 void
-GOPHER_Agent::deadneighb_callback(GOPHERNeighbEnt *ne)
+GOAFR_Agent::deadneighb_callback(GOAFRNeighbEnt *ne)
 {
 	Scheduler &s = Scheduler::instance();
 	double now = s.clock ();
@@ -1163,29 +1163,29 @@ GOPHER_Agent::deadneighb_callback(GOPHERNeighbEnt *ne)
 }
 
 void
-GOPHER_Agent::periprobe_callback(GOPHERNeighbEnt *ne)
+GOAFR_Agent::periprobe_callback(GOAFRNeighbEnt *ne)
 {
 	Packet *p = allocpkt();
 	struct hdr_ip *iph = HDR_IP(p);
-	struct hdr_gopher *gopherh = HDR_GOPHER(p);
+	struct hdr_goafr *goafrh = HDR_GOAFR(p);
 	struct hdr_cmn *ch = HDR_CMN(p);
 
 	ch->next_hop_ = ne->dst;
 	ch->addr_type_ = NS_AF_INET;
 	iph->daddr() = Address::instance().create_ipaddr(ne->dst, RT_PORT);
 	iph->dport() = RT_PORT;
-	ch->ptype_ = PT_GOPHER;
+	ch->ptype_ = PT_GOAFR;
 	iph->ttl() = 128;
 #ifdef PING_TTL
 	iph->ttl() = PING_TTL;
 #endif
-	gopherh->hops_[0].ip = Address::instance().get_nodeaddr(addr());
-	gopherh->nhops_ = 1;
-	gopherh->mode_ = GOPHERH_PPROBE;
+	goafrh->hops_[0].ip = Address::instance().get_nodeaddr(addr());
+	goafrh->nhops_ = 1;
+	goafrh->mode_ = GOAFRH_PPROBE;
 	if (use_congestion_control_)
-		gopherh->load = getLoad();
+		goafrh->load = getLoad();
 	ch->size() = hdr_size(p);
-	mn_->getLoc(&gopherh->hops_[0].x, &gopherh->hops_[0].y, &gopherh->hops_[0].z);
+	mn_->getLoc(&goafrh->hops_[0].x, &goafrh->hops_[0].y, &goafrh->hops_[0].z);
 
 	// schedule probe transmission
 	ch->xmit_failure_ = mac_callback;
@@ -1236,20 +1236,20 @@ cross_segment(double x1, double y1, double x2, double y2,
 }
 
 int
-GOPHER_Agent::crosses(GOPHERNeighbEnt *ne, hdr_gopher *gopherh)
+GOAFR_Agent::crosses(GOAFRNeighbEnt *ne, hdr_goafr *goafrh)
 {
 	int i;
 
 	// check all neighboring hops in perimeter thus far (through self)
-	for (i = 0; i < (gopherh->nhops_ - 1); i++) {
-		if ((gopherh->hops_[i].ip != ne->dst) &&
-			(gopherh->hops_[i+1].ip != ne->dst) &&
-			(gopherh->hops_[i].ip != gopherh->hops_[gopherh->nhops_-1].ip) &&
-			(gopherh->hops_[i+1].ip != gopherh->hops_[gopherh->nhops_-1].ip) &&
-			cross_segment(gopherh->hops_[i].x, gopherh->hops_[i].y,
-						  gopherh->hops_[i+1].x, gopherh->hops_[i+1].y,
-						  gopherh->hops_[gopherh->nhops_-1].x,
-						  gopherh->hops_[gopherh->nhops_-1].y,
+	for (i = 0; i < (goafrh->nhops_ - 1); i++) {
+		if ((goafrh->hops_[i].ip != ne->dst) &&
+			(goafrh->hops_[i+1].ip != ne->dst) &&
+			(goafrh->hops_[i].ip != goafrh->hops_[goafrh->nhops_-1].ip) &&
+			(goafrh->hops_[i+1].ip != goafrh->hops_[goafrh->nhops_-1].ip) &&
+			cross_segment(goafrh->hops_[i].x, goafrh->hops_[i].y,
+						  goafrh->hops_[i+1].x, goafrh->hops_[i+1].y,
+						  goafrh->hops_[goafrh->nhops_-1].x,
+						  goafrh->hops_[goafrh->nhops_-1].y,
 						  ne->x, ne->y))
 			return 1;
 	}
@@ -1257,69 +1257,69 @@ GOPHER_Agent::crosses(GOPHERNeighbEnt *ne, hdr_gopher *gopherh)
 }
 
 void
-GOPHER_Agent::periIn(Packet *p, hdr_gopher *gopherh, int rtxflag /*= 0*/)
+GOAFR_Agent::periIn(Packet *p, hdr_goafr *goafrh, int rtxflag /*= 0*/)
 {
 	double myx, myy, myz;
-	GOPHERNeighbEnt *ne, *inne;
+	GOAFRNeighbEnt *ne, *inne;
 
 	// update neighbor record for previous hop
   
 	// did I originate it?
-	if (gopherh->hops_[0].ip == Address::instance().get_nodeaddr(addr())) {
+	if (goafrh->hops_[0].ip == Address::instance().get_nodeaddr(addr())) {
 		// cache the perimeter
-		ne = ntab_->ent_finddst(gopherh->hops_[1].ip);
+		ne = ntab_->ent_finddst(goafrh->hops_[1].ip);
 		if (!ne) {
 			// apparently, neighbor we launched probe via is now gone
 			Packet::free(p);
 			return;
 		}
-#ifdef HDR_GOPHER_DYNAMIC
-		if (ne->peri && (ne->maxlen < gopherh->maxhops_)) {
-			// need to allocate more GopherPeriEnt slots in ne
+#ifdef HDR_GOAFR_DYNAMIC
+		if (ne->peri && (ne->maxlen < goafrh->maxhops_)) {
+			// need to allocate more GoafrPeriEnt slots in ne
 			delete[] ne->peri;
 			ne->maxlen = ne->perilen = 0;
 			ne->peri = NULL;
 		}
 #endif
 		if (!ne->peri) {
-#ifdef HDR_GOPHER_DYNAMIC
-			ne->peri = new struct PeriEnt[gopherh->maxhops_];
-			ne->maxlen = gopherh->maxhops_;
+#ifdef HDR_GOAFR_DYNAMIC
+			ne->peri = new struct PeriEnt[goafrh->maxhops_];
+			ne->maxlen = goafrh->maxhops_;
 #else
 			ne->peri = new struct PeriEnt[MAX_PERI_HOPS_STATIC];
 			ne->maxlen = MAX_PERI_HOPS_STATIC;
 #endif
 		}
-		bcopy(&gopherh->hops_[1], ne->peri,
-			  (gopherh->nhops_ - 1) * sizeof(struct PeriEnt));
-		ne->perilen = gopherh->nhops_ - 1;
+		bcopy(&goafrh->hops_[1], ne->peri,
+			  (goafrh->nhops_ - 1) * sizeof(struct PeriEnt));
+		ne->perilen = goafrh->nhops_ - 1;
 		/* no timer work to do--perimeter probe timer is governed by
 		   beacons/absence of beacons from a neighbor */
 		// we consumed the packet; free it!
 		Packet::free(p);
 		return;
 	}
-	// add self to GOPHER header perimeter
+	// add self to GOAFR header perimeter
 	mn_->getLoc(&myx, &myy, &myz);
-	gopherh->add_hop(Address::instance().get_nodeaddr(addr()), myx, myy, myz);
+	goafrh->add_hop(Address::instance().get_nodeaddr(addr()), myx, myy, myz);
 	if (use_congestion_control_)
-		gopherh->load = getLoad();
+		goafrh->load = getLoad();
 	// compute candidate next hop: sweep ccw about self from ingress hop
-	ne = inne = ntab_->ent_finddst(gopherh->hops_[gopherh->nhops_-2].ip);
+	ne = inne = ntab_->ent_finddst(goafrh->hops_[goafrh->nhops_-2].ip);
 	/* in theory, a perimeter probe received from an unknown neighbor should
 	   serve as a beacon from that neighbor... */
 	/* BUT, don't add the previous hop more than once when we retransmit a
 	   peri probe--the prev hop information is stale in that case */
 	if (!rtxflag && (ne == NULL)) {
-		GOPHERNeighbEnt nne(this);
+		GOAFRNeighbEnt nne(this);
 
-		nne.dst = gopherh->hops_[gopherh->nhops_-2].ip;
-		nne.x = gopherh->hops_[gopherh->nhops_-2].x;
-		nne.y = gopherh->hops_[gopherh->nhops_-2].y;
-		nne.z = gopherh->hops_[gopherh->nhops_-2].z;
+		nne.dst = goafrh->hops_[goafrh->nhops_-2].ip;
+		nne.x = goafrh->hops_[goafrh->nhops_-2].x;
+		nne.y = goafrh->hops_[goafrh->nhops_-2].y;
+		nne.z = goafrh->hops_[goafrh->nhops_-2].z;
 
 		if (use_congestion_control_)
-			nne.load = gopherh->load;
+			nne.load = goafrh->load;
 		inne = ne = ntab_->ent_add(&nne);
 
 		ne->dnt.sched(bexp_);
@@ -1338,14 +1338,14 @@ GOPHER_Agent::periIn(Packet *p, hdr_gopher *gopherh, int rtxflag /*= 0*/)
 	while ((ne = ntab_->ent_next_ccw(mn_, ne, use_planar_)) != inne) {
 #else
 		double fromx, fromy, fromz;
-	while((ne = ntab_->ent_findnext_onperi(mn_, gopherh->hops_[0].ip,
-										   gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z,
+	while((ne = ntab_->ent_findnext_onperi(mn_, goafrh->hops_[0].ip,
+										   goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z,
 										   use_planar_)) != inne){
 		printf("ne->dst %d\n", ne->dst);
 		
 #endif
 			// verify no crossing
-			if (!crosses(ne, gopherh))
+			if (!crosses(ne, goafrh))
 				break;			
 	}
 	// forward probe to ne
@@ -1367,7 +1367,7 @@ GOPHER_Agent::periIn(Packet *p, hdr_gopher *gopherh, int rtxflag /*= 0*/)
 }
 
 int
-GOPHER_Agent::getLoad() {
+GOAFR_Agent::getLoad() {
 	return (2 * ((Mac802_11 *)m)->getLoad() + ntab_->meanLoad()) / 3;
 }
 
@@ -1376,7 +1376,7 @@ GOPHER_Agent::getLoad() {
 /***************************************************/
 
 /* Added to GOAFR */
- int GOPHER_Agent::check_ellipse(Packet *p, int from_address, int to_address) {
+ int GOAFR_Agent::check_ellipse(Packet *p, int from_address, int to_address) {
 	// we find the current location 
 	double myx, myy, myz;
     mn_->getLoc(&myx, &myy, &myz);
@@ -1398,14 +1398,14 @@ GOPHER_Agent::getLoad() {
  /*Stop added to GOAFR*/
 
 void
-GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
+GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 
 	struct hdr_ip *iph = HDR_IP(p);
     struct hdr_cmn *cmh = HDR_CMN(p);
-    struct hdr_gopher *gopherh = HDR_GOPHER(p);
+    struct hdr_goafr *goafrh = HDR_GOAFR(p);
     
-    GOPHERNeighbEnt *ne=NULL;
-    GOPHERNeighbEnt *logne;
+    GOAFRNeighbEnt *ne=NULL;
+    GOAFRNeighbEnt *logne;
     Scheduler &s = Scheduler::instance();
     double now = s.clock();
 
@@ -1425,8 +1425,8 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 	}
     // End of what was added to support GOAFR
 
-    switch(gopherh->mode_) {
-	case GOPHERH_DATA_GREEDY: 
+    switch(goafrh->mode_) {
+	case GOAFRH_DATA_GREEDY: 
     
 	    // first of all, look if we're neighbor to dst
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
@@ -1447,7 +1447,7 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
  			// (wk: possibly problematic because if a newly born packet with next hop 0
 			// arrives here, a possible ping-pong will be detected (ne->dst == 0 and ..hops[0]
 			// is initialized with 0)
-			if (ne->dst == gopherh->hops_[0].ip)			
+			if (ne->dst == goafrh->hops_[0].ip)			
 					trace("VPPP %f _%d_ %d [%d -> %d]", now, mn_->address(), cmh->uid(), mn_->address(), ne->dst);
 
 			// set next hop to best neighbor
@@ -1463,15 +1463,15 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			// we send a beacon request and delay the pkt the first time
 			// should the new info be of no use, we'll process it further
 			if (use_reactive_beacon_) {
-				if (gopherh->retry < GOPHER_RBEACON_RETRIES) {
-					gopherh->retry++;
+				if (goafrh->retry < GOAFR_RBEACON_RETRIES) {
+					goafrh->retry++;
 					sendBeaconRequest();
-					double delay = 2*GOPHER_RBEACON_JITTER;
+					double delay = 2*GOAFR_RBEACON_JITTER;
 					pd_timer->add(cmh->uid(), delay, (void*)p);
 					return;
 				}else{
 					pd_timer->remove(cmh->uid()); // precaution
-					gopherh->retry = 0;
+					goafrh->retry = 0;
 				}
 			}
 
@@ -1495,7 +1495,7 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					// no proactive probes, so no peri_proact_ to worry about
 					ne = ntab_->ent_findnext_onperi(mn_, iph->daddr(), iph->dx_, iph->dy_, iph->dz_, use_planar_);
 					if (!ne) { // no face toward the destination
-						if(gopherh->geoanycast)
+						if(goafrh->geoanycast)
 							{
 								// wk: forwardPacket: no better neigbhor on peri
 								locservice_->dropPacketCallback(p);
@@ -1510,27 +1510,27 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			  
 					// put packet in peri data mode, forward
 					cmh->size() -= hdr_size(p); // strip data header
-					gopherh->mode_ = GOPHERH_DATA_PERI;
+					goafrh->mode_ = GOAFRH_DATA_PERI;
 					cmh->size() += hdr_size(p); // add peri header
 			
 					// mark point of entry into peri data mode
-					mn_->getLoc(&gopherh->peript_.x, &gopherh->peript_.y, &gopherh->peript_.z);
-					gopherh->perips_.x = gopherh->peript_.x;
-					gopherh->perips_.y = gopherh->peript_.y;
-					gopherh->perips_.z = gopherh->peript_.z;
+					mn_->getLoc(&goafrh->peript_.x, &goafrh->peript_.y, &goafrh->peript_.z);
+					goafrh->perips_.x = goafrh->peript_.x;
+					goafrh->perips_.y = goafrh->peript_.y;
+					goafrh->perips_.z = goafrh->peript_.z;
 					// Add the ip adress
-					gopherh->perips_.ip = mn_->address();
+					goafrh->perips_.ip = mn_->address();
 
 					// mark ips of edge endpoints
-					gopherh->periptip_[0] = gopherh->hops_[0].ip;        // prev edge on peri
-					gopherh->periptip_[1] = mn_->address(); // myself
-					gopherh->periptip_[2] = ne->dst;        // next edge on peri
+					goafrh->periptip_[0] = goafrh->hops_[0].ip;        // prev edge on peri
+					goafrh->periptip_[1] = mn_->address(); // myself
+					goafrh->periptip_[2] = ne->dst;        // next edge on peri
 
 					// N.B. first dst hop is hops_[1]
 					// (leave room for hop-by-hop ip, position in hops_[0])!!
-					gopherh->nhops_ = 1;
-					gopherh->currhop_ = 1;
-					gopherh->add_hop(mn_->address(), gopherh->peript_.x, gopherh->peript_.y, gopherh->peript_.z);
+					goafrh->nhops_ = 1;
+					goafrh->currhop_ = 1;
+					goafrh->add_hop(mn_->address(), goafrh->peript_.x, goafrh->peript_.y, goafrh->peript_.z);
 					cmh->next_hop_ = ne->dst;
 					break;
 				}
@@ -1542,14 +1542,14 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 
 					double fromx, fromy, fromz;
 					ne = ntab_->ent_findnext_onperi(mn_,
-													gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z,
+													goafrh->hops_[0].ip, goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z,
 													use_planar_);
 
 					if (!ne) {
 
 						// we're well and truly hung; nothing closer on a peri, either
 						if (drop_debug_ && (cmh->opt_num_forwards_ != 16777215)) {
-							GOPHERNeighbTableIter ni;
+							GOAFRNeighbTableIter ni;
 							ni = ntab_->InitLoop();
 							while ((logne = ntab_->NextLoop(&ni))) {
 								trace("VPER _%d_ (%.5f, %.5f):", logne->dst, logne->x, logne->y);
@@ -1559,7 +1559,7 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 								}
 							}
 						}
- 						if(gopherh->geoanycast)
+ 						if(goafrh->geoanycast)
 							{
 								// wk forwardPacket: we're hung
 								locservice_->dropPacketCallback(p);
@@ -1573,15 +1573,15 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					}else{
 			    
 						cmh->size() -= hdr_size(p); // strip data header 
-						gopherh->mode_ = GOPHERH_DATA_PERI; // put packet in peri mode
+						goafrh->mode_ = GOAFRH_DATA_PERI; // put packet in peri mode
 						cmh->size() += hdr_size(p); // add peri header
 
 						// N.B. first dst hop is hops_[1]
 						// (leave room for hop-by-hop ip, position in hops_[0])!! 
-						gopherh->nhops_ = 1;
-						gopherh->currhop_ = 1;
-						gopherh->hops_[1].ip = ne->dst;
-						cmh->next_hop_ = gopherh->hops_[1].ip;
+						goafrh->nhops_ = 1;
+						goafrh->currhop_ = 1;
+						goafrh->hops_[1].ip = ne->dst;
+						cmh->next_hop_ = goafrh->hops_[1].ip;
 						trace("VSM->P %f _%d_ [%d -> %d]", now, mn_->address(), iph->saddr(), iph->daddr());
 						break;
 					}
@@ -1600,7 +1600,7 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			// we could have used a perimeter here--turn them on
 			peri_proact_ = 1;
 
-			if(gopherh->geoanycast)
+			if(goafrh->geoanycast)
 				{
 					// wk forwardPacket no closer  neighbor
 					locservice_->dropPacketCallback(p);
@@ -1622,16 +1622,16 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 	     *end greedy
 	     *******************************************/
 
-	case GOPHERH_DATA_PERI:
+	case GOAFRH_DATA_PERI:
 
 	    // first of all, look if we're neighbor to dst
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
 			cmh->size() -= hdr_size(p); // strip data peri header
-			gopherh->mode_ = GOPHERH_DATA_GREEDY;
-			cmh->size() += hdr_size(p); // strip data gopher header
-			gopherh->nhops_ = 1;
-			gopherh->currhop_ = 1;
-			gopherh->hops_[1].ip = ne->dst;
+			goafrh->mode_ = GOAFRH_DATA_GREEDY;
+			cmh->size() += hdr_size(p); // strip data goafr header
+			goafrh->nhops_ = 1;
+			goafrh->currhop_ = 1;
+			goafrh->hops_[1].ip = ne->dst;
 			cmh->next_hop_ = ne->dst;
 			break;
 	    }
@@ -1639,22 +1639,22 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 	    if (use_peri_) {
 	      
 			double myx, myy, myz, closerx, closery;
-		    closerx = gopherh->perips_.x;
-			closery = gopherh->perips_.y;
+		    closerx = goafrh->perips_.x;
+			closery = goafrh->perips_.y;
 
 			// non-source-routed perimeter forwarding rule
 			mn_->getLoc(&myx, &myy, &myz);
 
 			// We record when we arrive at a node that is closer to the destination
 			if ((distance(myx, myy, myz, iph->dx_, iph->dy_, iph->dz_) <
-				distance(gopherh->peript_.x, gopherh->peript_.y, gopherh->peript_.z,
+				distance(goafrh->peript_.x, goafrh->peript_.y, goafrh->peript_.z,
 						 iph->dx_, iph->dy_, iph->dz_))) 
 				{
 
-				gopherh->perips_.ip = mn_->address();
-				gopherh->perips_.x = myx;
-				gopherh->perips_.y = myy;
-				gopherh->perips_.z = myz;
+				goafrh->perips_.ip = mn_->address();
+				goafrh->perips_.x = myx;
+				goafrh->perips_.y = myy;
+				goafrh->perips_.z = myz;
                 
 			}
 
@@ -1662,27 +1662,27 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				// forward along current face, or change faces where appropriate
 				/* don't choose *any* edge--only consider edges on the
 				   face we're forwarding on at the moment. */
-				for(int i=0; i<gopherh->nhops_; i++)
-					trace("Vne %.8f _%d_ <- %d", CURRTIME, mn_->address(), gopherh->hops_[i].ip);
+				for(int i=0; i<goafrh->nhops_; i++)
+					trace("Vne %.8f _%d_ <- %d", CURRTIME, mn_->address(), goafrh->hops_[i].ip);
 
-				ne = ntab_->ent_finddst(gopherh->hops_[gopherh->nhops_-1].ip);
+				ne = ntab_->ent_finddst(goafrh->hops_[goafrh->nhops_-1].ip);
 				if(ne){
 					double fromx, fromy, fromz;
 					ne = ntab_->ent_findnext_onperi(mn_,
-													gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z,
+													goafrh->hops_[0].ip, goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z,
 													use_planar_);
 
 					// We have returned to the start point, now we go forward -- GOAFR
-					if ((gopherh->periptip_[1] == mn_->address()) &&
-						(gopherh->periptip_[2] == ne->dst)) {
+					if ((goafrh->periptip_[1] == mn_->address()) &&
+						(goafrh->periptip_[2] == ne->dst)) {
 						
-						gopherh->mode_ = GOAFR_DATA_ADVANCE; // put packet in advance mode
+						goafrh->mode_ = GOAFR_DATA_ADVANCE; // put packet in advance mode
         				
 						// Set the next hop
-						gopherh->nhops_ = 1;
-						gopherh->currhop_ = 1;
-						gopherh->hops_[1].ip = mn_->address();
-						cmh->next_hop_ = gopherh->hops_[1].ip; // we jump to this node and then we advance
+						goafrh->nhops_ = 1;
+						goafrh->currhop_ = 1;
+						goafrh->hops_[1].ip = mn_->address();
+						cmh->next_hop_ = goafrh->hops_[1].ip; // we jump to this node and then we advance
 						break; // get out of this and forward the node
 					}
 			
@@ -1690,7 +1690,7 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					// does the candidate next edge have a closer pt?
 					if (!ne) {
 						// no face toward the destination
-						if(gopherh->geoanycast)
+						if(goafrh->geoanycast)
 							{
 								// wk forwardPaket
 								locservice_->dropPacketCallback(p);
@@ -1703,8 +1703,8 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 
 					/** face-change(p,t) */
 					if (ne->closer_pt(mn_->address(), myx, myy, myz,
-									  gopherh->peript_.x, gopherh->peript_.y,
-									  gopherh->periptip_[1], gopherh->periptip_[0],
+									  goafrh->peript_.x, goafrh->peript_.y,
+									  goafrh->periptip_[1], goafrh->periptip_[0],
 									  iph->dx_, iph->dy_, &closerx, &closery)) {
 						/* yes. choose a new next hop on the peri pierced by the line
 						   to the destination. */
@@ -1712,24 +1712,24 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						   choose that cut at the point closest to destination */
 						int counter = 0;
 						while (ne->closer_pt(mn_->address(), myx, myy, myz,
-											 gopherh->peript_.x, gopherh->peript_.y,
-											 gopherh->periptip_[1], gopherh->periptip_[0],
+											 goafrh->peript_.x, goafrh->peript_.y,
+											 goafrh->periptip_[1], goafrh->periptip_[0],
 											 iph->dx_, iph->dy_, &closerx, &closery)) {
 							// fake that ingress edge was edge from ne
 							
 							
 							// re-use single-hop history
-							gopherh->hops_[gopherh->nhops_-1].ip = ne->dst;
-							gopherh->hops_[gopherh->nhops_-1].x = ne->x;
-							gopherh->hops_[gopherh->nhops_-1].y = ne->y;
-							gopherh->hops_[gopherh->nhops_-1].z = ne->z;
+							goafrh->hops_[goafrh->nhops_-1].ip = ne->dst;
+							goafrh->hops_[goafrh->nhops_-1].x = ne->x;
+							goafrh->hops_[goafrh->nhops_-1].y = ne->y;
+							goafrh->hops_[goafrh->nhops_-1].z = ne->z;
 							
 							// record closest point on edge to ne
-							gopherh->perips_.x = closerx;
-							gopherh->perips_.y = closery;
-							gopherh->perips_.z = 0.0;
+							goafrh->perips_.x = closerx;
+							goafrh->perips_.y = closery;
+							goafrh->perips_.z = 0.0;
 							
-							GOPHERNeighbEnt *ne_temp = ntab_->ent_findnext_onperi(mn_, ne->dst, ne->x, ne->y, ne->z, use_planar_);
+							GOAFRNeighbEnt *ne_temp = ntab_->ent_findnext_onperi(mn_, ne->dst, ne->x, ne->y, ne->z, use_planar_);
 							if((ne_temp == NULL) || (ne_temp->dst == ne->dst))
 								break;
 							ne = ne_temp;
@@ -1737,9 +1737,9 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						}
 
 						// record edge endpt ips
-						gopherh->periptip_[0] = ne->dst; // prev hop
-						gopherh->periptip_[1] = mn_->address(); // self
-						gopherh->periptip_[2] = ne->dst; // next hop
+						goafrh->periptip_[0] = ne->dst; // prev hop
+						goafrh->periptip_[1] = mn_->address(); // self
+						goafrh->periptip_[2] = ne->dst; // next hop
 
 						cmh->next_hop_ = ne->dst;
 						goto finish_pkt;
@@ -1757,43 +1757,43 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					/* we're trying to retransmit a packet, but the ingress hop is
 					   gone. drop it. */
 					// a drop due to MAC_CALLBACK. For the moment, inform it
-					if(gopherh->geoanycast)
+					if(goafrh->geoanycast)
 						{
 							// wk forwardPaket
 							locservice_->dropPacketCallback(p);
 							if (p==NULL) { return; }
 						}
 					// a drop due to MAC_CALLBACK. For the moment,don't inform it
-					trace("VneNULL %.8f _%d_ <- %d", CURRTIME, mn_->address(), gopherh->hops_[gopherh->nhops_-1].ip);
+					trace("VneNULL %.8f _%d_ <- %d", CURRTIME, mn_->address(), goafrh->hops_[goafrh->nhops_-1].ip);
 					drop(p, DROP_RTR_MAC_CALLBACK);
 					return;
 				}
 				cmh->next_hop_ = ne->dst;
 				if (use_loop_detect_) {
-					gopherh->add_hop(mn_->address(), myx, myy, myz);
+					goafrh->add_hop(mn_->address(), myx, myy, myz);
 					printf("Warning: This size change has not been modified, yet!\n");
 					cmh->size() += 12;
 				}
 				else {
-					gopherh->hops_[gopherh->nhops_-1].ip = mn_->address();
-					gopherh->hops_[gopherh->nhops_-1].x = myx;
-					gopherh->hops_[gopherh->nhops_-1].y = myy;
-					gopherh->hops_[gopherh->nhops_-1].z = myz;
+					goafrh->hops_[goafrh->nhops_-1].ip = mn_->address();
+					goafrh->hops_[goafrh->nhops_-1].x = myx;
+					goafrh->hops_[goafrh->nhops_-1].y = myy;
+					goafrh->hops_[goafrh->nhops_-1].z = myz;
 				}
 			} // end if(use_planar_)
 			else {
 		
 				// am I the right waypoint?
-				if (gopherh->hops_[gopherh->currhop_].ip == mn_->address()) {
+				if (goafrh->hops_[goafrh->currhop_].ip == mn_->address()) {
 					// am I the final waypoint?
-					if (gopherh->currhop_ == (gopherh->nhops_-1)) {
-						// yes! return packet to gopher mode
+					if (goafrh->currhop_ == (goafrh->nhops_-1)) {
+						// yes! return packet to goafr mode
 						ntab_->counter_clock = true; // next peri -> route counterclockwise
 						cmh->size() -= hdr_size(p); // strip data peri header
-						gopherh->mode_ = GOPHERH_DATA_GREEDY;
-						cmh->size() += hdr_size(p); // strip data gopher header
-						gopherh->currhop_ = 0;
-						gopherh->nhops_ = 0;
+						goafrh->mode_ = GOAFRH_DATA_GREEDY;
+						cmh->size() += hdr_size(p); // strip data goafr header
+						goafrh->currhop_ = 0;
+						goafrh->nhops_ = 0;
 						forwardPacket(p);
 						return;
 					}
@@ -1801,11 +1801,11 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						// forward using source route...
 						double fromx, fromy, fromz;
 						ne = ntab_->ent_findnext_onperi(mn_,
-														gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z,
+														goafrh->hops_[0].ip, goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z,
 														use_planar_);
 
 						if(!ne){
-							if(gopherh->geoanycast)
+							if(goafrh->geoanycast)
 							{
 								// wk forwardPacket 
 								locservice_->dropPacketCallback(p);
@@ -1816,14 +1816,14 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 							return;
 						}
 
-						gopherh->currhop_++;
-						gopherh->hops_[gopherh->currhop_].ip = ne->dst;
-						cmh->next_hop_ = gopherh->hops_[gopherh->currhop_].ip;
+						goafrh->currhop_++;
+						goafrh->hops_[goafrh->currhop_].ip = ne->dst;
+						cmh->next_hop_ = goafrh->hops_[goafrh->currhop_].ip;
 			    
 					}
 				}
 				else {
-					if(gopherh->geoanycast)
+					if(goafrh->geoanycast)
 							{
 								// wk forwardPacket
 								locservice_->dropPacketCallback(p);
@@ -1851,11 +1851,11 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 		// first of all, look if we're neighbor to dst - just in case
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
 			cmh->size() -= hdr_size(p); // strip data peri header
-			gopherh->mode_ = GOPHERH_DATA_GREEDY;
-			cmh->size() += hdr_size(p); // strip data gopher header
-			gopherh->nhops_ = 1;
-			gopherh->currhop_ = 1;
-			gopherh->hops_[1].ip = ne->dst;
+			goafrh->mode_ = GOAFRH_DATA_GREEDY;
+			cmh->size() += hdr_size(p); // strip data goafr header
+			goafrh->nhops_ = 1;
+			goafrh->currhop_ = 1;
+			goafrh->hops_[1].ip = ne->dst;
 			cmh->next_hop_ = ne->dst;
 			break;
 	    }
@@ -1863,26 +1863,26 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 	    if (use_peri_) {
 	      
 			double myx, myy, myz, closerx, closery;
-		    closerx = gopherh->perips_.x;
-			closery = gopherh->perips_.y;
+		    closerx = goafrh->perips_.x;
+			closery = goafrh->perips_.y;
 
 			// non-source-routed perimeter forwarding rule
-			/** to resume gopher forwarding, this *node* must be closer than
+			/** to resume goafr forwarding, this *node* must be closer than
 				the point where the packet entered peri mode. */
 			mn_->getLoc(&myx, &myy, &myz);
 
 			// Cutoff function, when arrive at the closest node, so we go back to business as usual
-			if (mn_->address() == gopherh->perips_.ip) {
+			if (mn_->address() == goafrh->perips_.ip) {
 				cmh->size() -= hdr_size(p); // strip data peri header
-				gopherh->mode_ = GOPHERH_DATA_GREEDY;
-				cmh->size() += hdr_size(p); // add data gopher header
+				goafrh->mode_ = GOAFRH_DATA_GREEDY;
+				cmh->size() += hdr_size(p); // add data goafr header
 				/*
 				 always add back (- - is +) 12 bytes: if use_implicit_beacon_,
 				   src added 12 to size, don't re-add hops_[0]; otherwise,
 				   still don't want to count hops_[0]. 
 				*/
-				gopherh->currhop_ = 0;
-				gopherh->nhops_ = 0;
+				goafrh->currhop_ = 0;
+				goafrh->nhops_ = 0;
 				
 				// recursive, but must call target_->recv in callee frame
 				trace("VSM->G %f _%d_ [%d -> %d]", now, mn_->address(), iph->saddr(), iph->daddr());
@@ -1895,23 +1895,23 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				// forward along current face, or change faces where appropriate
 				/* don't choose *any* edge--only consider edges on the
 				   face we're forwarding on at the moment. */
-				for(int i=0; i<gopherh->nhops_; i++)
-					trace("Vne %.8f _%d_ <- %d", CURRTIME, mn_->address(), gopherh->hops_[i].ip);
+				for(int i=0; i<goafrh->nhops_; i++)
+					trace("Vne %.8f _%d_ <- %d", CURRTIME, mn_->address(), goafrh->hops_[i].ip);
 
-				ne = ntab_->ent_finddst(gopherh->hops_[gopherh->nhops_-1].ip);
+				ne = ntab_->ent_finddst(goafrh->hops_[goafrh->nhops_-1].ip);
 				if(ne){
 					double fromx, fromy, fromz;
 					ne = ntab_->ent_findnext_onperi(
-                     mn_, gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z, use_planar_);
+                     mn_, goafrh->hops_[0].ip, goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z, use_planar_);
 
 					/** drop if we've looped on this perimeter:
 						are about to revisit the first edge we took on it */
 					// If we arrive here, then something has gone wrong, and we drop the message 
 					// Ensure that this does not happen the instant we begin routing
-					if ((gopherh->periptip_[1] == mn_->address()) &&
-						(gopherh->periptip_[2] == ne->dst)) {
+					if ((goafrh->periptip_[1] == mn_->address()) &&
+						(goafrh->periptip_[2] == ne->dst)) {
 
-						if(gopherh->geoanycast)
+						if(goafrh->geoanycast)
 							{
 								// wk forwardPacket, finished perimeter 
 								// without finding target
@@ -1928,7 +1928,7 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					// does the candidate next edge have a closer pt?
 					if (!ne) {
 						// no face toward the destination
-						if(gopherh->geoanycast)
+						if(goafrh->geoanycast)
 							{
 								// wk forwardPaket
 								locservice_->dropPacketCallback(p);
@@ -1941,8 +1941,8 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 
 					/** face-change(p,t) */
 					if (ne->closer_pt(mn_->address(), myx, myy, myz,
-									  gopherh->peript_.x, gopherh->peript_.y,
-									  gopherh->periptip_[1], gopherh->periptip_[0],
+									  goafrh->peript_.x, goafrh->peript_.y,
+									  goafrh->periptip_[1], goafrh->periptip_[0],
 									  iph->dx_, iph->dy_, &closerx, &closery)) {
 						/* yes. choose a new next hop on the peri pierced by the line
 						   to the destination. */
@@ -1950,24 +1950,24 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						   choose that cut at the point closest to destination */
 						int counter = 0;
 						while (ne->closer_pt(mn_->address(), myx, myy, myz,
-											 gopherh->peript_.x, gopherh->peript_.y,
-											 gopherh->periptip_[1], gopherh->periptip_[0],
+											 goafrh->peript_.x, goafrh->peript_.y,
+											 goafrh->periptip_[1], goafrh->periptip_[0],
 											 iph->dx_, iph->dy_, &closerx, &closery)) {
 							// fake that ingress edge was edge from ne
 							
 							
 							// re-use single-hop history
-							gopherh->hops_[gopherh->nhops_-1].ip = ne->dst;
-							gopherh->hops_[gopherh->nhops_-1].x = ne->x;
-							gopherh->hops_[gopherh->nhops_-1].y = ne->y;
-							gopherh->hops_[gopherh->nhops_-1].z = ne->z;
+							goafrh->hops_[goafrh->nhops_-1].ip = ne->dst;
+							goafrh->hops_[goafrh->nhops_-1].x = ne->x;
+							goafrh->hops_[goafrh->nhops_-1].y = ne->y;
+							goafrh->hops_[goafrh->nhops_-1].z = ne->z;
 							
 							// record closest point on edge to ne
-							gopherh->perips_.x = closerx;
-							gopherh->perips_.y = closery;
-							gopherh->perips_.z = 0.0;
+							goafrh->perips_.x = closerx;
+							goafrh->perips_.y = closery;
+							goafrh->perips_.z = 0.0;
 							
-							GOPHERNeighbEnt *ne_temp = ntab_->ent_findnext_onperi(mn_, ne->dst, ne->x, ne->y, ne->z, use_planar_);
+							GOAFRNeighbEnt *ne_temp = ntab_->ent_findnext_onperi(mn_, ne->dst, ne->x, ne->y, ne->z, use_planar_);
 							if((ne_temp == NULL) || (ne_temp->dst == ne->dst))
 								break;
 							ne = ne_temp;
@@ -1975,9 +1975,9 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						}
 
 						// record edge endpt ips
-						gopherh->periptip_[0] = ne->dst; // prev hop
-						gopherh->periptip_[1] = mn_->address(); // self
-						gopherh->periptip_[2] = ne->dst; // next hop
+						goafrh->periptip_[0] = ne->dst; // prev hop
+						goafrh->periptip_[1] = mn_->address(); // self
+						goafrh->periptip_[2] = ne->dst; // next hop
 
 						cmh->next_hop_ = ne->dst;
 						goto finish_pkt;
@@ -1995,43 +1995,43 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					/* we're trying to retransmit a packet,b ut the ingress hop is
 					   gone. drop it. */
 					// a drop due to MAC_CALLBACK. For the moment, inform it
-					if(gopherh->geoanycast)
+					if(goafrh->geoanycast)
 						{
 							// wk forwardPaket
 							locservice_->dropPacketCallback(p);
 							if (p==NULL) { return; }
 						}
 					// a drop due to MAC_CALLBACK. For the moment,don't inform it
-					trace("VneNULL %.8f _%d_ <- %d", CURRTIME, mn_->address(), gopherh->hops_[gopherh->nhops_-1].ip);
+					trace("VneNULL %.8f _%d_ <- %d", CURRTIME, mn_->address(), goafrh->hops_[goafrh->nhops_-1].ip);
 					drop(p, DROP_RTR_MAC_CALLBACK);
 					return;
 				}
 				cmh->next_hop_ = ne->dst;
 				if (use_loop_detect_) {
-					gopherh->add_hop(mn_->address(), myx, myy, myz);
+					goafrh->add_hop(mn_->address(), myx, myy, myz);
 					printf("Warning: This size change has not been modified, yet!\n");
 					cmh->size() += 12;
 				}
 				else {
-					gopherh->hops_[gopherh->nhops_-1].ip = mn_->address();
-					gopherh->hops_[gopherh->nhops_-1].x = myx;
-					gopherh->hops_[gopherh->nhops_-1].y = myy;
-					gopherh->hops_[gopherh->nhops_-1].z = myz;
+					goafrh->hops_[goafrh->nhops_-1].ip = mn_->address();
+					goafrh->hops_[goafrh->nhops_-1].x = myx;
+					goafrh->hops_[goafrh->nhops_-1].y = myy;
+					goafrh->hops_[goafrh->nhops_-1].z = myz;
 				}
 			} // end if(use_planar_)
 			else {
 		
 				// am I the right waypoint?
-				if (gopherh->hops_[gopherh->currhop_].ip == mn_->address()) {
+				if (goafrh->hops_[goafrh->currhop_].ip == mn_->address()) {
 					// am I the final waypoint?
-					if (gopherh->currhop_ == (gopherh->nhops_-1)) {
-						// yes! return packet to gopher mode
+					if (goafrh->currhop_ == (goafrh->nhops_-1)) {
+						// yes! return packet to goafr mode
 						ntab_->counter_clock = true; // next peri -> route counterclockwise
 						cmh->size() -= hdr_size(p); // strip data peri header
-						gopherh->mode_ = GOPHERH_DATA_GREEDY;
-						cmh->size() += hdr_size(p); // strip data gopher header
-						gopherh->currhop_ = 0;
-						gopherh->nhops_ = 0;
+						goafrh->mode_ = GOAFRH_DATA_GREEDY;
+						cmh->size() += hdr_size(p); // strip data goafr header
+						goafrh->currhop_ = 0;
+						goafrh->nhops_ = 0;
 						forwardPacket(p);
 						return;
 					}
@@ -2039,11 +2039,11 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						// forward using source route...
 						double fromx, fromy, fromz;
 						ne = ntab_->ent_findnext_onperi(mn_,
-														gopherh->hops_[0].ip, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z,
+														goafrh->hops_[0].ip, goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z,
 														use_planar_);
 
 						if(!ne){
-							if(gopherh->geoanycast)
+							if(goafrh->geoanycast)
 							{
 								// wk forwardPacket 
 								locservice_->dropPacketCallback(p);
@@ -2054,14 +2054,14 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 							return;
 						}
 
-						gopherh->currhop_++;
-						gopherh->hops_[gopherh->currhop_].ip = ne->dst;
-						cmh->next_hop_ = gopherh->hops_[gopherh->currhop_].ip;
+						goafrh->currhop_++;
+						goafrh->hops_[goafrh->currhop_].ip = ne->dst;
+						cmh->next_hop_ = goafrh->hops_[goafrh->currhop_].ip;
 			    
 					}
 				}
 				else {
-					if(gopherh->geoanycast)
+					if(goafrh->geoanycast)
 							{
 								// wk forwardPacket
 								locservice_->dropPacketCallback(p);
@@ -2104,18 +2104,18 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
     mn_->getLoc(&myx, &myy, &myz);
     /* the packet may *already* have hops stored; don't allocate with
        add_hop()! */
-    gopherh->hops_[0].ip = mn_->address();
-    gopherh->hops_[0].x = myx;
-    gopherh->hops_[0].y = myy;
-    gopherh->hops_[0].z = myz;
+    goafrh->hops_[0].ip = mn_->address();
+    goafrh->hops_[0].x = myx;
+    goafrh->hops_[0].y = myy;
+    goafrh->hops_[0].z = myz;
 
     // reactive beaconing requires, that a retried pkt
     // is marked as clean again, so it can be retried
     // at the next node
-    if (use_reactive_beacon_) { gopherh->retry = 0; }
+    if (use_reactive_beacon_) { goafrh->retry = 0; }
     
     if (use_congestion_control_)
-		gopherh->load = getLoad();
+		goafrh->load = getLoad();
 
     if (verbose_)
 		trace ("VFP %.5f _%d -> %d_ %d:%d -> %d:%d", now, mn_->address(),
@@ -2137,7 +2137,7 @@ GOPHER_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 /***********/
 
 void
-GOPHER_Agent::recv(Packet *p, Handler *) {
+GOAFR_Agent::recv(Packet *p, Handler *) {
 
     // Check if this node is awake
     if (!active_) {
@@ -2150,12 +2150,12 @@ GOPHER_Agent::recv(Packet *p, Handler *) {
     locservice_->recv(p);
     if (p==NULL) { return; }
     /*
-      Check if GOPHER is interested in this pkt
+      Check if GOAFR is interested in this pkt
     */
 
     struct hdr_ip *iph = HDR_IP(p);
     struct hdr_cmn *cmh = HDR_CMN(p);
-    struct hdr_gopher *gopherh = HDR_GOPHER(p);
+    struct hdr_goafr *goafrh = HDR_GOAFR(p);
 
     int src = Address::instance().get_nodeaddr(iph->saddr());
 
@@ -2166,10 +2166,10 @@ GOPHER_Agent::recv(Packet *p, Handler *) {
 	    
             // Fresh pkt that needs setting up
 			if (iph->dport() != RT_PORT) { 
-				gopherh->mode_ = GOPHERH_DATA_GREEDY; 
+				goafrh->mode_ = GOAFRH_DATA_GREEDY; 
 			} // non-route pkts
-			gopherh->geoanycast = true;
-			if (gopherh->port_ != hdr_gopher::LOCS) { cmh->size() += IP_HDR_LEN; }   // non-ls pkts
+			goafrh->geoanycast = true;
+			if (goafrh->port_ != hdr_goafr::LOCS) { cmh->size() += IP_HDR_LEN; }   // non-ls pkts
 			cmh->size() += hdr_size(p);
 			// HLS packets do their own TTL management
 			if(cmh->ptype() != PT_HLS)
@@ -2188,7 +2188,7 @@ GOPHER_Agent::recv(Packet *p, Handler *) {
 
 		}else{
 
-			if ((gopherh->port_ != hdr_gopher::LOCS) && (gopherh->mode_ == GOPHERH_DATA_GREEDY)) {
+			if ((goafrh->port_ != hdr_goafr::LOCS) && (goafrh->mode_ == GOAFRH_DATA_GREEDY)) {
 				// No real data pkt should visit its source twice 
 				drop(p, DROP_RTR_ROUTE_LOOP);
 				return;
@@ -2207,7 +2207,7 @@ GOPHER_Agent::recv(Packet *p, Handler *) {
 			// expiration is likely to occur) we can assume that there 
 			// exists no route.
 			
-			if(gopherh->geoanycast)
+			if(goafrh->geoanycast)
 				{
 					// if there is a TTL problem, we treat at least the
 					// requests 
@@ -2226,31 +2226,31 @@ GOPHER_Agent::recv(Packet *p, Handler *) {
     */
     
     // LOCS Packets
-    if (gopherh->port_ == hdr_gopher::LOCS) {
+    if (goafrh->port_ == hdr_goafr::LOCS) {
 		forwardPacket(p); 
 		return; 
     }
     
-    // GOPHER Packets (Routing Packets)
+    // GOAFR Packets (Routing Packets)
     if (iph->dport() == RT_PORT) {
 		char *as;
 
-		switch (gopherh->mode_) {
-	    case GOPHERH_BEACON:
+		switch (goafrh->mode_) {
+	    case GOAFRH_BEACON:
 			if (src != mn_->address()) { recvBeacon(p); }
 			break;
-	    case GOPHERH_BEACON_REQ:
+	    case GOAFRH_BEACON_REQ:
 			if (src != mn_->address()) { recvBeaconReq(p); }
 			break;
-	    case GOPHERH_PPROBE:
-			periIn(p, gopherh);
+	    case GOAFRH_PPROBE:
+			periIn(p, goafrh);
 			break;
-	    case GOPHERH_DATA_GREEDY:
+	    case GOAFRH_DATA_GREEDY:
 			as = Address::instance().print_nodeaddr(addr());
-			fprintf(stderr, "gopher data pkt @ %s:RT_PORT!\n",as); fflush(stderr);
+			fprintf(stderr, "goafr data pkt @ %s:RT_PORT!\n",as); fflush(stderr);
 			delete[] as;
 			break;
-	    case GOPHERH_DATA_PERI:
+	    case GOAFRH_DATA_PERI:
 			as = Address::instance().print_nodeaddr(addr());
 			fprintf(stderr, "peri data pkt @ %s:RT_PORT!\n",as); fflush(stderr);
 			delete[] as;
@@ -2262,7 +2262,7 @@ GOPHER_Agent::recv(Packet *p, Handler *) {
 			break;
 	    default:
 			as = Address::instance().print_nodeaddr(addr());
-			fprintf(stderr, "unk pkt type %d @ %s:RT_PORT!\n", gopherh->mode_,as); fflush(stderr);
+			fprintf(stderr, "unk pkt type %d @ %s:RT_PORT!\n", goafrh->mode_,as); fflush(stderr);
 			delete[] as;
 			break;
 		}
@@ -2278,10 +2278,10 @@ GOPHER_Agent::recv(Packet *p, Handler *) {
 /****************************/
 
 int
-GOPHER_Agent::command(int argc, const char *const *argv) {
+GOAFR_Agent::command(int argc, const char *const *argv) {
     
     if (argc == 2) {
-		if (strcmp(argv[1], "start-gopher") == 0) {
+		if (strcmp(argv[1], "start-goafr") == 0) {
 			init();
 			return TCL_OK;
 		}
@@ -2379,7 +2379,7 @@ GOPHER_Agent::command(int argc, const char *const *argv) {
 }
 
 void
-GOPHER_Agent::init(void) {
+GOAFR_Agent::init(void) {
 
     // Init LocService
     locservice_->init();
@@ -2387,7 +2387,7 @@ GOPHER_Agent::init(void) {
   
     if (active_) {
 		God::instance()->signOn(addr());
-#ifdef GOPHER_TRACE_WAKESLEEP
+#ifdef GOAFR_TRACE_WAKESLEEP
 		trace("VGI: %f %d", Scheduler::instance().clock(), mn_->address());
 #endif
 
@@ -2398,7 +2398,7 @@ GOPHER_Agent::init(void) {
 		if (use_timed_plnrz_) { planar_timer_->sched(1.0); }
     
 		// Init SendPermissions
-		for (unsigned int i=0;i<GOPHER_PKT_TYPES;i++) {
+		for (unsigned int i=0;i<GOAFR_PKT_TYPES;i++) {
 			send_allowed[i] = true;
 		}
 	
@@ -2407,7 +2407,7 @@ GOPHER_Agent::init(void) {
 }
 
 void
-GOPHER_Agent::sleep() {
+GOAFR_Agent::sleep() {
     
     assert(active_);
     
@@ -2415,12 +2415,12 @@ GOPHER_Agent::sleep() {
     m->sleep();
     if (ifq_) { ((PriQueue *)ifq_)->clear(); }
     
-#ifdef GOPHER_TRACE_WAKESLEEP
+#ifdef GOAFR_TRACE_WAKESLEEP
     trace("VGSLEEP %f _%d_ ", Scheduler::instance().clock(), mn_->address());
 #endif
 
     // Stop SendPermissions
-    for (unsigned int i=0;i<GOPHER_PKT_TYPES;i++) {
+    for (unsigned int i=0;i<GOAFR_PKT_TYPES;i++) {
 		send_allowed[i] = false;
     } 
 
@@ -2450,7 +2450,7 @@ GOPHER_Agent::sleep() {
 }
 
 void
-GOPHER_Agent::wake() {
+GOAFR_Agent::wake() {
 
     assert(!active_);
 
@@ -2465,11 +2465,11 @@ GOPHER_Agent::wake() {
     send_buf_timer.sched(sendbuf_interval());
 
     // Init SendPermissions
-    for (unsigned int i=0;i<GOPHER_PKT_TYPES;i++) {
+    for (unsigned int i=0;i<GOAFR_PKT_TYPES;i++) {
 		send_allowed[i] = true;
     }
 
-#ifdef GOPHER_TRACE_WAKESLEEP    
+#ifdef GOAFR_TRACE_WAKESLEEP    
     trace("VGWAKE %f _%d_", Scheduler::instance().clock(), mn_->address());
 #endif
 
@@ -2488,10 +2488,10 @@ GOPHER_Agent::wake() {
 /***********************/
 
 void
-GOPHER_Agent::beacon_proc(int src, double x, double y, double z, int load)
+GOAFR_Agent::beacon_proc(int src, double x, double y, double z, int load)
 {
-	GOPHERNeighbEnt *ne;
-	GOPHERNeighbEnt nne(this);
+	GOAFRNeighbEnt *ne;
+	GOAFRNeighbEnt nne(this);
 
 	double now = Scheduler::instance().clock();
 	nne.dst = src;
@@ -2519,29 +2519,29 @@ GOPHER_Agent::beacon_proc(int src, double x, double y, double z, int load)
 }
 
 void
-GOPHER_Agent::recvBeacon(Packet *p) {
+GOAFR_Agent::recvBeacon(Packet *p) {
 
     struct hdr_ip *iph = HDR_IP(p);
-    struct hdr_gopher *gopherh = HDR_GOPHER(p);
+    struct hdr_goafr *goafrh = HDR_GOAFR(p);
 
     int src = Address::instance().get_nodeaddr(iph->saddr());
 
-    beacon_proc(src, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z, gopherh->load);
+    beacon_proc(src, goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z, goafrh->load);
     Packet::free(p);
 }
 
 void
-GOPHER_Agent::recvBeaconReq(Packet *p) {
+GOAFR_Agent::recvBeaconReq(Packet *p) {
 
     struct hdr_ip *iph = HDR_IP(p);
-    struct hdr_gopher *gopherh = HDR_GOPHER(p);
+    struct hdr_goafr *goafrh = HDR_GOAFR(p);
 
     // Evaluate Beacon Req Information
     int src = Address::instance().get_nodeaddr(iph->saddr());
-    beacon_proc(src, gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z, gopherh->load);
+    beacon_proc(src, goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z, goafrh->load);
 
     // Answer Request with a Beacon
-    double delay = Random::uniform(GOPHER_RBEACON_JITTER);
+    double delay = Random::uniform(GOAFR_RBEACON_JITTER);
     sendBeacon(delay);
 
     // Discard Request
@@ -2549,24 +2549,24 @@ GOPHER_Agent::recvBeaconReq(Packet *p) {
 }
 
 void
-GOPHER_Agent::sendBeaconRequest() {
+GOAFR_Agent::sendBeaconRequest() {
     
     assert(active_);
 
-    if (!allowedToSend(GOPHERH_BEACON_REQ)) { return; }
+    if (!allowedToSend(GOAFRH_BEACON_REQ)) { return; }
 
     Packet *p = allocpkt();
 
     struct hdr_cmn *hdrc = HDR_CMN(p);
     struct hdr_ip *iph = HDR_IP(p);
-    struct hdr_gopher *gopherh = HDR_GOPHER(p);
+    struct hdr_goafr *goafrh = HDR_GOAFR(p);
   
     // Set up Beacon Headers
-    gopherh->mode_ = GOPHERH_BEACON_REQ;
-    gopherh->nhops_ = 1;
-    mn_->getLoc(&gopherh->hops_[0].x, &gopherh->hops_[0].y, &gopherh->hops_[0].z);
+    goafrh->mode_ = GOAFRH_BEACON_REQ;
+    goafrh->nhops_ = 1;
+    mn_->getLoc(&goafrh->hops_[0].x, &goafrh->hops_[0].y, &goafrh->hops_[0].z);
 
-    hdrc->ptype_ = PT_GOPHER;
+    hdrc->ptype_ = PT_GOAFR;
     hdrc->next_hop_ = IP_BROADCAST;
     hdrc->addr_type_ = NS_AF_INET;
     hdrc->size() = hdr_size(p);
@@ -2575,49 +2575,49 @@ GOPHER_Agent::sendBeaconRequest() {
     iph->dport() = RT_PORT;
 
     if (use_congestion_control_) {
-		gopherh->load = getLoad();
+		goafrh->load = getLoad();
     }
     
-    beaconreq_delay_->resched(GOPHER_BEACON_REQ_DELAY);
-    block(GOPHERH_BEACON_REQ);
+    beaconreq_delay_->resched(GOAFR_BEACON_REQ_DELAY);
+    block(GOAFRH_BEACON_REQ);
 
     Scheduler::instance().schedule(target_, p, 0.0);
 }
 
 void
-GOPHER_Agent::checkGopherCondition(const Packet *p) {
+GOAFR_Agent::checkGoafrCondition(const Packet *p) {
 
     // If we announced ourselves not long ago, we
     //  don't need to do it again
-    if (!allowedToSend(GOPHERH_BEACON)) { return; }
+    if (!allowedToSend(GOAFRH_BEACON)) { return; }
 
     struct hdr_ip *iph = HDR_IP(p);
-    struct hdr_gopher *gopherh = HDR_GOPHER(p);
+    struct hdr_goafr *goafrh = HDR_GOAFR(p);
 
-    // Data Gopher Packets should be checked, to see
-    //  if i'm on their gopher path. if so, we'll 
+    // Data Goafr Packets should be checked, to see
+    //  if i'm on their goafr path. if so, we'll 
     //  send a beacon to announce our position
 
-    if (gopherh->mode_ == GOPHERH_DATA_GREEDY) {
+    if (goafrh->mode_ == GOAFRH_DATA_GREEDY) {
 	
 		double mydist, shortest, myx, myy, myz;
 
 		mn_->getLoc(&myx, &myy, &myz);
-		shortest = distance(gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z, 
+		shortest = distance(goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z, 
 							iph->dx_, iph->dy_, iph->dz_);
-		mydist   = distance(gopherh->hops_[0].x, gopherh->hops_[0].y, gopherh->hops_[0].z, 
+		mydist   = distance(goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z, 
 							myx, myy, myz);
 		if (mydist < shortest) {
-			double delay = Random::uniform(GOPHER_RBEACON_JITTER);
+			double delay = Random::uniform(GOAFR_RBEACON_JITTER);
 			sendBeacon(delay);
-			beacon_delay_->resched(GOPHER_BEACON_DELAY);
-			block(GOPHERH_BEACON);
+			beacon_delay_->resched(GOAFR_BEACON_DELAY);
+			block(GOAFRH_BEACON);
 		}
     }
 }
 
 void
-GOPHER_Agent::sendBeacon(double delay) {
+GOAFR_Agent::sendBeacon(double delay) {
 
 	assert(active_);
 
@@ -2625,13 +2625,13 @@ GOPHER_Agent::sendBeacon(double delay) {
 
 	struct hdr_cmn *hdrc = HDR_CMN(p);
 	struct hdr_ip *iph = HDR_IP(p);
-	struct hdr_gopher *gopherh = HDR_GOPHER(p);
+	struct hdr_goafr *goafrh = HDR_GOAFR(p);
 	// Set up Beacon Headers
-	gopherh->mode_ = GOPHERH_BEACON;
-	gopherh->nhops_ = 1;
-	mn_->getLoc(&gopherh->hops_[0].x, &gopherh->hops_[0].y, &gopherh->hops_[0].z);
+	goafrh->mode_ = GOAFRH_BEACON;
+	goafrh->nhops_ = 1;
+	mn_->getLoc(&goafrh->hops_[0].x, &goafrh->hops_[0].y, &goafrh->hops_[0].z);
 
-	hdrc->ptype_ = PT_GOPHER;
+	hdrc->ptype_ = PT_GOAFR;
 	hdrc->next_hop_ = IP_BROADCAST;
 	hdrc->addr_type_ = NS_AF_INET;
 	hdrc->size() = hdr_size(p);
@@ -2640,7 +2640,7 @@ GOPHER_Agent::sendBeacon(double delay) {
 	iph->dport() = RT_PORT;
 
 	if (use_congestion_control_) {
-		gopherh->load = getLoad();
+		goafrh->load = getLoad();
 	}
 
 	Scheduler::instance().schedule(target_, p, delay);
@@ -2651,12 +2651,12 @@ GOPHER_Agent::sendBeacon(double delay) {
 /********************/
 
 void
-GOPHERPacketDelayTimer::handle() {
+GOAFRPacketDelayTimer::handle() {
     a->forwardPacket((Packet*)local_info);
 }
 
 void
-GOPHERPacketDelayTimer::deleteInfo(void* info) {
+GOAFRPacketDelayTimer::deleteInfo(void* info) {
     Packet::free((Packet*)info);
 }
 
@@ -2665,7 +2665,7 @@ GOPHERPacketDelayTimer::deleteInfo(void* info) {
 /**************************************/
 
 void
-GOPHER_Agent::Terminate()
+GOAFR_Agent::Terminate()
 {
     for (int c=0; c<SEND_BUF_SIZE; c++) {
 		if (send_buf[c].p) {
@@ -2676,7 +2676,7 @@ GOPHER_Agent::Terminate()
 }
 
 void
-GOPHER_Agent::notifyPos(nsaddr_t id)
+GOAFR_Agent::notifyPos(nsaddr_t id)
 {
     struct hdr_ip *iph;
     struct hdr_cmn *cmnh;
@@ -2711,7 +2711,7 @@ GOPHER_Agent::notifyPos(nsaddr_t id)
 }
 
 void
-GOPHER_Agent::stickPacketInSendBuffer(Packet *p)
+GOAFR_Agent::stickPacketInSendBuffer(Packet *p)
 {
 	double min = 99999.0; //initialize min to some big enough number
 	int min_index = 0;
@@ -2749,7 +2749,7 @@ GOPHER_Agent::stickPacketInSendBuffer(Packet *p)
 }
 
 void
-GOPHER_Agent::dropSendBuff(Packet *&p, const char* reason)
+GOAFR_Agent::dropSendBuff(Packet *&p, const char* reason)
 {
     struct hdr_ip *iph = HDR_IP(p);
 
@@ -2766,7 +2766,7 @@ GOPHER_Agent::dropSendBuff(Packet *&p, const char* reason)
 }
 
 void
-GOPHER_Agent::sendBufferCheck()
+GOAFR_Agent::sendBufferCheck()
 {
 
     for (int c=0; c <SEND_BUF_SIZE; c++) {
@@ -2787,7 +2787,7 @@ GOPHER_Agent::sendBufferCheck()
 }
 
 void
-GOPHERSendBufferTimer::expire(Event *e)
+GOAFRSendBufferTimer::expire(Event *e)
 {
 	a_->sendBufferCheck();
 	resched(a_->sendbuf_interval());
@@ -2798,10 +2798,10 @@ GOPHERSendBufferTimer::expire(Event *e)
 /*********************************************/
 
 int
-GOPHER_Agent::hdr_size(Packet* p)
+GOAFR_Agent::hdr_size(Packet* p)
 {
     struct hdr_cmn *cmnh = HDR_CMN(p);
-    struct hdr_gopher *gopherh = HDR_GOPHER(p);
+    struct hdr_goafr *goafrh = HDR_GOAFR(p);
 
     unsigned int size = 0;
 
@@ -2819,17 +2819,17 @@ GOPHER_Agent::hdr_size(Packet* p)
     if (!use_implicit_beacon_)
 		imp_beacon = 0;
 
-    if (cmnh->ptype() == PT_GOPHER) { // GOPHER Packet
+    if (cmnh->ptype() == PT_GOAFR) { // GOAFR Packet
 
-		switch (gopherh->mode_) {
-	    case GOPHERH_PPROBE:
+		switch (goafrh->mode_) {
+	    case GOAFRH_PPROBE:
 			return (packetType + 2*id + 2*position + position + imp_beacon);
-	    case GOPHERH_BEACON:
+	    case GOAFRH_BEACON:
 			return (packetType + imp_beacon); 
-	    case GOPHERH_BEACON_REQ:
+	    case GOAFRH_BEACON_REQ:
 			return (packetType + imp_beacon); 
 	    default:
-			printf("Invalid GOPHER Packet wants to know it's size !\n");
+			printf("Invalid GOAFR Packet wants to know it's size !\n");
 			abort();
 		}
     }
@@ -2841,13 +2841,13 @@ GOPHER_Agent::hdr_size(Packet* p)
 		size = packetType + imp_beacon;
     }
     
-    if ((cmnh->ptype() != PT_GOPHER) && (cmnh->ptype() != PT_LOCS)) { // Data Packet
+    if ((cmnh->ptype() != PT_GOAFR) && (cmnh->ptype() != PT_LOCS)) { // Data Packet
 
-		switch (gopherh->mode_) {
-	    case GOPHERH_DATA_GREEDY: 
+		switch (goafrh->mode_) {
+	    case GOAFRH_DATA_GREEDY: 
 			size = (packetType + position + imp_beacon);
 			break;
-	    case GOPHERH_DATA_PERI:
+	    case GOAFRH_DATA_PERI:
 			size = (packetType + position + 2*id + 2*position + position + imp_beacon); // last position for intersecting line
 			break;
 	    default:
@@ -2864,12 +2864,12 @@ GOPHER_Agent::hdr_size(Packet* p)
 /* Timer Functions */
 /*******************/
 
-void GOPHER_DeadNeighbTimer::expire(Event *) { if (a->isActive()) a->deadneighb_callback(ne); }
-void GOPHER_PeriProbeTimer::expire(Event *) { if (a->isActive()) a->periprobe_callback(ne); }
-void GOPHER_BeaconTimer::expire(Event *) { if (a->isActive()) a->beacon_callback(); }
-void GOPHER_LastPeriTimer::expire(Event *) { if (a->isActive()) a->lastperi_callback(); }
-void GOPHER_PlanarTimer::expire(Event *) { if (a->isActive()) a->planar_callback(); }
+void GOAFR_DeadNeighbTimer::expire(Event *) { if (a->isActive()) a->deadneighb_callback(ne); }
+void GOAFR_PeriProbeTimer::expire(Event *) { if (a->isActive()) a->periprobe_callback(ne); }
+void GOAFR_BeaconTimer::expire(Event *) { if (a->isActive()) a->beacon_callback(); }
+void GOAFR_LastPeriTimer::expire(Event *) { if (a->isActive()) a->lastperi_callback(); }
+void GOAFR_PlanarTimer::expire(Event *) { if (a->isActive()) a->planar_callback(); }
 
-void GOPHERBeaconReqDelayTimer::expire(Event *) { if (a->isActive()) a->allow(GOPHERH_BEACON_REQ); }
-void GOPHERBeaconDelayTimer::expire(Event *) { if (a->isActive()) a->allow(GOPHERH_BEACON); }
+void GOAFRBeaconReqDelayTimer::expire(Event *) { if (a->isActive()) a->allow(GOAFRH_BEACON_REQ); }
+void GOAFRBeaconDelayTimer::expire(Event *) { if (a->isActive()) a->allow(GOAFRH_BEACON); }
 

@@ -338,7 +338,7 @@ OBJ_CC = \
 	\
 	gpsr/gpsr.o \
 	greedy/greedy.o\
-	gopher/gopher.o\
+	goafr/goafr.o\
 	\
 	$(OBJ_STL)
 
@@ -432,8 +432,6 @@ $(NS): $(OBJ) common/tclAppInit.o common/main-monolithic.o
 	$(LINK) $(LDFLAGS) $(LDOUT)$@ $^ $(LIB)
 
 endif 
-
-
 
 Makefile: Makefile.in
 	@echo "Makefile.in is newer than Makefile."

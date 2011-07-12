@@ -10,7 +10,7 @@ cp Makefile $NS_ROOT"."
 # routing folders are copied
 #cp -rf gpsr $NS_ROOT
 #cp -rf greedy $NS_ROOT
-cp -rf gopher $NS_ROOT
+cp -rf goafr $NS_ROOT
 
 # content of support folder is copied
 cp support/* $NS_ROOT"/common/."
@@ -21,7 +21,7 @@ cp support/* $NS_ROOT"/common/."
 #cp gls_evaluate.pl $NS_ROOT"/hls/utils/."
 #cp run.tcl $NS_ROOT"/hls/utils/."
 #cp greedy_test.tcl $NS_ROOT"/hls/utils/."
-#cp gopher_test.tcl $NS_ROOT"/hls/utils/."
+#cp goafr_test.tcl $NS_ROOT"/hls/utils/."
 #cp hls.tcl $NS_ROOT"/hls/utils/."
 
 #cp hls.cc $NS_ROOT"/hls/."
@@ -45,7 +45,7 @@ cp support/* $NS_ROOT"/common/."
 
 # copy the tcl parameters to the right folder
 #cp greedy.tcl $NS_ROOT"/tcl/mobility/."
-#cp gopher.tcl $NS_ROOT"/tcl/mobility/."
+#cp goafr.tcl $NS_ROOT"/tcl/mobility/."
 
 #cp commen_routing.h $NS_ROOT"/."
 

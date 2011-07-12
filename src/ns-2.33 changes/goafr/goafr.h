@@ -1,5 +1,5 @@
-#ifndef _GOPHER_h
-#define _GOPHER_h
+#ifndef _GOAFR_h
+#define _GOAFR_h
 
 /*
 
@@ -26,11 +26,11 @@
   the terms of this license and disclaimer.
 
   Author: Brad Karp, Harvard University EECS, May, 1999
-  $Id: gopher.h,v 1.1 2004/05/10 16:38:26 schenke Exp $
+  $Id: goafr.h,v 1.1 2004/05/10 16:38:26 schenke Exp $
 */
 using namespace std;
 
-// GOPHER for ns2 w/wireless extensions
+// GOAFR for ns2 w/wireless extensions
 
 #include "agent.h"
 #include "ip.h"
@@ -62,15 +62,15 @@ using namespace std;
 #define _GRID_     2 
 #define _CELL_     3
 
-// GOPHER Defaults - Karp
-#define GOPHER_ALIVE_DESYNC  0.5	/* desynchronizing term for alive beacons */
-#define GOPHER_ALIVE_INT     0.5	/* interval between alive beacons */
-#define GOPHER_ALIVE_EXP     (3*(GOPHER_ALIVE_INT+GOPHER_ALIVE_DESYNC*GOPHER_ALIVE_INT))
+// GOAFR Defaults - Karp
+#define GOAFR_ALIVE_DESYNC  0.5	/* desynchronizing term for alive beacons */
+#define GOAFR_ALIVE_INT     0.5	/* interval between alive beacons */
+#define GOAFR_ALIVE_EXP     (3*(GOAFR_ALIVE_INT+GOAFR_ALIVE_DESYNC*GOAFR_ALIVE_INT))
 				/* timeout for expiring rx'd beacons */
-#define GOPHER_PPROBE_INT    1.5	/* interval between perimeter probes */
-#define GOPHER_PPROBE_DESYNC 0.5	/* desynchronizing term for perimeter probes */
-#define GOPHER_PPROBE_EXP    8.0	/* how often must use a perimeter to keep probing them */
-#define GOPHER_PPROBE_RTX    1
+#define GOAFR_PPROBE_INT    1.5	/* interval between perimeter probes */
+#define GOAFR_PPROBE_DESYNC 0.5	/* desynchronizing term for perimeter probes */
+#define GOAFR_PPROBE_EXP    8.0	/* how often must use a perimeter to keep probing them */
+#define GOAFR_PPROBE_RTX    1
 
 #define PERI_DEFAULT_HOPS 32	/* default max number of hops in peri header */
 #define MAX_PERI_HOPS_STATIC 128
@@ -84,22 +84,22 @@ using namespace std;
 #define JITTER_VAR      0.3
 
 // Reactive Beaconing
-#define GOPHER_RBEACON_JITTER   0.015
-#define GOPHER_RBEACON_RETRIES  1
-#define GOPHER_BEACON_REQ_DELAY bexp_
-#define GOPHER_BEACON_DELAY     bexp_
+#define GOAFR_RBEACON_JITTER   0.015
+#define GOAFR_RBEACON_RETRIES  1
+#define GOAFR_BEACON_REQ_DELAY bexp_
+#define GOAFR_BEACON_DELAY     bexp_
 
 // Packet Types
-#define GOPHER_PKT_TYPES    6     /* how many pkt types are defined */
+#define GOAFR_PKT_TYPES    6     /* how many pkt types are defined */
 
-#define GOPHERH_DATA_GREEDY 0	/* gopher mode data packet */
-#define GOPHERH_DATA_PERI   1	/* perimeter mode data packet */
+#define GOAFRH_DATA_GREEDY 0	/* goafr mode data packet */
+#define GOAFRH_DATA_PERI   1	/* perimeter mode data packet */
 #define GOAFR_DATA_ADVANCE  2   /* advance to the node closest to the sink*/
-#define GOPHERH_PPROBE      3	/* perimeter probe packet */
-#define GOPHERH_BEACON      4     /* liveness beacon packet */
-#define GOPHERH_BEACON_REQ  5     /* neighbor request */
+#define GOAFRH_PPROBE      3	/* perimeter probe packet */
+#define GOAFRH_BEACON      4     /* liveness beacon packet */
+#define GOAFRH_BEACON_REQ  5     /* neighbor request */
 
-#define GOPHER_ROUTE_VERBOSE 1   /* should shortest route be aquired and */
+#define GOAFR_ROUTE_VERBOSE 1   /* should shortest route be aquired and */
 
 
 #ifndef CURRTIME
@@ -107,25 +107,25 @@ using namespace std;
 #endif
 
 
-// opaque type: returned by GOPHERNeighbTable iterator, holds place in table
-typedef unsigned int GOPHERNeighbTableIter;
+// opaque type: returned by GOAFRNeighbTable iterator, holds place in table
+typedef unsigned int GOAFRNeighbTableIter;
 
 
-class GOPHER_Agent;
-class GOPHERNeighbEnt;
-class GOPHERNeighbTable;
+class GOAFR_Agent;
+class GOAFRNeighbEnt;
+class GOAFRNeighbTable;
 
 
 /**************/
 /* Structures */
 /**************/
 
-struct GOPHERSendBufEntry{
+struct GOAFRSendBufEntry{
     double t;
     Packet *p;
 };
 
-struct hdr_gopher {
+struct hdr_goafr {
     
     struct PeriEnt hops_[MAX_PERI_HOPS_STATIC];
     struct PeriEnt peript_; // starting point
@@ -145,7 +145,7 @@ struct hdr_gopher {
   
 
 
-    enum port_t { GOPHER=0, LOCS=1 };
+    enum port_t { GOAFR=0, LOCS=1 };
     int port_;
 
     int size() { return 0; }
@@ -153,13 +153,13 @@ struct hdr_gopher {
     // NS-2 requirements
     static int offset_;
     inline static int& offset() { return offset_; } 
-    inline static hdr_gopher* access(const Packet* p) {
-	return (hdr_gopher*) p->access(offset_);
+    inline static hdr_goafr* access(const Packet* p) {
+	return (hdr_goafr*) p->access(offset_);
     }
   
     void add_hop(nsaddr_t addip, double addx, double addy, double addz) {
 	if (nhops_ == MAX_PERI_HOPS_STATIC) {
-	    fprintf(stderr, "hdr_gopher::add_hop: out of slots!\n");
+	    fprintf(stderr, "hdr_goafr::add_hop: out of slots!\n");
 	    abort();
 	}
 	hops_[nhops_].x = addx; hops_[nhops_].y = addy; hops_[nhops_].z = addz;
@@ -173,118 +173,118 @@ struct hdr_gopher {
 /* Timer Classes */
 /*****************/
 
-class GOPHERPacketDelayTimer : public QueuedTimer {
+class GOAFRPacketDelayTimer : public QueuedTimer {
     
  public:
- GOPHERPacketDelayTimer(GOPHER_Agent *a_, int size) : QueuedTimer(size)
+ GOAFRPacketDelayTimer(GOAFR_Agent *a_, int size) : QueuedTimer(size)
 	{ a = a_; }
     void handle();
     void deleteInfo(void* info);
 
  private:
-    GOPHER_Agent *a; 
+    GOAFR_Agent *a; 
     
 };
 
-class GOPHERSendBufferTimer : public TimerHandler {
+class GOAFRSendBufferTimer : public TimerHandler {
 
  public:
-    GOPHERSendBufferTimer(GOPHER_Agent *a): TimerHandler() { a_ = a; }
+    GOAFRSendBufferTimer(GOAFR_Agent *a): TimerHandler() { a_ = a; }
     void expire(Event *e);
 
  protected:
-    GOPHER_Agent *a_;
+    GOAFR_Agent *a_;
 
 };
 
-class GOPHER_BeaconTimer : public TimerHandler {
+class GOAFR_BeaconTimer : public TimerHandler {
 
  public:
-    GOPHER_BeaconTimer(GOPHER_Agent *a_) { a = a_; }
+    GOAFR_BeaconTimer(GOAFR_Agent *a_) { a = a_; }
     virtual void expire(Event *);
 
  protected:
-    GOPHER_Agent *a;
+    GOAFR_Agent *a;
 };
 
-class GOPHER_LastPeriTimer : public TimerHandler {
+class GOAFR_LastPeriTimer : public TimerHandler {
 
  public:
-    GOPHER_LastPeriTimer(GOPHER_Agent *a_) { a = a_; }
+    GOAFR_LastPeriTimer(GOAFR_Agent *a_) { a = a_; }
     virtual void expire(Event *);
     
  protected:
-    GOPHER_Agent *a;
+    GOAFR_Agent *a;
 };
 
-class GOPHER_PlanarTimer : public TimerHandler {
+class GOAFR_PlanarTimer : public TimerHandler {
 
  public:
-    GOPHER_PlanarTimer(GOPHER_Agent *a_) { a = a_; }
+    GOAFR_PlanarTimer(GOAFR_Agent *a_) { a = a_; }
     virtual void expire(Event *);
 
  protected:
-    GOPHER_Agent *a;
+    GOAFR_Agent *a;
 };
 
 
-class GOPHER_DeadNeighbTimer : public TimerHandler {
+class GOAFR_DeadNeighbTimer : public TimerHandler {
 
  public:
-    GOPHER_DeadNeighbTimer(GOPHER_Agent *a_, GOPHERNeighbEnt *ne_) 
+    GOAFR_DeadNeighbTimer(GOAFR_Agent *a_, GOAFRNeighbEnt *ne_) 
 	{ a = a_; ne = ne_; }
     virtual void expire(Event *);
     
  protected:
-    GOPHER_Agent *a;
-    GOPHERNeighbEnt *ne;
+    GOAFR_Agent *a;
+    GOAFRNeighbEnt *ne;
 };
 
-class GOPHER_PeriProbeTimer : public TimerHandler {
+class GOAFR_PeriProbeTimer : public TimerHandler {
 
  public:
-    GOPHER_PeriProbeTimer(GOPHER_Agent *a_, GOPHERNeighbEnt *ne_)
+    GOAFR_PeriProbeTimer(GOAFR_Agent *a_, GOAFRNeighbEnt *ne_)
 	{ a = a_; ne = ne_; }
     virtual void expire(Event *);
     
  protected:
-    GOPHER_Agent *a;
-    GOPHERNeighbEnt *ne;
+    GOAFR_Agent *a;
+    GOAFRNeighbEnt *ne;
 };
 
-class GOPHERBeaconDelayTimer : public TimerHandler {
+class GOAFRBeaconDelayTimer : public TimerHandler {
 
  public:
-    GOPHERBeaconDelayTimer(GOPHER_Agent *a_) { a = a_; }
+    GOAFRBeaconDelayTimer(GOAFR_Agent *a_) { a = a_; }
     virtual void expire(Event *);
 
  protected:
-    GOPHER_Agent *a;
+    GOAFR_Agent *a;
 };
 
-class GOPHERBeaconReqDelayTimer : public TimerHandler {
+class GOAFRBeaconReqDelayTimer : public TimerHandler {
 
  public:
-    GOPHERBeaconReqDelayTimer(GOPHER_Agent *a_) { a = a_; }
+    GOAFRBeaconReqDelayTimer(GOAFR_Agent *a_) { a = a_; }
     virtual void expire(Event *);
 
  protected:
-    GOPHER_Agent *a;
+    GOAFR_Agent *a;
 };
 
 /******************/
 /* Neighbor Entry */
 /******************/
 
-class GOPHERNeighbEnt {
+class GOAFRNeighbEnt {
 
  public:
-     GOPHERNeighbEnt(GOPHER_Agent *ina) :
+     GOAFRNeighbEnt(GOAFR_Agent *ina) :
 	 peri(NULL), perilen(0), maxlen(0), dnt(ina, this), ppt(ina, this)
        {
        };
 	
-     void planarize(class GOPHERNeighbTable *, int, double, double, double); /** [HMF] Screen this edge */
+     void planarize(class GOAFRNeighbTable *, int, double, double, double); /** [HMF] Screen this edge */
 
      int closer_pt(nsaddr_t myip, double myx, double myy, double myz,
 		   double ptx, double pty, nsaddr_t ptipa, nsaddr_t ptipb,
@@ -299,22 +299,22 @@ class GOPHERNeighbEnt {
      int maxlen;	   //**< [HMF] allocated slots in peri
      int live;	           //**< [HMF] when planarizing, whether edge should be used
      int load;	           //**< [MT] Load on MAC layer (802.11) at this neighbor (= 0..100)
-     GOPHER_DeadNeighbTimer dnt; //**< [HMF] timer for expiration of neighbor
-     GOPHER_PeriProbeTimer ppt;  //**< [HMF] Timer for generation of perimeter probe to neighbor
+     GOAFR_DeadNeighbTimer dnt; //**< [HMF] timer for expiration of neighbor
+     GOAFR_PeriProbeTimer ppt;  //**< [HMF] Timer for generation of perimeter probe to neighbor
 };
 
 /******************/
 /* Neighbor Table */
 /******************/
-/** Array that is ordered by destination addr and holds the GOPHERNeighbEnts */
+/** Array that is ordered by destination addr and holds the GOAFRNeighbEnts */
 
-class GOPHERNeighbTable {
+class GOAFRNeighbTable {
 
  public:
-     GOPHERNeighbTable(GOPHER_Agent *mya);
-     ~GOPHERNeighbTable();
+     GOAFRNeighbTable(GOAFR_Agent *mya);
+     ~GOAFRNeighbTable();
     
-     void ent_delete(const GOPHERNeighbEnt *ent);          //** Delete an entry
+     void ent_delete(const GOAFRNeighbEnt *ent);          //** Delete an entry
      void planarize(int, int, double, double, double);          //** Remove all crossing edges
 
      inline double norm(double tmp_bear){
@@ -331,31 +331,31 @@ class GOPHERNeighbTable {
        return to_norm;
      }
 	    
-     GOPHERNeighbEnt *ent_add(const GOPHERNeighbEnt *ent); //** [HMF] Add an entry
-     GOPHERNeighbEnt *ent_finddst(nsaddr_t dst);           //** [HMF] Find an entry by his destination address
+     GOAFRNeighbEnt *ent_add(const GOAFRNeighbEnt *ent); //** [HMF] Add an entry
+     GOAFRNeighbEnt *ent_finddst(nsaddr_t dst);           //** [HMF] Find an entry by his destination address
 
      // Neighbor Functions
-     class GOPHERNeighbEnt *ent_findshortest       //** Find Closest
+     class GOAFRNeighbEnt *ent_findshortest       //** Find Closest
 	 (MobileNode *mn, double x, double y, double z);
-     class GOPHERNeighbEnt *ent_findshortest_cc    //** Find Closest with congestion control 
+     class GOAFRNeighbEnt *ent_findshortest_cc    //** Find Closest with congestion control 
 	 (MobileNode *mn, double x, double y, double z, double alpha);
-     class GOPHERNeighbEnt *ent_findshortestXcptLH //** Find Closest that is not the LastHop
+     class GOAFRNeighbEnt *ent_findshortestXcptLH //** Find Closest that is not the LastHop
 	 (MobileNode *mn, nsaddr_t lastHopId, double x, double y, double z);
 
      //** [HMF] Iterating through every table on peri and return the first
      //*  hop on the perimeter that is close to the destination than
      //*  itself 
-     class GOPHERNeighbEnt *ent_findcloser_onperi
+     class GOAFRNeighbEnt *ent_findcloser_onperi
 	 (MobileNode *mn, double x, double y, double z, int *perihop);
-     class GOPHERNeighbEnt *ent_findcloser_edgept
+     class GOAFRNeighbEnt *ent_findcloser_edgept
 	 (MobileNode *, double, double, nsaddr_t, nsaddr_t, double, double, double *, double *);
-     class GOPHERNeighbEnt *ent_next_ccw(MobileNode *, GOPHERNeighbEnt *, int);
-     class GOPHERNeighbEnt *ent_next_ccw(double, double, double, int, GOPHERNeighbEnt * = 0);
-     class GOPHERNeighbEnt *ent_findface(MobileNode *, double, double, double, int);
-     GOPHERNeighbTableIter InitLoop(); 
-     class GOPHERNeighbEnt *NextLoop(GOPHERNeighbTableIter *);
-     class GOPHERNeighbEnt *ent_findnext_onperi(MobileNode *, int, double, double, double, int);
-     class GOPHERNeighbEnt *ent_findnextcloser_onperi(MobileNode *mn, double dx, double dy, double dz);
+     class GOAFRNeighbEnt *ent_next_ccw(MobileNode *, GOAFRNeighbEnt *, int);
+     class GOAFRNeighbEnt *ent_next_ccw(double, double, double, int, GOAFRNeighbEnt * = 0);
+     class GOAFRNeighbEnt *ent_findface(MobileNode *, double, double, double, int);
+     GOAFRNeighbTableIter InitLoop(); 
+     class GOAFRNeighbEnt *NextLoop(GOAFRNeighbTableIter *);
+     class GOAFRNeighbEnt *ent_findnext_onperi(MobileNode *, int, double, double, double, int);
+     class GOAFRNeighbEnt *ent_findnextcloser_onperi(MobileNode *mn, double dx, double dy, double dz);
      int meanLoad();         //**< calculates the mean load of all neighbors in this table
      inline int noEntries() {return nents;}
      
@@ -366,29 +366,29 @@ class GOPHERNeighbTable {
      DHeap *valid;
      int itedge;
  protected:
-  friend class GOPHERNeighbEnt;
+  friend class GOAFRNeighbEnt;
 
  private:
 
      int nents;		     //** Entries currently in use
      int maxents;	     
-     GOPHER_Agent *a;    
-     GOPHERNeighbEnt **tab;
+     GOAFR_Agent *a;    
+     GOAFRNeighbEnt **tab;
 };
 
 /**************/
-/* GOPHER Agent */
+/* GOAFR Agent */
 /**************/
 
-class GOPHER_Agent : public Tap, public Agent {
+class GOAFR_Agent : public Tap, public Agent {
 
  public:
-    GOPHER_Agent(void);
+    GOAFR_Agent(void);
     
     // Timer called Functions
     void beacon_callback(void);	                   // generate a beacon (timer-triggered)
-    void deadneighb_callback(class GOPHERNeighbEnt *ne); // neighbor gone (timer/MAC-trig)
-    void periprobe_callback(class GOPHERNeighbEnt *ne);  // gen perimeter probe (timer-trig)
+    void deadneighb_callback(class GOAFRNeighbEnt *ne); // neighbor gone (timer/MAC-trig)
+    void periprobe_callback(class GOAFRNeighbEnt *ne);  // gen perimeter probe (timer-trig)
     void lastperi_callback(void);	           // turn off peri probes when unused for timeout
     void planar_callback(void);	                   // planarization callback
 #ifdef SPAN
@@ -414,9 +414,9 @@ class GOPHER_Agent : public Tap, public Agent {
     int check_ellipse(Packet *p, int current_address, int to_address); // Check whether the next point is inside the ellipsis 
     // End GOAFR
 
-    bool send_allowed[GOPHER_PKT_TYPES]; //**< array with permission value to send pkttype
+    bool send_allowed[GOAFR_PKT_TYPES]; //**< array with permission value to send pkttype
 
-    int off_gopher_;		 //**< offset of the GOPHER packet header in pkt 
+    int off_goafr_;		 //**< offset of the GOAFR packet header in pkt 
     int use_mac_;		 //**< whether or not to simulate full MAC level 
     int use_peri_;		 //**< whether or not to use perimeters 
     int verbose_;		 //**< verbosity (binary) 
@@ -440,30 +440,30 @@ class GOPHER_Agent : public Tap, public Agent {
     double cc_alpha_;		 //**< parameter for congestion control [MT]
     int use_span_;               //**< whether or not to use span services [CL]
 
-    friend class GOPHERNeighbEnt;
+    friend class GOAFRNeighbEnt;
     class MobileNode *mn_;	        //**< MobileNode 
     class PriQueue *ifq_;	        //**< InterfaceQueue [MK]
     class Mac *m;                       //**< MAC
     class Trace *tracetarget;		//**< Trace Target
     class LocationService *locservice_; //**< LocationService [MK]
-    class GOPHERNeighbTable *ntab_;           //**< Neighbor Table
+    class GOAFRNeighbTable *ntab_;           //**< Neighbor Table
 
-    class GOPHER_BeaconTimer   *beacon_timer_;   //**< Alive Beacon Timer
-    class GOPHER_LastPeriTimer *lastperi_timer_; //**< Last Perimeter Used Timer
-    class GOPHER_PlanarTimer   *planar_timer_;   //**< Inter-Planarization Timer
-    class GOPHERPacketDelayTimer   *pd_timer;        //**< Packet Delay Timer [MK]
+    class GOAFR_BeaconTimer   *beacon_timer_;   //**< Alive Beacon Timer
+    class GOAFR_LastPeriTimer *lastperi_timer_; //**< Last Perimeter Used Timer
+    class GOAFR_PlanarTimer   *planar_timer_;   //**< Inter-Planarization Timer
+    class GOAFRPacketDelayTimer   *pd_timer;        //**< Packet Delay Timer [MK]
 
-    GOPHERSendBufferTimer send_buf_timer;
-    GOPHERSendBufEntry send_buf[SEND_BUF_SIZE];
+    GOAFRSendBufferTimer send_buf_timer;
+    GOAFRSendBufEntry send_buf[SEND_BUF_SIZE];
     
     // Reactive Beaconing
-    class GOPHERBeaconDelayTimer    *beacon_delay_;    //**< Min Delay between two Beacons
-    class GOPHERBeaconReqDelayTimer *beaconreq_delay_; //**< Min Delay between two Beacon Reqs
+    class GOAFRBeaconDelayTimer    *beacon_delay_;    //**< Min Delay between two Beacons
+    class GOAFRBeaconReqDelayTimer *beaconreq_delay_; //**< Min Delay between two Beacon Reqs
 
-    friend class GOPHERPacketDelayTimer;
-    friend class GOPHERSendBufferTimer;
+    friend class GOAFRPacketDelayTimer;
+    friend class GOAFRSendBufferTimer;
 
-    friend class GOPHERNeighbTable;
+    friend class GOAFRNeighbTable;
 
     virtual void recv(Packet *, Handler *);
     void trace(char *fmt, ...);
@@ -471,9 +471,9 @@ class GOPHER_Agent : public Tap, public Agent {
     void init();
 
     void forwardPacket(Packet *, int = 0);      //**< Forwarding Packets (Way too big for one function :( )
-    void periIn(Packet *, hdr_gopher *, int = 0);
+    void periIn(Packet *, hdr_goafr *, int = 0);
     int hdr_size(Packet* p);                    //**< [MK] Handles everything size related  
-    int crosses(class GOPHERNeighbEnt *, hdr_gopher *);
+    int crosses(class GOAFRNeighbEnt *, hdr_goafr *);
     int getLoad();				//**< [MT] recalculate my own load (using neighbors')
     
     // Beaconing Functions
@@ -482,7 +482,7 @@ class GOPHER_Agent : public Tap, public Agent {
     void recvBeaconReq(Packet*);                //**< [MK] receive Beacon Request
     void sendBeacon(double = 0.0);        //**< [MK] send Beacon
     void sendBeaconRequest();                   //**< [MK] send Beacon request
-    void checkGopherCondition(const Packet*);   //**< [MK] check if node is a Gopher Neighbor to src
+    void checkGoafrCondition(const Packet*);   //**< [MK] check if node is a Goafr Neighbor to src
 
     // SendBuffer Functions
     void notifyPos(nsaddr_t);
@@ -496,4 +496,4 @@ class GOPHER_Agent : public Tap, public Agent {
 
 };
 
-#endif //_GOPHER_h
+#endif //_GOAFR_h
