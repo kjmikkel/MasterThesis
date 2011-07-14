@@ -1,18 +1,18 @@
 # author: Thomas Ogilvie
 # sample tcl script showing the use of GPSR and HLS (hierarchical location service)
+# Changed by Mikkel Kjaer Jensen to accept GOAFR
 
-
-## GPSR Options
+## GOAFR Options
 Agent/GOAFR set bdesync_                0.5 ;# beacon desync random component
 Agent/GOAFR set bexp_                   [expr 3*([Agent/GOAFR set bint_]+[Agent/GOAFR set bdesync_]*[Agent/GOAFR set bint_])] ;# beacon timeout interval
 Agent/GOAFR set pint_                   1.5 ;# peri probe interval
 Agent/GOAFR set pdesync_                0.5 ;# peri probe desync random component
 Agent/GOAFR set lpexp_                  8.0 ;# peris unused timeout interval
 Agent/GOAFR set drop_debug_             1   ;#
-Agent/GOAFR set peri_proact_            1 	 ;# proactively generate peri probes
+Agent/GOAFR set peri_proact_            1   ;# proactively generate peri probes
 Agent/GOAFR set use_implicit_beacon_    1   ;# all packets act as beacons; promisc.
 Agent/GOAFR set use_timed_plnrz_        0   ;# replanarize periodically
-Agent/GOAFR set use_congestion_control_ 0
+Agent/GOAFR set use_congestion_control_ 0   ;
 Agent/GOAFR set use_reactive_beacon_    0   ;# only use reactive beaconing
 
 set val(bint)           0.5  ;# beacon interval
@@ -26,7 +26,7 @@ set val(locs)           0    ;# default to OmniLS
 set val(use_loop)       0    ;# look for unexpected loops in peris
 
 set val(agg_mac)          1 ;# Aggregate MAC Traces
-set val(agg_rtr)          0 ;# Aggregate RTR Traces
+set val(agg_rtr)          1 ;# Aggregate RTR Traces
 set val(agg_trc)          0 ;# Shorten Trace File
 
 
@@ -37,15 +37,15 @@ set val(mac)		Mac/802_11
 set val(ifq)		Queue/DropTail/PriQueue
 set val(ll)		LL
 set val(ant)		Antenna/OmniAntenna
-set val(x)		2000      ;# X dimension of the topography
-set val(y)		2000      ;# Y dimension of the topography
-set val(ifqlen)		512       ;# max packet in ifq
-set val(seed)		1.0
-set val(adhocRouting)	GOAFR      ;# AdHoc Routing Protocol
-set val(nn)		40       ;# how many nodes are simulated
-set val(stop)		40.0     ;# simulation time
-set val(use_gk)		0	  ;# > 0: use GridKeeper with this radius
-set val(zip)		0         ;# should trace files be zipped
+set val(x)		450    ;# X dimension of the topography
+set val(y)		450    ;# Y dimension of the topography
+set val(ifqlen)		512     ;# max packet in ifq
+set val(seed)		1.0     ;
+set val(adhocRouting)	GOAFR  ;# AdHoc Routing Protocol
+set val(nn)		12      ;# how many nodes are simulated
+set val(stop)		1.0     ;# simulation time
+set val(use_gk)		0	;# > 0: use GridKeeper with this radius
+set val(zip)		0       ;# should trace files be zipped
 
 set val(agttrc)         ON ;# Trace Agent
 set val(rtrtrc)         ON ;# Trace Routing Agent
@@ -54,10 +54,10 @@ set val(movtrc)         ON ;# Trace Movement
 
 
 set val(lt)		""
-set val(cp)		"cp-n40-a40-t40-c4-m0"
-set val(sc)		"sc-x2000-y2000-n40-s25-t40"
+set val(cp)	        "transmit_test_02"
+set val(sc)		"loc_test_02"
 
-set val(out)            "goafr_test.tr"
+set val(out)            "goafr_test_02.tr"
 
 Agent/GOAFR set locservice_type_ 3
 
@@ -88,8 +88,8 @@ set ns_		[new Simulator]
 $ns_ use-newtrace
 
 # Outputs nam traces
-set nf [open out.nam w]
-$ns_ namtrace-all $nf
+set nam_f [open goafr_00.nam w]
+$ns_ namtrace-all $nam_f
 
 set loadTrace  $val(lt)
 
@@ -165,12 +165,13 @@ $ns_ at  $val(stop).0002 "puts \"NS EXITING... $val(out)\" ; $ns_ halt"
 
 # A finish proc to flush traces and out call nam
 proc finish {} {
-        global ns nf
-        $ns flush-trace
-        close $nf
+        global ns_ nam_f tracefd
+        $ns_ flush-trace
+        close $nam_f
+        close $tracefd
 
         puts "running nam..."
-        exec nam out.nam &
+        exec nam goafr_00.nam &
         exit 0
 }
 

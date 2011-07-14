@@ -823,6 +823,7 @@ GOAFR_Agent::tap(const Packet *p)
 						goafrh->load);
 			break;
 	    case GOAFRH_DATA_PERI:
+		case GOAFRH_DATA_ADVANCE:
 			// XXX was hops_[goafrh->currhop_-1]
 			// prev hop position lives in hops_[0]
 			beacon_proc(goafrh->hops_[0].ip,
@@ -876,8 +877,10 @@ GOAFR_Agent::tap(const Packet *p)
     // trace for evaluation
 	struct hdr_ip *iph = HDR_IP(p);
 	bool arrival = ( ((goafrh->mode_ == GOAFRH_DATA_GREEDY) ||
-					  (goafrh->mode_ == GOAFRH_DATA_PERI)) &&
-					 (goafrh->port_ == hdr_goafr::GOAFR) &&
+					  (goafrh->mode_ == GOAFRH_DATA_PERI) 
+||
+					  (goafrh->mode_ == GOAFRH_DATA_ADVANCE) &&
+					  (goafrh->port_ == hdr_goafr::GOAFR)) &&
 					 (iph->daddr() == addr()) );
     if (arrival) {
       int analysis = God::instance()->path_analysis_;
@@ -1041,6 +1044,7 @@ GOAFR_Agent::lost_link(Packet *p)
 			switch (goafrh->mode_) {
 			case GOAFRH_DATA_GREEDY: { forwardPacket(rt); break; }
 			case GOAFRH_DATA_PERI:
+		    case GOAFRH_DATA_ADVANCE:
 				use_planar_ = 1;
 				if (use_planar_) { forwardPacket(rt, 1); }
 				else { drop(rt, DROP_RTR_NEXT_SRCRT_HOP); }
@@ -1077,6 +1081,7 @@ GOAFR_Agent::lost_link(Packet *p)
 				forwardPacket(rt);
 				break;
 			case GOAFRH_DATA_PERI:
+			case GOAFRH_DATA_ADVANCE:
 				use_planar_ = 1;
 				if (use_planar_)
 					// not src-routed; give it another chance via another neighbor
@@ -1377,29 +1382,36 @@ GOAFR_Agent::getLoad() {
 
 /* Added to GOAFR */
  int GOAFR_Agent::check_ellipse(Packet *p, int from_address, int to_address) {
+
 	// we find the current location 
 	double myx, myy, myz;
     mn_->getLoc(&myx, &myy, &myz);
-      
+	//	fprintf(stderr, "id: %s, x: %f, y: %f\n", p->bits(), myx, myy);
+	
     if (!p->ellipse_->point_in_ellipsis(myx, myy)) {
-	  fprintf(stderr, "entered hit the bounds");
 	  trace("Hit the bounds of the ellipse at %f and %f", myx, myy);
-      // If we are already doing a counter clockwise we should stop, and otherwise we should begin
-	  ntab_->counter_clock = !ntab_->counter_clock;
-		  
+	  
       if(p->ellipse_->hit_edge()) {
-	    // If this is the second time we hit the edge, then we should expand the ellipses
+	    // This is the second time we hit the edge, then we should expand the ellipsis, and continue on
 	    double major = p->ellipse_->get_major();
 	    p->ellipse_->change_major(2 * major);
+		return to_address;
+	  } else {
+	    // This is the first time we hit the edge, so we do not expand the ellipsis, but turn around
+		ntab_->counter_clock = !ntab_->counter_clock;
+		return from_address;		
 	  }
+	  
 	}
-	return 0;
+	// The point is in the ellipsis, so we just continue
+	return to_address;
 }
+	
  /*Stop added to GOAFR*/
 
 void
 GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
-
+	fprintf(stderr, "forward\n");
 	struct hdr_ip *iph = HDR_IP(p);
     struct hdr_cmn *cmh = HDR_CMN(p);
     struct hdr_goafr *goafrh = HDR_GOAFR(p);
@@ -1410,24 +1422,27 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
     double now = s.clock();
 
 	// Added to support GOAFR
+	
 	if (p->ellipse_ == NULL) {
-		fprintf(stderr, "*** Added ellipsis ***\n");
 		int src_address = iph->saddr();
 		int dst_address = iph->daddr();
-
+		fprintf(stderr, "found address\n");
 		double srcPosX, srcPosY, srcPosZ, dstPosX, dstPosY, dstPosZ;
 		// We find the locations
 		God::instance()->getPosition(src_address, &srcPosX, &srcPosY, &srcPosZ);
 		God::instance()->getPosition(dst_address, &dstPosX, &dstPosY, &dstPosZ);
+		fprintf(stderr, "found positions\n");
 		Point src_point = Point(srcPosX, srcPosY);
 		Point dst_point = Point(dstPosX, dstPosY);
 		p->ellipse_ = new Ellipsis(src_point, dst_point);
+		fprintf(stderr, "going outside the ellipsis\n");
 	}
+	
     // End of what was added to support GOAFR
-
+	
+	fprintf(stderr, "Mode: %d\n", goafrh->mode_);
     switch(goafrh->mode_) {
 	case GOAFRH_DATA_GREEDY: 
-    
 	    // first of all, look if we're neighbor to dst
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
 			cmh->next_hop_ = ne->dst;
@@ -1450,13 +1465,12 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			if (ne->dst == goafrh->hops_[0].ip)			
 					trace("VPPP %f _%d_ %d [%d -> %d]", now, mn_->address(), cmh->uid(), mn_->address(), ne->dst);
 
-			// set next hop to best neighbor
+			// set next hop to best neighbor, given that we are still in greedy mode, we cannot go outside the ellipsis (or really, it doesen't matter if we do) 
 			cmh->next_hop_ = ne->dst;
 			break;
 
 	    }
 		
-        
 		else {
 	        
 			// there seems to be no greedy neighbor
@@ -1623,9 +1637,9 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 	     *******************************************/
 
 	case GOAFRH_DATA_PERI:
-
 	    // first of all, look if we're neighbor to dst
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
+			fprintf(stderr, "Found destination on the cheap\n");
 			cmh->size() -= hdr_size(p); // strip data peri header
 			goafrh->mode_ = GOAFRH_DATA_GREEDY;
 			cmh->size() += hdr_size(p); // strip data goafr header
@@ -1675,9 +1689,10 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					// We have returned to the start point, now we go forward -- GOAFR
 					if ((goafrh->periptip_[1] == mn_->address()) &&
 						(goafrh->periptip_[2] == ne->dst)) {
-						
-						goafrh->mode_ = GOAFR_DATA_ADVANCE; // put packet in advance mode
-        				
+
+					    fprintf(stderr, "Set advance\n");             
+						goafrh->mode_ = GOAFRH_DATA_ADVANCE; // put packet in advance mode
+        				fprintf(stderr, "advance mode said: %d %d\n", goafrh->mode_, GOAFRH_DATA_ADVANCE);
 						// Set the next hop
 						goafrh->nhops_ = 1;
 						goafrh->currhop_ = 1;
@@ -1741,7 +1756,12 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						goafrh->periptip_[1] = mn_->address(); // self
 						goafrh->periptip_[2] = ne->dst; // next hop
 
-						cmh->next_hop_ = ne->dst;
+						// Changes to make GOAFR work correctly
+						cmh->next_hop_ = check_ellipse(p, mn_->address(), ne->dst);
+						if (cmh->next_hop_ == mn_->address()) {
+							// if we have to turn around, then the next node is this node again
+							goafrh->periptip_[2] = mn_->address();
+						}
 						goto finish_pkt;
 					} /* end if(ne->...) */
 				} /*end of if(ne): incoming node isn't in the neighbor-table!!! */
@@ -1768,7 +1788,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					drop(p, DROP_RTR_MAC_CALLBACK);
 					return;
 				}
-				cmh->next_hop_ = ne->dst;
+				cmh->next_hop_ =  check_ellipse(p, mn_->address(), ne->dst);
 				if (use_loop_detect_) {
 					goafrh->add_hop(mn_->address(), myx, myy, myz);
 					printf("Warning: This size change has not been modified, yet!\n");
@@ -1844,8 +1864,10 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			abort();
 	    }
 	    break;
-
-	case GOAFR_DATA_ADVANCE:
+		
+	case GOAFRH_DATA_ADVANCE:
+		
+		break;
 		// The node will now advance to the node that I found to be the closest to the sink
 
 		// first of all, look if we're neighbor to dst - just in case
@@ -1867,9 +1889,10 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			closery = goafrh->perips_.y;
 
 			// non-source-routed perimeter forwarding rule
-			/** to resume goafr forwarding, this *node* must be closer than
-				the point where the packet entered peri mode. */
-			mn_->getLoc(&myx, &myy, &myz);
+			/* to resume goafr forwarding, this *node* must be closer than 
+			the point where the packet entered peri mode. */ 
+		
+		    mn_->getLoc(&myx, &myy, &myz);
 
 			// Cutoff function, when arrive at the closest node, so we go back to business as usual
 			if (mn_->address() == goafrh->perips_.ip) {
@@ -1881,7 +1904,8 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				   src added 12 to size, don't re-add hops_[0]; otherwise,
 				   still don't want to count hops_[0]. 
 				*/
-				goafrh->currhop_ = 0;
+		
+		        goafrh->currhop_ = 0;
 				goafrh->nhops_ = 0;
 				
 				// recursive, but must call target_->recv in callee frame
@@ -1895,7 +1919,8 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				// forward along current face, or change faces where appropriate
 				/* don't choose *any* edge--only consider edges on the
 				   face we're forwarding on at the moment. */
-				for(int i=0; i<goafrh->nhops_; i++)
+		
+		        for(int i=0; i<goafrh->nhops_; i++)
 					trace("Vne %.8f _%d_ <- %d", CURRTIME, mn_->address(), goafrh->hops_[i].ip);
 
 				ne = ntab_->ent_finddst(goafrh->hops_[goafrh->nhops_-1].ip);
@@ -1908,7 +1933,8 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						are about to revisit the first edge we took on it */
 					// If we arrive here, then something has gone wrong, and we drop the message 
 					// Ensure that this does not happen the instant we begin routing
-					if ((goafrh->periptip_[1] == mn_->address()) &&
+		
+         			if ((goafrh->periptip_[1] == mn_->address()) &&
 						(goafrh->periptip_[2] == ne->dst)) {
 
 						if(goafrh->geoanycast)
@@ -2255,9 +2281,9 @@ GOAFR_Agent::recv(Packet *p, Handler *) {
 			fprintf(stderr, "peri data pkt @ %s:RT_PORT!\n",as); fflush(stderr);
 			delete[] as;
 			break;
-        case GOAFR_DATA_ADVANCE:
+        case GOAFRH_DATA_ADVANCE:
 			as = Address::instance().print_nodeaddr(addr());
-			fprintf(stderr, "peri data pkt @ %s:RT_PORT!\n",as); fflush(stderr);
+			fprintf(stderr, "advance data pkt @ %s:RT_PORT!\n",as); fflush(stderr);
 			delete[] as;
 			break;
 	    default:
@@ -2848,6 +2874,7 @@ GOAFR_Agent::hdr_size(Packet* p)
 			size = (packetType + position + imp_beacon);
 			break;
 	    case GOAFRH_DATA_PERI:
+		case GOAFRH_DATA_ADVANCE:
 			size = (packetType + position + 2*id + 2*position + position + imp_beacon); // last position for intersecting line
 			break;
 	    default:

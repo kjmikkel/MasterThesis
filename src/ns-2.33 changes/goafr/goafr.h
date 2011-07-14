@@ -94,7 +94,7 @@ using namespace std;
 
 #define GOAFRH_DATA_GREEDY 0	/* goafr mode data packet */
 #define GOAFRH_DATA_PERI   1	/* perimeter mode data packet */
-#define GOAFR_DATA_ADVANCE  2   /* advance to the node closest to the sink*/
+#define GOAFRH_DATA_ADVANCE  2   /* advance to the node closest to the sink*/
 #define GOAFRH_PPROBE      3	/* perimeter probe packet */
 #define GOAFRH_BEACON      4     /* liveness beacon packet */
 #define GOAFRH_BEACON_REQ  5     /* neighbor request */

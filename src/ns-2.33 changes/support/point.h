@@ -5,6 +5,8 @@
 class Point {
 private:
         double xval, yval;
+	
+	double check_limit(double test_value);
 public:
         // Constructor uses default arguments to allow calling with zero, one,
         // or two values.
