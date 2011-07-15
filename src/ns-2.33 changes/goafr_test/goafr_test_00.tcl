@@ -3,17 +3,17 @@
 
 
 ## GPSR Options
-Agent/GOAFR set bdesync_                0.5 ;# beacon desync random component
-Agent/GOAFR set bexp_                   [expr 3*([Agent/GOAFR set bint_]+[Agent/GOAFR set bdesync_]*[Agent/GOAFR set bint_])] ;# beacon timeout interval
-Agent/GOAFR set pint_                   1.5 ;# peri probe interval
-Agent/GOAFR set pdesync_                0.5 ;# peri probe desync random component
-Agent/GOAFR set lpexp_                  8.0 ;# peris unused timeout interval
-Agent/GOAFR set drop_debug_             1   ;#
-Agent/GOAFR set peri_proact_            1 	 ;# proactively generate peri probes
-Agent/GOAFR set use_implicit_beacon_    1   ;# all packets act as beacons; promisc.
-Agent/GOAFR set use_timed_plnrz_        0   ;# replanarize periodically
-Agent/GOAFR set use_congestion_control_ 0
-Agent/GOAFR set use_reactive_beacon_    0   ;# only use reactive beaconing
+Agent/GPSR set bdesync_                0.5 ;# beacon desync random component
+Agent/GPSR set bexp_                   [expr 3*([Agent/GPSR set bint_]+[Agent/GPSR set bdesync_]*[Agent/GPSR set bint_])] ;# beacon timeout interval
+Agent/GPSR set pint_                   1.5 ;# peri probe interval
+Agent/GPSR set pdesync_                0.5 ;# peri probe desync random component
+Agent/GPSR set lpexp_                  8.0 ;# peris unused timeout interval
+Agent/GPSR set drop_debug_             1   ;#
+Agent/GPSR set peri_proact_            1 	 ;# proactively generate peri probes
+Agent/GPSR set use_implicit_beacon_    1   ;# all packets act as beacons; promisc.
+Agent/GPSR set use_timed_plnrz_        0   ;# replanarize periodically
+Agent/GPSR set use_congestion_control_ 0
+Agent/GPSR set use_reactive_beacon_    0   ;# only use reactive beaconing
 
 set val(bint)           0.5  ;# beacon interval
 set val(use_mac)        1    ;# use link breakage feedback from MAC
@@ -41,7 +41,7 @@ set val(x)		2000      ;# X dimension of the topography
 set val(y)		2000      ;# Y dimension of the topography
 set val(ifqlen)		512       ;# max packet in ifq
 set val(seed)		1.0
-set val(adhocRouting)	GOAFR      ;# AdHoc Routing Protocol
+set val(adhocRouting)	GPSR      ;# AdHoc Routing Protocol
 set val(nn)		40       ;# how many nodes are simulated
 set val(stop)		40.0     ;# simulation time
 set val(use_gk)		0	  ;# > 0: use GridKeeper with this radius
@@ -57,24 +57,24 @@ set val(lt)		""
 set val(cp)		"cp-n40-a40-t40-c4-m0"
 set val(sc)		"sc-x2000-y2000-n40-s25-t40"
 
-set val(out)            "goafr_test.tr"
+set val(out)            "gpsr_test_00.tr"
 
-Agent/GOAFR set locservice_type_ 3
+Agent/GPSR set locservice_type_ 3
 
 add-all-packet-headers
 remove-all-packet-headers
-add-packet-header Common Flags IP LL Mac Message GOAFR  LOCS SR RTP Ping HLS
+add-packet-header Common Flags IP LL Mac Message GPSR  LOCS SR RTP Ping HLS
 
-Agent/GOAFR set bint_                  $val(bint)
+Agent/GPSR set bint_                  $val(bint)
 # Recalculating bexp_ here
-Agent/GOAFR set bexp_                 [expr 3*([Agent/GOAFR set bint_]+[Agent/GOAFR set bdesync_]*[Agent/GOAFR set bint_])] ;# beacon timeout interval
-Agent/GOAFR set use_peri_              $val(use_peri)
-Agent/GOAFR set use_planar_            $val(use_planar)
-Agent/GOAFR set use_mac_               $val(use_mac)
-Agent/GOAFR set use_beacon_            $val(use_beacon)
-Agent/GOAFR set verbose_               $val(verbose)
-Agent/GOAFR set use_reactive_beacon_   $val(use_reactive)
-Agent/GOAFR set use_loop_detect_       $val(use_loop)
+Agent/GPSR set bexp_                 [expr 3*([Agent/GPSR set bint_]+[Agent/GPSR set bdesync_]*[Agent/GPSR set bint_])] ;# beacon timeout interval
+Agent/GPSR set use_peri_              $val(use_peri)
+Agent/GPSR set use_planar_            $val(use_planar)
+Agent/GPSR set use_mac_               $val(use_mac)
+Agent/GPSR set use_beacon_            $val(use_beacon)
+Agent/GPSR set verbose_               $val(verbose)
+Agent/GPSR set use_reactive_beacon_   $val(use_reactive)
+Agent/GPSR set use_loop_detect_       $val(use_loop)
 
 CMUTrace set aggregate_mac_           $val(agg_mac)
 CMUTrace set aggregate_rtr_           $val(agg_rtr)

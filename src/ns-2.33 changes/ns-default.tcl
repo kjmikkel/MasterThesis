@@ -1376,15 +1376,15 @@ Agent/GREEDY set use_reactive_beacon_ 0
 Agent/GREEDY set locservice_type_ 3
 ### END GREEDY
 
-### Start GOPHER
-Agent/GOPHER set active_ 1
+### Start GOAFR
+Agent/GOAFR set active_ 1
 
-Agent/GOPHER set cc_alpha_ 0
-Agent/GOPHER set use_beacon_ 0
-Agent/GOPHER set use_congestion_control_ 0
-Agent/GOPHER set use_reactive_beacon_ 0
-Agent/GOPHER set locservice_type_ 3
-### END GOPHER
+Agent/GOAFR set cc_alpha_ 0
+Agent/GOAFR set use_beacon_ 0
+Agent/GOAFR set use_congestion_control_ 0
+Agent/GOAFR set use_reactive_beacon_ 0
+Agent/GOAFR set locservice_type_ 3
+### END GOAFR
 
 Agent/MIPBS set adSize_ 48
 Agent/MIPBS set shift_ 0

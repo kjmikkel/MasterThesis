@@ -1,6 +1,7 @@
 #include <math.h>
 #include <float.h>
 #include <stdio.h>
+#include <stdexcept>
 
 #include "point.h"
 using namespace std;
@@ -13,25 +14,36 @@ Point::Point(double x, double y) {
 double Point::x() { return xval; }
 double Point::y() { return yval; }
 
-double Point::check_limit(double test_value) {
-  if (test_value > DBL_MAX)
-    return sqrt(DBL_MAX);
+bool Point::check_limit(double test_value) {
+  if (test_value > sqrt(DBL_MAX) / 2)
+    return true;
 
-  if (test_value < DBL_MIN) {
-    return 0;
+  // Quick escape
+  if (test_value < -1000000000) {
+    return true;
+  } else {
+    return false;
   }
+
 }
 
 double Point::dist(Point other) {
-  
-  double local_new_x = check_limit(other.xval);
-  double local_new_y = check_limit(other.yval);
+  bool x_exceed = check_limit(other.xval);
+  bool y_exceed = check_limit(other.yval);
 
-  double xd = xval - local_new_x;
-  double yd = yval - local_new_y;
-  
-  fprintf(stderr, "local: %f, %f\n", xval, yval);
-  fprintf(stderr, "new: %f, %f\n", local_new_x, local_new_y);
-  fprintf(stderr, "dist 1: %f, %f\n", xd, yd);
+  if (x_exceed || y_exceed) {
+    return sqrt(DBL_MAX) / 2.0;
+  }
+
+  double xd = xval - other.xval;
+  double yd = yval - other.yval;
+
+  x_exceed = check_limit(xd);
+  y_exceed = check_limit(yd);
+
+  if (x_exceed || y_exceed) {
+    return sqrt(DBL_MAX) / 2.0;
+  }
+
   return sqrt(xd*xd + yd*yd);
 }

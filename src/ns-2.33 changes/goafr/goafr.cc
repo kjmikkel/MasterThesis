@@ -261,6 +261,7 @@ GOAFRNeighbTable::ent_findnext_onperi(MobileNode *mn, int node, double dx, doubl
 
 		brg_tmp2 = bearing(myx, myy, ne->x, ne->y);
 		brg_tmp = brg_tmp2 - brg;
+		// change peri
 		if(counter_clock){
 			while(brg_tmp > 0)
 				brg_tmp -= 2*M_PI;
@@ -1382,14 +1383,12 @@ GOAFR_Agent::getLoad() {
 
 /* Added to GOAFR */
  int GOAFR_Agent::check_ellipse(Packet *p, int from_address, int to_address) {
-
+	 
 	// we find the current location 
 	double myx, myy, myz;
     mn_->getLoc(&myx, &myy, &myz);
-	//	fprintf(stderr, "id: %s, x: %f, y: %f\n", p->bits(), myx, myy);
-	
+
     if (!p->ellipse_->point_in_ellipsis(myx, myy)) {
-	  trace("Hit the bounds of the ellipse at %f and %f", myx, myy);
 	  
       if(p->ellipse_->hit_edge()) {
 	    // This is the second time we hit the edge, then we should expand the ellipsis, and continue on
@@ -1398,7 +1397,7 @@ GOAFR_Agent::getLoad() {
 		return to_address;
 	  } else {
 	    // This is the first time we hit the edge, so we do not expand the ellipsis, but turn around
-		ntab_->counter_clock = !ntab_->counter_clock;
+	   	ntab_->counter_clock = !ntab_->counter_clock;
 		return from_address;		
 	  }
 	  
@@ -1411,7 +1410,6 @@ GOAFR_Agent::getLoad() {
 
 void
 GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
-	fprintf(stderr, "forward\n");
 	struct hdr_ip *iph = HDR_IP(p);
     struct hdr_cmn *cmh = HDR_CMN(p);
     struct hdr_goafr *goafrh = HDR_GOAFR(p);
@@ -1426,23 +1424,20 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 	if (p->ellipse_ == NULL) {
 		int src_address = iph->saddr();
 		int dst_address = iph->daddr();
-		fprintf(stderr, "found address\n");
+		
 		double srcPosX, srcPosY, srcPosZ, dstPosX, dstPosY, dstPosZ;
 		// We find the locations
 		God::instance()->getPosition(src_address, &srcPosX, &srcPosY, &srcPosZ);
 		God::instance()->getPosition(dst_address, &dstPosX, &dstPosY, &dstPosZ);
-		fprintf(stderr, "found positions\n");
 		Point src_point = Point(srcPosX, srcPosY);
 		Point dst_point = Point(dstPosX, dstPosY);
 		p->ellipse_ = new Ellipsis(src_point, dst_point);
-		fprintf(stderr, "going outside the ellipsis\n");
 	}
 	
     // End of what was added to support GOAFR
-	
-	fprintf(stderr, "Mode: %d\n", goafrh->mode_);
-    switch(goafrh->mode_) {
+	switch(goafrh->mode_) {
 	case GOAFRH_DATA_GREEDY: 
+		//		fprintf(stderr, "Greedy\n");
 	    // first of all, look if we're neighbor to dst
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
 			cmh->next_hop_ = ne->dst;
@@ -1637,9 +1632,9 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 	     *******************************************/
 
 	case GOAFRH_DATA_PERI:
+		//		fprintf(stderr, "Peri\n");
 	    // first of all, look if we're neighbor to dst
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
-			fprintf(stderr, "Found destination on the cheap\n");
 			cmh->size() -= hdr_size(p); // strip data peri header
 			goafrh->mode_ = GOAFRH_DATA_GREEDY;
 			cmh->size() += hdr_size(p); // strip data goafr header
@@ -1683,16 +1678,15 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				if(ne){
 					double fromx, fromy, fromz;
 					ne = ntab_->ent_findnext_onperi(mn_,
-													goafrh->hops_[0].ip, goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z,
+													goafrh->hops_[0].ip, 
+                                                    goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z,
 													use_planar_);
 
 					// We have returned to the start point, now we go forward -- GOAFR
 					if ((goafrh->periptip_[1] == mn_->address()) &&
 						(goafrh->periptip_[2] == ne->dst)) {
 
-					    fprintf(stderr, "Set advance\n");             
 						goafrh->mode_ = GOAFRH_DATA_ADVANCE; // put packet in advance mode
-        				fprintf(stderr, "advance mode said: %d %d\n", goafrh->mode_, GOAFRH_DATA_ADVANCE);
 						// Set the next hop
 						goafrh->nhops_ = 1;
 						goafrh->currhop_ = 1;
@@ -1715,55 +1709,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						drop(p, DROP_RTR_NO_ROUTE);
 						return;
 					}
-
-					/** face-change(p,t) */
-					if (ne->closer_pt(mn_->address(), myx, myy, myz,
-									  goafrh->peript_.x, goafrh->peript_.y,
-									  goafrh->periptip_[1], goafrh->periptip_[0],
-									  iph->dx_, iph->dy_, &closerx, &closery)) {
-						/* yes. choose a new next hop on the peri pierced by the line
-						   to the destination. */
-						/* several neighboring edges may be cut by line to destination;
-						   choose that cut at the point closest to destination */
-						int counter = 0;
-						while (ne->closer_pt(mn_->address(), myx, myy, myz,
-											 goafrh->peript_.x, goafrh->peript_.y,
-											 goafrh->periptip_[1], goafrh->periptip_[0],
-											 iph->dx_, iph->dy_, &closerx, &closery)) {
-							// fake that ingress edge was edge from ne
-							
-							
-							// re-use single-hop history
-							goafrh->hops_[goafrh->nhops_-1].ip = ne->dst;
-							goafrh->hops_[goafrh->nhops_-1].x = ne->x;
-							goafrh->hops_[goafrh->nhops_-1].y = ne->y;
-							goafrh->hops_[goafrh->nhops_-1].z = ne->z;
-							
-							// record closest point on edge to ne
-							goafrh->perips_.x = closerx;
-							goafrh->perips_.y = closery;
-							goafrh->perips_.z = 0.0;
-							
-							GOAFRNeighbEnt *ne_temp = ntab_->ent_findnext_onperi(mn_, ne->dst, ne->x, ne->y, ne->z, use_planar_);
-							if((ne_temp == NULL) || (ne_temp->dst == ne->dst))
-								break;
-							ne = ne_temp;
-							counter++;
-						}
-
-						// record edge endpt ips
-						goafrh->periptip_[0] = ne->dst; // prev hop
-						goafrh->periptip_[1] = mn_->address(); // self
-						goafrh->periptip_[2] = ne->dst; // next hop
-
-						// Changes to make GOAFR work correctly
-						cmh->next_hop_ = check_ellipse(p, mn_->address(), ne->dst);
-						if (cmh->next_hop_ == mn_->address()) {
-							// if we have to turn around, then the next node is this node again
-							goafrh->periptip_[2] = mn_->address();
-						}
-						goto finish_pkt;
-					} /* end if(ne->...) */
+					
 				} /*end of if(ne): incoming node isn't in the neighbor-table!!! */
 	    		  
 				// forward to next ccw neighbor from ingress edge
@@ -1866,8 +1812,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 	    break;
 		
 	case GOAFRH_DATA_ADVANCE:
-		
-		break;
+		//		fprintf(stderr, "advance\n");
 		// The node will now advance to the node that I found to be the closest to the sink
 
 		// first of all, look if we're neighbor to dst - just in case
@@ -1965,49 +1910,6 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						return;
 					}
 
-					/** face-change(p,t) */
-					if (ne->closer_pt(mn_->address(), myx, myy, myz,
-									  goafrh->peript_.x, goafrh->peript_.y,
-									  goafrh->periptip_[1], goafrh->periptip_[0],
-									  iph->dx_, iph->dy_, &closerx, &closery)) {
-						/* yes. choose a new next hop on the peri pierced by the line
-						   to the destination. */
-						/* several neighboring edges may be cut by line to destination;
-						   choose that cut at the point closest to destination */
-						int counter = 0;
-						while (ne->closer_pt(mn_->address(), myx, myy, myz,
-											 goafrh->peript_.x, goafrh->peript_.y,
-											 goafrh->periptip_[1], goafrh->periptip_[0],
-											 iph->dx_, iph->dy_, &closerx, &closery)) {
-							// fake that ingress edge was edge from ne
-							
-							
-							// re-use single-hop history
-							goafrh->hops_[goafrh->nhops_-1].ip = ne->dst;
-							goafrh->hops_[goafrh->nhops_-1].x = ne->x;
-							goafrh->hops_[goafrh->nhops_-1].y = ne->y;
-							goafrh->hops_[goafrh->nhops_-1].z = ne->z;
-							
-							// record closest point on edge to ne
-							goafrh->perips_.x = closerx;
-							goafrh->perips_.y = closery;
-							goafrh->perips_.z = 0.0;
-							
-							GOAFRNeighbEnt *ne_temp = ntab_->ent_findnext_onperi(mn_, ne->dst, ne->x, ne->y, ne->z, use_planar_);
-							if((ne_temp == NULL) || (ne_temp->dst == ne->dst))
-								break;
-							ne = ne_temp;
-							counter++;
-						}
-
-						// record edge endpt ips
-						goafrh->periptip_[0] = ne->dst; // prev hop
-						goafrh->periptip_[1] = mn_->address(); // self
-						goafrh->periptip_[2] = ne->dst; // next hop
-
-						cmh->next_hop_ = ne->dst;
-						goto finish_pkt;
-					} /* end if(ne->...) */
 				} /*end of if(ne): incoming node isn't in the neighbor-table!!! */
 	    		  
 				// forward to next ccw neighbor from ingress edge

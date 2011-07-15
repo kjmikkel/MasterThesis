@@ -2,8 +2,8 @@
 
 NS_ROOT="../../ns-allinone-2.33/ns-2.33/"
 
-cp Makefile.in $NS_ROOT"."
-cp Makefile $NS_ROOT"."
+#cp Makefile.in $NS_ROOT"."
+#cp Makefile $NS_ROOT"."
 
 #cp packet.h $NS_ROOT"common/"
 

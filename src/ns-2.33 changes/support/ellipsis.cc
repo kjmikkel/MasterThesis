@@ -9,13 +9,12 @@ Ellipsis::Ellipsis(Point point1, Point point2)
     p1 = point1;
     p2 = point2;
 
+    
     hit_edge_counter = 0;
-    fprintf(stderr, "before set major %f\n", p1.dist(p2));
-    major = 2 * p1.dist(p2);
-    fprintf(stderr, "after set major\n");
-    fprintf(stderr, "before set mionr\n");
+    major = 2.0 * p1.dist(p2);
+    
+    
     find_minor();
-    fprintf(stderr, "after set minor\n");
   }
 
 
@@ -42,10 +41,17 @@ void Ellipsis::find_minor() {
 bool Ellipsis::point_in_ellipsis(double x, double y) {
   Point p = Point(x, y);
 
-  double distance_to_p1 = p1.dist(p);
-  double distance_to_p2 = p2.dist(p);
+  double distance_to_p1 = fabs(p1.dist(p));
+ 
+  double distance_to_p2 = fabs(p2.dist(p));
+ 
+  if ((distance_to_p1 > major) || (distance_to_p2 > major))
+    return false;
+
+  if ((distance_to_p1 > (major / 2.0)) && (distance_to_p2 > (major / 2.0)))
+    return false;
 
   bool inside = (distance_to_p1 + distance_to_p2 < major);
-
+  
   return inside;
 }
