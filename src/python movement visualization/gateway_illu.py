@@ -27,7 +27,7 @@ def save_pickle_file(file_name, data):
   with open(file_name, mode='wb') as f:
     pickle.dump(data, f)
 
-def make_nodes(clasified_nodes, number_of_points, max_values):
+def make_nodes(clasified_nodes, number_of_points, max_x_values, max_y_values):
   # We must ensure that all points are uniqe
   used_points = {}
   data = []
@@ -40,8 +40,8 @@ def make_nodes(clasified_nodes, number_of_points, max_values):
 
     not_used = False
     while not not_used:
-      x = (random.randint(0, max_values) * 1.0) / 10.0
-      y = (random.randint(0, max_values) * 1.0) / 10.0
+      x = (random.randint(0, max_x_values) * 1.0) / 10.0
+      y = (random.randint(0, max_y_values) * 1.0) / 10.0
         
       if used_points.get((x, y)) == None:
         used_points[(x, y)] = 1
@@ -109,7 +109,7 @@ def find_node_and_gateway(D, node, node_set, node_gateway, unit_cutoff):
       node_gateway.append(node)
 
 
-def find_usefull_points(clasified_nodes, unit_cutoff):
+def find_usefull_points(clasified_nodes):
   graph = load_pickle_file(saved_graphs_name)
  
   node1 = clasified_nodes[0][0:2]
@@ -122,7 +122,14 @@ def find_usefull_points(clasified_nodes, unit_cutoff):
 
   nodes = graph.keys()
 
-  print 'Gateway distance: ' + str(D1[node2])
+  gateway_distance = D1[node2]
+  gateway_node1_distance = gateway_distance / 2
+  gateway_node2_distance = gateway_distance / 2  
+
+  if gateway_distance % 2 == 1:
+    gateway_node2_distance += 1 
+
+  print 'Gateway distance: ' + str(gateway_node1_distance) + ', ' + str(gateway_node2_distance)
   
   # Nodes there are less than the cutoff away from one of the nodes
   node1_set = []
@@ -136,8 +143,8 @@ def find_usefull_points(clasified_nodes, unit_cutoff):
     if node in (node1, node2):
       continue
 
-    find_node_and_gateway(D1, node, node1_set, node1_gateways, unit_cutoff)
-    find_node_and_gateway(D2, node, node2_set, node2_gateways, unit_cutoff)
+    find_node_and_gateway(D1, node, node1_set, node1_gateways, gateway_node1_distance)
+    find_node_and_gateway(D2, node, node2_set, node2_gateways, gateway_node2_distance)
 
 #  print node1_gateway, node2_gateway
 
@@ -287,17 +294,20 @@ def make_latex(clasified_nodes, cutoff):
 
   
 
-def gateway_suite(number_points, max_value, cutoff, unit_cutoff, state):
+def gateway_suite(number_points, max_x_value, max_y_value, cutoff, state):
   if state <= 0:
-    make_nodes(source_sink, number_points, max_value)
+    make_nodes(source_sink, number_points, max_x_value, max_y_value)
+    print 'Made points'
 
   if state <= 1:
     make_gateway_graph(source_sink, cutoff)
-
-  if state <= 2:
-    find_usefull_points(source_sink, unit_cutoff)
+    print 'Made graphs'
   
+  if state <= 2:
+    find_usefull_points(source_sink)
+    print 'found usefull points'
+
   if state <= 3:
     make_latex(source_sink, cutoff)
 
-gateway_suite(200, 150, 1.5, 3, 3)
+gateway_suite(200, 60, 60, 1.5, 1)

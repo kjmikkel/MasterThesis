@@ -57,7 +57,8 @@ def tikz_graph(graph, edge_list, point_to_name):
     y = str(point[1] / modifier)
     name = point_to_name[point]
     s += '{(' + x + ', ' + y + ')' + '/' + name + '}'
-  s += '}{\n\t\\node[vertex] (\\name) at \\pos {};\n'
+  s += '}{\n\t\\node[invis]  (\\name) at \\pos {};\n' 
+  s += '\t\\node[vertex] () at \\pos {};\n'
 # s += '\t\draw[outline] {\\pos circle (' + str(cutoff_distance / modifier) +  ')} node {};\n
   s += '}' 
     
@@ -212,6 +213,39 @@ def make_and_print_graphs(point_list, name, cutoff_distance):
   mst_name = 'svg/MST-' + name
   svg_graph(mst_name, mst, mst_edge_list, max_x, max_y, min_x, min_y) 
 
+def simple_print_graph(name, point_list, graph): 
+  neighbour_dict = {}
+
+  min_x = sys.float_info.max
+  min_y = sys.float_info.max
+
+  max_x = sys.float_info.min
+  max_y = sys.float_info.min
+    
+  point_index_outer = 0
+  point_index_inner = 0
+
+  # make directory to turn point into name
+  point_to_name = {}
+  only_points = []
+  for entry in point_list:
+    point_to_name[entry[1]] = entry[0]
+    only_points.append(entry[1])
+     
+  start = open('graph-basis.tex', 'r')
+  begin = start.read()
+  start.close()
+
+  edge_list = make_edge_list(graph)
+
+  str_graph = tikz_graph(graph, edge_list, point_to_name)
+
+  begin += str_graph + '\n'
+
+  save = open('tex/' + name + '.tex', 'w')
+  save.write(begin)
+  save.flush()
+  save.close()
 
 def make_graph_from_list(str_list, name, cutoff_distance):
   point_list = []
