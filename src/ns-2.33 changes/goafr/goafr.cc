@@ -535,8 +535,10 @@ GOAFRNeighbTable::ent_add(const GOAFRNeighbEnt *ent)
 	if (i <= (nents - 1))
 		owslot = tab[nents];
 	j = nents-1;
-	while (j >= i)
-		tab[j+1] = tab[j--];
+	while (j >= i) {
+		tab[j+1] = tab[j- 1];
+		j--;
+	}
 	// slam into table, without overwriting timers
 	if (i <= (nents - 1))
 		tab[i] = owslot;
@@ -787,7 +789,7 @@ GOAFR_Agent::tracepkt(Packet *p, double now, int me, const char *type)
 		snprintf (buf, 1024, "%s (%f,%f,%f)", buf, goafrh->hops_[0].x,
 				  goafrh->hops_[0].y, goafrh->hops_[0].z);
 		if (verbose_)
-			trace("%s", buf);
+			trace((char*)"%s", buf);
 	}
 }
 
@@ -877,10 +879,9 @@ GOAFR_Agent::tap(const Packet *p)
     // Each DATA arrival has to trigger a connectivity
     // trace for evaluation
 	struct hdr_ip *iph = HDR_IP(p);
-	bool arrival = ( ((goafrh->mode_ == GOAFRH_DATA_GREEDY) ||
-					  (goafrh->mode_ == GOAFRH_DATA_PERI) 
-||
-					  (goafrh->mode_ == GOAFRH_DATA_ADVANCE) &&
+	bool arrival = ( (((goafrh->mode_ == GOAFRH_DATA_GREEDY) ||
+					  (goafrh->mode_ == GOAFRH_DATA_PERI) ||
+					  (goafrh->mode_ == GOAFRH_DATA_ADVANCE)) &&
 					  (goafrh->port_ == hdr_goafr::GOAFR)) &&
 					 (iph->daddr() == addr()) );
     if (arrival) {
@@ -921,7 +922,7 @@ GOAFR_Agent::lost_link(Packet *p)
 		return;
     }
 
-    trace ("VLL %.8f _%d_ %d (%d->%d->%d) [%d]",
+    trace ((char*)"VLL %.8f _%d_ %d (%d->%d->%d) [%d]",
 		   Scheduler::instance().clock(),
 		   mn_->address(),
 		   hdrc->uid(),
@@ -933,7 +934,7 @@ GOAFR_Agent::lost_link(Packet *p)
     if (hdrc->addr_type_ == NS_AF_INET) {
 		ne = ntab_->ent_finddst(hdrc->next_hop_);
 		if (verbose_)
-			trace ("VLP %.5f %d:%d->%d:%d lost at %d [hop %d]",
+			trace ((char*)"VLP %.5f %d:%d->%d:%d lost at %d [hop %d]",
 				   Scheduler::instance().clock(),
 				   HDR_IP(p)->saddr(),
 				   HDR_IP(p)->sport(),
@@ -999,13 +1000,13 @@ GOAFR_Agent::lost_link(Packet *p)
 #if 0     
     }else {
 		// ifq_ invalid;
-		trace ("VLLIV %.5f _%d_", 
+		trace ((char*)"VLLIV %.5f _%d_", 
 			   Scheduler::instance().clock(),
 			   mn_->address());
     }
 #endif
     if (verbose_)
-		trace ("VLLPC %.5f _%d_ %d", 
+		trace ((char*)"VLLPC %.5f _%d_ %d", 
 			   Scheduler::instance().clock(),
 			   mn_->address(),
 			   pCount);
@@ -1019,7 +1020,7 @@ GOAFR_Agent::lost_link(Packet *p)
 
 		if (verbose_) {
 			struct hdr_ip* iphdr = HDR_IP(rt);
-			trace("VLLR: %.8f _%d_ %d (%d->%d->%d) [%d]",
+			trace((char*)"VLLR: %.8f _%d_ %d (%d->%d->%d) [%d]",
 				  Scheduler::instance().clock(),
 				  mn_->address(),
 				  hdrc->uid(),
@@ -1155,7 +1156,7 @@ GOAFR_Agent::deadneighb_callback(GOAFRNeighbEnt *ne)
 	double now = s.clock ();
 
 	if (verbose_)
-		trace ("VTO %.5f _%d_ %d->%d", now, mn_->address(), mn_->address(),
+		trace ((char*)"VTO %.5f _%d_ %d->%d", now, mn_->address(), mn_->address(),
 			   ne->dst);
 	// remove the neighbor entry from the table!
 	ntab_->ent_delete(ne);
@@ -1343,7 +1344,6 @@ GOAFR_Agent::periIn(Packet *p, hdr_goafr *goafrh, int rtxflag /*= 0*/)
 #ifndef KARP_PERI
 	while ((ne = ntab_->ent_next_ccw(mn_, ne, use_planar_)) != inne) {
 #else
-		double fromx, fromy, fromz;
 	while((ne = ntab_->ent_findnext_onperi(mn_, goafrh->hops_[0].ip,
 										   goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z,
 										   use_planar_)) != inne){
@@ -1458,7 +1458,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			// arrives here, a possible ping-pong will be detected (ne->dst == 0 and ..hops[0]
 			// is initialized with 0)
 			if (ne->dst == goafrh->hops_[0].ip)			
-					trace("VPPP %f _%d_ %d [%d -> %d]", now, mn_->address(), cmh->uid(), mn_->address(), ne->dst);
+				trace((char*)"VPPP %f _%d_ %d [%d -> %d]", now, mn_->address(), cmh->uid(), mn_->address(), ne->dst);
 
 			// set next hop to best neighbor, given that we are still in greedy mode, we cannot go outside the ellipsis (or really, it doesen't matter if we do) 
 			cmh->next_hop_ = ne->dst;
@@ -1495,7 +1495,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				if (verbose_) {
 					double myx, myy, myz;
 					mn_->getLoc(&myx, &myy, &myz);
-					trace("VEPM %f _%d_ [%d -> %d] [%.2f/%.2f]",
+					trace((char*)"VEPM %f _%d_ [%d -> %d] [%.2f/%.2f]",
 						  now, mn_->address(), iph->saddr(), iph->daddr(),
 						  myx, myy);
 				}
@@ -1523,7 +1523,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					goafrh->mode_ = GOAFRH_DATA_PERI;
 					cmh->size() += hdr_size(p); // add peri header
 
-					trace("Start Peri from node %d", mn_->address());
+					trace((char*)"Start Peri from node %d", mn_->address());
 
 					// mark point of entry into peri data mode
 					double myx, myy, myz;
@@ -1534,6 +1534,14 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					goafrh->perips_.x = myx;
 					goafrh->perips_.y = myy;
 					goafrh->perips_.z = myz;
+
+
+					// We make a note of the point we are starting from
+					goafrh->peript_.ip = mn_->address();
+					goafrh->peript_.x = myx;
+					goafrh->peript_.y = myy;
+					goafrh->peript_.z = myz;
+
 					// Make it understand we are just starting out
 					p->greedy_start = true;
 
@@ -1593,9 +1601,9 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 							GOAFRNeighbTableIter ni;
 							ni = ntab_->InitLoop();
 							while ((logne = ntab_->NextLoop(&ni))) {
-								trace("VPER _%d_ (%.5f, %.5f):", logne->dst, logne->x, logne->y);
+								trace((char*)"VPER _%d_ (%.5f, %.5f):", logne->dst, logne->x, logne->y);
 								for (int j = 0; j < logne->perilen; j++) {
-									trace("VPER\t\t_%d_ (%.5f, %.5f)",
+									trace((char*)"VPER\t\t_%d_ (%.5f, %.5f)",
 										  logne->peri[j].ip, logne->peri[j].x, logne->peri[j].y);
 								}
 							}
@@ -1623,7 +1631,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						goafrh->currhop_ = 1;
 						goafrh->hops_[1].ip = ne->dst;
 						cmh->next_hop_ = goafrh->hops_[1].ip;
-						trace("VSM->P %f _%d_ [%d -> %d]", now, mn_->address(), iph->saddr(), iph->daddr());
+						trace((char*)"VSM->P %f _%d_ [%d -> %d]", now, mn_->address(), iph->saddr(), iph->daddr());
 						break;
 					}
 				} // if(peri_proact)
@@ -1669,7 +1677,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
 			cmh->size() -= hdr_size(p); // strip data peri header
 			goafrh->mode_ = GOAFRH_DATA_GREEDY;
-			trace("Back to Greedy\n");
+			trace((char*)"Back to Greedy\n");
 			cmh->size() += hdr_size(p); // strip data goafr header
 			goafrh->nhops_ = 1;
 			goafrh->currhop_ = 1;
@@ -1695,7 +1703,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 		
 			// We record when we arrive at a node that is closer to the destination than the current best
 			if (new_distance < old_distance) {	
-				trace("Change best point from %d, %3.f to %d %3.f\n", goafrh->perips_.ip, old_distance, mn_->address(), new_distance);
+				trace((char*)"Change best point from %d, %3.f to %d %3.f\n", goafrh->perips_.ip, old_distance, mn_->address(), new_distance);
 				goafrh->perips_.ip = mn_->address();
 				goafrh->perips_.x = myx;
 				goafrh->perips_.y = myy;
@@ -1707,7 +1715,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				/* don't choose *any* edge--only consider edges on the
 				   face we're forwarding on at the moment. */
 				for(int i=0; i<goafrh->nhops_; i++)
-					trace("Vne %.8f _%d_ <- %d", CURRTIME, mn_->address(), goafrh->hops_[i].ip);
+					trace((char*)"Vne %.8f _%d_ <- %d", CURRTIME, mn_->address(), goafrh->hops_[i].ip);
 
 				ne = ntab_->ent_finddst(goafrh->hops_[goafrh->nhops_-1].ip);
 				if(ne){
@@ -1717,13 +1725,14 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
                                                     goafrh->hops_[0].x, goafrh->hops_[0].y, goafrh->hops_[0].z,
 													use_planar_);
 
+					// At this point we have to check whether we have returend to the point where we entered the periferiy search
+					mn_->getLoc(&fromx, &fromy, &fromz);					
+					double distance_to_point = distance(fromx, fromy, fromz, goafrh->peript_.x, goafrh->peript_.y,  goafrh->peript_.z); 
 
-					mn_->getLoc(&fromx, &fromy, &fromz);
-					double distance_to_point = distance(fromx, fromy, fromz, goafrh->perips_.x, goafrh->perips_.y,  goafrh->perips_.z); 
-					if (p->greedy_start && (goafrh->perips_.ip == mn_->address() || distance_to_point < 2) && !p->reversed()) {
+					if (!p->greedy_start && (goafrh->peript_.ip == mn_->address() || distance_to_point < 2) && !p->reversed()) {
 						// We have returned to the start point, and we have not reversed our direction, we then go forward -- GOAFR
 
-						trace("Start the advance from %d to %d.", mn_->address(), goafrh->perips_.ip);
+						trace((char*)"Start the advance from %d to %d.", mn_->address(), goafrh->perips_.ip);
 						goafrh->mode_ = GOAFRH_DATA_ADVANCE; // put packet in advance mode
 						// Set the next hop
 						goafrh->nhops_ = 1;
@@ -1733,7 +1742,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						break; // get out of this and forward the node
 						
 					}
-					p->greedy_start = true;
+					p->greedy_start = false;
 			
 					// possible error
 					// does the candidate next edge have a closer pt?
@@ -1770,7 +1779,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 							if (p==NULL) { return; }
 						}
 					// a drop due to MAC_CALLBACK. For the moment,don't inform it
-					trace("VneNULL %.8f _%d_ <- %d", CURRTIME, mn_->address(), goafrh->hops_[goafrh->nhops_-1].ip);
+					trace((char*)"VneNULL %.8f _%d_ <- %d", CURRTIME, mn_->address(), goafrh->hops_[goafrh->nhops_-1].ip);
 					drop(p, DROP_RTR_MAC_CALLBACK);
 					return;
 				}
@@ -1802,7 +1811,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						ntab_->counter_clock = true; // next peri -> route counterclockwise
 						cmh->size() -= hdr_size(p); // strip data peri header
 						goafrh->mode_ = GOAFRH_DATA_GREEDY;
-						trace("Back to Greedy\n");
+						trace((char*)"Back to Greedy\n");
 						cmh->size() += hdr_size(p); // strip data goafr header
 						goafrh->currhop_ = 0;
 						goafrh->nhops_ = 0;
@@ -1861,10 +1870,10 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 
 		// first of all, look if we're neighbor to dst - just in case
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
-			trace("Advanced to _%d_", goafrh->perips_.ip);
+			trace((char*)"Advanced to _%d_", goafrh->perips_.ip);
 			cmh->size() -= hdr_size(p); // strip data peri header
 			goafrh->mode_ = GOAFRH_DATA_GREEDY;
-			trace("Back to Greedy\n");
+			trace((char*)"Back to Greedy\n");
 			cmh->size() += hdr_size(p); // strip data goafr header
 			goafrh->nhops_ = 1;
 			goafrh->currhop_ = 1;
@@ -1881,16 +1890,16 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 			the point where the packet entered peri mode. */ 
 			double myx, myy, myz;
 		    mn_->getLoc(&myx, &myy, &myz);
+			double pt_distance = distance(goafrh->perips_.x, goafrh->perips_.y, goafrh->perips_.z,
+									   myx              , myy              , myz              );
 
 			// Cutoff function, when arrive at the closest node, so we go back to business as usual
-			if (mn_->address() == goafrh->perips_.ip || (
-                distance(goafrh->perips_.x, goafrh->perips_.y, goafrh->perips_.z,
-                         myx              , myy              , myz              ) < 5)) {
-				trace("Advanced to _%d_", goafrh->perips_.ip);
+			if (mn_->address() == goafrh->perips_.ip || pt_distance < 5) {
+				trace((char*)"Advanced to _%d_", goafrh->perips_.ip);
 				cmh->size() -= hdr_size(p); // strip data peri header
 				goafrh->mode_ = GOAFRH_DATA_GREEDY;
 				cmh->size() += hdr_size(p); // add data goafr header
-				trace("Back to Greedy\n");
+				trace((char*)"Back to Greedy\n");
 
 				/*
 				 always add back (- - is +) 12 bytes: if use_implicit_beacon_,
@@ -1902,7 +1911,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				goafrh->nhops_ = 0;
 				
 				// recursive, but must call target_->recv in callee frame
-				trace("VSM->G %f _%d_ [%d -> %d]", now, mn_->address(), iph->saddr(), iph->daddr());
+				trace((char*)"VSM->G %f _%d_ [%d -> %d]", now, mn_->address(), iph->saddr(), iph->daddr());
 		
 				forwardPacket(p);
 				return;
@@ -1914,7 +1923,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				   face we're forwarding on at the moment. */
 		
 		        for(int i=0; i<goafrh->nhops_; i++)
-					trace("Vne %.8f _%d_ <- %d", CURRTIME, mn_->address(), goafrh->hops_[i].ip);
+					trace((char*)"Vne %.8f _%d_ <- %d", CURRTIME, mn_->address(), goafrh->hops_[i].ip);
 
 				ne = ntab_->ent_finddst(goafrh->hops_[goafrh->nhops_-1].ip);
 				if(ne){
@@ -1925,7 +1934,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						are about to revisit the first edge we took on it */
 					// If we arrive here, then something has gone wrong, and we drop the message 
 					// Ensure that this does not happen the instant we begin routing
-		
+					/*
          			if ((goafrh->periptip_[1] == mn_->address()) &&
 						(goafrh->periptip_[2] == ne->dst)) {
 
@@ -1942,7 +1951,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						drop(p, DROP_RTR_NO_ROUTE);
 						return;
 					}
-			
+					*/
 					// does the candidate next edge have a closer pt?
 					if (!ne) {
 						// no face toward the destination
@@ -1952,7 +1961,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 								locservice_->dropPacketCallback(p);
 								if (p==NULL) { return; }
 							}
-						trace("Advance drop at node %d, best node is %d", mn_->address(), goafrh->perips_.ip);
+						trace((char*)"Advance drop at node %d, best node is %d", mn_->address(), goafrh->perips_.ip);
 
 						drop(p, DROP_RTR_NO_ROUTE);
 						return;
@@ -1978,7 +1987,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 							if (p==NULL) { return; }
 						}
 					// a drop due to MAC_CALLBACK. For the moment,don't inform it
-					trace("VneNULL %.8f _%d_ <- %d", CURRTIME, mn_->address(), goafrh->hops_[goafrh->nhops_-1].ip);
+					trace((char*)"VneNULL %.8f _%d_ <- %d", CURRTIME, mn_->address(), goafrh->hops_[goafrh->nhops_-1].ip);
 					drop(p, DROP_RTR_MAC_CALLBACK);
 					return;
 				}
@@ -2004,13 +2013,13 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 							 myx              , myy              , myz              ) < 5) {
 					// am I the final waypoint?
 					if (goafrh->currhop_ == (goafrh->nhops_-1)) {
-						trace("Advanced to _%d_", goafrh->perips_.ip);
+						trace((char*)"Advanced to _%d_", goafrh->perips_.ip);
 						// yes! return packet to greedy mode
 						ntab_->counter_clock = true; // next peri -> route counterclockwise
 						cmh->size() -= hdr_size(p); // strip data peri header
 						goafrh->mode_ = GOAFRH_DATA_GREEDY;
 						cmh->size() += hdr_size(p); // strip data goafr header
-						trace("Back to Greedy\n");
+						trace((char*)"Back to Greedy\n");
 
 						goafrh->currhop_ = 0;
 						goafrh->nhops_ = 0;
@@ -2099,7 +2108,7 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 		goafrh->load = getLoad();
 
     if (verbose_)
-		trace ("VFP %.5f _%d -> %d_ %d:%d -> %d:%d", now, mn_->address(),
+		trace ((char*)"VFP %.5f _%d -> %d_ %d:%d -> %d:%d", now, mn_->address(),
 			   ne->dst,
 			   Address::instance().get_nodeaddr(iph->saddr()),
 			   iph->sport(),
@@ -2305,7 +2314,7 @@ GOAFR_Agent::command(int argc, const char *const *argv) {
 			double srcPosX, srcPosY, srcPosZ, dstPosX, dstPosY, dstPosZ;
 			God::instance()->getPosition(addr(), &srcPosX, &srcPosY, &srcPosZ);
 			God::instance()->getPosition(dst, &dstPosX, &dstPosY, &dstPosZ);			
-			trace("TESTQ %.12f %d (%.2f %.2f) %d (%.2f %.2f)", 
+			trace((char*)"TESTQ %.12f %d (%.2f %.2f) %d (%.2f %.2f)", 
 				  Scheduler::instance().clock(), // timestamp
 				  addr(), // source of the query
 				  srcPosX,// source position x
@@ -2369,7 +2378,7 @@ GOAFR_Agent::init(void) {
     if (active_) {
 		God::instance()->signOn(addr());
 #ifdef GOAFR_TRACE_WAKESLEEP
-		trace("VGI: %f %d", Scheduler::instance().clock(), mn_->address());
+		trace((char*)"VGI: %f %d", Scheduler::instance().clock(), mn_->address());
 #endif
 
 		if ((use_beacon_)&&(!use_reactive_beacon_)) {
@@ -2397,7 +2406,7 @@ GOAFR_Agent::sleep() {
     if (ifq_) { ((PriQueue *)ifq_)->clear(); }
     
 #ifdef GOAFR_TRACE_WAKESLEEP
-    trace("VGSLEEP %f _%d_ ", Scheduler::instance().clock(), mn_->address());
+    trace((char*)"VGSLEEP %f _%d_ ", Scheduler::instance().clock(), mn_->address());
 #endif
 
     // Stop SendPermissions
@@ -2482,7 +2491,7 @@ GOAFR_Agent::beacon_proc(int src, double x, double y, double z, int load)
 
 	ne = ntab_->ent_add(&nne);
 
-	if (false) { trace("VBP %f _%d_ [%d/%.2f/%.2f]", now, mn_->address(), src, x, y); }
+	if (false) { trace((char*)"VBP %f _%d_ [%d/%.2f/%.2f]", now, mn_->address(), src, x, y); }
 	{
 		// entry wasn't in table before. need to planarize, if option dictates.
 		ne->live = 1;
@@ -2675,7 +2684,7 @@ GOAFR_Agent::notifyPos(nsaddr_t id)
 					double dstx, dsty, dstz;
 					God::instance()->getPosition(iph->daddr(), &dstx, &dsty, &dstz);
 		    
-					trace("SB %.5f _%d_ %d unusual send [%d %.4f %.2f %.2f] (%.2f %.2f)", 
+					trace((char*)"SB %.5f _%d_ %d unusual send [%d %.4f %.2f %.2f] (%.2f %.2f)", 
 						  Scheduler::instance().clock(), 
 						  mn_->address(),
 						  cmnh->uid(),
@@ -2700,7 +2709,7 @@ GOAFR_Agent::stickPacketInSendBuffer(Packet *p)
 	struct hdr_ip *iph = HDR_IP(p); 
 
 	if (verbose_)
-		trace("SB %.5f _%d_ stuck into send buff %d -> %d", 
+		trace((char*)"SB %.5f _%d_ stuck into send buff %d -> %d", 
 			  Scheduler::instance().clock(), 
 			  mn_->address(), 
 			  iph->saddr(),
@@ -2718,7 +2727,7 @@ GOAFR_Agent::stickPacketInSendBuffer(Packet *p)
   
 	// kill somebody
 	if (verbose_) 
-		trace("SB %.5f _%d_ dropped %d -> %d", 
+		trace((char*)"SB %.5f _%d_ dropped %d -> %d", 
 			  Scheduler::instance().clock(), 
 			  mn_->address(), 
 			  iph->saddr(), 
@@ -2735,7 +2744,7 @@ GOAFR_Agent::dropSendBuff(Packet *&p, const char* reason)
     struct hdr_ip *iph = HDR_IP(p);
 
     if (verbose_) 
-		trace("SB %.5f _%d_ dropped %d -> %d for %s", 
+		trace((char*)"SB %.5f _%d_ dropped %d -> %d for %s", 
 			  Scheduler::instance().clock(), 
 			  mn_->address(),  
 			  iph->saddr(), 
