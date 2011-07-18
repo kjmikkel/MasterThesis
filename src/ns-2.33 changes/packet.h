@@ -490,6 +490,9 @@ private:
 	AppData* data_;		// variable size buffer for 'data'
 	static void init(Packet*);     // initialize pkt hdr 
 	bool fflag_;
+	// Added to support GOAFR
+	bool reversed_direction;  // Not to be confused with counter clockwise
+	// End of added to support for GOAFR
 protected:
 	static Packet* free_;	// packet free list
 	int	ref_count_;	// free the pkt until count to 0
@@ -497,10 +500,12 @@ public:
 	Packet* next_;		// for queues and the free list
 	static int hdrlen_;
 
-	// The ellipsis that the packet has to keep inside
-        Ellipsis* ellipse_;      
+	// Support added to GOAFR
+        Ellipsis* ellipse_; 	// The ellipsis that the packet has to keep inside
+	bool greedy_start;
+	// End support added to GOAFR
 
-	Packet() : bits_(0), data_(0), ref_count_(0), next_(0), ellipse_(0) { }
+	Packet() : bits_(0), data_(0), ref_count_(0), next_(0), ellipse_(0), reversed_direction(0), greedy_start(0) { }
 	inline unsigned char* const bits() { return (bits_); }
 	inline Packet* copy() const;
 	inline Packet* refcopy() { ++ref_count_; return this; }
@@ -536,6 +541,14 @@ public:
 	}
 	inline int datalen() const { return data_ ? data_->size() : 0; }
 
+	inline void reverse_direction() {
+		reversed_direction = !reversed_direction;
+	}
+
+	inline bool reversed() {
+		return reversed_direction;
+	}
+
 	// Monarch extn
 
 	static void dump_header(Packet *p, int offset, int length);
@@ -566,7 +579,7 @@ class iface_literal {
 public:
 	enum iface_constant { 
 		UNKN_IFACE= -1, /* 
-				 * iface value for locally originated packets 
+				 * iface value fo½r locally originated packets 
 				 */
 		ANY_IFACE= -2   /* 
 				 * hashnode with iif == ANY_IFACE_   
@@ -780,10 +793,11 @@ inline Packet* Packet::copy() const
 		p->data_ = data_->copy();
 	p->txinfo_.init(&txinfo_);
         
-        // Added to support ellispses
+        // Added to support GOAFR
         if (ellipse_ != NULL) {
 		p->ellipse_ = ellipse_->copy();
 	}
+	// End added to support GOAFR
  
 	return (p);
 }

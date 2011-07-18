@@ -11,14 +11,20 @@ cp -rf goafr_test $NS_ROOT
 cd $NS_ROOT"goafr_test/"
 
 ../ns goafr_test_00.tcl
+#../ns gpsr_test_00.tcl
 cp goafr_test_00.tr "$SRC_FOLDER""goafr_test/."
+cp gpsr_test_00.tr "$SRC_FOLDER""goafr_test/."
+
 cp goafr_test_00.tr "$VISULIZE""."
+cp gpsr_test_00.tr "$VISULIZE""."
+
 cp goafr_00.nam "$SRC_FOLDER""goafr_test/."
+cp gpsr_00.nam "$SRC_FOLDER""goafr_test/."
 
 cd "$VISULIZE"
-cd ..
+perl evaluate.pl -f goafr_test_00.tr
 
-python trace_analysis.py
+#python trace_analysis.py
 
 #cd tex
 #pdflatex tex_test.tex
