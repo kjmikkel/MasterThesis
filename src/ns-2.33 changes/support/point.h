@@ -1,15 +1,12 @@
-#ifndef POINT_H
-#define POINT_H
-
-#include <iostream>
-#include <math.h>
-
-using namespace std;
+#ifndef ns_point_h
+#define ns_point_h
 
 // Class to represent points.
 class Point {
 private:
         double xval, yval;
+	
+	bool check_limit(double test_value);
 public:
         // Constructor uses default arguments to allow calling with zero, one,
         // or two values.

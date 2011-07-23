@@ -1,7 +1,7 @@
 #include "hls_basic.h"
 #include "../gpsr/gpsr.h"
 #include "../greedy/greedy.h"
-#include "../gopher/gopher.h"
+#include "../goafr/goafr.h"
 
 // Header ////////////////////////////////////////////////
  
@@ -84,7 +84,7 @@ Packet* RequestProcessor::newReply(Packet* req, struct nodeposition* infosrc) {
     // The new routing
     struct hdr_gpsr *gpsrh = HDR_GPSR(pkt);
     struct hdr_greedy *greedyh = HDR_GREEDY(pkt);
-    struct hdr_gopher *gopherh = HDR_GOPHER(pkt);
+    struct hdr_goafr *goafrh = HDR_GOAFR(pkt);
 
     hlsh->init();
     hlsh->type_ = HLS_REPLY;
@@ -129,9 +129,9 @@ Packet* RequestProcessor::newReply(Packet* req, struct nodeposition* infosrc) {
     greedyh->port_ = hdr_greedy::LOCS;
     greedyh->geoanycast = false;
 
-    gopherh->mode_ = GOPHERH_DATA_GREEDY;
-    gopherh->port_ = hdr_gopher::LOCS;
-    gopherh->geoanycast = false;
+    goafrh->mode_ = GOAFRH_DATA_GREEDY;
+    goafrh->port_ = hdr_goafr::LOCS;
+    goafrh->geoanycast = false;
     
     return pkt;
 } // end of RequestProcessor::newReply(...)
@@ -153,7 +153,7 @@ void RequestProcessor::sendCellcastReply(const Packet* req,
     struct hdr_cmn *cmnh = HDR_CMN(pkt);
     struct hdr_gpsr *gpsrh = HDR_GPSR(pkt);
     struct hdr_greedy *greedyh = HDR_GREEDY(pkt);
-    struct hdr_gopher *gopherh = HDR_GOPHER(pkt);
+    struct hdr_goafr *goafrh = HDR_GOAFR(pkt);
 
     hlsh->init();
     hlsh->type_ = HLS_CELLCAST_REPLY;
@@ -204,9 +204,9 @@ void RequestProcessor::sendCellcastReply(const Packet* req,
     greedyh->port_ = hdr_greedy::LOCS;
     greedyh->geoanycast = false;
 
-    gopherh->mode_ = GOPHERH_DATA_GREEDY;
-    gopherh->port_ = hdr_gopher::LOCS;
-    gopherh->geoanycast = false;
+    goafrh->mode_ = GOAFRH_DATA_GREEDY;
+    goafrh->port_ = hdr_goafr::LOCS;
+    goafrh->geoanycast = false;
     
     if(hls_verbose)
       {
@@ -374,7 +374,7 @@ nodeposition BasicUpdateSender::sendUpdatePacketToCell(int cellid, int level)
   struct hdr_cmn *cmnh = HDR_CMN(pkt);
   struct hdr_gpsr *gpsrh = HDR_GPSR(pkt);
   struct hdr_greedy *greedyh = HDR_GREEDY(pkt);
-  struct hdr_gopher *gopherh = HDR_GOPHER(pkt);
+  struct hdr_goafr *goafrh = HDR_GOAFR(pkt);
   struct hdr_hls *hlsh = HDR_HLS(pkt);
 
   
@@ -406,9 +406,9 @@ nodeposition BasicUpdateSender::sendUpdatePacketToCell(int cellid, int level)
   greedyh->port_ = hdr_greedy::LOCS;
   greedyh->geoanycast = true;
 
-  gopherh->mode_ = GOPHERH_DATA_GREEDY;
-  gopherh->port_ = hdr_gopher::LOCS;
-  gopherh->geoanycast = true;
+  goafrh->mode_ = GOAFRH_DATA_GREEDY;
+  goafrh->port_ = hdr_goafr::LOCS;
+  goafrh->geoanycast = true;
 
   // init my own header
   hlsh->init();
@@ -775,7 +775,7 @@ void BasicRequestProcessor::sendCellcastRequest(int nodeid, request_id reqid,
   struct hdr_cmn *cmnh = HDR_CMN(p);
   struct hdr_gpsr *gpsrh = HDR_GPSR(p);
   struct hdr_greedy *greedyh = HDR_GREEDY(p);
-  struct hdr_gopher *gopherh = HDR_GOPHER(p);
+  struct hdr_goafr *goafrh = HDR_GOAFR(p);
 
   gpsrh->mode_ = GPSRH_DATA_GREEDY;
   gpsrh->port_ = hdr_gpsr::LOCS;
@@ -787,10 +787,10 @@ void BasicRequestProcessor::sendCellcastRequest(int nodeid, request_id reqid,
   greedyh->geoanycast = true;
   greedyh->nhops_ = 1;
 
-  gopherh->mode_ = GOPHERH_DATA_GREEDY;
-  gopherh->port_ = hdr_gopher::LOCS;
-  gopherh->geoanycast = true;
-  gopherh->nhops_ = 1;
+  goafrh->mode_ = GOAFRH_DATA_GREEDY;
+  goafrh->port_ = hdr_goafr::LOCS;
+  goafrh->geoanycast = true;
+  goafrh->nhops_ = 1;
 
 
   hls_->mn_->getLoc(&gpsrh->hops_[0].x, 
@@ -1179,7 +1179,7 @@ void BasicRequestProcessor::sendCirclecastRequest(int nodeid, request_id reqID,
   struct hdr_cmn *cmnh = HDR_CMN(p);
   struct hdr_gpsr *gpsrh = HDR_GPSR(p);
   struct hdr_greedy *greedyh = HDR_GREEDY(p);
-  struct hdr_gopher *gopherh = HDR_GOPHER(p);
+  struct hdr_goafr *goafrh = HDR_GOAFR(p);
  
   iph->sport() = RT_PORT;
   iph->dport() = RT_PORT;
@@ -1230,9 +1230,9 @@ void BasicRequestProcessor::sendCirclecastRequest(int nodeid, request_id reqID,
   greedyh->port_ = hdr_greedy::LOCS;
   greedyh->geoanycast = true;
 
-  gopherh->mode_ = GOPHERH_DATA_GREEDY;
-  gopherh->port_ = hdr_gopher::LOCS;
-  gopherh->geoanycast = true;
+  goafrh->mode_ = GOAFRH_DATA_GREEDY;
+  goafrh->port_ = hdr_goafr::LOCS;
+  goafrh->geoanycast = true;
 
   // out node is the source of the packet
   nodeposition tmpPos = hls_->getNodeInfo();
@@ -1436,7 +1436,7 @@ void BasicRequestProcessor::processRequestUnreachableCell(Packet* &p_old)
   struct hdr_cmn *cmnh = HDR_CMN(p_next_level);
   struct hdr_gpsr *gpsrh = HDR_GPSR(p_next_level);
   struct hdr_greedy *greedyh = HDR_GREEDY(p_next_level);
-  struct hdr_gopher *gopherh = HDR_GOPHER(p_next_level);
+  struct hdr_goafr *goafrh = HDR_GOAFR(p_next_level);
  
   iph->sport() = RT_PORT;
   iph->dport() = RT_PORT;
@@ -1485,9 +1485,9 @@ void BasicRequestProcessor::processRequestUnreachableCell(Packet* &p_old)
   greedyh->port_ = hdr_greedy::LOCS;
   greedyh->geoanycast = true;
 
-  gopherh->mode_ = GOPHERH_DATA_GREEDY;
-  gopherh->port_ = hdr_gopher::LOCS;
-  gopherh->geoanycast = true;
+  goafrh->mode_ = GOAFRH_DATA_GREEDY;
+  goafrh->port_ = hdr_goafr::LOCS;
+  goafrh->geoanycast = true;
 
   // put the info from the old packet in the new one
   hlsh->src.copyFrom(&hlsh_old->src);
@@ -1765,7 +1765,7 @@ void BasicHandoverManager::handoverInformation(nodeposition* info)
   struct hdr_cmn *cmnh = HDR_CMN(pkt);
   struct hdr_gpsr *gpsrh = HDR_GPSR(pkt);
   struct hdr_greedy *greedyh = HDR_GREEDY(pkt);
-  struct hdr_gopher *gopherh = HDR_GOPHER(pkt);
+  struct hdr_goafr *goafrh = HDR_GOAFR(pkt);
   struct hdr_hls *hlsh = HDR_HLS(pkt);
 
   
@@ -1797,9 +1797,9 @@ void BasicHandoverManager::handoverInformation(nodeposition* info)
   greedyh->port_ = hdr_greedy::LOCS;
   greedyh->geoanycast = true;
 
-  gopherh->mode_ = GOPHERH_DATA_GREEDY;
-  gopherh->port_ = hdr_gopher::LOCS;
-  gopherh->geoanycast = true;
+  goafrh->mode_ = GOAFRH_DATA_GREEDY;
+  goafrh->port_ = hdr_goafr::LOCS;
+  goafrh->geoanycast = true;
 
   // init my own header
   hlsh->init();

@@ -173,9 +173,9 @@ Node/MobileNode instproc reset {} {
 		[$self set ragent_] resetSB
 	}
 
-	# Special processing for GOPHER
-	set gopheronly [string first "GOPHER" [[$self set ragent_] info class]] 
-	if {$gopheronly != -1 } {
+	# Special processing for GOAFR
+	set goafronly [string first "GOAFR" [[$self set ragent_] info class]] 
+	if {$goafronly != -1 } {
 		[$self set ragent_] resetSB
 	}
 # inserted - to
@@ -225,9 +225,9 @@ Node/MobileNode instproc add-target { agent port } {
 		$agent if-queue [$self set ifq_(0)]   ;# ifq between LL and MAC
 	}
 
-	# Special processing for GOPHER
-	set gopheronly [string first "GOPHER" [$agent info class]] 
-	if {$gopheronly != -1 } {
+	# Special processing for GOAFR
+	set goafronly [string first "GOAFR" [$agent info class]] 
+	if {$goafronly != -1 } {
 		$agent if-queue [$self set ifq_(0)]   ;# ifq between LL and MAC
 	}
 	#<zheng: add>
@@ -257,9 +257,9 @@ Node/MobileNode instproc add-target { agent port } {
 		$agent if-queue [$self set ifq_(0)]   ;# ifq between LL and MAC
 	}
 
-	# Special processing for GOPHER
-	set gopheronly [string first "GOPHER" [$agent info class]] 
-	if {$gopheronly != -1 } {
+	# Special processing for GOAFR
+	set goafronly [string first "GOAFR" [$agent info class]] 
+	if {$goafronly != -1 } {
 		$agent if-queue [$self set ifq_(0)]   ;# ifq between LL and MAC
 	}
 # inserted - to

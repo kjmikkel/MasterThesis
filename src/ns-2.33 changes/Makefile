@@ -33,12 +33,12 @@ MANDEST	= /usr/local/man
 BLANK	= # make a blank space.  DO NOT add anything to this line
 
 # The following will be redefined under Windows (see WIN32 lable below)
-CC	= gcc
-CPP	= g++
+CC	= gcc-4.3
+CPP	= g++-4.3
 LINK	= $(CPP)
 LINK_SHLIB = gcc -shared
 MKDEP	= ./conf/mkdep
-TCLSH	= /home/mikkel/Downloads/ns-allinone-2.33/bin/tclsh8.4
+TCLSH	= /home/mikkel/Documents/MasterThesis/ns-allinone-2.33/bin/tclsh8.4
 TCL2C	= ../tclcl-1.19/tcl2c++
 AR	= ar rc $(BLANK)
 
@@ -64,7 +64,7 @@ DEFINE	= -DTCP_DELAY_BIND_ALL -DNO_TK -DTCLCL_CLASSINSTVAR  -DNDEBUG -DLINUX_TCP
 INCLUDES = \
 	-I.  \
 	-I. \
-	-I/home/mikkel/Downloads/ns-allinone-2.33/tclcl-1.19 -I/home/mikkel/Downloads/ns-allinone-2.33/otcl-1.13 -I/home/mikkel/Downloads/ns-allinone-2.33/include -I/home/mikkel/Downloads/ns-allinone-2.33/include -I/usr/include/pcap \
+	-I/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/tclcl-1.19 -I/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/otcl -I/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/include -I/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/include -I/usr/include/pcap \
 	-I./tcp -I./sctp -I./common -I./link -I./queue \
 	-I./adc -I./apps -I./mac -I./mobile -I./trace \
 	-I./routing -I./tools -I./classifier -I./mcast \
@@ -76,7 +76,7 @@ INCLUDES = \
 
 
 LIB	= \
-	-L/home/mikkel/Downloads/ns-allinone-2.33/tclcl-1.19 -ltclcl -L/home/mikkel/Downloads/ns-allinone-2.33/otcl-1.13 -lotcl -L/home/mikkel/Downloads/ns-allinone-2.33/lib -ltk8.4 -L/home/mikkel/Downloads/ns-allinone-2.33/lib -ltcl8.4 \
+	-L/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/tclcl-1.19 -ltclcl -L/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/otcl -lotcl -L/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/lib -ltk8.4 -L/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/lib -ltcl8.4 \
 	-lXext -lX11 \
 	 -lnsl -ldl \
 	-lm -lm 
@@ -160,7 +160,7 @@ NS_TCL_LIB_STL = tcl/lib/ns-diffusion.tcl \
 
 OBJ_CC = \
 	tools/random.o tools/rng.o tools/ranvar.o common/misc.o common/timer-handler.o \
-	common/scheduler.o common/object.o common/packet.o \
+	common/scheduler.o common/object.o common/point.o common/ellipsis.o common/packet.o \
 	common/ip.o routing/route.o common/connector.o common/ttl.o \
 	trace/trace.o trace/trace-ip.o \
 	classifier/classifier.o classifier/classifier-addr.o \
@@ -338,11 +338,8 @@ OBJ_CC = \
 	\
 	gpsr/gpsr.o \
 	greedy/greedy.o\
-        gopher/gopher.o\
+	goafr/goafr.o\
 	\
-        support/point.o\
-        support/ellipsis.o\
-        \
 	$(OBJ_STL)
 
 
@@ -435,8 +432,6 @@ $(NS): $(OBJ) common/tclAppInit.o common/main-monolithic.o
 	$(LINK) $(LDFLAGS) $(LDOUT)$@ $^ $(LIB)
 
 endif 
-
-
 
 Makefile: Makefile.in
 	@echo "Makefile.in is newer than Makefile."
@@ -536,13 +531,13 @@ $(GEN_DIR)version.c: VERSION
 	$(RM) $@
 	$(TCLSH) bin/string2c.tcl version_string < VERSION > $@
 
-$(GEN_DIR)ptypes.cc: common/ptypes2tcl common/packet.h
+$(GEN_DIR)ptypes.cc: common/ptypes2tcl common/packet.h common/ellipsis.h
 	./common/ptypes2tcl > $@
 
 common/ptypes2tcl: common/ptypes2tcl.o
 	$(LINK) $(LDFLAGS) $(LDOUT)$@ common/ptypes2tcl.o
 
-common/ptypes2tcl.o: common/ptypes2tcl.cc common/packet.h
+common/ptypes2tcl.o: common/ptypes2tcl.cc common/packet.h common/ellipsis.h
 
 dirs:
 	for d in $(DESTDIR)$(MANDEST)/man1; do \

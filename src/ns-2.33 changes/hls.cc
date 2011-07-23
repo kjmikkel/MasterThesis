@@ -38,7 +38,7 @@
 // just for broadcast
 #include "../gpsr/gpsr.h"
 #include "../greedy/greedy.h"
-#include "../gopher/gopher.h"
+#include "../goafr/goafr.h"
 
 
 HLS::HLS(Agent* p)
@@ -108,7 +108,7 @@ void HLS::evaluatePacket(const Packet *p)
   //struct hdr_ip *iphdr = HDR_IP(p);
   struct hdr_gpsr *gpsrh = HDR_GPSR(p);
   struct hdr_greedy *greedyh = HDR_GREEDY(p);
-  struct hdr_gopher *gopherh = HDR_GOPHER(p);
+  struct hdr_goafr *goafrh = HDR_GOAFR(p);
   struct hdr_cmn *cmnh = HDR_CMN(p);
 
   if ((cmnh->ptype()==PT_GPSR)&&(gpsrh->mode_ == GPSRH_BEACON)) {
@@ -137,15 +137,15 @@ void HLS::evaluatePacket(const Packet *p)
     passiveEntries_->add(&neighb);
   } // end of BEACON processing
 
-    if ((cmnh->ptype()==PT_GOPHER)&&(gopherh->mode_ == GOPHERH_BEACON)) {
+    if ((cmnh->ptype()==PT_GOAFR)&&(goafrh->mode_ == GOAFRH_BEACON)) {
     // Direct Neighbor Information from GPSR Beacons
     nodeposition neighb;
     neighb.id = HDR_IP(p)->saddr();//iphdr->saddr();
     neighb.ts = Scheduler::instance().clock(); // Off by a few because Beacons don't have a TS
 
-    neighb.pos.x = gopherh->hops_[0].x;
-    neighb.pos.y = gopherh->hops_[0].y;
-    neighb.pos.z = gopherh->hops_[0].z;    
+    neighb.pos.x = goafrh->hops_[0].x;
+    neighb.pos.y = goafrh->hops_[0].y;
+    neighb.pos.z = goafrh->hops_[0].z;    
 
     passiveEntries_->add(&neighb);
   } // end of BEACON processing
@@ -403,7 +403,7 @@ bool HLS::sendRequest(int nodeid, int level)
   struct hdr_cmn *cmnh = HDR_CMN(p);
   struct hdr_gpsr *gpsrh = HDR_GPSR(p);
   struct hdr_greedy *greedyh = HDR_GREEDY(p);
-  struct hdr_gopher *gopherh = HDR_GOPHER(p);
+  struct hdr_goafr *goafrh = HDR_GOAFR(p);
 
   iph->sport() = RT_PORT;
   iph->dport() = RT_PORT;
@@ -463,9 +463,9 @@ bool HLS::sendRequest(int nodeid, int level)
   greedyh->port_ = hdr_gpsr::LOCS;
   greedyh->geoanycast = true;
 
-  gopherh->mode_ = GOPHERH_DATA_GREEDY;
-  gopherh->port_ = hdr_gopher::LOCS;
-  gopherh->geoanycast = true;
+  goafrh->mode_ = GOAFRH_DATA_GREEDY;
+  goafrh->port_ = hdr_goafr::LOCS;
+  goafrh->geoanycast = true;
 
   // now we have to put our position information into the
   // packet (together with a timestamp)

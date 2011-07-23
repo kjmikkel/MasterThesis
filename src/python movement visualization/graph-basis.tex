@@ -1,0 +1,16 @@
+\colorlet{circle edge}{black!50}
+\colorlet{circle area}{gray!20}
+\def\scale{0.07}
+
+\tikzset{
+  filled/.style={fill=circle area, draw=circle edge, thick},
+  outline/.style={draw=circle edge, thick}
+  }
+
+\setlength{\parskip}{5mm}
+
+\tikzstyle{edge} = [draw, thick, -]
+\tikzstyle{invis}=[circle,fill=white!100,minimum size =0pt,inner sep=0pt]
+\tikzstyle{vertex}=[circle,fill=black!25,minimum size=5pt,inner sep=0pt]
+\tikzstyle{selected edge} = [draw, line width=2cm,-,gray!20] 
+\tikzstyle{real edge} = [draw, line width=2pt,-, gray!70]

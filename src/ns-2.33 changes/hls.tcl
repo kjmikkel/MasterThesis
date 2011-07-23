@@ -57,7 +57,7 @@ set val(lt)		""
 set val(cp)		"cp-n40-a40-t40-c4-m0"
 set val(sc)		"sc-x2000-y2000-n40-s25-t40"
 
-set val(out)            "hls_test.tr"
+set val(out)            "goafr_test.tr"
 
 Agent/GPSR set locservice_type_ 3
 

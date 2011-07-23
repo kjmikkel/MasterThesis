@@ -1,23 +1,10 @@
 #include <math.h>
+#include <float.h>
+#include <stdio.h>
+#include <stdexcept>
 
+#include "point.h"
 using namespace std;
-
-// Class to represent points.
-class Point {
-private:
-        double xval, yval;
-public:
-        // Constructor uses default arguments to allow calling with zero, one,
-        // or two values.
-  Point(double x = 0.0, double y = 0.0);
- 
-  // Extractors.
-  double x();
-  double y();
-
-        // Distance to another point.  Pythagorean thm.
-  double dist(Point other);
-};
 
 Point::Point(double x, double y) {
                 xval = x;
@@ -27,9 +14,36 @@ Point::Point(double x, double y) {
 double Point::x() { return xval; }
 double Point::y() { return yval; }
 
-double Point::dist(Point other) {
-  double xd = xval - other.xval;
-  double yd = yval - other.yval;
-  return sqrt(xd*xd + yd*yd);
+bool Point::check_limit(double test_value) {
+  if (test_value > sqrt(DBL_MAX) / 2)
+    return true;
+
+  // Quick escape
+  if (test_value < -1000000000) {
+    return true;
+  } else {
+    return false;
+  }
+
 }
 
+double Point::dist(Point other) {
+  bool x_exceed = check_limit(other.xval);
+  bool y_exceed = check_limit(other.yval);
+
+  if (x_exceed || y_exceed) {
+    return sqrt(DBL_MAX) / 2.0;
+  }
+
+  double xd = xval - other.xval;
+  double yd = yval - other.yval;
+
+  x_exceed = check_limit(xd);
+  y_exceed = check_limit(yd);
+
+  if (x_exceed || y_exceed) {
+    return sqrt(DBL_MAX) / 2.0;
+  }
+
+  return sqrt(xd*xd + yd*yd);
+}

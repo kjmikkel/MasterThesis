@@ -199,8 +199,8 @@ source ../mobility/com.tcl
 source ../mobility/gpsr.tcl
 # GREEDY
 source ../mobility/greedy.tcl
-# GOPHER
-source ../mobility/gopher.tcl
+# GOAFR
+source ../mobility/goafr.tcl
 
 # inserted - 2.11.05 - to
 
@@ -642,9 +642,9 @@ Simulator instproc create-wireless-node args {
 	    GREEDY {
 		    set ragent [$self create-greedy-agent $node]
 	    }
-	    # GOPHER
-	    GOPHER {
-		    set ragent [$self create-gopher-agent $node]
+	    # GOAFR
+	    GOAFR {
+		    set ragent [$self create-goafr-agent $node]
 	    }
 	# insterted - to 
 		    DSR {
@@ -874,10 +874,10 @@ Simulator instproc create-greedy-agent { node } {
 }
 # inserted - to
 
-# GOPHER
-Simulator instproc create-gopher-agent { node } {
+# GOAFR
+Simulator instproc create-goafr-agent { node } {
 	# Create a greedy routing agent for this node
-	set ragent [new Agent/GOPHER]
+	set ragent [new Agent/GOAFR]
 	# Setup address (supports hier-addr) for greedy agent
 	# and mobilenode
 	set addr [$node node-addr]
@@ -888,7 +888,7 @@ Simulator instproc create-gopher-agent { node } {
 	}
 	$node addr $addr
 	$node set ragent_ $ragent
-	$self at 0.0 "$ragent start-gopher"    ;# start updates
+	$self at 0.0 "$ragent start-goafr"    ;# start updates
 	return $ragent
 }
 # inserted - to

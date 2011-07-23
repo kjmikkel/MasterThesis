@@ -64,7 +64,7 @@
 #include "locservices/hdr_locs.h" // locservices
 #include <gpsr/gpsr.h>              // GPSR
 #include <greedy/greedy.h>          // GREEDY
-#include <gopher/gopher.h>          // GOPHER
+#include <goafr/goafr.h>          // GOAFR
   // inserted - wk
 #include <hls/hls_basic.h>
 // inserted - to
@@ -1154,13 +1154,13 @@ CMUTrace::format_greedy(Packet *p, int offset)
 	}
 }
 
-// Addition for GOPHER Traces
+// Addition for GOAFR Traces
 void
-CMUTrace::format_gopher(Packet *p, int offset)
+CMUTrace::format_goafr(Packet *p, int offset)
 {
 	struct hdr_cmn *cmnh   = HDR_CMN(p);
 	struct hdr_ip *iph     = HDR_IP(p);
-	struct hdr_gopher * gopherh = HDR_GOPHER(p);
+	struct hdr_goafr * goafrh = HDR_GOAFR(p);
 	struct hdr_locs *locsh = HDR_LOCS(p);
 
 	char op = (char) type_;
@@ -1188,14 +1188,14 @@ CMUTrace::format_gopher(Packet *p, int offset)
 			    if (aggregate_rtr) {
 				    sprintf(pt_->buffer() + offset,
 					    "%d %d [%d %d]",
-					    gopherh->mode_,
+					    goafrh->mode_,
 					    cmnh->num_forwards_,
 					    gpath,
 					    spath);
 			    }else{
 				    sprintf(pt_->buffer() + offset,
 					    "%d %d [%d %d] [%.2f/%.2f/%.5f]->[%.2f/%.2f/%.5f]",
-					    gopherh->mode_,
+					    goafrh->mode_,
 					    cmnh->num_forwards_,
 					    gpath,
 					    spath,
@@ -1209,7 +1209,7 @@ CMUTrace::format_gopher(Packet *p, int offset)
 		    }else{
 			    sprintf(pt_->buffer() + offset,
 				    "%d %d [%d %d]",
-				    gopherh->mode_,
+				    goafrh->mode_,
 				    cmnh->num_forwards_,
 				    gpath,
 				    spath);
@@ -1218,7 +1218,7 @@ CMUTrace::format_gopher(Packet *p, int offset)
 	    case RECV:
 		    sprintf(pt_->buffer() + offset,
 			    "%d %d [%d %d]",
-			    gopherh->mode_,
+			    goafrh->mode_,
 			    cmnh->num_forwards_,
 			    gpath,
 			    spath);
@@ -1226,7 +1226,7 @@ CMUTrace::format_gopher(Packet *p, int offset)
 	    default:
 		    sprintf(pt_->buffer() + offset,
 			    "%d %d [%d %d]",
-			    gopherh->mode_,
+			    goafrh->mode_,
 			    cmnh->num_forwards_,
 			    0,0);
 	}
@@ -1703,8 +1703,8 @@ void CMUTrace::format(Packet* p, const char *why)
                 case PT_GREEDY: // GREEDY
 			format_greedy(p, offset);
 		        break;
-                case PT_GOPHER: // GOPHER
-                        format_gopher(p, offset);
+                case PT_GOAFR: // GOAFR
+                        format_goafr(p, offset);
                         break;
 		case PT_HLS : // hierarchical location service
 			format_hls(p,offset);

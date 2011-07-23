@@ -46,7 +46,7 @@
 #include "lib/bsd-list.h"
 #include "packet-stamp.h"
 #include "ns-process.h"
-#include "support/ellipsis.h"
+#include "ellipsis.h"
 
 // Used by wireless routing code to attach routing agent
 #define RT_PORT		255	/* port that all route msgs are sent to */
@@ -78,8 +78,8 @@
 #define HDR_GPSR(p)     (hdr_gpsr::access(p))
 // GREEDY
 #define HDR_GREEDY(p)   (hdr_greedy::access(p))
-// GOPHER
-#define HDR_GOPHER(p) (hdr_gopher::access(p))
+// GOAFR
+#define HDR_GOAFR(p) (hdr_goafr::access(p))
 // inserted - to
 
 /* --------------------------------------------------------------------*/
@@ -197,7 +197,7 @@ static const packet_t PT_LOCS = 61;
 static const packet_t PT_GPSR = 62; // GPSR
 static const packet_t PT_HLS = 63; // HLS - wk
 static const packet_t PT_GREEDY = 64; // GREEDY
-static const packet_t PT_GOPHER = 65; // GOPHER
+static const packet_t PT_GOAFR = 65; // GOAFR
 static packet_t       PT_NTYPE = 66; // This MUST be the LAST one
 // insterted - to
 
@@ -267,7 +267,7 @@ public:
 		    type == PT_AODV ||
                     type == PT_GPSR ||
                     type == PT_GREEDY ||
-                    type == PT_GOPHER)
+                    type == PT_GOAFR)
 			return ROUTING;		
 		if (type == PT_TCP || 
 		    type == PT_TELNET || 
@@ -305,117 +305,117 @@ public:
 		nPkt_ = PT_NTYPE+1;
 		
 
-		name_[PT_TCP]= "tcp";
-		name_[PT_UDP]= "udp";
-		name_[PT_CBR]= "cbr";
-		name_[PT_AUDIO]= "audio";
-		name_[PT_VIDEO]= "video";
-		name_[PT_ACK]= "ack";
-		name_[PT_START]= "start";
-		name_[PT_STOP]= "stop";
-		name_[PT_PRUNE]= "prune";
-		name_[PT_GRAFT]= "graft";
-		name_[PT_GRAFTACK]= "graftAck";
-		name_[PT_JOIN]= "join";
-		name_[PT_ASSERT]= "assert";
-		name_[PT_MESSAGE]= "message";
-		name_[PT_RTCP]= "rtcp";
-		name_[PT_RTP]= "rtp";
-		name_[PT_RTPROTO_DV]= "rtProtoDV";
-		name_[PT_CtrMcast_Encap]= "CtrMcast_Encap";
-		name_[PT_CtrMcast_Decap]= "CtrMcast_Decap";
-		name_[PT_SRM]= "SRM";
+		name_[PT_TCP]= (char*)"tcp";
+		name_[PT_UDP]= (char*)"udp";
+		name_[PT_CBR]= (char*)"cbr";
+		name_[PT_AUDIO]= (char*)"audio";
+		name_[PT_VIDEO]= (char*)"video";
+		name_[PT_ACK]= (char*)"ack";
+		name_[PT_START]= (char*)"start";
+		name_[PT_STOP]= (char*)"stop";
+		name_[PT_PRUNE]= (char*)"prune";
+		name_[PT_GRAFT]= (char*)"graft";
+		name_[PT_GRAFTACK]= (char*)"graftAck";
+		name_[PT_JOIN]= (char*)"join";
+		name_[PT_ASSERT]= (char*)"assert";
+		name_[PT_MESSAGE]= (char*)"message";
+		name_[PT_RTCP]= (char*)"rtcp";
+		name_[PT_RTP]= (char*)"rtp";
+		name_[PT_RTPROTO_DV]= (char*)"rtProtoDV";
+		name_[PT_CtrMcast_Encap]= (char*)"CtrMcast_Encap";
+		name_[PT_CtrMcast_Decap]= (char*)"CtrMcast_Decap";
+		name_[PT_SRM]= (char*)"SRM";
 	
-		name_[PT_REQUEST]= "sa_req";	
-		name_[PT_ACCEPT]= "sa_accept";
-		name_[PT_CONFIRM]= "sa_conf";
-		name_[PT_TEARDOWN]= "sa_teardown";
-		name_[PT_LIVE]= "live"; 
-		name_[PT_REJECT]= "sa_reject";
+		name_[PT_REQUEST]= (char*)"sa_req";	
+		name_[PT_ACCEPT]= (char*)"sa_accept";
+		name_[PT_CONFIRM]= (char*)"sa_conf";
+		name_[PT_TEARDOWN]= (char*)"sa_teardown";
+		name_[PT_LIVE]= (char*)"live"; 
+		name_[PT_REJECT]= (char*)"sa_reject";
 	
-		name_[PT_TELNET]= "telnet";
-		name_[PT_FTP]= "ftp";
-		name_[PT_PARETO]= "pareto";
-		name_[PT_EXP]= "exp";
-		name_[PT_INVAL]= "httpInval";
-		name_[PT_HTTP]= "http";
-		name_[PT_ENCAPSULATED]= "encap";
-		name_[PT_MFTP]= "mftp";
-		name_[PT_ARP]= "ARP";
-		name_[PT_MAC]= "MAC";
-		name_[PT_TORA]= "TORA";
-		name_[PT_DSR]= "DSR";
-		name_[PT_AODV]= "AODV";
-		name_[PT_IMEP]= "IMEP";
+		name_[PT_TELNET]= (char*)"telnet";
+		name_[PT_FTP]= (char*)"ftp";
+		name_[PT_PARETO]= (char*)"pareto";
+		name_[PT_EXP]= (char*)"exp";
+		name_[PT_INVAL]= (char*)"httpInval";
+		name_[PT_HTTP]= (char*)"http";
+		name_[PT_ENCAPSULATED]= (char*)"encap";
+		name_[PT_MFTP]= (char*)"mftp";
+		name_[PT_ARP]= (char*)"ARP";
+		name_[PT_MAC]= (char*)"MAC";
+		name_[PT_TORA]= (char*)"TORA";
+		name_[PT_DSR]= (char*)"DSR";
+		name_[PT_AODV]= (char*)"AODV";
+		name_[PT_IMEP]= (char*)"IMEP";
 
-		name_[PT_RAP_DATA] = "rap_data";
-		name_[PT_RAP_ACK] = "rap_ack";
+		name_[PT_RAP_DATA] = (char*)"rap_data";
+		name_[PT_RAP_ACK] = (char*)"rap_ack";
 
- 		name_[PT_TFRC]= "tcpFriend";
-		name_[PT_TFRC_ACK]= "tcpFriendCtl";
-		name_[PT_PING]="ping";
+ 		name_[PT_TFRC]= (char*)"tcpFriend";
+		name_[PT_TFRC_ACK]= (char*)"tcpFriendCtl";
+		name_[PT_PING]=(char*)"ping";
 	
-		name_[PT_PBC] = "PBC";
+		name_[PT_PBC] = (char*)"PBC";
 
 	 	/* For diffusion : Chalermek */
- 		name_[PT_DIFF] = "diffusion";
+ 		name_[PT_DIFF] = (char*)"diffusion";
 
 		// Link state routing updates
-		name_[PT_RTPROTO_LS] = "rtProtoLS";
+		name_[PT_RTPROTO_LS] = (char*)"rtProtoLS";
 
 		// MPLS LDP packets
-		name_[PT_LDP] = "LDP";
+		name_[PT_LDP] = (char*)"LDP";
 
 		// for GAF
-                name_[PT_GAF] = "gaf";      
+                name_[PT_GAF] = (char*)"gaf";      
 
 		// RealAudio packets
-		name_[PT_REALAUDIO] = "ra";
+		name_[PT_REALAUDIO] = (char*)"ra";
 
 		//pushback 
-		name_[PT_PUSHBACK] = "pushback";
+		name_[PT_PUSHBACK] = (char*)"pushback";
 
 #ifdef HAVE_STL
 		// for PGM
-		name_[PT_PGM] = "PGM";
+		name_[PT_PGM] = (char*)"PGM";
 #endif //STL
 
 		// LMS entries
-		name_[PT_LMS]="LMS";
-		name_[PT_LMS_SETUP]="LMS_SETUP";
+		name_[PT_LMS]=(char*)"LMS";
+		name_[PT_LMS_SETUP]=(char*)"LMS_SETUP";
 
-		name_[PT_SCTP]= "sctp";
- 		name_[PT_SCTP_APP1] = "sctp_app1";
+		name_[PT_SCTP]= (char*)"sctp";
+ 		name_[PT_SCTP_APP1] = (char*)"sctp_app1";
 		
 		// smac
-		name_[PT_SMAC]="smac";
+		name_[PT_SMAC]=(char*)"smac";
 
 		// HDLC
-		name_[PT_HDLC]="HDLC";
+		name_[PT_HDLC]=(char*)"HDLC";
 
 		// XCP
-		name_[PT_XCP]="xcp";
+		name_[PT_XCP]=(char*)"xcp";
 
 		// Bell Labs (PackMime OL)
-		name_[PT_BLTRACE]="BellLabsTrace";
+		name_[PT_BLTRACE]=(char*)"BellLabsTrace";
 
 // ->
-		name_[PT_LOCS]="LOCS";
+		name_[PT_LOCS]=(char*)"LOCS";
 
 		// HLS - wk
-		name_[PT_HLS]= "HLS";
+		name_[PT_HLS]= (char*)"HLS";
 
 		// GPSR
-		name_[PT_GPSR]= "GPSR";
+		name_[PT_GPSR]= (char*)"GPSR";
 
 		// GREEDY
-		name_[PT_GREEDY]= "GREEDY";
+		name_[PT_GREEDY]= (char*)"GREEDY";
 
-		// GOPHER
-		name_[PT_GOPHER]= "GOPHER";
+		// GOAFR
+		name_[PT_GOAFR]= (char*)"GOAFR";
 // insterted - to
 		
-		name_[PT_NTYPE]= "undefined";
+		name_[PT_NTYPE]= (char*)"undefined";
 	}
 	static int addPacket(char *name);
 	static packet_t getType(const char *name)
@@ -490,6 +490,9 @@ private:
 	AppData* data_;		// variable size buffer for 'data'
 	static void init(Packet*);     // initialize pkt hdr 
 	bool fflag_;
+	// Added to support GOAFR
+	bool reversed_direction;  // Not to be confused with counter clockwise
+	// End of added to support for GOAFR
 protected:
 	static Packet* free_;	// packet free list
 	int	ref_count_;	// free the pkt until count to 0
@@ -497,9 +500,12 @@ public:
 	Packet* next_;		// for queues and the free list
 	static int hdrlen_;
 
-        static Ellipsis ellipse;      // The ellipsis that the packet has to keep inside
+	// Support added to GOAFR
+        Ellipsis* ellipse_; 	// The ellipsis that the packet has to keep inside
+	bool greedy_start;
+	// End support added to GOAFR
 
-	Packet() : bits_(0), data_(0), ref_count_(0), next_(0) { }
+	Packet() : bits_(0), data_(0), ref_count_(0), next_(0), ellipse_(0), reversed_direction(0), greedy_start(0) { }
 	inline unsigned char* const bits() { return (bits_); }
 	inline Packet* copy() const;
 	inline Packet* refcopy() { ++ref_count_; return this; }
@@ -535,6 +541,14 @@ public:
 	}
 	inline int datalen() const { return data_ ? data_->size() : 0; }
 
+	inline void reverse_direction() {
+		reversed_direction = !reversed_direction;
+	}
+
+	inline bool reversed() {
+		return reversed_direction;
+	}
+
 	// Monarch extn
 
 	static void dump_header(Packet *p, int offset, int length);
@@ -565,7 +579,7 @@ class iface_literal {
 public:
 	enum iface_constant { 
 		UNKN_IFACE= -1, /* 
-				 * iface value for locally originated packets 
+				 * iface value fo½r locally originated packets 
 				 */
 		ANY_IFACE= -2   /* 
 				 * hashnode with iif == ANY_IFACE_   
@@ -700,6 +714,7 @@ inline Packet* Packet::alloc()
 		p->time_ = 0;
 	} else {
 		p = new Packet;
+		p->ellipse_ = NULL;
 		p->bits_ = new unsigned char[hdrlen_];
 		if (p == 0 || p->bits_ == 0)
 			abort();
@@ -752,6 +767,13 @@ inline void Packet::free(Packet* p)
 				delete p->data_;
 				p->data_ = 0;
 			}
+
+			// Added to support GOAFR - delete the ellipse
+			if (p->ellipse_ != NULL) {
+				delete p->ellipse_;
+				p->ellipse_ = NULL;
+			}
+			
 			init(p);
 			p->next_ = free_;
 			free_ = p;
@@ -770,6 +792,12 @@ inline Packet* Packet::copy() const
 	if (data_) 
 		p->data_ = data_->copy();
 	p->txinfo_.init(&txinfo_);
+        
+        // Added to support GOAFR
+        if (ellipse_ != NULL) {
+		p->ellipse_ = ellipse_->copy();
+	}
+	// End added to support GOAFR
  
 	return (p);
 }

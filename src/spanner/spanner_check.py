@@ -11,6 +11,8 @@ if cmd_folder not in sys.path:
 
 import make_graph, dijkstra
 
+psyco.full()
+
 point_set_location = 'Pointsets/'
 point_filename = 'pointset_'
 
@@ -498,7 +500,7 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
 
   point_str = str(number_of_points) + '/'
   
-  for result_index in range(0, 500):
+  for result_index in range(0, num_results):
     index_str = str(result_index + 1)
 
     if result_index % 10 == 0 and result_index > 0:
@@ -542,11 +544,8 @@ def container_analysis(container, filename, paths):
   results = graph_results[0]
   container.edges.extend(graph_results[1])
   container.total_length += graph_results[2]
-  try:
-    container.scc.append(graph_results[3])
-  except IndexError:
-    print graph_results
-    raise IndexError
+  container.scc.append(graph_results[3])
+
   old_missing_path = copy.deepcopy(paths)  
   
   distance = 0
@@ -684,6 +683,7 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
 
 
 def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state, from_val, to_val):	
+
   """
   A single function call to tie the entire test stack together and to make it easier to parameterise
   """
