@@ -94,29 +94,14 @@ A logical extension to the Two-level graph is the multiple-level graph. In the m
 \label{section:spanners}
 As mentioned in \ref{section:graph_concepts} it would be very nice if we could get a guarantee on how effective a given graph building algorithm would be. However, before looking further into this we must first decide what a spanner means for a \ac{manet}.
 
-When dealing with pure graph theory, as long as the space is well-defined, it is always clear what the shortest path between two nodes in the graph. For instance, with a non-planar graph on the planer under the euclidean metric, the shortest path will always be a straight line, so the graph with the lest distance will be the complete graph. Using the complete graph is of course inefficient, and multiple algorithms and graph types have been invented to find an acceptable trade-off between the number of edges, extra auxiliary nodes, and the distance between any two nodes.
+If we were given a set of nodes in the plane, and told to create the graph that would leave us with the least distance under the eucldian metric, between any pair of points, then the best choice would clearly be the complete graph. This would also be the shortest distance if we use the number of hops as the primary metric. Using the complete graph is of course inefficient (and impossible if the graph has more than 4 nodes and has to be planar), and multiple algorithms and graph types have been invented to find an acceptable trade-off between the number of edges, extra nodes (such as the ones found in steiner-trees), and the distance or hops between any pair of nodes.
 
-When trying to apply spanners to \acp{manet} we have to remember that each node has a limited broadcast range, creating an upper bound on the length of an edge. Depending on the scheme and the hardware of the node, each node may cost same, no matter the length of the edge (since each message is not directed, but rather transmitted omni-directionally). I will therefore in the following use the term limited-range spanner when dealing with spanners for \acp{manet}. 
+When trying to apply spanners to \acp{manet} we have to remember that each node has a limited broadcast range, creating an upper bound on the length of an edge. Depending on the scheme and the hardware of the node, each edge may cost the same, no matter its length (since messages are not sent as directed beams, but rather transmitted omni-directionally), or there may be an option to increase the radius of the signal for an additional cost. In the following I will assume the fixed cost-model, as it is far more likely to be used than variable-cost model. Because of these differences in spanners for the \acp{manet}, I will therefore use the term \emph{limited-range spanner} to distingiush them from the concept as it is normaly used. 
 
 \todo{make figure of limited-range spanner}
 
-Due to lack of empirical data I have tested the   500 point-sets with 1000 nodes in a 500 by 500 plane and a transmission range of 20. I have tested the spanner by producing 3 different graphs: The non-planar maximum graph \todo{define this before this point}, the \ac{gabe} and the \ac{rng}. For each point-set I have generated 10 different pairs of nodes, and then checked the distance and number of nodes between them (both having the weight of the edges being proportional to their length, but also where each edge costs the same --- the unit graph) for all three graphs. 
+Since I have been unable to find emperical data detailing the effectiveness of either the \acp{gabe} or \acp{rng} compared the to the non-planar graph, I have decided to emperically test the three different graph types. For more information about the setup of this test see section \ref{section:test_desc_spanners} and section \ref{section:test_results_spanners} for the results.
 
-I will use the non-planar maximum graphs as the benchmark that I will hold the other two graph types up against. I will record shortest, longest and average number of nodes the message has to be transported through, and the number of lost paths (i.e. paths that existed in the more complete graph of the point-set, but isn't present in this graph). 
 
-Since there is no guarantee that two nodes will be connected in any of the graphs, I will have to deal with such cases.
 
-If there is no path between a pair in the non-planar graph, then there cannot be a path between the pair in either the \ac{gabe} or the \ac{rng}, as these are sub-graphs of the non-planar graph, I will ignore it. However, if there is a path in the path between a pair in the non-planar graph, but none in either the \ac{gabe} or the \ac{rng}, then I will record a miss for that graph, since it is an obvious detriment. 
 
-The python scrips I used to generate and tests the graphs can be found in the \texttt{src/spanner/spanner\_check.py} along with the data (see the README for explanation) and \texttt{src/spanner/graph\_support} in the GitHub repository refereed to in section~\ref{section:source_code} on p.~\pageref{section:source_code}. All requirements in the code is mentioned in the README file.\\
-
-The non-planar maximum graph:
-\input{results/spanner/graph_results_100.tex}\\
-
-The Gabriel Graph:
-\input{results/spanner/gg_results_100.tex}\\
-
-The RNG:
-\input{results/spanner/rng_results_100.tex}
-
-It is very curios to note that all the reults are exactly the same. Unless we are dealing with an error in the scripts making it, we must conclude that we in we practice does not have a longer route if we use a planar graph instead of a non-planar maximum graph.
