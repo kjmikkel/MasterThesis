@@ -124,28 +124,22 @@ class results_container:
     print self.scc
     self.number_scc = (sum(self.scc) * 1.0) / len(self.scc) * 1.0 # Strongly connected components
 
-  def print_latex(self):
+  def get_latex_values(self):
+    self.finalize()
 
-    newline = '\\\\\n'
+    distance = (c_round(self.distance_value), c_round(self.max_value), c_round(self.min_value), c_round(self.average_distance))
+    unit_distance = (str(self.unit_distance_value), c_round(self.max_unit_value), c_round(self.min_unit_value), c_round(self.average_unit_distance))
+    neighbours = (c_round(self.max_neighbours), c_round(self.min_neighbours), c_round(self.average_neighbours))
     
-    string  = '\\begin{tabular}{lll}\n'
-    string += ' & Distance & Unit Distance' + newline
-    string += 'Total: & ' + c_round(self.distance_value) + ' & ' + str(self.unit_distance_value) +  newline
-    string += 'Average: & ' + c_round(self.average_distance) + ' & ' + c_round(self.average_unit_distance) + newline
-    string += 'Min value: & ' + c_round(self.min_value) + ' & ' + str(self.min_unit_value) + newline
-    string += 'Max value: & ' + c_round(self.max_value) + ' & ' + str(self.max_unit_value) + newline
-    string += '\\hline\n'
-    string += 'Number of missing paths: & ' + str(self.num_errors) + ' &' + newline
-    string += '\\end{tabular}' + newline
-    string += 'Total number of edges: ' + str(self.edge_number) + newline
-    string += 'Total length of graphs: ' + c_round(self.total_length) + newline
-    string += 'Average number of strongly connected components: ' + c_round(self.number_scc) + newline
-    string += 'Average numbers of neighbours: ' + str(self.average_neighbours) + newline
-    string += 'Minimum number of neighbours: ' + str(self.max_neighbours) + newline
-    string += 'Maximum number of neighbours: ' + str(self.min_neighbours) + newline
-
-    
-    return string 
+    return_dict = {}
+    return_dict["distance"] = distance
+    return_dict["unit"] = unit_distance
+    return_dict["error"] = str(self.num_errors)
+    return_dict["total_length"] = c_round(self.total_length)
+    return_dict["num_edges"] = str(self.edge_number)
+    return_dict["SCC"] = str(self.number_scc)
+ 
+    return return_dict
 
   def __str__(self):
     string =  'Name: ' + self.name + '\n'
@@ -167,7 +161,7 @@ def ftd(num):
   return Decimal(str(num))
 
 def c_round(num):
-  return "%.4f" % num
+  return "%.2f" % num
 
 def load_pickle_file(file_name):
   result = None
@@ -278,6 +272,7 @@ def make_node_pairs(number_of_points, num, number_tests):
     node_pairs_to_check = []
     if len(num_sets_dict) < 5:
   #    num_time1 = datetime.now()
+      print "advanced"
       node_pairs_to_check = advanced_node_pairs(number_of_points, set_container, nodes)
   #    num_time2 = datetime.now()
   #    advanced = num_time2 - num_time1
@@ -465,11 +460,16 @@ def do_actual_test(graph, node_pairs):
   for pair in node_pairs:
     (start_node, end_node) = pair 
     
+#    print start_node, end_node
+
     (D, P, Path) = dijkstra.shortestPath(graph, start_node, end_node)  
     (D_unit, P_unit, Path_unit) = dijkstra.shortestUnitPath(graph, start_node, end_node)
 
     if len(Path) > 0:
-      distance = D[end_node]
+      try:
+        distance = D[end_node]
+      except KeyError:
+        print D, end_node
       unit_distance = D_unit[end_node]
     else:
       distance = -1 
@@ -530,7 +530,7 @@ def container_analysis(container, filename, paths):
   
   results = graph_results[0]
   container.edges.extend(graph_results[1])
-  container.total_length += graph_results[2]
+  container.total_length += graph_results[2][0]
   container.scc.append(graph_results[3])
 
   old_missing_path = copy.deepcopy(paths)  
@@ -545,8 +545,7 @@ def container_analysis(container, filename, paths):
 
   for result_index in range(0, len(results)):
     result = results[result_index]
-
-    (local_distance, path, local_unit_distance, unit_path) = result
+    (local_distance, path, local_unit_distance, unit_path) = results
 
     if len(path) == 0 and len(unit_path) == 0:
 
@@ -596,17 +595,49 @@ def print_latex_results(number_of_points):
   filename = results_rng_location + point_str + 'rng_results'
   rng_results = load_pickle_file(filename)
 
-  print 'Normal graph'
-  graph_latex = graph_results.print_latex()
+  newline = "\\\n"
+  graph_latex = graph_results.get_latex_values()
+  gg_latex = gg_results.print_latex_values()
+  rng_latex = rng_results.print_latex_values()
+
+  graph_distance = graph_latex["distance"]
+  gg_distance = gg_latex["distance"]
+  rng_distance = rng_latex["distance"]
+
+  graph_unit = graph_latex["unit"]
+  gg_unit = gg_latex["unit"]
+  rng_unit = rng_latex["unit"]
+
+  graph_unit_distance = graph_results.unit_distance_value * 1.0
+  gg_unit_distance = gg_results.unit_distance_value * 1.0
+  rng_unit_distance = rng_results.unit_distance_value * 1.0
+
+  graph_gg_unit  = (gg_unit_distance  / graph_unit_distance) * 100
+  graph_rng_unit = (rng_unit_distance / graph_unit_distance) * 100
+
+  latex_table =  "\\begin{tabular}{ccrrrr}\n"
+  latex_table += "\\multicolumn{2}{}{}        & Length of graph: & Max node-pair: & Min node-pair: & Avg node-pair \n"
+  latex_table += "\\multirow{3}{*}{Distance}  & NML & %s & %s & %s & %s ", graph_distance[0], graph_distance[1], graph_distance[2], graph_distance[3] 
+  """ 
+ latex_table += newline
+ latex_table += "                            & GG  & " + gg_distance[0] + " & " + gg_distance[1] + " & " + gg_distance[2] + " & " + gg_distance[3] + " " + newline
+  latex_table += "                            & RNG & " + rng_distance[0] + " & " + rng_distance[1] + " & " + rng_distance[2] + " & " + rng_distance[3] + " " + newline
+  latex_table += "\\hline \n"
+  latex_table += "Unit      & NML & " + graph_unit[0] + "\phantom{.00} & " + graph_unit[1] + " & " + graph_unit[2] + " & " + graph_unit[3] + " " + newline 
+  latex_table += "Distance  & GG  & " + gg_unit[0] + "\phantom{.00} & " + gg_unit[1] + " & " + gg_unit[2] + " & " + gg_unit[3] + " " + newline  
+  latex_table += "          & RNG & " + + rng_unit[0] + "\phantom{.00} & " + rng_unit[1] + " & " + rng_unit[2] + " & " + rng_unit[3] + " " + newline
+  latex_table += "\hline" 
+  latex_table += "\hline"
+  latex_table += "& & Distance: & Unit Distance: " + newline 
+  latex_table += "Percentage   & NML & 100.00 \% & 100,00 \%" + newline
+  latex_table + of the       & GG  & 101.50 \% & 109.94 \% \\
+normal graph & RNG & 104.13 \% & 113.05 \%
+\end{tabular}
+  """
+  print latex_table 
+  """
   save_file(latex_location + 'graph_results_' + point_str[0:-1], graph_latex) 
 
-  print 'Gabriel graph'
-  gg_latex = gg_results.print_latex()
-  save_file(latex_location + 'gg_results_' + point_str[0:-1], gg_latex) 
-
-  print 'RN graph'
-  rng_latex = rng_results.print_latex()
-  save_file(latex_location + 'rng_results_' + point_str[0:-1], rng_latex)
 
   print 'Total results'
   graph_distance = graph_results.distance_value * 1.0
@@ -616,12 +647,7 @@ def print_latex_results(number_of_points):
   graph_gg =  gg_distance / graph_distance
   graph_rng = rng_distance / graph_distance
 
-  graph_unit_distance = graph_results.unit_distance_value * 1.0
-  gg_unit_distance = gg_results.unit_distance_value * 1.0
-  rng_unit_distance = rng_results.unit_distance_value * 1.0
 
-  graph_gg_unit  = gg_unit_distance  / graph_unit_distance
-  graph_rng_unit = rng_unit_distance / graph_unit_distance
 
   newline = '\\\\\n'
   line   = '\\hline\n'
@@ -664,6 +690,7 @@ def do_integrity_test(point_list, node_pairs):
     print gg_container
     print '***'
     print rng_container
+  """
 
 def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state):
   """
@@ -735,20 +762,20 @@ radio_range = 20
 #do_suite(1000,  number_tests, pr_test, eq(1000),  radio_range, start_state, end_state)
 #do_suite(2500,  number_tests, pr_test, eq(2500),  radio_range, start_state, end_state)
 #do_suite(5000,  number_tests, pr_test, eq(5000),  radio_range, start_state, end_state)
-do_suite(7500,  number_tests, pr_test, eq(7500),  radio_range, start_state, end_state)
-do_suite(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state)
+#do_suite(7500,  number_tests, pr_test, eq(7500),  radio_range, start_state, end_state)
+#do_suite(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state)
 
-start_state = 2
-end_state = 2
+start_state = 1
+end_state = 6
 
 do_suite(100, number_tests, 100, 100, radio_range , start_state, end_state)
-do_suite(250,   number_tests, pr_test, eq(250),   radio_range, start_state, end_state)
-do_suite(500,   number_tests, pr_test, eq(500),   radio_range, start_state, end_state)
-do_suite(1000,  number_tests, pr_test, eq(1000),  radio_range, start_state, end_state)
-do_suite(2500,  number_tests, pr_test, eq(2500),  radio_range, start_state, end_state)
-do_suite(5000,  number_tests, pr_test, eq(5000),  radio_range, start_state, end_state)
-do_suite(7500,  number_tests, pr_test, eq(7500),  radio_range, start_state, end_state)
-do_suite(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state)
+#do_suite(250,   number_tests, pr_test, eq(250),   radio_range, start_state, end_state)
+#do_suite(500,   number_tests, pr_test, eq(500),   radio_range, start_state, end_state)
+#do_suite(1000,  number_tests, pr_test, eq(1000),  radio_range, start_state, end_state)
+#do_suite(2500,  number_tests, pr_test, eq(2500),  radio_range, start_state, end_state)
+#do_suite(5000,  number_tests, pr_test, eq(5000),  radio_range, start_state, end_state)
+#do_suite(7500,  number_tests, pr_test, eq(7500),  radio_range, start_state, end_state)
+#do_suite(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state)
 
 """
 point_list = [(0,0), (20, 0), (4, -5), (15, -5)]
