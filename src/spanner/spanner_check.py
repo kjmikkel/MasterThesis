@@ -1,4 +1,5 @@
-import os, sys, random, copy, math, json, pickle, psyco
+import os, sys, random, copy, math, json, pickle
+from multiprocessing import Process
 from decimal import *
 from datetime import datetime
 # I define the precision of the decimal numbers
@@ -242,13 +243,16 @@ def generate_graphs(number_of_points, number_of_graphs, cutoff_distance):
     filename = rng_f + point_str + rng_placement + rng_filename + index_str
     save_pickle_file(filename, rng_graph)
             
-def make_node_pairs(number_of_points, num, number_tests):
+def make_node_pairs(number_of_points, num, number_tests, from_val, to_val):
   point_str = str(number_of_points) + '/'
 
-  for graph_index in range(0, num):
+  for graph_index in range(from_val - 1, to_val	):
     
     if graph_index % 10 == 0 and graph_index > 0:
       print 'Made node pairs for ' + str(graph_index) + ' tests.'
+	
+    if os.path.exists(node_pair_location + point_str + "node_pair_" + str(graph_index + 1) + ".pickle"):
+      continue
 
     node_pairs_to_check = []
     
@@ -262,15 +266,21 @@ def make_node_pairs(number_of_points, num, number_tests):
   #  num_time1 = datetime.now()
     # We find out how many sets we are working with
     num_sets_dict = {}
+    set_len = 0
     for node in nodes:
-      num_sets_dict[tuple(set_container[node])] = 1
-    
+      tup = tuple(set_container[node])
+      if not num_sets_dict.get(tup):
+        num_sets_dict[tup] = 1
+        set_len += 1
+      
+      if set_len >= 5:
+        break
  #   num_time2 = datetime.now()
  #   test_time = num_time2 - num_time1
 
 
     node_pairs_to_check = []
-    if len(num_sets_dict) < 5:
+    if set_len < 5:
   #    num_time1 = datetime.now()
       print "advanced"
       node_pairs_to_check = advanced_node_pairs(number_of_points, set_container, nodes)
@@ -390,14 +400,17 @@ def advanced_node_pairs(number_tests, set_container, nodes):
   return node_pairs_to_check
  
 
-def do_test(number_of_points, num, number_tests):
+def do_test(number_of_points, num, number_tests, from_val, to_val):
   point_str = str(number_of_points) + '/'
-  for graph_index in range(0, num):
+  for graph_index in range(from_val, to_val):
+    index_str = str(graph_index + 1)  
+
+ #   if os.path.exists(results_rng_location + point_str + rng_placement + rng_filename + index_str + ".pickle"):
+ #     continue
 
     if graph_index % 10 == 0 and graph_index > 0:
       print 'Made ' + str(graph_index) + ' tests.'
 
-    index_str = str(graph_index + 1)   
 
     node_pairs_to_check = load_pickle_file(node_pair_location + point_str + 'node_pair_' + str(graph_index + 1))
 
@@ -692,7 +705,12 @@ def do_integrity_test(point_list, node_pairs):
     print rng_container
   """
 
-def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state):
+def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state):	
+  do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, 0, num_graphs)	
+
+
+def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state, from_val, to_val):	
+
   """
   A single function call to tie the entire test stack together and to make it easier to parameterise
   """
@@ -719,11 +737,11 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
     print 'Made graphs'
   
   if (start_state <= 2) and (end_state >= 2):
-    make_node_pairs(point_num, num_graphs, pr_graph_test)
+    make_node_pairs(point_num, num_graphs, pr_graph_test, from_val, to_val)
     print 'Made node pairs'
 
   if (start_state <= 3) and (end_state >= 3):
-    do_test(point_num, num_graphs, pr_graph_test)
+    do_test(point_num, num_graphs, pr_graph_test, from_val, to_val)
     print 'Done results'
     
   if (start_state <= 4) and (end_state >= 4):
@@ -765,17 +783,75 @@ radio_range = 20
 #do_suite(7500,  number_tests, pr_test, eq(7500),  radio_range, start_state, end_state)
 #do_suite(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state)
 
-start_state = 1
-end_state = 6
+start_state = 2
+end_state = 3
 
-do_suite(100, number_tests, 100, 100, radio_range , start_state, end_state)
+#do_suite(100, number_tests, 100, 100, radio_range , start_state, end_state)
 #do_suite(250,   number_tests, pr_test, eq(250),   radio_range, start_state, end_state)
 #do_suite(500,   number_tests, pr_test, eq(500),   radio_range, start_state, end_state)
 #do_suite(1000,  number_tests, pr_test, eq(1000),  radio_range, start_state, end_state)
 #do_suite(2500,  number_tests, pr_test, eq(2500),  radio_range, start_state, end_state)
 #do_suite(5000,  number_tests, pr_test, eq(5000),  radio_range, start_state, end_state)
 #do_suite(7500,  number_tests, pr_test, eq(7500),  radio_range, start_state, end_state)
-#do_suite(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state)
+step = 500 / 7
+
+p1 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, 1, step))
+p2 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step, step * 2))
+p3 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 2, step * 3))
+p4 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 3, step * 4))
+p5 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 4, step * 5))
+p6 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 5, step * 6))
+p7 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 6, step * 7 + 3))
+
+p1.start()
+p2.start()
+p3.start()
+p4.start()
+p5.start()
+p6.start()
+p7.start()
+
+p1.join()
+p2.join()
+p3.join()
+p4.join()
+p5.join()
+p6.join()
+p7.join()
+
+
+start_state = 3
+end_state = 3
+for num_nodes in [100, 250, 500, 1000, 2500, 5000, 7500, 10000]:
+  p1 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 1, step))
+  p2 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step, step * 2))
+  p3 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 2, step * 3))
+  p4 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 3, step * 4))
+  p5 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 4, step * 5))
+  p6 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 5, step * 6))
+  p7 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 6, step * 7 + 3))
+
+  p1.start()
+  p2.start()
+  p3.start()
+  p4.start()
+  p5.start()
+  p6.start()
+  p7.start()
+
+  p1.join()
+  p2.join()
+  p3.join()
+  p4.join()
+  p5.join()
+  p6.join()
+  p7.join()
+
+start_state = 3
+end_state = 8
+
+for num_nodes in [100, 250, 500, 1000, 2500, 5000, 7500, 10000]:
+  do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 1, number_tests)
 
 """
 point_list = [(0,0), (20, 0), (4, -5), (15, -5)]
