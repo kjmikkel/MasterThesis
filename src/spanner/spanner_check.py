@@ -71,8 +71,8 @@ class results_container:
 
     self.total_length = 0
 
-    self.scc = [] # Strongly connected components
-    self.number_scc = 0
+    self.cc = [] # Strongly connected components
+    self.number_cc = 0
 
   def get_min_internal(self, min_dist):
     return min(min_dist)
@@ -121,9 +121,9 @@ class results_container:
     self.max_neighbours = max(self.edges)
     self.min_neighbours = min(self.edges)
 
-    # SCC
-    print self.scc
-    self.number_scc = (sum(self.scc) * 1.0) / len(self.scc) * 1.0 # Strongly connected components
+    # CC
+    print self.cc
+    self.number_cc = (sum(self.cc) * 1.0) / len(self.cc) * 1.0 # Strongly connected components
 
   def get_latex_values(self):
     self.finalize()
@@ -138,7 +138,7 @@ class results_container:
     return_dict["error"] = str(self.num_errors)
     return_dict["total_length"] = c_round(self.total_length)
     return_dict["num_edges"] = str(self.edge_number)
-    return_dict["SCC"] = str(self.number_scc)
+    return_dict["CC"] = str(self.number_cc)
  
     return return_dict
 
@@ -449,10 +449,10 @@ def perform_tests(load_graph_name, save_data_name, node_pairs):
       set_tuple = tuple(set_container[node])
       strong_dict[set_tuple] = 1
     
-    num_scc = len(strong_dict.keys())  
+    num_cc = len(strong_dict.keys())  
     
 
-    save_pickle_file(save_data_name, (results, neighbours, graph_distance, num_scc))
+    save_pickle_file(save_data_name, (results, neighbours, graph_distance, num_cc))
 
 def get_edge_data(graph):
     nodes = graph.keys()
@@ -544,7 +544,7 @@ def container_analysis(container, filename, paths):
   results = graph_results[0]
   container.edges.extend(graph_results[1])
   container.total_length += graph_results[2][0]
-  container.scc.append(graph_results[3])
+  container.cc.append(graph_results[3])
 
   old_missing_path = copy.deepcopy(paths)  
   
