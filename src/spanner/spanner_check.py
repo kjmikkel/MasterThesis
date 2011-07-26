@@ -263,7 +263,6 @@ def make_node_pairs(number_of_points, num, number_tests, from_val, to_val):
     (_ , set_container) = make_graph.MST_Kruskal(non_planar_graph)
     nodes = non_planar_graph.keys()
 
-  #  num_time1 = datetime.now()
     # We find out how many sets we are working with
     num_sets_dict = {}
     set_len = 0
@@ -275,27 +274,15 @@ def make_node_pairs(number_of_points, num, number_tests, from_val, to_val):
       
       if set_len >= 5:
         break
- #   num_time2 = datetime.now()
- #   test_time = num_time2 - num_time1
 
 
     node_pairs_to_check = []
     if set_len < 5:
-  #    num_time1 = datetime.now()
       print "advanced"
       node_pairs_to_check = advanced_node_pairs(number_of_points, set_container, nodes)
-  #    num_time2 = datetime.now()
-  #    advanced = num_time2 - num_time1
     else:
- #     num_time1 = datetime.now()
       node_pairs_to_check = brute_force_node_pairs(number_of_points, set_container, nodes)
- #     num_time2 = datetime.now()
- #     brute = num_time2 - num_time1
 
-#    print "Test time: \t\t" + str(test_time)
-#    print "Advanced: \t\t" + str(advanced)
-#    print "Bruteforce: \t\t" + str(brute)
-#    print "Test + Advanced: \t" + str(test_time + advanced) + ", less?: " + str((test_time + advanced) < brute)  
     save_pickle_file(node_pair_location + point_str + "node_pair_" + str(graph_index + 1), node_pairs_to_check)
     
 
@@ -451,7 +438,6 @@ def perform_tests(load_graph_name, save_data_name, node_pairs):
     
     num_cc = len(cc_dict.keys())  
     
-
     save_pickle_file(save_data_name, (results, neighbours, graph_distance, num_cc))
 
 def get_edge_data(graph):
@@ -625,53 +611,33 @@ def print_latex_results(number_of_points):
   gg_unit_distance = gg_results.unit_distance_value * 1.0
   rng_unit_distance = rng_results.unit_distance_value * 1.0
 
-  graph_gg_unit  = (gg_unit_distance  / graph_unit_distance) * 100
-  graph_rng_unit = (rng_unit_distance / graph_unit_distance) * 100
-
-  latex_table =  "\\begin{tabular}{ccrrrr}\n"
-  latex_table += "\\multicolumn{2}{}{}        & Length of graph: & Max node-pair: & Min node-pair: & Avg node-pair \n"
-  latex_table += "\\multirow{3}{*}{Distance}  & NML & %s & %s & %s & %s ", graph_distance[0], graph_distance[1], graph_distance[2], graph_distance[3] 
-  """ 
- latex_table += newline
- latex_table += "                            & GG  & " + gg_distance[0] + " & " + gg_distance[1] + " & " + gg_distance[2] + " & " + gg_distance[3] + " " + newline
-  latex_table += "                            & RNG & " + rng_distance[0] + " & " + rng_distance[1] + " & " + rng_distance[2] + " & " + rng_distance[3] + " " + newline
-  latex_table += "\\hline \n"
-  latex_table += "Unit      & NML & " + graph_unit[0] + "\phantom{.00} & " + graph_unit[1] + " & " + graph_unit[2] + " & " + graph_unit[3] + " " + newline 
-  latex_table += "Distance  & GG  & " + gg_unit[0] + "\phantom{.00} & " + gg_unit[1] + " & " + gg_unit[2] + " & " + gg_unit[3] + " " + newline  
-  latex_table += "          & RNG & " + + rng_unit[0] + "\phantom{.00} & " + rng_unit[1] + " & " + rng_unit[2] + " & " + rng_unit[3] + " " + newline
-  latex_table += "\hline" 
-  latex_table += "\hline"
-  latex_table += "& & Distance: & Unit Distance: " + newline 
-  latex_table += "Percentage   & NML & 100.00 \% & 100,00 \%" + newline
-  latex_table + of the       & GG  & 101.50 \% & 109.94 \% \\
-normal graph & RNG & 104.13 \% & 113.05 \%
-\end{tabular}
-  """
-  print latex_table 
-  """
-  save_file(latex_location + 'graph_results_' + point_str[0:-1], graph_latex) 
-
-
-  print 'Total results'
   graph_distance = graph_results.distance_value * 1.0
   gg_distance    = gg_results.distance_value * 1.0
   rng_distance   = rng_results.distance_value * 1.0
 
-  graph_gg =  gg_distance / graph_distance
-  graph_rng = rng_distance / graph_distance
+  graph_gg =  gg_distance / graph_distance * 100.00
+  graph_rng = rng_distance / graph_distance * 100.00
 
+  graph_gg_unit  = (gg_unit_distance  / graph_unit_distance) * 100.00
+  graph_rng_unit = (rng_unit_distance / graph_unit_distance) * 100.00
 
-
-  newline = '\\\\\n'
-  line   = '\\hline\n'
-  string = '\\begin{tabular}{l|c|c|}' + '\n'
-  string += ' & Gabriel Graph & RNG' + newline
-  string += line
-  string += 'Distance: & ' + c_round(graph_gg) + ' & ' + c_round(graph_rng) + newline
-  string += 'Unit Distance: & ' + c_round(graph_gg_unit) + ' & ' + c_round(graph_rng_unit) + newline
-  string += '\\end{tabular}'  
-
-  save_file(latex_location + 'spanner_' + point_str[0:-1], string)
+  latex_table =  "\\begin{tabular}{ccrrrr}\n"
+  latex_table += "\\multicolumn{2}{}{}        & Length of graph: & Max node-pair: & Min node-pair: & Avg node-pair \n"
+  latex_table += "\\multirow{3}{*}{Distance}  & NML & %s & %s & %s & %s%s" % (graph_distance[0], graph_distance[1], graph_distance[2], graph_distance[3], newline) 
+  latex_table += "                            & GG  &  %s & %s & %s & %s%s" % (gg_distance[0], gg_distance[1], gg_distance[2], gg_distance[3], newline)
+  latex_table += "                            & RNG & %s & %s & %s & %s%s" % (rng_distance[0], rng_distance[1], rng_distance[2], rng_distance[3], newline) 
+  latex_table += "\\hline \n"
+  latex_table += "Unit      & NML & %s\phantom{.00} & %s  & %s & %s%s" % (graph_unit[0], graph_unit[1], graph_unit[2], graph_unit[3], newline)  
+  latex_table += "Distance  & GG  %s\phantom{.00} & %s & %s & %s%s" % (gg_unit[0], gg_unit[1], gg_unit[2], gg_unit[3], newline)  
+  latex_table += "          & RNG & %s\phantom{.00} & %s & %s & %s%s" % (rng_unit[0], rng_unit[1], rng_unit[2], rng_unit[3], newline)
+  latex_table += "\hline" 
+  latex_table += "\hline"
+  latex_table += "& & Distance: & Unit Distance: " + newline 
+  latex_table += "Percentage   & NML & 100.00 \% & 100,00 \%" + newline
+  latex_table += "of the       & GG  & %s \% & %s \%%s" % (graph_gg, graph_gg_unit, newline)
+  latex_table += "normal graph & RNG & %s \% & %s \%\n" % (graph_rng, graph_rng_unit)
+  latex_table += "\end{tabular}"
+  save_file(latex_location + 'graph_results_' + point_str[0:-1], graph_latex)
   
 def do_integrity_test(point_list, node_pairs):
   (normal_graph, tree) = make_graph.SciPy_KDTree(point_list, 20)
@@ -703,7 +669,6 @@ def do_integrity_test(point_list, node_pairs):
     print gg_container
     print '***'
     print rng_container
-  """
 
 def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state):	
   do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, 0, num_graphs)	
@@ -713,9 +678,7 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
 
   """
   A single function call to tie the entire test stack together and to make it easier to parameterise
-  """
 
-  """
   Quick reference for state:
   0 or below: Do everything
   1: Don't do point generation
