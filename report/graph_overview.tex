@@ -43,9 +43,9 @@ $$
 and for \ac{gabe} $a = 1/12$ and $b = 1$, for uniform distributions \cite{GGExpected}.
 
 It is not immediately apparent how one would compare \ac{gabe} and \ac{rng} to \ac{cldp}, since \ac{cldp} is effected on the run-time behaviour of the transmission between the nodes. However, as mentioned before the \ac{rng} is a subset of the \ac{gabe}, which illustrated in figure~\ref{fig:graph_comparison} and figure~\ref{fig:gg-rng-example-big}.
-
+\hide{
 \tikfig{gg-rng-example-big}{In the following examples all the nodes have the same transmission radius. In figure~\ref{fig:norm_graph} we see the non-planar graph. In figure~\ref{fig:gg_graph} we see the \ac{gabe} for the same set of points, clearly being planar and with far less edges, and in figure~\ref{fig:rng_graph} we see the \ac{rng} graph, which on closer inspection turns out to be a subset of the \ref{fig:gg_graph}. For comparison we have the Minimum Spanning tree in figure~\ref{fig:mst}}\todo{unhide when we have to print}
-
+}
 Neither the \ac{manet} or the \ac{anet} can be said to be entirely static. Even in an \ac{anet}, where we assume the nodes remain stationary, every single node will eventually run out of energy or fail. The routing graph must therefore always have a maintenance system that can deal with changes to the underlying graph. 
 
 To complicate matter further different nodes can have different communications radius as exemplified in figure~\ref{fig:node_different_radius}, which shows us that a node needs to confirm that it indeed has a bidirectional link to each of its adjacent nodes, and cannot take it for granted.
