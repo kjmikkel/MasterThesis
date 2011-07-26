@@ -62,7 +62,7 @@ class results_container:
     self.num_errors = 0
     self.legal_empty = 0
 
-    # Statistics about edges - implement this!
+    # Statistics about
     self.edges = []
     self.edge_number = 0
     self.average_neighbours = 0
@@ -71,7 +71,7 @@ class results_container:
 
     self.total_length = 0
 
-    self.cc = [] # Strongly connected components
+    self.cc = [] # Connected components
     self.number_cc = 0
 
   def get_min_internal(self, min_dist):
@@ -123,7 +123,7 @@ class results_container:
 
     # CC
     print self.cc
-    self.number_cc = (sum(self.cc) * 1.0) / len(self.cc) * 1.0 # Strongly connected components
+    self.number_cc = (sum(self.cc) * 1.0) / len(self.cc) * 1.0 # Connected components
 
   def get_latex_values(self):
     self.finalize()
@@ -441,15 +441,15 @@ def perform_tests(load_graph_name, save_data_name, node_pairs):
     results                        = do_actual_test(graph, local_node_pairs) 
     (neighbours, graph_distance)   = get_edge_data(graph)   
 
-    # We find all the Strongly Connected Components
+    # We find all the Connected Components
     (_ , set_container) = make_graph.MST_Kruskal(graph)
 
-    strong_dict = {}
+    cc_dict = {}
     for node in set_container.keys():
       set_tuple = tuple(set_container[node])
-      strong_dict[set_tuple] = 1
+      cc_dict[set_tuple] = 1
     
-    num_cc = len(strong_dict.keys())  
+    num_cc = len(cc_dict.keys())  
     
 
     save_pickle_file(save_data_name, (results, neighbours, graph_distance, num_cc))
