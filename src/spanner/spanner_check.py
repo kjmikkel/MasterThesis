@@ -11,8 +11,6 @@ if cmd_folder not in sys.path:
 
 import make_graph, dijkstra
 
-psyco.full()
-
 point_set_location = 'Pointsets/'
 point_filename = 'pointset_'
 
@@ -410,8 +408,8 @@ def do_test(number_of_points, num, number_tests, from_val, to_val):
   for graph_index in range(from_val, to_val):
     index_str = str(graph_index + 1)  
 
- #   if os.path.exists(results_rng_location + point_str + rng_placement + rng_filename + index_str + ".pickle"):
- #     continue
+    if os.path.exists(results_rng_location + point_str + rng_placement + rng_filename + index_str + ".pickle"):
+      continue
 
     if graph_index % 10 == 0 and graph_index > 0:
       print 'Made ' + str(graph_index) + ' tests.'
@@ -757,7 +755,7 @@ radio_range = 20
 #do_suite(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state)
 
 start_state = 2
-end_state = 3
+end_state = 2
 
 #do_suite(100, number_tests, 100, 100, radio_range , start_state, end_state)
 #do_suite(250,   number_tests, pr_test, eq(250),   radio_range, start_state, end_state)
@@ -768,6 +766,7 @@ end_state = 3
 #do_suite(7500,  number_tests, pr_test, eq(7500),  radio_range, start_state, end_state)
 step = 500 / 7
 
+"""
 p1 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, 1, step))
 p2 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step, step * 2))
 p3 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 2, step * 3))
@@ -791,12 +790,13 @@ p4.join()
 p5.join()
 p6.join()
 p7.join()
-
+"""
 
 start_state = 3
 end_state = 3
 for num_nodes in [100, 250, 500, 1000, 2500, 5000, 7500, 10000]:
-  p1 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 1, step))
+  print "******* %s *******" % num_nodes
+  p1 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, step))
   p2 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step, step * 2))
   p3 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 2, step * 3))
   p4 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 3, step * 4))
