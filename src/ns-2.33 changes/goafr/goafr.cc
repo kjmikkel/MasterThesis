@@ -536,7 +536,8 @@ GOAFRNeighbTable::ent_add(const GOAFRNeighbEnt *ent)
 		owslot = tab[nents];
 	j = nents-1;
 	while (j >= i) {
-		tab[j+1] = tab[j- 1];
+		// the second index has to be j, not j-1, otherwise we will get a segfault
+		tab[j+1] = tab[j];
 		j--;
 	}
 	// slam into table, without overwriting timers
@@ -1435,17 +1436,17 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 	}
 	
     // End of what was added to support GOAFR
+	
 	switch(goafrh->mode_) {
 	case GOAFRH_DATA_GREEDY: 
-		//		fprintf(stderr, "Greedy\n");
-	    // first of all, look if we're neighbor to dst
+		
+		// first of all, look if we're neighbor to dst
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
 			cmh->next_hop_ = ne->dst;
 			break;
 	    }
 	    
-        
-	    // try to find the next best neighbor
+		// try to find the next best neighbor
 	    if (use_congestion_control_)
 			ne = ntab_->ent_findshortest_cc(mn_, iph->dx_, iph->dy_, iph->dz_, cc_alpha_);
 	    else
@@ -1491,7 +1492,6 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				  ((HDR_HLS(p)->type_ == HLS_UPDATE)||
 				   (HDR_HLS(p)->type_ == HLS_HANDOVER))))
 			{
-		
 				if (verbose_) {
 					double myx, myy, myz;
 					mn_->getLoc(&myx, &myy, &myz);
@@ -1503,7 +1503,6 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				if (use_planar_) {
 					// no proactive probes, so no peri_proact_ to worry about
 					ne = ntab_->ent_findnext_onperi(mn_, iph->daddr(), iph->dx_, iph->dy_, iph->dz_, use_planar_);
-				
 					if (!ne) { // no face toward the destination
 						if(goafrh->geoanycast)
 							{
@@ -1511,13 +1510,12 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 								locservice_->dropPacketCallback(p);
 								if (p==NULL) { return; }
 							}
-						
 						TRACE_CONN(p,addr(),addr(),HDR_IP(p)->daddr());
-
+						fprintf(stderr, "before drop\n");
 						drop(p, DROP_RTR_NO_ROUTE);
 						return;
 					}
-			  
+	
 					// put packet in peri data mode, forward
 					cmh->size() -= hdr_size(p); // strip data header
 					goafrh->mode_ = GOAFRH_DATA_PERI;
@@ -1570,7 +1568,6 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 				  		  break;
 					  ne = ne_temp;
 					}
-
 					// mark ips of edge endpoints
 					goafrh->periptip_[0] = goafrh->hops_[0].ip;        // prev edge on peri
 					goafrh->periptip_[1] = mn_->address(); // myself
@@ -1672,7 +1669,6 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 	     *******************************************/
 
 	case GOAFRH_DATA_PERI:
-		//		fprintf(stderr, "Peri\n");
 	    // first of all, look if we're neighbor to dst
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
 			cmh->size() -= hdr_size(p); // strip data peri header

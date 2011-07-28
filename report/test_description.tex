@@ -32,8 +32,8 @@ In order to perform the tests I will need to define the parameters and their ran
 
 \item[Number of nodes:] It is clear that denser node distribution, everything else being equal, will give a more robust network,
 
-\item[Percentage of nodes failing/leaving the network:] Since we are dealing with a \manet, it is clear that a nodes may leave the network or fail (either due to equipment failure or lack of power). 
-\item[Percentage of nodes entering the network:] In a \manet we have to assume that nodes can enter the network.
+\item[Percentage of nodes failing/leaving the network:] Since we are dealing with a \ac{manet}, it is clear that a nodes may leave the network or fail (either due to equipment failure or lack of power). 
+\item[Percentage of nodes entering the network:] In a \ac{manet} we have to assume that nodes can enter the network.
 \end{description}
 
 
@@ -137,3 +137,62 @@ In order to make the tests more fair I decided to randomly generate 500 differen
 The python scrips I used to generate and tests the graphs can be found at \texttt{src/spanner/spanner\_check.py} along with the data (see the README for explanation) and \texttt{src/spanner/graph\_support} in the GitHub repository refereed to in section~\ref{section:source_code} on p.~\pageref{section:source_code}. All requirements in the code is mentioned in the README file.\\
 
 Due to the sheer size of the test data (well in excess of 10 GB), I am unable to upload all of it to my repository, and I have therefore only uploaded the node-sets, since all the graphs will be able to be created from them (though sadly not the node pairs).
+
+\tikgraph{avg_neigh}{caption}
+
+
+\begin{figure}
+\centering
+\begin{tikzpicture}
+\begin{axis}[xlabel=Number of nodes in graph, ylabel=Average number of neighbours]
+\addplot+[only marks] coordinates{
+(100, 20) (150, 8) (250, 12) (500, 9) (1000, 3)
+};
+\legend{ddd}
+\end{axis}
+\end{tikzpicture}
+\caption{Example}
+\end{figure}
+
+\hide{
+\begin{tikzpicture}
+\begin{loglogaxis}[xlabel=Cost,ylabel=Error]
+
+\addplot coordinates {
+(5,
+8.31160034e-02)
+(17,
+2.54685628e-02)
+(49,
+7.40715288e-03)
+(129,
+2.10192154e-03)
+(321,
+5.87352989e-04)
+(769,
+1.62269942e-04)
+(1793, 4.44248889e-05)
+(4097, 1.20714122e-05)
+(9217, 3.26101452e-06)
+};
+\addplot coordinates {
+(7,
+8.47178381e-02)
+(31,
+3.04409349e-02)
+(111,
+1.02214539e-02)
+(351,
+3.30346265e-03)
+(1023, 1.03886535e-03)
+(2815, 3.19646457e-04)
+(7423, 9.65789766e-05)
+(18943, 2.87339125e-05)
+(47103, 8.43749881e-06)
+};
+\legend{Case 1,Case 2}
+\end{loglogaxis}
+\end{tikzpicture}
+\caption{A larger example}
+\end{figure}
+}
