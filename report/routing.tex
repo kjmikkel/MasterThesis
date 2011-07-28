@@ -21,13 +21,13 @@ Combined, the first and third property says that the state of routing process is
 It is worth noting that the 3 properties only apply to the routing algorithm itself, and not the layers below. This is an important distinction, as most routing solutions require reach node to track which messages it receives, so that future copies of the same message can be ignored in the future --- ensuring that a message will not needlessly congest the network. In the same vain, some routing solutions, such as \cite{speed} has its lower layers use this information to apply congestion avoidance. Another application is to use the messages being passed around could be to keep track of which nodes are still active --- this is usually combined with diagnostic or ``accounting'' messages. 
 
 \subsection{Categories of Routing algorithms}
+\label{section:cat_routing}
 When a routing algorithm wants to send a message or a number of messages from a sink to a source, an important question is whether it has been maintaining a path to the sink, it has to create a path to the sink, or each message should find its own way from the source to the sink.
 
 If the algorithm requires and already established path, then there are two fundamentally different principles that can be applied.
 \begin{description}
 \route{Destination Sequential Distance Vector (DSDV)}
 {With the DSDV, every node tries to remember as many as possible paths to the other nodes in the graph. The mapping from nodes to paths can either just be the next neighbour that a message needs to be routed to, or the entire path. In pure implementations of DSDV, each node knows a path to all other nodes. The advantage of DSDV is that when the information is correct it gives an efficient path, while the disadvantage is that it is memory and bandwidth intensive, since each node has to contain a full routing table, and thus has problems scaling to large \ac{manet}. Depending on how much the nodes move, it could also be prone to contain outdated information.
-%In order to find a path DSDV uses a distributed version of Bell
 }
 {DSDV}
 
@@ -48,7 +48,7 @@ Routing algorithms suited for \acp{manet} can be sorted into the following categ
 {The simplest of the routing algorithms. The entire network is flooded with the message, ensuring that the message eventually reaches the sink. We can be sure that the message will not flood the network forever, thanks to the recording system detailed in section \ref{record-recived}. If the sink can be reached from the source, then flooding is  guarantied to work, but will use a lot of the networks bandwidth, and requires many of the nodes to be active.}
 {Sur2, larMANET} 
 
-\tikfig{rdr}{The grey background area is the area in which routing take place (any message that moves outside will be discarded). The black lines between the nodes represent a bidirectional link, while the grey background between nodes represent the valid bidrectional links inside the grey area. It is clear that the shape of the flooding will have a large effect on the number of nodes that will receive the transmission.}
+\tikfig{rdr}{The grey background area is the area in which routing take place (any message that moves outside will be discarded). The black lines between the nodes represent a bidirectional link, while the grey background between nodes represent the valid bidirectional links inside the grey area. It is clear that the shape of the flooding will have a large effect on the number of nodes that will receive the transmission.}
 
 \route{Restricted Direction Routing (RDR)}
       {Restricted Directed Routing is an algorithm that can be described as a kind of directed flooding. Let G be a geometrical shape. G is now placed such that both the source and the sink are both contained in G (preferably with a non-zero margin, to counter act any movement). The source now floods all nodes inside G with the message, hopefully reaching the sink. Once the first message arrives, a path between the source and sink is established, and any future messages in that pack is sent through this path \todo{clarify}.
