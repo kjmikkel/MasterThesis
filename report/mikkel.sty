@@ -36,6 +36,7 @@
 %\usepackage{ulem}
 
 \usepackage{tikz} % For figures
+\usepackage{pgfplots}
 \usetikzlibrary{shapes, snakes, patterns}
 %\ifPDF
 %	\usepackage[pdftex]{hyperref}
@@ -125,6 +126,14 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \centering
 \tigz{#1}
 \caption{\label{fig:#1}#2}
+\end{figure}
+}
+
+\newcommand{\tikgraph}[2]{
+\begin{figure}
+\centering
+\input{figures/graph/#1.tex}
+\caption{\label{graph:#1}#2}
 \end{figure}
 }
 
