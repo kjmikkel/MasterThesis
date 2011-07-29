@@ -10,23 +10,24 @@ In order to test any algorithm I might implement, I will need a network simulato
 \item[Opnet Modeler:] Opnet is a commercial network simulator. Every layer of the network stack has to be modelled as a finite state machine \cite{MANcom}. 
 \end{description}
 
-From \cite{MANcom} it is clear that the Network simulators gives widely different results. Since it is not clear which of the simulators which gives the result that is closest to reality, the parameters I will have to apply to find the best network simulator are: The license of the network simulator. When it was last updated, how configurable any given simulation is, whether or not it supports wireless routing, how much memory it consumes while running, which languages are required to implement a new protocol, how many programming languages are required to implement a new scenario, how many articles cite the simulator \todo{figure out whether or not this should be removed}, and whether new routing protocols can just be plugged in, or if the entire network simulator has to be recompiled. For Configurable and memory I will use A, B and C, with A as the highest and C is the lowest, to grade them
-
+From \cite{MANcom} it is clear that the Network simulators gives widely different results. Since it is not clear which of the simulators which gives the result that is closest to reality, the parameters I will have to apply to find the best network simulator are: The license of the network simulator. When it was last updated, how configurable any given simulation is, whether or not it supports wireless routing, how much memory it consumes while running, which languages are required to implement a new protocol, how many programming languages are required to implement a new scenario, how many articles cite the simulator \todo{figure out whether or not this should be removed}, and whether new routing protocols can just be plugged in, or if the entire network simulator has to be recompiled. For Configurable and memory I will use A, B and C, with A as the highest and C is the lowest, to grade them\\
+\begin{scriptsize}
 \begin{minipage}{15.0cm}
-\begin{tabular}[4]{l|c|c|c}
-                          & ns-2      & ns-3    & GloMoSim  \\
-\hline\\
-License:                  & GNU GPL   & GNU GPL & Academic  \\
+\begin{tabular}[4]{lccc}
+                          & ns-2      & ns-3      & GloMoSim  \\
+\hline
+License:                  & GNU GPL   & GNU GPL   & Academic  \\
 Last updated              & 2011-05-1\footnote{See \url{http://sourceforge.net/projects/nsnam/}} & & 2001-19-12\footnote{See \url{http://pcl.cs.ucla.edu/projects/glomosim/academic/download.html}}\\
-Configurability           & Extensive & Slightly less extensive \\
-Support for wireless      & Yes       & Yes    &Yes \\
-Memory requirements       & A & B & B \\
-Req for routing protocol  & C++ and OTCL & C++ & Parsec \\
-Req for new scenario      & OTCL      & Python  & \\
-Plug-in or Recompile      & Recompile & Recompile  & Recompile
+Configurability           & Extensive & Extensive & Slightly less extensive \\
+Support for wireless      & Yes       & Yes       & Yes \\
+Memory requirements       & A         & B         & B   \\
+Req for routing protocol  & C++ and OTCL & C++    & Parsec \\
+Req for new scenario      & OTCL      & Python    & \\
+Plug-in or Recompile      & Recompile & Recompile & Recompile
 \end{tabular}
-\end{minipage}\\\\
+\end{minipage}
+\end{scriptsize}
 
 All of the simulators have simple node mobility models built-in. I have however chosen to use a third-party program, BonnMotion\footnote{BonnMotion has been produced as a collaboration between the University of Bonn and the Toilers at \url{toilers.mines.edu} -- last accessed the 16/5 2011} on the grounds that it supports a far greater range of mobility models\footnote{Such as ``Disaster Area'', which I have not found built in implemented in any of the network simulators}, and it enables me to store, and process, the movement traces.
 
-Based on the above, I have chosen to use the ns-2 simulator, since it is far more customisable than both ns-3 and GloMoSim and still being supported, unlike GloMoSim.
+Based on the above, I have chosen to use the ns-2 simulator, since it is far more customisable than both ns-3 and GloMoSim and still being supported, unlike GloMoSim. As mentioned ealier I have however opted to use the ns-2.33 instead of the latest version ns-2.34, on the grounds that much of the leg work had already been done for ns-2, and I did not feel it was worth risiking introducing bugs into the system by porting it to ns-2.34.
