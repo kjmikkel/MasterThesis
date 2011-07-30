@@ -127,7 +127,7 @@ def rng_graph_old(edges, neighbours_dict):
   print 'Changed edges:', len(edges)
   return edges
 
-def rn_graph(old_graph):
+def rn_graph(old_graph, kd_tree, data):
   """
   Current implementation of the Relative Neighbourhood Graph, still based on the old graph, but this version should be faster
   """
@@ -142,12 +142,25 @@ def rn_graph(old_graph):
       add_edge = True
       distance_to_v = neighbours_to_u[v]
       
-      # We have to check through one of the arrays, and therefore it is best if we do it with the shortest array
-      fewest_neighours = neighbours_to_u
-      if len(neighbours_to_v) > len(neighbours_to_u):
-        fewest_neighours = neighbours_to_v
+      mid_point = find_midpoint(u, v)
+      mid_point_radius = (distance_to_v * 1.0) + 0.000000001 # This last bit is due to rounding errors
+    
+      close_nodes = kd_tree.query_ball_point(mid_point, mid_point_radius)      
 
-      for w in fewest_neighours:
+      # We have to check through one of the arrays, and therefore it is best if we do it with the shortest array
+      fewest_neighbours = neighbours_to_u.keys()
+      if len(neighbours_to_v) > len(neighbours_to_u):
+        fewest_neighbours = neighbours_to_v.keys()
+      if len(fewest_neighbours) > len(close_nodes):
+#        print len(fewest_neighbours)
+ #       print len(close_nodes)
+        fewest_neighbours = []
+        for node_index in close_nodes:
+          fewest_neighbours.append(data[node_index])
+       # print fewest_neighbours
+
+#      print "fewest: " + str(len(fewest_neighbours))
+      for w in fewest_neighbours:
         if w == u or w == v:
           continue
         
