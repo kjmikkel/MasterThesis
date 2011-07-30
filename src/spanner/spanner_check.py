@@ -1,7 +1,8 @@
-import os, sys, random, copy, math, json, pickle, psyco
+import os, sys, random, copy, math, json, pickle
 from multiprocessing import Process
 from decimal import *
 from datetime import datetime
+
 # I define the precision of the decimal numbers
 getcontext().prec = 5
 
@@ -10,8 +11,6 @@ if cmd_folder not in sys.path:
   sys.path.insert(0, cmd_folder)
 
 import make_graph, dijkstra
-
-psyco.full()
 
 point_set_location = 'Pointsets/'
 point_filename = 'pointset_'
@@ -137,6 +136,7 @@ class results_container:
     return_dict["error"] = str(self.num_errors)
     return_dict["total_length"] = c_round(self.total_length)
     return_dict["num_edges"] = str(self.edge_number)
+    return_dict["neighbours"] = neighbours
     return_dict["CC"] = str(self.number_cc)
  
     return return_dict
@@ -230,17 +230,31 @@ def generate_graphs(number_of_points, number_of_graphs, cutoff_distance):
     filename = point_set_location + point_str + point_filename + index_str
     new_data = load_pickle_file(filename)
 
-    (normal_graph, tree) = make_graph.SciPy_KDTree(new_data, cutoff_distance)
-    filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
-    save_pickle_file(filename, normal_graph)   
+    old_start = datetime.today()
+    tree = make_graph.SciPy_KDTree(new_data)
+    rn_tree = make_graph.rn_kdtree(new_data, tree)
+    old_end = datetime.today()
     
-    gabriel_graph = make_graph.gabriel_graph(normal_graph, tree, new_data)
-    filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
-    save_pickle_file(filename, gabriel_graph)
+#    normal_graph = make_graph.make_non_planar_graph(new_data, cutoff_distance, tree)
+#    filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
+#    save_pickle_file(filename, normal_graph)   
+    
+#    gabriel_graph = make_graph.gabriel_graph(normal_graph, tree, new_data)
+#    filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
+#    save_pickle_file(filename, gabriel_graph)
+    
+    new_start = datetime.today()
+    rn_graph = make_graph.rn_brute(new_data)
+    new_end = datetime.today()
 
-    rng_graph = make_graph.rn_graph(gabriel_graph, tree, new_data)
-    filename = rng_f + point_str + rng_placement + rng_filename + index_str
-    save_pickle_file(filename, rng_graph)
+    print "old: " + str(old_end - old_start)
+    print "new: " + str(new_end - new_start) 
+    print "Alike: " + str(rn_tree == rn_graph)
+    
+
+#    filename = rng_f + point_str + rng_placement + rng_filename + index_str
+#    rn_graph_load = load_pickle_file(filename)
+    #save_pickle_file(filename, rng_graph)
             
 def make_node_pairs(number_of_points, num, number_tests, from_val, to_val):
   point_str = str(number_of_points) + '/'
@@ -645,6 +659,56 @@ def print_latex_results(number_of_points):
 
   save_file(latex_location + 'graph_results_' + point_str[0:-1], latex_table)
 
+def make_pgf_graph(item_list, plot, legend):
+  latex_graph = ""
+  latex_graph += "\\begin{tikzpicture}\n"
+  latex_graph +=  "\\begin{axis}[xlabel=Nodes in graph, ylabel=Average neighbours,legend cell align=center style={cells={anchor=east}, legend pos=outer north east,}]\n"
+  
+  for item in item_list:
+    latex_graph += "\\%s{\n" % plot
+    latex_graph += item
+    latex_graph += "};\n"
+
+  latex_graph += "\\legend{%s}\n" % legend
+  latex_graph += "\\end{axis}\n"
+  latex_graph += "\\end{tikzpicture}\n"
+
+  return latex_graph
+
+def print_graphs(number_list):
+
+  graph_avg = ""
+  gg_avg = ""
+  rng_avg = ""
+  graph_folder = "../../report/figures/graph/"
+
+  for number in number_list:
+    point_str = str(number) + '/'
+  
+    filename = results_non_location + point_str + 'graph_results' 
+    graph_results = load_pickle_file(filename)
+  
+    filename = results_gg_location + point_str + 'gg_results'
+    gg_results = load_pickle_file(filename)
+  
+    filename = results_rng_location + point_str + 'rng_results'
+    rng_results = load_pickle_file(filename)
+
+    graph_latex = graph_results.get_latex_values()
+    gg_latex    = gg_results.get_latex_values()
+    rng_latex   = rng_results.get_latex_values()
+
+    graph_neighbours = graph_latex["neighbours"]
+    gg_neighbours    = gg_latex["neighbours"]
+    rng_neighbours   = rng_latex["neighbours"]
+
+    graph_avg += "(%s, %s) " % (number, graph_neighbours[2])
+    gg_avg    += "(%s, %s) " % (number, gg_neighbours[2])
+    rng_avg   += "(%s, %s) " % (number, rng_neighbours[2])
+
+  avg_neigh_graph = make_pgf_graph([graph_avg, gg_avg, rng_avg], "addplot+[only marks] coordinates", "Non-planar, Gabriel Graph, RNG")
+  save_file(graph_folder + "avg_neigh", avg_neigh_graph)
+
   
 def do_integrity_test(point_list, node_pairs):
   (normal_graph, tree) = make_graph.SciPy_KDTree(point_list, 20)
@@ -679,7 +743,6 @@ def do_integrity_test(point_list, node_pairs):
 
 def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state):	
   do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, 0, num_graphs)	
-
 
 def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state, from_val, to_val):	
 
@@ -738,31 +801,20 @@ def eq(points):
 # point_num num_graphs pr_graphs_test max_values cut_off state
 #do_suite(10, 2, 30, 20, 15, 0)
 
-start_state = 0
+start_state = 1
 end_state = 1
-number_tests = 500
+number_tests = 1
 pr_test = 100
 radio_range = 20
-
-#do_suite(100, number_tests, 100, 100, radio_range , start_state, end_state)
-#do_suite(250,   number_tests, pr_test, eq(250),   radio_range, start_state, end_state)
-#do_suite(500,   number_tests, pr_test, eq(500),   radio_range, start_state, end_state)
-#do_suite(1000,  number_tests, pr_test, eq(1000),  radio_range, start_state, end_state)
-#do_suite(2500,  number_tests, pr_test, eq(2500),  radio_range, start_state, end_state)
-#do_suite(5000,  number_tests, pr_test, eq(5000),  radio_range, start_state, end_state)
-#do_suite(7500,  number_tests, pr_test, eq(7500),  radio_range, start_state, end_state)
-#do_suite(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state)
+for number_index in [100, 250, 500, 1000, 2500, 5000, 7500, 10000]:
+  do_suite(number_index,  number_tests, pr_test, eq(number_index),  radio_range, start_state, end_state, 0, 1)
 
 start_state = 2
 end_state = 3
 
-#do_suite(100, number_tests, 100, 100, radio_range , start_state, end_state)
-#do_suite(250,   number_tests, pr_test, eq(250),   radio_range, start_state, end_state)
-#do_suite(500,   number_tests, pr_test, eq(500),   radio_range, start_state, end_state)
-#do_suite(1000,  number_tests, pr_test, eq(1000),  radio_range, start_state, end_state)
-#do_suite(2500,  number_tests, pr_test, eq(2500),  radio_range, start_state, end_state)
-#do_suite(5000,  number_tests, pr_test, eq(5000),  radio_range, start_state, end_state)
-#do_suite(7500,  number_tests, pr_test, eq(7500),  radio_range, start_state, end_state)
+#for number_index in [100, 250, 500, 1000, 2500, 5000, 7500, 10000]:
+#  do_suite(number_index,  number_tests, pr_test, eq(number_index),  radio_range, start_state, end_state, 0, number_tests)
+
 step = 500 / 7
 """
 p1 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, 1, step))
@@ -822,8 +874,10 @@ for num_nodes in [100, 250, 500, 1000, 2500, 5000, 7500, 10000]:
 start_state = 3
 end_state = 8
 
-for num_nodes in [100, 250, 500, 1000, 2500]: #, 5000, 7500, 10000]:
-  do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
+#for num_nodes in [250, 500, 1000, 2500]: #, 5000, 7500, 10000]:
+#  do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
+
+#print_graphs([250, 500])
 
 """
 point_list = [(0,0), (20, 0), (4, -5), (15, -5)]
