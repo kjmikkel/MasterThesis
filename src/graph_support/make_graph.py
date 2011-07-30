@@ -1,6 +1,8 @@
 from scipy.spatial import KDTree
+from scipy.spatial import Delaunay
 import math, copy
 from priodict import priorityDictionary
+from datetime import datetime
 
 def brute_force(data, cut_off):
   """
@@ -100,82 +102,125 @@ def gabriel_graph(old_graph, kd_tree, data):
     graph[u] = local_edges    
   return graph
 
-def rng_graph_old(edges, neighbours_dict):
+def gabriel_graph_kdtree(points, kd_tree):
   """
-  The old version of the Relative Neighbourhood graph, which removes edges that should not be in the neighbourhood graph - 
+  The new version of the Gabriel Graph algorithm which uses the kd-tree to create the edges, instead of removing them
   """
-  print 'All edges:', len(edges)
+  graph = {}
+  edges = make_delaunay_edges(points)
     
-  keys = neighbours_dict.keys()
-  for key in keys:
-    neighbours = neighbours_dict[key]
-    edges_remove = []
-    for v in neighbours:
-      for w in neighbours:
-        if v == w:
-          continue
-
-        if find_distance(key[1], v[1]) > max(find_distance(key[1], w[1]), find_distance(v[1], w[1])):
-          edges_remove.append((key, v))
-          break
-
-  if len(edges_remove) > 0:
-    for edge in edges_remove:
-      if edge in edges:
-        edges.remove(edge)
-        
-  print 'Changed edges:', len(edges)
-  return edges
-
-def rn_graph(old_graph, kd_tree, data):
-  """
-  Current implementation of the Relative Neighbourhood Graph, still based on the old graph, but this version should be faster
-  """
-  graph = {}    
-  for u in old_graph:
-    local_graph = {}	
-    neighbours_to_u = old_graph[u]
+  for edge in edges:
+    u = edge[0]
+    v = edge[1]
+    mid_point = find_midpoint(u, v)
+    distance_to_v = find_distance(u, v)
+    mid_point_radius = ((distance_to_v * 1.0)  / 2.0) + 0.0000001  # This last bit is due to rounding errors
     
-    for v in neighbours_to_u:
-      neighbours_to_v = old_graph[v]
-       
-      add_edge = True
-      distance_to_v = neighbours_to_u[v]
+    close_nodes = kd_tree.query_ball_point(mid_point, mid_point_radius)      
       
-      mid_point = find_midpoint(u, v)
-      mid_point_radius = (distance_to_v * 1.0) + 0.000000001 # This last bit is due to rounding errors
-    
-      close_nodes = kd_tree.query_ball_point(mid_point, mid_point_radius)      
-
-      # We have to check through one of the arrays, and therefore it is best if we do it with the shortest array
-      fewest_neighbours = neighbours_to_u.keys()
-      if len(neighbours_to_v) > len(neighbours_to_u):
-        fewest_neighbours = neighbours_to_v.keys()
-      if len(fewest_neighbours) > len(close_nodes):
-#        print len(fewest_neighbours)
- #       print len(close_nodes)
-        fewest_neighbours = []
-        for node_index in close_nodes:
-          fewest_neighbours.append(data[node_index])
-       # print fewest_neighbours
-
-#      print "fewest: " + str(len(fewest_neighbours))
-      for w in fewest_neighbours:
-        if w == u or w == v:
-          continue
-        
-        if distance_to_v > max(find_distance(u, w), find_distance(v, w)):
-          add_edge = False
-          break
-      
-      if add_edge:
-        local_graph[v] = distance_to_v
-    
-    graph[u] = local_graph
-            
+    if len(close_nodes) == 2:
+      add_graph_value(graph, v, u, distance_to_v)
+      add_graph_value(graph, u, v, distance_to_v)
+          
   return graph
 
+def gabriel_graph_brute(points):
+  """
+  The new version of the Gabriel Graph algorithm which uses the kd-tree to create the edges, instead of removing them
+  """
+  graph = {}
+  edges = make_delaunay_edges(points)
+    
+  for edge in edges:
+    u = edge[0]
+    v = edge[1]
+    mid_point = find_midpoint(u, v)
+    distance_to_v = find_distance(u, v)
+    add = True
+    for point in points:
+      if not (point == u or point == v):
+        p_dist = find_distance(point, mid_point)
+        if p_dist < distance_to_v:
+          add = False;
+          break
 
+    if add:
+      add_graph_value(graph, v, u, distance_to_v)
+      add_graph_value(graph, u, v, distance_to_v)
+          
+  return graph
+
+def add_graph_value(graph, index1, index2, point_distance):
+  if graph.get(index1):
+    graph[index1][index2] = point_distance
+  else:
+    graph[index1] = {index2: point_distance}    
+  return graph
+
+def make_delaunay_edges(points):
+  delaunay = Delaunay(points)
+  
+  edges = []
+  for i in xrange(delaunay.nsimplex): 
+    if i > delaunay.neighbors[i,2]: 
+      edges.append((points[delaunay.vertices[i,0]], points[delaunay.vertices[i,1]])) 
+    if i > delaunay.neighbors[i,0]: 
+      edges.append((points[delaunay.vertices[i,1]], points[delaunay.vertices[i,2]])) 
+    if i > delaunay.neighbors[i,1]: 
+      edges.append((points[delaunay.vertices[i,2]], points[delaunay.vertices[i,0]])) 
+
+  return edges
+
+def rn_graph_brute(points):
+  edges = make_delaunay_edges(points)  
+  rn_graph_dict = {}
+
+  for edge in edges:
+    v = edge[0]
+    u = edge[1]
+    edge_distance = find_distance(u, v)
+    add = True
+    for point in points:
+      if not (point == u or point == v):
+        if edge_distance > max(find_distance(v, point), find_distance(u, point)):
+          add = False
+          break
+      else:
+        continue
+    if add:
+      add_graph_value(rn_graph_dict, v, u, edge_distance)
+      add_graph_value(rn_graph_dict, u, v, edge_distance)
+
+  return rn_graph_dict
+
+def rn_graph_kdtree(points, kdtree):
+  edges = make_delaunay_edges(points)
+  rn_graph_dict = {}
+
+  for edge in edges:
+    v = edge[0]
+    u = edge[1]
+    edge_distance = find_distance(u, v)
+    add = True
+    u_points = kdtree.query_ball_point(u, edge_distance)
+    v_points = kdtree.query_ball_point(v, edge_distance)
+
+    points_index = u_points
+    points_index.extend(v_points)
+
+    for point_index in points_index:
+      point = points[point_index]
+      if not (point == u or point == v):
+        if edge_distance > max(find_distance(v, point), find_distance(u, point)):
+          add = False
+          break
+      else:
+        continue
+    if add:
+      add_graph_value(rn_graph_dict, v, u, edge_distance)
+      add_graph_value(rn_graph_dict, u, v, edge_distance)
+
+  return rn_graph_dict  
 
 def MST_Kruskal(graph):
   """
@@ -227,31 +272,31 @@ def MST_Kruskal(graph):
 
   return (result_graph, set_container) 
 
-
-
-def SciPy_KDTree(data, cutoff_distance):
+def SciPy_KDTree(points):
   """
   The kDTree is used to create the "complete"-moblie ad-hoc graph
   """
-  result = {}
-  tree = KDTree(data)
+  
+  tree = KDTree(points)
+  return tree
 
+def make_non_planar_graph(points, cutoff_distance, tree):
   # Now we make the actuall graph
-  neighbors = tree.query_ball_point(data, cutoff_distance)
+  neighbours = tree.query_ball_point(points, cutoff_distance)
  
-  for entry_num in range(0, len(data)):
-    point = data[entry_num]
-    local_neighbors = neighbors[entry_num]
+  for entry_num in range(0, len(points)):
+    point = points[entry_num]
+    local_neighbours = neighbours[entry_num]
     local_result = {}    
  
-    for actual_neighbor in local_neighbors:
-      neighbor = data[actual_neighbor]
+    for actual_neighbour in local_neighbours:
+      neighbour = points[actual_neighbour]
       
       # if one of our 'neighbours' is the point itself then we skip it
-      if neighbor == point:
+      if neighbour == point:
         continue
       else:
-        local_result[neighbor] = find_distance(neighbor, point)
+        local_result[neighbour] = find_distance(neighbour, point)
     
     result[point] = local_result
 
