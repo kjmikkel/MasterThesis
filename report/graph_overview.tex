@@ -22,15 +22,35 @@ Having chosen to keep our graphs planar we must take care that the routing graph
 
 I have found the following general methods for making the planar graphs:
 \begin{description}
-\item[The \ac{gabe}:] Two nodes $v$ and $u$ only share an edge iff the circle that has $\overline{vu}$ as its diameter does not contain a node $q$ \cite{gopher, gpsr}. 
+\item[The \ac{gabe}:] The \ac{gabe} is a subset of the Delaunay triangulation, where two nodes $v$ and $u$ only share an edge iff the circle that has $\overline{vu}$ as its diameter does not contain a node $q$. In practice a good way of computing the \gabe{gabe} is to use the Delaunay triangulation to limit the number of node pairs that have to be checked.
+\begin{algorithmic}[H]
+  \caption{GabrielGraph}
+  \SetKwData{edge}{edge}
+  \SetKwData{pOne}{p1}\SetKwData{pTwo}{p2}
+  \SetKwData{mid}{midPoint0}
+  \setKwInOut{Input}{input}
+  \setKwInOut{Output}{output}
+  \dontprintsemicolon
+  \Input{A set of points P}
+  \Output{The Gabriel Graph based on P}
+  delaunay $\gets$ MakeDelaunay(P) \;
+  \ForEach{\edge $\in Edges(delaunay)$}{
+    \pOne $\gets FirstPoint(\edge)$ \;
+    \pTwo $\gets SecondPoint(\edge)$ \;
+    \mid $\gets FindMidPoint(\pOne, \pTwo)$ \;
+ 
+
+    }
+\STATE 
+\end{algorithmic} 
+
+\cite{gpsr, gopher}. 
 \item[The \ac{rng}:] Two nodes $v$ and $u$ share an edge if there is no node $q$ such that $|\overline{vq}|, |\overline{uq}| \leq |\overline{vu}|$ (i.e. $q$ is closer to both $v$ and $u$ than $v$ and $u$ are to each other). \cite{gpsr, RNG}
+\item[The \ac{cldp}:] \ac{cldp} works by having each node uses \emph{the right-hand-rule}\label{right-hand rule}\footnote{The right-hand-rule states that for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started.} and checks whether or not any of its links crosses/is crossed by another edge. In other words, \ac{cldp} first builds up a graph that may be non-planar, and then in a distributed manner finds and removes edges that makes the graph non-planar without disconnecting parts of graph (as the paper accuses both \ac{gabe} and \ac{rng} of). \ac{cldp} is not dependent on the Unit graph assumption \cite{practical}. 
 \end{description}
 
-Both \ac{gabe} and \ac{rng} are based on the \ac{uga}, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}.
-\label{right-hand rule}
-\begin{description}
-\item[The \ac{cldp}:] \ac{cldp} works by having each node uses \emph{the right-hand-rule}\footnote{The right-hand-rule states that for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started.} and checks whether or not any of its links crosses/is crossed by another edge. In other words, \ac{cldp} first builds up a graph that may be non-planar, and then in a distributed manner finds and removes edges that makes the graph non-planar without disconnecting parts of graph (as the paper accuses both \ac{gabe} and \ac{rng} of). \ac{cldp} is not dependent on the Unit graph assumption \cite{practical}. 
-\end{description}
+Both the \ac{gabe} and the \ac{rng} are based on the \ac{uga}, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}.
+
 
 The \ac{gabe} is a sub-graph of the Delaunay triangulation, and \ac{rng} is a subset of \ac{gabe} \todo{find and cite}, and as such they are both well described and understood graphs many of the same properties as the Delaunay triangulation. \ac{cldp} on the other hand is not a graph, but rather an algorithm that takes an already existing graph and makes sure its planar, which, according to \cite{practical} is less likely to make the graph disconnected than \ac{gabe} and \ac{rng}. It is therefore harder to reason about most probable maximum number of neighbours for \ac{cldp}. 
 
@@ -58,9 +78,9 @@ To complicate matter further different nodes can in practise have different comm
 Likewise it is important to remember that a node in practise might be able to adjust its communications range (at a higher energy cost). See figure~\ref{fig:different_radius}
 
 \subsection{Two-Level graphs}
-\tikfig{gateway-node}{Node $s$ and $t$ are the source and the sink respectively, the rectangular nodes with $CH$ are the \acp{ch} and the diamond nodes are the gateway nodes. From the image we can see that the message travels from the source to the header, between the gateways and then to the second  and then lastly to the sink. It is also clear that it would have been faster to go from the gateway and then to the sink, but since the gateway in this model does not know the location of the different nodes, this is impossible in this model.}
+\tikfig{gateway-node}{Node $s$ and $t$ are the source and the sink respectively, the rectangular nodes with $CH$ are the \acp{ch} and the diamond nodes are the gateway node, and the entirely white or black nodes are the regular nodes that have elected the right- and leftmost \ac{ch} respectively. From the figure we can see that the message travels from the source to the header, between the gateways and then to the second  and then lastly to the sink, as indicated by the grey background. It is also clear that it would have been faster to go from the gateway and then to the sink, but since the gateway in this model does not know the location of the different nodes, the message will first have to be routed to the rightmost node.}
 
-\label{cluster methods}
+\label{section:cluster_methods}
 Node Clustering is a hierarchical alternative to the flat graph. Instead of having every node being the same, a number of nodes are made into \acp{ch} such that all nodes in the graph has 1 cluster head that they communicate with. Most of the time the nodes that belong to a certain \ac{ch} is its one-hop neighbours, but there are also schemes that allows nodes to have a clustered that is farther away, in order to reduce the number of \acp{ch}. With \acp{ch} a layer specialisation and hierarchy is added to the network, which reduces the complexity of an otherwise entirely flat network, while still retaining some decentralisation.
 
 In order to improve the routing, \acp{ch} are almost always accompanied by \emph{gateway nodes}. Gateway nodes are nodes that connect two clusters --- see figure~\ref{fig:gateway-node} for an illustration. \cite{spanners} defines a gateway node as follows:

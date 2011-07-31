@@ -27,7 +27,7 @@ Preferably we would like to have these \ac{manet} connected to the Internet, but
 I expect the reader to have a university level understanding of Computer Networking\footnote{For instance having read \cite{ComNet} or similar}, especially when it comes to understanding the building blocks of the network stack, as well as the most common problems with wireless networks. I also expect the reader to have an university level understanding of Algorithms (Having read \cite{algo} or similar) and graph theory.
 
 \subsection{Scope and Limitations}
-While important in a real world application, I will in this thesis not concern myself with security, neither in the form of the authentication, anonymity of the sender or ensuring that the individual nodes are not misbehaving, or behaving maliciously. For a treatment of security see \cite{trustedRouting}. Furthermore, if there does not exist a path between two nodes, I will not make any guarantee that the message will ever arrive at the sink. I will furthermore assume that all nodes have the same broadcast radius unless explicitly specified.
+While important in a real world application, I will in this thesis not concern myself overly much with security, neither in the form of the authentication, anonymity of the sender or ensuring that the individual nodes are not misbehaving, or behaving maliciously. For a treatment of security see \cite{trustedRouting}. Furthermore, I will not try to solve the problem of sending a message from a source to a sink if they cannot be conencted by a path.I will furthermore assume that all nodes have the same broadcast radius unless explicitly specified.
 
 \subsection{Anatomy of a \ac{manet}}
 A real-life implementation of a \ac{manet} will need the following elements:
@@ -58,6 +58,9 @@ For this project I have read the following articles for background information: 
 \subsection{Source Code and Test Data}
 \label{section:source_code}
 The source code, report and test data can be found in my GitHub repository at \url{https://github.com/kjmikkel/MasterThesis} and is released under the \todo{add license the stuff is released under}.
+The python scrips I used to generate and tests the graphs can be found at \texttt{src/spanner/spanner\_check.py} along with the data (see the README for explanation) and \texttt{src/spanner/graph\_support} All requirements in the code is mentioned in the README file.\\
+
+Due to the sheer size of the test data (well in excess of 10 GB), I am unable to upload all of it to my repository, and I have therefore only uploaded the node-sets, since all the graphs will be able to be created from them (though sadly not the node-pairs, as they too take up too much space).
 
 \subsection{Overview}
 In this section I give a quick overview of what the different sections in report will cover.

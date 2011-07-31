@@ -51,7 +51,7 @@
 \subfloat[New node added]{\label{fig:better_route2}
 \begin{tikzpicture} 
   % The source and the sink, and the new node
-  \foreach \pos/\name in {{(0,0)/s}, {(3, 0)/t}, {(1.5, -0.4)/*}} {
+  \foreach \pos/\name in {{(0,0)/s}, {(3, 0)/t}, {(1.5, -0.4)/u}} {
     \node[vertex] (\name) at \pos {$\name$};
   }
          
@@ -62,7 +62,7 @@
   }
 
   \begin{pgfonlayer}{background}
-    \foreach \source/ \dest in {s/-, -/i, i/*, */j, j/h, h/t}
+    \foreach \source/ \dest in {s/-, -/i, i/u, u/j, j/h, h/t}
       \path[selected edge] (\source) -- (\dest);
   \end{pgfonlayer}
 
@@ -73,7 +73,7 @@
   \foreach \source/\sink in \connectExtra
     \path[edge] (\source) -- (\sink);
        
-  \foreach \source/\sink in {i/*, */j}
+  \foreach \source/\sink in {i/u, u/j}
     \path[edge] (\source) -- (\sink);
 
 \end{tikzpicture}}
