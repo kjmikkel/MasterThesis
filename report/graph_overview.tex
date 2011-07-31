@@ -22,7 +22,8 @@ Having chosen to keep our graphs planar we must take care that the routing graph
 
 I have found the following general methods for making the planar graphs:
 \begin{description}
-\item[The \ac{gabe}:] The \ac{gabe} is a subset of the Delaunay triangulation, where two nodes $v$ and $u$ only share an edge iff the circle that has $\overline{vu}$ as its diameter does not contain a node $q$. In practice a good way of computing the \gabe{gabe} is to use the Delaunay triangulation to limit the number of node pairs that have to be checked.
+\item[The \ac{gabe}:] The \ac{gabe} is a subset of the Delaunay triangulation, where two nodes $v$ and $u$ only share an edge iff the circle that has $\overline{vu}$ as its diameter does not contain a node $q$. In practise a good way of computing the \ac{gabe} is to use the Delaunay triangulation to limit the number of node pairs that have to be checked.
+\hide{
 \begin{algorithmic}[H]
   \caption{GabrielGraph}
   \SetKwData{edge}{edge}
@@ -43,7 +44,7 @@ I have found the following general methods for making the planar graphs:
     }
 \STATE 
 \end{algorithmic} 
-
+}
 \cite{gpsr, gopher}. 
 \item[The \ac{rng}:] Two nodes $v$ and $u$ share an edge if there is no node $q$ such that $|\overline{vq}|, |\overline{uq}| \leq |\overline{vu}|$ (i.e. $q$ is closer to both $v$ and $u$ than $v$ and $u$ are to each other). \cite{gpsr, RNG}
 \item[The \ac{cldp}:] \ac{cldp} works by having each node uses \emph{the right-hand-rule}\label{right-hand rule}\footnote{The right-hand-rule states that for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started.} and checks whether or not any of its links crosses/is crossed by another edge. In other words, \ac{cldp} first builds up a graph that may be non-planar, and then in a distributed manner finds and removes edges that makes the graph non-planar without disconnecting parts of graph (as the paper accuses both \ac{gabe} and \ac{rng} of). \ac{cldp} is not dependent on the Unit graph assumption \cite{practical}. 
