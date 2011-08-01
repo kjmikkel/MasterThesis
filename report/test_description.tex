@@ -43,9 +43,11 @@ As I have now detailed in section~\ref{section:input_parameters} which parameter
 \item[Amount and Data-transmission type:] 500 kB, 5120 kB, 20480 kB
 \item[Size of simulation area:] 500 by 500 units and 1000 by 1000 units
 \item[Routing algorithms:] GOAFR \cite{gopher}, GPSR \cite{gpsr}, Greedy \cite{gopher}, DSDV \cite{DSDV}
-\item[Number of nodes:] 500, 750, 1000
+\item[Number of nodes:] 100 to 10000 nodes in increments of 100 nodes, giving me 100 datapoints that will be used to analyse the succcess of the routing algorithms. 
 \item[Nodes failing:] 0\%, 10\%, 40\%
 \item[Nodes entering:] 0\%, 30\%
+\item[Time:] 10 minutes (600 seconds)
+\item[Maximum number of nodes transmitting at one time:] 30\% of the network
 \end{description}
 
 Not all combinations are going to be tried, since this would create far too many tests to feasibly to test or analyse. However, some of these are going to be combined. For instance it would be preferable to do different data-transmissions during the life time of the network.\todo{finish this up}
@@ -99,12 +101,11 @@ Both GOAFR and GOAFR+ has proved to be theoretical asymptotically worst-case opt
 Due to time constraints I have only been able to implement GOAFR in ns-2, and so will only use that in the tests.
 
 \subsubsection{GPSR}
-
+\cite{gpsr}.
 
 
 \subsubsection{DSDV}
 
-\subsubsection{}
 
 \subsection{Mobility models}
 
@@ -118,29 +119,29 @@ blah blah
 In this section I will detail how I have chosen to set up the limited-range spanner tests for the three different graphs: non-planar, the \acp{gabe} and the \acp{rng}.
 
 \subsubsection{Creation of the graphs}
-It is clear that we must create several graphs of several different number of nodes, as it otherwise is impossible to gain a proper perspective on how well the \ac{gabe} and the \ac{rng} stack up against the non-planar graph. In order to better describe the graphs I will use, I will introduce the notion of \emph{node-sets}, which is a finite set of nodes, where all nodes have a x- and y-coordinate and a transmit distance. Also of importence is the concept of \emph{node-category}, which is a set of node-sets, where all node-sets in any given node-category has the same amount of nodes in them. 
+It is clear that we must create several graphs of several different number of nodes, as it otherwise is impossible to gain a proper perspective on how well the \ac{gabe} and the \ac{rng} stack up against the non-planar graph. In order to better describe the graphs I will use, I will introduce the notion of \emph{node-sets}, which is a finite set of nodes, where all nodes have a x- and y-coordinate and a transmit distance. Also of impotence is the concept of \emph{node-category}, which is a set of node-sets, where all node-sets in any given node-category has the same amount of nodes in them. 
 
 In order to do this test I will first have to make several decisions:
 \begin{itemize}
 \item Decide upon whether we are going to uniformly distribute the nodes or if some sort of clustering should be done. 
-\item How many node-categories I will have to create, balancing the need for datapoints and their spread with the time they will take to create and analyse.
+\item How many node-categories I will have to create, balancing the need for data-points and their spread with the time they will take to create and analyse.
 \item Decide upon the density for the node-categories --- if indeed there should be a fixed density for them, or if the density should be random.
 \item The number of graph I will generate and the number of test I will perform for each graph in order to get enough test data to properly gauge the underlying data.
 \end{itemize}
 
-I have not encountered any specific point clustering algorithm in the literature besides the various mobility models (see \cite{MobilityAdHocResearch, disasterArea}) which has lead me to place the nodes uniformly in the plane. The justification of this was both the fact that part of this investigation was an experimental look into how the non-planar graph would behave compared to the \ac{gabe} and the \ac{rng}, and not just about \acp{manet}. In retrospect I can see that using data from the mobility model would proper would have given a better picture and would most likely have made it possible for me to cut down on the number of graphs that would have to have been generated (since the graphs would be representive of the the mobility model, and not just uniformly distributed). See section~\ref{section:future_work} for my recormendation for future comparisons between the graphs.   
-Since I have chosen to uniformaly distribute the nodes I will need a large number of tests in order for the underlying properties of the three types of graphs to emerge. Therefore I will therefore have to limit the number of node-categories so that I will be able to process all the tests. I will therefore chose to limit myself to 8 node-categories with the following number of nodes: 100, 250, 500, 1000, 2500, 5000, 7500 and 10000 nodes.
+I have not encountered any specific point clustering algorithm in the literature besides the various mobility models (see \cite{MobilityAdHocResearch, disasterArea}) which has lead me to place the nodes uniformly in the plane. The justification of this was both the fact that part of this investigation was an experimental look into how the non-planar graph would behave compared to the \ac{gabe} and the \ac{rng}, and not just about \acp{manet}. In retrospect I can see that using data from the mobility model would proper would have given a better picture and would most likely have made it possible for me to cut down on the number of graphs that would have to have been generated (since the graphs would be representative of the the mobility model, and not just uniformly distributed). See section~\ref{section:future_work} for my recommendation for future comparisons between the graphs.   
+Since I have chosen to uniformly distribute the nodes I will need a large number of tests in order for the underlying properties of the three types of graphs to emerge. Therefore I will therefore have to limit the number of node-categories so that I will be able to process all the tests. I will therefore chose to limit myself to 8 node-categories with the following number of nodes: 100, 250, 500, 1000, 2500, 5000, 7500 and 10000 nodes.
 
-I feel this is a good compromise between having a reasonable number of data-points and big enough spread, while still being able to compute them in a reasonable amount of time. The nodes are going to be placed uniformaly in the plane, with the lower bound of their coordinates being 0, and the upper bound depending on the number of points in the graph. No two points will have same the coordinates. 
+I feel this is a good compromise between having a reasonable number of data-points and big enough spread, while still being able to compute them in a reasonable amount of time. The nodes are going to be placed uniformly in the plane, with the lower bound of their coordinates being 0, and the upper bound depending on the number of points in the graph. No two points will have same the coordinates. 
 
-Since we are dealing with limited-range spanners, the value of the node density and the radio-range of the nodes becomes important\footnote{If I had made the choice to use the mobility models or a cluster node algorithm, these factors would still have an impact, but properly less}. Different densities and radio-ranges would heavily influence the outcome of the results, as a high node density/radio-range would favour the non-planar graph over the two other graph types, while a low density/radio-range would create heavily disconnected graphs in all three cases. Since having many disconnected graphs would make testing difficult, I have tried to find combination that would give me a low number of connected components pr. node-set, while still keeping the density resonably low. From several experiments this let me to a density of 0.01 nodes pr. square unit and a radio range of 20 units, and make the space the nodes are placed over a function of the number of nodes. Specifiably, if we let $x$ be the length of the sides in a square and $num$ be the number of nodes, then we have that the density is
+Since we are dealing with limited-range spanners, the value of the node density and the radio-range of the nodes becomes important\footnote{If I had made the choice to use the mobility models or a cluster node algorithm, these factors would still have an impact, but properly less}. Different densities and radio-ranges would heavily influence the outcome of the results, as a high node density/radio-range would favour the non-planar graph over the two other graph types, while a low density/radio-range would create heavily disconnected graphs in all three cases. Since having many disconnected graphs would make testing difficult, I have tried to find combination that would give me a low number of connected components pr. node-set, while still keeping the density reasonably low. From several experiments this let me to a density of 0.01 nodes pr. square unit and a radio range of 20 units, and make the space the nodes are placed over a function of the number of nodes. Specifiably, if we let $x$ be the length of the sides in a square and $num$ be the number of nodes, then we have that the density is
 \begin{eqnarray}
 \frac{num}{x^2} &=& 0.01 \\
 0.01 * x^2 &=& num \\
 x^2 &=& 100 * num\\
 x &=& \sqrt{100 * num}  
 \end{eqnarray}
-meaning that in practice the graphs are squares in the plane with the following dimensions, which will also be the upper limits on their coordiantes:
+meaning that in practise the graphs are squares in the plane with the following dimensions, which will also be the upper limits on their coordinates:
 
 \begin{tabular}{lrrrrrrrr}
 Number of nodes: & 100 & 250 & 500 & 1000 & 2500 & 5000 & 7500 & 10000 \\
@@ -156,7 +157,7 @@ I will do this for all three types of graphs, and record whether or not a path e
 For each node-pair tested for the graphs I will find the total distance passed, the average distance and the average maximum and minimum distance for all the tests\footnote{I feel it is necessary to use the average since there may be outliers that easily could skew the results}. Likewise I will find the total number of hops, the average number of hops and the average maximum and minimum number of hops. Since one of the advantages of the \ac{gabe} and the \ac{rng} is that they have fewer neighbours, I will also find the total number of neighbours, the average, max- and minimum number of neighbours. I will also include the average number of connected components, which will give us an good idea of how connected the graphs are.
 
 \subsubsection{Size of the test}
-Since the node-sets that we are going to generate the grapohs from are going to distributed uniformly, I feel that in order to gain a proper picture of the situation we need to generate many node-sets, so that any underlying pattern can show it self. Therefore I have decided to generate 500 different uniformly distributed node-sets. For each node-set I will then generate one non-planar graph, one \ac{gabe}, and one \ac{rng}, meaning that for each node 
+Since the node-sets that we are going to generate the graphs from are going to distributed uniformly, I feel that in order to gain a proper picture of the situation we need to generate many node-sets, so that any underlying pattern can show it self. Therefore I have decided to generate 500 different uniformly distributed node-sets. For each node-set I will then generate one non-planar graph, one \ac{gabe}, and one \ac{rng}, meaning that for each node 
 
   which I use to generate 500 graphs for the non-planar, \ac{gabe} and \ac{rng} (for a total of 1500 graphs for each ). Each node-set is then used to generate the three types of graph. For each node-set I then generate 100 node-pairs. I feel that this will give me an reasonable amount of data to analyse, while still being computable for the larger number of nodes.
 
