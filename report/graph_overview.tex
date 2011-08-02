@@ -12,7 +12,7 @@ Curiously I have not been able to find any literature on the topic of \ac{anet},
 
 From figure~\ref{fig:routing_not_planar} and figure~\ref{fig:routing_planar} it is clear that in non-planar graph, each node can communicate directly with more nodes than compared to the planar graph. Since non-planar graphs are allowed to have edges that overlap, while planar graphs are not, it is clear that given a set of nodes, one would always be able to construct a non-planar graph whose nodes would be better (or at least just as well) connected than the nodes in any planar graph. The question then becomes whether the non-planar graph is well suited for a \ac{manet}, or a planar graph would be better. The advantage of having a non-planar graph is that there is a faster route from the source to the sink (since more edges are allowed), but its problematic from a theoretical and practical perspective.
 
-From a theoretical perspective it is clear that we know less about a non-planar graph than that of a planar one. For instance we have Euler's formula, which states that if we let $v$ be the number of vertices's, $f$ the number of faces and $e$ the number of edges then $v - e + f = 2$. Thus we can begin to reason about the ratio of the graph if we are given one of $e$, $f$ or $v$. This also becomes a problem with routing, as it likewise becomes harder to reason about routing with non-planar graphs\hide{, and most traditional routing algorithms assume to work on planar graphs\todo{do traditional routing algorithms assume that the graph is planar?}}. It is also important to remember that a routing algorithm working on a non-planar graph will have to work on more edges, which will slow it down.
+From a theoretical perspective it is clear that we know less about a non-planar graph than that of a planar one. For instance we have Euler's formula, which states that if we let $v$ be the number of vertices's, $f$ the number of faces and $e$ the number of edges then $v - e + f = 2$. Thus we can begin to reason about the ratio of the graph if we are given one of $e$, $f$ or $v$. This also becomes a problem with routing, as it likewise becomes harder to reason about routing with non-planar graphs, and most routing algorithms (such as GPSR) requries the graph to be planar (see section~\ref{section:gpsr} on p. \pageref{section:gpsr}). It is also important to remember that a routing algorithm working on a non-planar graph will have to work on more edges, which will slow it down.
 
 From a practical perspective working with non-planar graphs will mean that each node will have to keep track of more neighbours (since there is no theoretical upper bound on the nodes in the vicinity, though realistically I would say that more than 50 neighbours are unlikely, even for crowded areas). In dense networks the extra neighbours added by having a non-planar graph can be significant --- see figure~\ref{fig:gg-rng-example-big} on p. \pageref{fig:gg-rng-example-big} for an illustration of this. The number of neighbours for each node also becomes a problem with routing schemes that explicitly sends information to a single neighbour instead of flooding the entire network, as more nodes have to be inspected, than if we had a planar graph. While more energy has to be used to keep track of neighbours, this does not mean a greater transmission overhead, as we per our \ac{uga} assumption are transmitting our data omni-directional, and not directly to each neighbour in a turn by turn fashion.
 
@@ -22,15 +22,36 @@ Having chosen to keep our graphs planar we must take care that the routing graph
 
 I have found the following general methods for making the planar graphs:
 \begin{description}
-\item[The \ac{gabe}:] Two nodes $v$ and $u$ only share an edge iff the circle that has $\overline{vu}$ as its diameter does not contain a node $q$ \cite{gopher, gpsr}. 
+\item[The \ac{gabe}:] The \ac{gabe} is a subset of the Delaunay triangulation, where two nodes $v$ and $u$ only share an edge iff the circle that has $\overline{vu}$ as its diameter does not contain a node $q$. In practise a good way of computing the \ac{gabe} is to use the Delaunay triangulation to limit the number of node pairs that have to be checked.
+\hide{
+\begin{algorithmic}[H]
+  \caption{GabrielGraph}
+  \SetKwData{edge}{edge}
+  \SetKwData{pOne}{p1}\SetKwData{pTwo}{p2}
+  \SetKwData{mid}{midPoint0}
+  \setKwInOut{Input}{input}
+  \setKwInOut{Output}{output}
+  \dontprintsemicolon
+  \Input{A set of points P}
+  \Output{The Gabriel Graph based on P}
+  delaunay $\gets$ MakeDelaunay(P) \;
+  \ForEach{\edge $\in Edges(delaunay)$}{
+    \pOne $\gets FirstPoint(\edge)$ \;
+    \pTwo $\gets SecondPoint(\edge)$ \;
+    \mid $\gets FindMidPoint(\pOne, \pTwo)$ \;
+ 
+
+    }
+\STATE 
+\end{algorithmic} 
+}
+\cite{gpsr, gopher}. 
 \item[The \ac{rng}:] Two nodes $v$ and $u$ share an edge if there is no node $q$ such that $|\overline{vq}|, |\overline{uq}| \leq |\overline{vu}|$ (i.e. $q$ is closer to both $v$ and $u$ than $v$ and $u$ are to each other). \cite{gpsr, RNG}
+\item[The \ac{cldp}:] \ac{cldp} works by having each node uses \emph{the right-hand-rule}\label{right-hand rule}\footnote{The right-hand-rule states that for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started.} and checks whether or not any of its links crosses/is crossed by another edge. In other words, \ac{cldp} first builds up a graph that may be non-planar, and then in a distributed manner finds and removes edges that makes the graph non-planar without disconnecting parts of graph (as the paper accuses both \ac{gabe} and \ac{rng} of). \ac{cldp} is not dependent on the Unit graph assumption \cite{practical}. 
 \end{description}
 
-Both \ac{gabe} and \ac{rng} are based on the \ac{uga}, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}.
-\label{right-hand rule}
-\begin{description}
-\item[The \ac{cldp}:] \ac{cldp} works by having each node uses \emph{the right-hand-rule}\footnote{The right-hand-rule states that for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started.} and checks whether or not any of its links crosses/is crossed by another edge. In other words, \ac{cldp} first builds up a graph that may be non-planar, and then in a distributed manner finds and removes edges that makes the graph non-planar without disconnecting parts of graph (as the paper accuses both \ac{gabe} and \ac{rng} of). \ac{cldp} is not dependent on the Unit graph assumption \cite{practical}. 
-\end{description}
+Both the \ac{gabe} and the \ac{rng} are based on the \ac{uga}, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}.
+
 
 The \ac{gabe} is a sub-graph of the Delaunay triangulation, and \ac{rng} is a subset of \ac{gabe} \todo{find and cite}, and as such they are both well described and understood graphs many of the same properties as the Delaunay triangulation. \ac{cldp} on the other hand is not a graph, but rather an algorithm that takes an already existing graph and makes sure its planar, which, according to \cite{practical} is less likely to make the graph disconnected than \ac{gabe} and \ac{rng}. It is therefore harder to reason about most probable maximum number of neighbours for \ac{cldp}. 
 
@@ -58,9 +79,13 @@ To complicate matter further different nodes can in practise have different comm
 Likewise it is important to remember that a node in practise might be able to adjust its communications range (at a higher energy cost). See figure~\ref{fig:different_radius}
 
 \subsection{Two-Level graphs}
+<<<<<<< HEAD
 \tikfig{gateway-nodeTwo}{Node $s$ and $t$ are the source and the sink respectively, the rectangular nodes with $CH$ are the \acp{ch} and the diamond nodes are the gateway nodes. From the image we can see that the message travels from the source to the header, between the gateways and then to the second  and then lastly to the sink. It is also clear that it would have been faster to go from the gateway and then to the sink, but since the gateway in this model does not know the location of the different nodes, this is impossible in this model.}
+=======
+\tikfig{gateway-node}{Node $s$ and $t$ are the source and the sink respectively, the rectangular nodes with $CH$ are the \acp{ch} and the diamond nodes are the gateway node, and the entirely white or black nodes are the regular nodes that have elected the right- and leftmost \ac{ch} respectively. From the figure we can see that the message travels from the source to the header, between the gateways and then to the second  and then lastly to the sink, as indicated by the grey background. It is also clear that it would have been faster to go from the gateway and then to the sink, but since the gateway in this model does not know the location of the different nodes, the message will first have to be routed to the rightmost node.}
+>>>>>>> 0d64b3a24040986e64f36fa523e1cd21139c03a1
 
-\label{cluster methods}
+\label{section:cluster_methods}
 Node Clustering is a hierarchical alternative to the flat graph. Instead of having every node being the same, a number of nodes are made into \acp{ch} such that all nodes in the graph has 1 cluster head that they communicate with. Most of the time the nodes that belong to a certain \ac{ch} is its one-hop neighbours, but there are also schemes that allows nodes to have a clustered that is farther away, in order to reduce the number of \acp{ch}. With \acp{ch} a layer specialisation and hierarchy is added to the network, which reduces the complexity of an otherwise entirely flat network, while still retaining some decentralisation.
 
 In order to improve the routing, \acp{ch} are almost always accompanied by \emph{gateway nodes}. Gateway nodes are nodes that connect two clusters --- see figure~\ref{fig:gateway-node} for an illustration. \cite{spanners} defines a gateway node as follows:

@@ -16,7 +16,7 @@ Given two nodes $v$ and $u$ in the graph, I will say that $u$ is \emph{adjacent}
 
 One way to avoid this problem is to apply the \ac{uga}. The \ac{uga} states that all nodes has a perfect omni-directional transmission, that they all spend the same amount of power on the transmission, and that ``the energy dissipates as the square of distance'' \cite{practical}. For the sake of convenience I will employ the \ac{uga} in this thesis.\label{section:apply_uga}
 
-More generally I will say that two nodes nodes $v$ and $u$ can only communicate if there exists a \emph{bidirectional link} between the nodes, and that a bidirectional link exist iff $v$ is adjacent to $u$ and $u$ is adjacent to $v$.
+More generally I will say that two nodes nodes $v$ and $u$ can only communicate if there exists a \emph{bidirectional link} between the nodes, and that a bidirectional link exist iff $v$ is adjacent to $u$ and $u$ is adjacent to $v$. Two nodes are said to be \emph{Neighbours}, if there exist a bidirectional link between them.
 
 Now we can begin to define the \emph{connection graph}. Given a set of nodes $V$ the connection graph C is defined as $C = (V, E)$, where the set of edges $E$ contains an edge between node $v$ and $u$ iff there is a bidirectional link between $v$ and $u$ -- see figure~\ref{fig:connec}. The connection graph only tells us which nodes that are able to communicate with each other, not how the messages are going to be routed. Therefore I introduce the \emph{Routing Graph} R, where $R = (V, E^{\prime})$, where $E^{\prime} \subseteq E$. It is this graph $R$ that the message are routed through in order to find a path from the source to the sink.
 

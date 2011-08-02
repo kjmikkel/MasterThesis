@@ -1,28 +1,31 @@
 \section{Routing Algorithms}
 \label{section:routing_algorithms}
 
+In this section I will give an overview of the various routing algorithms and general methods that exist, as well as some of the problems that occur when having to route a message in a \ac{manet}, as well as possible solutions for these problems. I will not go into minute detail for all routing algorithms, instead rather giving a broad overview of how they work and their underlying idea, since I feel that it would better serve the point of this thesis to give a broad overlook of various algorithms, and that detailed descriptions would eat up too much space. That being said, more detail about GOAFR, GOAFR+, GPSR and DSDV can be found in section~\ref{section:routing_algorithm}, as these will be actively used.
+
 The biggest conceptual difference for routing/shortest path algorithms in a \ac{manet} compared to main-stray routing/shortest path algorithms, is the loss of global overview that these algorithms have --- such as relaxing a specific nodes' edges at a specific time. There exist distributed version of some of the ``classic'' routing algorithms --- such as Bellman-Ford --- but their usefulness is limited in a mobile network, since they will have to be recomputed either each time a node wants to transmit a message, or each time the underlying graph changes.
 
 As mentioned in Section~\ref{section:fundamental_graph_routing}, the problem of sending a message from the source to the sink  becomes a graph routing problem \footnote{But not necessary a shortest-path routing problem, since factors like fairness or maximisation of the lifetime of the \ac{manet} becomes issues in practise}.
 
 When routing a message from the source to the sink, it is important to distinguish the message that is being transmitted and the nodes that are transmitting. The transmitted message does not only include the information that is intended for the node at the sink, but also extra meta-data needed for routing. This includes time-to-live, position of the source node, position of the sink, message id etc. The nodes are all assumed to use the same routing algorithm, and at the very least knowing who their neighbours are.
 
-Most of the following algorithms will mostly be based around the idea of \emph{local routing algorithms}. 
+Most of the following algorithms will mostly be based around the idea of \emph{local routing algorithms}, on the grounds that I have found them to be both the most numerous and most elegant.
 
 Paraphrasing \cite{compass}, a local routing algorithm is an algorithm that for fills the following criteria:
 \begin{enumerate}
-\item Each message will have a limited memory to store information about a constant number of vertexes, but it have full access to the position of the sink and the source. At no point does the message have full knowledge of the entire graph. 
+\item Each message will have a limited memory to store information about a constant number of nodes, but it have full access to the position of the source and the sink. At no point will the message have full knowledge of the entire graph. 
 \item Let $s$ be the source of the message, $t$ the sink, and $v$ be a node in the graph that can be reached from $s$. Arriving at $v$, the message can then use the information $v$ has stored about its neighbours. Based on this information, one of the neighbours of $v$ is chosen as the next receiver of the message, unless $v = t$, in which case the message will not be propagated.
-\item A message will not leave information that the nodes routing algorithm will be able to use. In this sense nodes are considered stateless.\end{enumerate}
+\item A message will not leave information that the nodes routing algorithm will be able to use. In this sense nodes are considered stateless.
+\end{enumerate}
 
-Combined, the first and third property says that the state of routing process is contained in the message being routed, while the control and logic of the routing is contained in the nodes, which only acts upon the information in the message received and their knowledge about their neighbours. Since all the nodes are running the same routing algorithm, a well designed routing algorithm ensures that the message will arrive.
+Combined, the first and third property says that the state/data of routing process is contained in the message being routed, while the control and logic of the routing is contained in the nodes, which only acts upon the information in the message received and their knowledge about their neighbours. Since all the nodes are running the same routing algorithm, a well designed routing algorithm ensures that the message will arrive.
 
 \label{record-recived}
-It is worth noting that the 3 properties only apply to the routing algorithm itself, and not the layers below. This is an important distinction, as most routing solutions require reach node to track which messages it receives, so that future copies of the same message can be ignored in the future --- ensuring that a message will not needlessly congest the network. In the same vain, some routing solutions, such as \cite{speed} has its lower layers use this information to apply congestion avoidance. Another application is to use the messages being passed around could be to keep track of which nodes are still active --- this is usually combined with diagnostic or ``accounting'' messages. 
+It is worth noting that the 3 properties only apply to the routing algorithm itself, and not the layers below. This is an important distinction, as most routing solutions require reach node to track which messages it receives, so that future copies of the same message can be ignored in the future --- ensuring that a message will not needlessly congest the network. In the same vein, some routing solutions, such as \cite{speed} has its lower layers use this information to apply congestion avoidance. The messages can also be used to keep track of which nodes are still active --- though there will still be a need for diagnostic or ``accounting'' messages. 
 
 \subsection{Categories of Routing algorithms}
 \label{section:cat_routing}
-When a routing algorithm wants to send a message or a number of messages from a sink to a source, an important question is whether it has been maintaining a path to the sink, it has to create a path to the sink, or each message should find its own way from the source to the sink.
+When a routing algorithm wants to send a message or a number of messages from a source to a sink, an important question is whether it has been maintaining a path to the sink, it has to create a path to the sink, or each message should find its own way from the source to the sink.
 
 If the algorithm requires and already established path, then there are two fundamentally different principles that can be applied.
 \begin{description}
@@ -37,7 +40,6 @@ If the algorithm requires and already established path, then there are two funda
 The AODV has route maintenance mechanism, that works thus: Let node $n_k$ and $n_{k+1}$ be the [$k$]th and [$k+1$]th node on the path from the source to the sink for $k \in \N$. If $n_{k+1}$ is no longer adjacent to $n_{k}$, then it will begin a tear-down protocol that will delete its routing table, and then tell the [$k-1$]th node to do the same until the message arrives at the source, which can then rebuild the path if it is still relevant.
 AODV does not describe any specific routing algorithm to establish a route.}
 {larMANET, AODV}
-
 \end{description}
 
 \tikfig{greedy-problem}{In this topology we attempt greedy routing from node \emph{s} to node \emph{t}. The edges between the nodes define a bidirectional link. The grey background indicates the chosen path. We see that the greedy algorithm first routes the message to node \emph{a}, since node \emph{a} is closer to node \emph{t} than node \emph{d}. However, since neither node \emph{b} or node \emph{c} are closer to node \emph{t} than node \emph{a} (as illustrated by the radius centred on node \emph{t}), the greedy routing does not continue. Node \emph{a} is in this situation often called the \emph{local minimum}. In this context, the face created by node \emph{a}, \emph{b}, \emph{c} and node \emph{t} a \emph{void}}
@@ -48,12 +50,12 @@ Routing algorithms suited for \acp{manet} can be sorted into the following categ
 {The simplest of the routing algorithms. The entire network is flooded with the message, ensuring that the message eventually reaches the sink. We can be sure that the message will not flood the network forever, thanks to the recording system detailed in section \ref{record-recived}. If the sink can be reached from the source, then flooding is  guarantied to work, but will use a lot of the networks bandwidth, and requires many of the nodes to be active.}
 {Sur2, larMANET} 
 
-\tikfig{rdr}{The grey background area is the area in which routing take place (any message that moves outside will be discarded). The black lines between the nodes represent a bidirectional link, while the grey background between nodes represent the valid bidirectional links inside the grey area. It is clear that the shape of the flooding will have a large effect on the number of nodes that will receive the transmission.}
+\tikfig{rdr}{The grey background area is the area in which routing take place (any message that moves outside will be discarded). The black lines between the nodes represent a bidirectional link, while the grey background between nodes represent the valid bidirectional links inside the grey area. It is clear that the shape of the flooding area will have a large effect on the number of nodes that will receive the transmission.}
 
 \route{Restricted Direction Routing (RDR)}
-      {Restricted Directed Routing is an algorithm that can be described as a kind of directed flooding. Let G be a geometrical shape. G is now placed such that both the source and the sink are both contained in G (preferably with a non-zero margin, to counter act any movement). The source now floods all nodes inside G with the message, hopefully reaching the sink. Once the first message arrives, a path between the source and sink is established, and any future messages in that pack is sent through this path \todo{clarify}.
+      {Restricted Directed Routing is an algorithm that can be described as a kind of directed flooding. Let G be a geometrical shape. G is now placed such that both the source and the sink are both contained in G (preferably with a non-zero margin, to counteract any movement). The source now floods all nodes inside G with the message, hopefully reaching the sink. Once the first message arrives, a path between the source and sink is established, which will be used if the required data is too large to send in a single message.
 
-The there is no standard shape, but possible choices includes Linear Swept Sphere, Circle or Rectangle -- see figure \ref{fig:rdr}. Obviously, RDR is only applicable when the source has an idea of the location of the sink, otherwise another algorithm (like flooding) has to be employed. In the case where both nodes wants to contact each other simultaneously (say, in situations where timers are involved), a bi-directional RDR can take place, where each node tries to find each other, until both reach each other, and a path can be established.}
+The there is no standard or required shape, but possible choices includes the Linear Swept Disc\footnote{A Linear Swept Disc is a geometrical figure that is constructed by placing the centre of a disc with a positive radius at one end of a line-segment, and then sweeping along the line-segment to the other end.}, Circle or Rectangle -- see figure \ref{fig:rdr}. Obviously, RDR is only applicable when the source has an idea of the location of the sink, otherwise another algorithm (like flooding) has to be employed. In the case where both nodes wants to contact each other simultaneously (say, in situations where timers are involved), a bi-directional RDR can take place, where each node tries to find each other, until both reach each other, and a path can be established.}
 {larMANET}
 
 \route{Directed Diffusion (DD)}
@@ -65,63 +67,60 @@ Since DD is a pull algorithm it might be especially useful in sensor networks.}
 {directed}
 
 \route{Greedy routing} 
-{\label{greedy}Greedy routing is a simple routing scheme that always chooses to route the message to that path of its neighbours that is closest to the sink. In the case where the message arrives at a node $n$, where all of $n$'s neighbours are farther away from the sink than $n$, then no action is specified, and the message will not be delivered -- see figure~\ref{fig:greedy-problem} for an illustration. The greedy algorithm thus offers no guarantee in delivering the message, but in practise it improves as the density of the network increases.}
+{\label{section:greedy}Greedy routing is a simple routing scheme that always chooses to route the message to that path of its neighbours that is closest to the sink. In the case where the message arrives at a node $n$, where all of $n$'s neighbours are further away from the sink than $n$, then no action is specified, and the message will not be delivered -- see figure~\ref{fig:greedy-problem} for an illustration of how this can happen, even if the message is right besides a legal path to the sink. The greedy algorithm thus offers no guarantee in delivering the message, but in practise it delivery rates improves with the density of the network.}
 {gopher, beyondUnit}
 \route{Geometrical routing}
-{Geometrical routing uses the location of the current node and the location of the sink. There exist many different kinds of routing algorithms, but common for them is that unlike the greedy routing technique, they sometimes not transmit the message to a node that is closest to the sink. This flexibility allows the geometrical algorithms to find a path to the sink. An example of a Geometrical algorithm could be the OFR \cite{gopher} routing algorithm, which uses the line-segments between the sink and the source to find which faces in the graph it needs to route to eventually arrive at the sink}
+{Geometrical routing uses the location of the current node and the location of the sink. There exist many different kinds of routing algorithms, but common for them is that unlike the greedy routing technique, they are allowed to transmit the message to a node that is further away from the sink than the current node. This flexibility allows the geometrical algorithms to find a path to the sink. An often used technique is to explore the face of the graph`-
+
+An example of a Geometrical algorithm could be the OFR \cite{gopher} routing algorithm, which uses the line-segments between the sink and the source to find which faces in the graph it needs to route to eventually arrive at the sink}
 {gopher+, gopher, gpsr}
 
 \route{Shortest path} 
-      {The shortest path technique uses distributed versions of shortest-path algorithms in order to find shortest-path from either one node to another, or from all nodes to all other nodes. As one might imagine, this approach has problems in mobile networks, where the structure of the graph can be in constant flux. Even in static networks an all-to-all solution will use $O(n^2)$ for the whole system where $n$ is the number of nodes. Even if this is only $O(n)$ for each node, this is still rather expensive. Examples of distributed algorithms include Distributed Bellman-Ford}
+      {The shortest path technique uses distributed versions of shortest-path algorithms in order to find shortest-path from either one node to another, or from all nodes to all other nodes. As one might imagine, this approach has problems in mobile networks, where the structure of the graph can be in constant flux, and where these values often have to be updated. Examples of distributed shortest path algorithms include Distributed Bellman-Ford}
 {Sur2, contractionGraph, DSDV}
-
 \end{description}
 
 Different routing algorithms make different assumptions about the mobility of the graph. There are several routing algorithms \cite{adaptive, two-tier} that the infrastructure contains a number of stationary nodes or sensors that can send and receive information. 
 
-\tikfig{hidden_terminal}{The hidden terminal problem. In this example node c is communicating with node b (illustrated by the grey colour in node b's transmitting radius) Since the transmission does not reach node a, it is not possible for node a to detect the communication between node b and node c, and it will thus believe that it is free to transmit its message to node b. For more detailed information, see \cite{ComNet} or similar.}
+\tikfig{hidden_terminal}{The hidden terminal problem. In this example node $c$ is communicating with node $b$ (illustrated by the grey colour in node $b$'s transmitting radius) Since the transmission does not reach node $a$, it is not possible for node a to detect the communication between node $b$ and node $c$, and it will thus believe that it is free to transmit its message to node $b$. For more detailed information, see \cite{ComNet} or similar.}
 
-In practise the system will have to deal with all the problems inherent in wireless communication, such as the hidden terminal problem (see figure~\ref{fig:hidden_terminal}) and message collision. It would be preferable if a lower communications layer took care of this instead of having to implementing it in the algorithm itself.
+In practise the system will have to deal with all the problems inherent in wireless communication, such as the hidden terminal problem (see figure~\ref{fig:hidden_terminal}) and message collision. It would be preferable if a lower communications layer took care of this instead of having to implementing it in the algorithm itself, and I will therefore not deal with the problem in this thesis.
 
 \subsection{Fundamental Graph Routing problems}
-
-A fundamental problem that has to be answered in any geographical routing algorithm is now to deal with situations where a node has sent a message to a sink, but does not know the sinks location. There are several solutions to this problem:
+A fundamental problem that has to be answered in any geographical routing algorithm is now to deal with the situation where the sink has moved so that it has lost all of its old neighbours, but its no location has not been updated globally (or a message is in transit while the update happens):
 
 \begin{itemize}
-\item Once the sink has moved a certain distance away from its neighbours, it could inform them of its current position, and then tells its local neighbours. Effectively this solution creates an area of way-points that can be used to find the sink \cite{adaptive}.
-\item If we are dealing with a cluster method (see Section~\ref{cluster methods} for explanation of clusters), then the sink only needs to inform its old \ac{ch} that it has moved to a new \ac{ch}, and in the same way as before, the message will catch up with the sink.
-\item Instead of getting the exact location of the sink at the beginning and then routing blindly towards that location, layers of node location ``servers'', really just a normal node that knows the location of several nodes in the network, can be established. A server may not know where any given node is, but it may know where a closer server that either knows the location of the sink, or knows a server closer to the sink \ldots and so on until we find a server that knows where the sink is. Thus the sink will eventually be found \cite{scaleLocation}.
+\item Once the sink has moved a certain distance away from its old neighbours, it could inform both its old and new neighbours of its new location. Effectively this solution creates a system of temporary way-points that can be used to find the sink based on its old location \cite{adaptive}.
+\item If we are dealing with a cluster method (see Section~\ref{section:cluster_methods} for explanation of clusters), then the sink only needs to inform its old \ac{ch} that it has moved to a new \ac{ch}, and in the same way as before, the message will catch up with the sink.
+\item Instead of getting the exact location of the sink at the beginning and then routing blindly towards that location, layers of nodes acting as location servers. All nodes would act as these servers These ``servers'' are normal nodes that knows the location of several other nodes in the network. A server may not know where any given node is, but it will know of a server who is more likely to know where the node is (in \cite{scaleLocation} this is based on an id and a hierarchical partitioning into bigger and bigger squares of the plane the nodes exist in), and will route the message to that node. This continues until the sink is found, or the message reaches a dead-end (say if the node is no longer a part of the network) \cite{scaleLocation}.
 \end{itemize}
 
 Another problem found in Graph routing is that of security. Unless some kind of security system is employed, a malicious node can not only impersonate other nodes, but it can also sniff the messages that are transmitted in its area (not only the ones that are directly sent to it). Further a malicious node can spam the network with bogus messages, creating congestion in the network and draining the nodes power. One proposed solution to this problem is to include secure keys that uniquely identify each node. However, without a central key-server (both for distribution and authentication), this is not practical \cite{trustedRouting}.
 
-\section{Problems introduced with node movement}
+\subsection{Problems introduced with node movement}
 
-\tikfig{network_patition}{In \ref{fig:network_part1} we see 2 previously unconnected networks being connected by a lone mobile node. The network will now have to exchange location information. In \ref{fig:network_part2} the network has shared their location information, but here the network has been partitioned, and the invalid location has to discarded.}
+\tikfig{network_patition}{In \ref{fig:network_part1} we see 2 previously unconnected networks being connected by a lone mobile node. The network will now have to exchange location information. In \ref{fig:network_part2} the network has shared their location information, but here the network has been partitioned, and the invalid location will have to be discarded.}
 
 Movement presents us with the following problems:
 
 \tikfig{shortest_path_change}{The nodes that are connected with an edge have an bidirectional link, and the bidirectional links with a grey background are the ones that are routed through. In \ref{fig:short_path1} we see a path from node $s$ to node $t$. In \ref{fig:short_path2} we see that the movement of node $*$ means that we have to chose a longer path to the node $s$ from node $t$.}
 
-\tikfig{better_route}{}
-
-\tikfig{changed_route}{In figure \ref{fig:changed_route1} we see that the routing algorithm has found a route $r$ (the path with the grey background) from the source $s$ to the sink $t$ through the node $*$, and now sends packages through it. In figure \ref{fig:changed_route2} node $*$ has moved away, and the route $r$ can no longer be used, and the routing algorithm has to find a new route.}
+\tikfig{better_route}{In figure~\ref{fig:better_route1} and \ref{fig:better_route2} we see a graph before and after the addition of node $u$. It is clear that in figure~\ref{fig:better_route2} there exist a far better route from $s$ to $t$.}
 
 \begin{itemize}
 \item Changes underlying graph -- see figure~\ref{fig:shortest_path_change}.
-\item Can invalidate location information about the node \todo{make figures for all of these}
+\item If the nodes location is stored somewhere in the network outside of the node, then this can be invalidated by the movement, as its new location may take time to propagate.
 \item If the node is part of path from \emph{s} to \emph{t} (and the node is neither), which is stored and which is believed to be used again, then that path may fail, and a longer path may have to be taken. In some cases this may lead to situations where the new optimal path will lead away from the sink --- see figure \ref{fig:shortest_path_change}.
 \item The moving node may create a link between 2 previously separate networks, creating the need for location exchanges for the 2 other disjoint networks -- see figure \ref{fig:network_part1} for an illustration of this.
 \item The moving node may partition a network into 2 separate networks, if the node was the only node the 2 networks could communicate through --- see figure \ref{fig:network_part2} for an illustration of this.
 \item The node may move into a position that creates a better path than the one before it moved --- so the surrounding nodes must be informed about this --- see figure \ref{fig:better_route} for an illustration of this.
 \end{itemize}
 
-The movement creates the need for the following solutions:
+To fix these problems the following solutions will have to be decided upon and implemented:
 \begin{itemize}
-\item There needs to be a way to restructure the underlying graph so that it reflects the movement of the node \cite{practical}
-\item The location of the moving node needs to be updated. This does not necessary need to be done to all the nodes in the network, nor all the nodes that knew it before. There are many schemes for this, such as GLS \cite{scaleLocation} which partitions the world into squares, and then partitions these squares into other squares, resulting in several layers of squares. In each of these squares, there is a single node that knows the location of the node (and a scheme to find it) \cite{scaleLocation}.
+\item There needs to be a way to restructure the underlying graph so that it reflects the movement of the node \cite{practical}.
+\item The location of the moving node needs to be updated. This does not necessary need to be done to all the nodes in the network, nor all the nodes that knew it before. There are many schemes for this, such as the Grid Location Service (GLS) \cite{scaleLocation} which partitions the world into a hierarchy of bigger and bigger squares. In each of these squares, there is a single node that knows the location of the node (and a scheme to find it) \cite{scaleLocation}. Other possible solutions exist such as quorum based strategy \cite{quorum_basic}, where a subset of the nodes (referred to as the virtual \emph{backbone}) keep track of the location information\todo{Make sure this is correct}. Not all nodes hold all information, but rather is stored in a subset of the backbone (the so-called quorum). When information has to be retrieved, a normal node has to request it from a backbone node, which can then query other backbone nodes until the information is found. For more strategies see \ref{surveyPosition}.
 \item Depending on implementation there may be no problem --- a time-out system that detects that the message did not arrive, the node right before the missing node reports back that it could not deliver the message etc. The system would then have to find a new path to the sink.
-\item If the network is partitioned, then the best course of action is to have a mechanism that will ensure that will allow the nodes to forget about the nodes they are no longer connected to. 
-\item If connection is established between network \emph{a} and network \emph{b}, there should be a mechanism so that network \emph{a} and inform network \emph{b} of its nodes, and vice versa. Optimally this should already be a part of how nodes advertise their presence.
-\item In order to take advantage of new nodes, they need to advertise their presence (and their location) to the entire system 
+\item Both the network patition and the network merging should be handled by the system that removes and adds nodes to the location databases in the first place. While merging several networks will change a lot of information and, depending on the method used, might require a lot of messages, there is no fundamental difference from when a single node enters the network. The same applies to when the network is partitioned. 
+\item Again, while this might cause a change in the way messages are routed, the node only needs to be known to the rest of the network for the routing changes to take effect. 
 \end{itemize}

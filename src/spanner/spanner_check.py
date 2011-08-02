@@ -232,7 +232,8 @@ def generate_graphs(number_of_points, number_of_graphs, cutoff_distance):
 
     old_start = datetime.today()
     tree = make_graph.SciPy_KDTree(new_data)
-    rn_tree = make_graph.rn_kdtree(new_data, tree)
+ #   rn_tree = make_graph.rn_kdtree(new_data, tree)
+    gg_tree = make_graph.gabriel_graph_kdtree(new_data, tree, cutoff_distance)
     old_end = datetime.today()
     
 #    normal_graph = make_graph.make_non_planar_graph(new_data, cutoff_distance, tree)
@@ -240,20 +241,30 @@ def generate_graphs(number_of_points, number_of_graphs, cutoff_distance):
 #    save_pickle_file(filename, normal_graph)   
     
 #    gabriel_graph = make_graph.gabriel_graph(normal_graph, tree, new_data)
-#    filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
+    filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
 #    save_pickle_file(filename, gabriel_graph)
     
     new_start = datetime.today()
-    rn_graph = make_graph.rn_brute(new_data)
+    g_graph = make_graph.gabriel_graph_brute(new_data, cutoff_distance)
     new_end = datetime.today()
 
     print "old: " + str(old_end - old_start)
     print "new: " + str(new_end - new_start) 
-    print "Alike: " + str(rn_tree == rn_graph)
+    print "Alike: " + str(gg_tree == g_graph)
     
 
 #    filename = rng_f + point_str + rng_placement + rng_filename + index_str
-#    rn_graph_load = load_pickle_file(filename)
+    g_graph_load = load_pickle_file(filename)
+    edge_num = 0
+    for key in g_graph_load:
+      edge_num += len(g_graph_load[key])
+    edge_num /= 2
+
+    new_edge_num = 0
+    for key in gg_tree:
+      new_edge_num += len(gg_tree[key])
+    new_edge_num /= 2
+    print "Old and new: " + str(g_graph_load == gg_tree) + " " + str(g_graph_load == g_graph) + " num in old graph: %s, num in new %s" % (edge_num, new_edge_num)
     #save_pickle_file(filename, rng_graph)
             
 def make_node_pairs(number_of_points, num, number_tests, from_val, to_val):
