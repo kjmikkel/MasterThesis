@@ -79,11 +79,8 @@ To complicate matter further different nodes can in practise have different comm
 Likewise it is important to remember that a node in practise might be able to adjust its communications range (at a higher energy cost). See figure~\ref{fig:different_radius}
 
 \subsection{Two-Level graphs}
-<<<<<<< HEAD
-\tikfig{gateway-nodeTwo}{Node $s$ and $t$ are the source and the sink respectively, the rectangular nodes with $CH$ are the \acp{ch} and the diamond nodes are the gateway nodes. From the image we can see that the message travels from the source to the header, between the gateways and then to the second  and then lastly to the sink. It is also clear that it would have been faster to go from the gateway and then to the sink, but since the gateway in this model does not know the location of the different nodes, this is impossible in this model.}
-=======
+
 \tikfig{gateway-node}{Node $s$ and $t$ are the source and the sink respectively, the rectangular nodes with $CH$ are the \acp{ch} and the diamond nodes are the gateway node, and the entirely white or black nodes are the regular nodes that have elected the right- and leftmost \ac{ch} respectively. From the figure we can see that the message travels from the source to the header, between the gateways and then to the second  and then lastly to the sink, as indicated by the grey background. It is also clear that it would have been faster to go from the gateway and then to the sink, but since the gateway in this model does not know the location of the different nodes, the message will first have to be routed to the rightmost node.}
->>>>>>> 0d64b3a24040986e64f36fa523e1cd21139c03a1
 
 \label{section:cluster_methods}
 Node Clustering is a hierarchical alternative to the flat graph. Instead of having every node being the same, a number of nodes are made into \acp{ch} such that all nodes in the graph has 1 cluster head that they communicate with. Most of the time the nodes that belong to a certain \ac{ch} is its one-hop neighbours, but there are also schemes that allows nodes to have a clustered that is farther away, in order to reduce the number of \acp{ch}. With \acp{ch} a layer specialisation and hierarchy is added to the network, which reduces the complexity of an otherwise entirely flat network, while still retaining some decentralisation.
