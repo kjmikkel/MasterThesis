@@ -43,7 +43,7 @@ As I have now detailed in section~\ref{section:input_parameters} which parameter
 \item[Amount and Data-transmission type:] 500 kB, 5120 kB, 20480 kB
 \item[Size of simulation area:] 500 by 500 units and 1000 by 1000 units
 \item[Routing algorithms:] GOAFR \cite{gopher}, GPSR \cite{gpsr}, Greedy \cite{gopher}, DSDV \cite{DSDV}
-\item[Number of nodes:] 100 to 10000 nodes in increments of 100 nodes, giving me 100 datapoints that will be used to analyse the succcess of the routing algorithms. 
+\item[Number of nodes:] 100 to 10000 nodes in increments of 100 nodes, giving me 100 data-points that will be used to analyse the success of the routing algorithms. 
 \item[Nodes failing:] 0\%, 10\%, 40\%
 \item[Nodes entering:] 0\%, 30\%
 \item[Time:] 10 minutes (600 seconds)
@@ -101,7 +101,27 @@ Both GOAFR and GOAFR+ has proved to be theoretical asymptotically worst-case opt
 Due to time constraints I have only been able to implement GOAFR in ns-2, and so will only use that in the tests.
 
 \subsubsection{GPSR}
-\cite{gpsr}.
+\label{section:gpsr}
+Greedy Perimeter Stateless Routing is a routing algorithm that uses a hybrid of Greedy routing and face routing. The idea is to use Greedy routing as much as possible, and only use the face routing recover from situations where it reaches a situation where the Greedy routing fails. The algorithm will use the right-hand-rule (see section~\ref{right-hand rule} on p. \pageref{right-hand rule}) to route the messages in perimeter mode to ensure they stay within the same face. I base all the description in this subsection on \cite{gpsr}.
+
+If we let $x$ be the point where the Greedy routing fails, and $t$ be the sink, then the gist of the perimeter routing is to route through the faces that are intersected by the line-segment $\overline{xt}$, in order to find a point that is closer to $t$ than $x$, and possibly recover. In order to do this the algorithm will explore each face sequentially, moving on to the next face when it encounters a node or, more likely, an edge that is intersected by $\overline{xt}$. 
+
+In order for the routing to work the algorithm relies on 4 values:
+\begin{description}
+\item[$t$:] The sink, which contains its own coordinates
+\item[$L_p$:] The node where the algorithm went from Greedy routing to Perimeter routing. This value is overwritten if the routing goes back to Greedy routing and then back to Perimeter routing. This, together with $t$, is used to create the line-segment $\overline{L_pt}$, that is used to signal when the message is close enough to $t$ to move to the next face.
+\item[$L_f$:] The point on $\overline{L_pt}$ where the message entered the current face. Most of the time this will not be the position of a node, but rather a point on an edge between the face whose perimeter the message has just explored, and the next face. 
+\item[$e_0$:] The first edge the message traversed on the current face. This is used as the termination condition for the perimeter exploration in the case where $t$ is unreachable. 
+\end{description}
+
+also, in the following let $f$ denote the current face we are routing on.
+
+\begin{enumerate}
+\item The algorithm begins with greedy routing until it either reaches the sink, in which case it terminates, or it reaches a local minimum and therefore fails. In the case of failure the message enters perimeter mode and goes to step 2.
+\item The message will enter perimeter routing and record its current node as both $L_p$ and $L_f$, and store the line-segment $\overline{L_pt}$, which we will use throughout our routing. The edge counter-clockwise to $L_p$ is stored in $e_0$. The algorithm goes to step 3
+\item Let $p$ be the current node, if $|\overline{pt}| < |\overline{L_pt}|$ we have reached a node closer to the sink than the local minimum, and we continue with our Greedy routing --- the algorithm goes to step 1. If on the other hand $p$ is farther away from the sink than $L_p$, the message is transferred to the counter-clockwise node $q$ on $f$. If $\overline{pq} == e_0$ then we have come full circle, and there exist no path to the sink $t$, so drop the message. If on the other hand either $q$ or $\overline{pq}$ is intersected by $\overline{L_pt}$, then transmit the message to $q$ and go to step 4, otherwise just transmit the message and go to step 3.
+\item Let $p$ be the current node. Set $L_f$ to $p$ and switch to the next face. Let $q$ be the counter-clockwise neighbour of $p$ on the new face and set $e_0$ to $\overline{pq}$. Go to step 3. 
+\end{enumerate}
 
 
 \subsubsection{DSDV}
