@@ -230,25 +230,27 @@ def generate_graphs(number_of_points, number_of_graphs, cutoff_distance):
     filename = point_set_location + point_str + point_filename + index_str
     new_data = load_pickle_file(filename)
 
+    tree = make_graph.SciPy_KDTree(new_data)
+    
+    normal_graph = make_graph.make_non_planar_graph(new_data, cutoff_distance, tree)
+    filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
+    save_pickle_file(filename, normal_graph) 
+
     if number_of_points > 2500:
-      tree = make_graph.SciPy_KDTree(new_data)
       rn_graph = make_graph.rn_graph_kdtree(new_data, tree, cutoff_distance)
     else:
       rn_graph = make_graph.rn_graph_brute(new_data, cutoff_distance)
 
-#    normal_graph = make_graph.make_non_planar_graph(new_data, cutoff_distance, tree)
-#    filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
-#    save_pickle_file(filename, normal_graph)   
-    
-#    gabriel_graph = make_graph.gabriel_graph(normal_graph, tree, new_data)
-#    filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
-#    save_pickle_file(filename, gabriel_graph)
- 
     filename = rng_f + point_str + rng_placement + rng_filename + index_str
-    rn_graph_load = load_pickle_file(filename)
-    
-    print rn_graph == rn_graph_load
-    #save_pickle_file(filename, rng_graph)
+    save_pickle_file(filename, rn_graph)
+ 
+    if number_of_points > 2500:
+      g_graph = make_graph.gabriel_graph_kdtree(new_data, tree, cutoff_distance)
+    else:
+      g_graph = make_graph.gabriel_graph_brute(new_data, cutoff_distance)
+  
+    filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
+    save_pickle_file(filename, g_graph)
             
 def make_node_pairs(number_of_points, num, number_tests, from_val, to_val):
   point_str = str(number_of_points) + '/'

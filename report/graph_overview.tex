@@ -14,7 +14,7 @@ From figure~\ref{fig:routing_not_planar} and figure~\ref{fig:routing_planar} it 
 
 From a theoretical perspective it is clear that we know less about a non-planar graph than that of a planar one. For instance we have Euler's formula, which states that if we let $v$ be the number of vertices's, $f$ the number of faces and $e$ the number of edges then $v - e + f = 2$. Thus we can begin to reason about the ratio of the graph if we are given one of $e$, $f$ or $v$. This also becomes a problem with routing, as it likewise becomes harder to reason about routing with non-planar graphs, and most routing algorithms (such as GPSR) requries the graph to be planar (see section~\ref{section:gpsr} on p. \pageref{section:gpsr}). It is also important to remember that a routing algorithm working on a non-planar graph will have to work on more edges, which will slow it down.
 
-From a practical perspective working with non-planar graphs will mean that each node will have to keep track of more neighbours (since there is no theoretical upper bound on the nodes in the vicinity, though realistically I would say that more than 50 neighbours are unlikely, even for crowded areas). In dense networks the extra neighbours added by having a non-planar graph can be significant --- see figure \todo{make crowded street example} for an illustration of this. The number of neighbours for each node also becomes a problem with routing schemes that explicitly sends information to a single neighbour instead of flooding the entire network, as more nodes have to be inspected, than if we had a planar graph. While more energy has to be used to keep track of neighbours, this does not mean a greater transmission overhead, as we per our \ac{uga} assumption are transmitting our data omni-directional, and not directly to each neighbour in a turn by turn fashion.
+From a practical perspective working with non-planar graphs will mean that each node will have to keep track of more neighbours (since there is no theoretical upper bound on the nodes in the vicinity, though realistically I would say that more than 50 neighbours are unlikely, even for crowded areas). In dense networks the extra neighbours added by having a non-planar graph can be significant --- see figure~\ref{fig:gg-rng-example-big} on p. \pageref{fig:gg-rng-example-big} for an illustration of this. The number of neighbours for each node also becomes a problem with routing schemes that explicitly sends information to a single neighbour instead of flooding the entire network, as more nodes have to be inspected, than if we had a planar graph. While more energy has to be used to keep track of neighbours, this does not mean a greater transmission overhead, as we per our \ac{uga} assumption are transmitting our data omni-directional, and not directly to each neighbour in a turn by turn fashion.
 
 From this I conclude that while a non-planar graph can be used as an alternative to planar graphs, I do not feel that the loss of knowledge and extra bookkeeping is worth it. I will therefore in this thesis only pursue planar graphs. However, in section
  
@@ -79,6 +79,7 @@ To complicate matter further different nodes can in practise have different comm
 Likewise it is important to remember that a node in practise might be able to adjust its communications range (at a higher energy cost). See figure~\ref{fig:different_radius}
 
 \subsection{Two-Level graphs}
+
 \tikfig{gateway-node}{Node $s$ and $t$ are the source and the sink respectively, the rectangular nodes with $CH$ are the \acp{ch} and the diamond nodes are the gateway node, and the entirely white or black nodes are the regular nodes that have elected the right- and leftmost \ac{ch} respectively. From the figure we can see that the message travels from the source to the header, between the gateways and then to the second  and then lastly to the sink, as indicated by the grey background. It is also clear that it would have been faster to go from the gateway and then to the sink, but since the gateway in this model does not know the location of the different nodes, the message will first have to be routed to the rightmost node.}
 
 \label{section:cluster_methods}
@@ -98,7 +99,9 @@ Using \acp{ch} we divide the communication between nodes into 3 stages:
 \item From the source to the local \ac{ch} 
 \item From the local \ac{ch} to the \ac{ch} closest to the sink
 \item From the \ac{ch} closets to the sink to the sink itself\footnote{If either \ac{ch} is the sink or the source, and the first or third part is of course eliminated}.
-\end{enumerate}\todo{refernce the figure of this}
+\end{enumerate}
+See figure~\ref{fig:gateway-node} for an illustration of this.
+
  \acp{ch} thus decreases the number of nodes that needs to keep track of the other nodes, and the gateway nodes divides the routing into multiple smaller trips.  
 
 However, since we are introducing a layer of centralisation, we must ensure that we can detect and replace a \ac{ch} should it fail (and to elect it in the first place). An often used system is a voting system, or an selection algorithm (based hash value of the node's id, its MAC value etc.).

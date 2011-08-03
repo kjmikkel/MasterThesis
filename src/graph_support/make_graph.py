@@ -102,7 +102,7 @@ def gabriel_graph(old_graph, kd_tree, data):
     graph[u] = local_edges    
   return graph
 
-def gabriel_graph_kdtree(points, kd_tree):
+def gabriel_graph_kdtree(points, kd_tree, cutoff_distance):
   """
   The new version of the Gabriel Graph algorithm which uses the kd-tree to create the edges, instead of removing them
   """
@@ -112,19 +112,22 @@ def gabriel_graph_kdtree(points, kd_tree):
   for edge in edges:
     u = edge[0]
     v = edge[1]
-    mid_point = find_midpoint(u, v)
     distance_to_v = find_distance(u, v)
-    mid_point_radius = ((distance_to_v * 1.0)  / 2.0) + 0.0000001  # This last bit is due to rounding errors
-    
+    if cutoff_distance < distance_to_v:
+      continue
+    mid_point = find_midpoint(u, v)
+
+    # This last addition is due to avoid problems with rounding errors, should not create problems as the points have their coordinates as integers
+    mid_point_radius = find_distance(u, mid_point)  + 0.000001   
     close_nodes = kd_tree.query_ball_point(mid_point, mid_point_radius)      
       
-    if len(close_nodes) == 2:
-      add_graph_value(graph, v, u, distance_to_v)
-      add_graph_value(graph, u, v, distance_to_v)
-          
+    if len(close_nodes) <= 2:
+      graph = add_graph_value(graph, v, u, distance_to_v)
+      graph = add_graph_value(graph, u, v, distance_to_v)
+
   return graph
 
-def gabriel_graph_brute(points):
+def gabriel_graph_brute(points, cutoff_distance):
   """
   The new version of the Gabriel Graph algorithm which uses the kd-tree to create the edges, instead of removing them
   """
@@ -134,19 +137,25 @@ def gabriel_graph_brute(points):
   for edge in edges:
     u = edge[0]
     v = edge[1]
-    mid_point = find_midpoint(u, v)
     distance_to_v = find_distance(u, v)
+    if cutoff_distance < distance_to_v:
+      continue
+    mid_point = find_midpoint(u, v)
+    mid_dist = find_distance(u, mid_point)
     add = True
     for point in points:
       if not (point == u or point == v):
         p_dist = find_distance(point, mid_point)
-        if p_dist < distance_to_v:
+
+        if p_dist <= mid_dist:
           add = False;
           break
+      else:
+        continue
 
     if add:
-      add_graph_value(graph, v, u, distance_to_v)
-      add_graph_value(graph, u, v, distance_to_v)
+      graph = add_graph_value(graph, v, u, distance_to_v)
+      graph = add_graph_value(graph, u, v, distance_to_v)
           
   return graph
 
