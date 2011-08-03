@@ -101,6 +101,9 @@ Both GOAFR and GOAFR+ has proved to be theoretical asymptotically worst-case opt
 Due to time constraints I have only been able to implement GOAFR in ns-2, and so will only use that in the tests.
 
 \subsubsection{GPSR}
+\tikfig{gpsr}
+{A demonstration of the GPSR routing algorithm. The grey background with grey nodes indicates when the GPSR algorithms is in the Greedy phase and the the black nodes with the black background indicates when the algorithm is running in perimiter phase}
+
 \label{section:gpsr}
 Greedy Perimeter Stateless Routing is a routing algorithm that uses a hybrid of Greedy routing and face routing. The idea is to use Greedy routing as much as possible, and only use the face routing recover from situations where it reaches a situation where the Greedy routing fails. The algorithm will use the right-hand-rule (see section~\ref{right-hand rule} on p. \pageref{right-hand rule}) to route the messages in perimeter mode to ensure they stay within the same face. I base all the description in this subsection on \cite{gpsr}.
 
@@ -122,7 +125,6 @@ also, in the following let $f$ denote the current face we are routing on.
 \item Let $p$ be the current node, if $|\overline{pt}| < |\overline{L_pt}|$ we have reached a node closer to the sink than the local minimum, and we continue with our Greedy routing --- the algorithm goes to step 1. If on the other hand $p$ is farther away from the sink than $L_p$, the message is transferred to the counter-clockwise node $q$ on $f$. If $\overline{pq} == e_0$ then we have come full circle, and there exist no path to the sink $t$, so drop the message. If on the other hand either $q$ or $\overline{pq}$ is intersected by $\overline{L_pt}$, then transmit the message to $q$ and go to step 4, otherwise just transmit the message and go to step 3.
 \item Let $p$ be the current node. Set $L_f$ to $p$ and switch to the next face. Let $q$ be the counter-clockwise neighbour of $p$ on the new face and set $e_0$ to $\overline{pq}$. Go to step 3. 
 \end{enumerate}
-
 
 \subsubsection{DSDV}
 
