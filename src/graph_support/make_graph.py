@@ -171,7 +171,7 @@ def make_delaunay_edges(points):
 
   return edges
 
-def rn_graph_brute(points):
+def rn_graph_brute(points, cutoff_distance):
   edges = make_delaunay_edges(points)  
   rn_graph_dict = {}
 
@@ -179,6 +179,10 @@ def rn_graph_brute(points):
     v = edge[0]
     u = edge[1]
     edge_distance = find_distance(u, v)
+    
+    if cutoff_distance < edge_distance:
+      continue
+
     add = True
     for point in points:
       if not (point == u or point == v):
@@ -193,7 +197,7 @@ def rn_graph_brute(points):
 
   return rn_graph_dict
 
-def rn_graph_kdtree(points, kdtree):
+def rn_graph_kdtree(points, kdtree, cutoff_distance):
   edges = make_delaunay_edges(points)
   rn_graph_dict = {}
 
@@ -201,6 +205,11 @@ def rn_graph_kdtree(points, kdtree):
     v = edge[0]
     u = edge[1]
     edge_distance = find_distance(u, v)
+    
+    # If the nodes are father apart then we can mannage, then we proceed to the next edge
+    if cutoff_distance < edge_distance:
+      continue
+    
     add = True
     u_points = kdtree.query_ball_point(u, edge_distance)
     v_points = kdtree.query_ball_point(v, edge_distance)
