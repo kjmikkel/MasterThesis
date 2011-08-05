@@ -53,11 +53,13 @@ I have found the following general methods for making the planar graphs:
 Both the \ac{gabe} and the \ac{rng} are based on the \ac{uga}, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}.
 
 
-The \ac{gabe} is a sub-graph of the Delaunay triangulation, and \ac{rng} is a subset of \ac{gabe} \todo{find and cite}, and as such they are both well described and understood graphs many of the same properties as the Delaunay triangulation. \ac{cldp} on the other hand is not a graph, but rather an algorithm that takes an already existing graph and makes sure its planar, which, according to \cite{practical} is less likely to make the graph disconnected than \ac{gabe} and \ac{rng}. It is therefore harder to reason about most probable maximum number of neighbours for \ac{cldp}. 
+The \ac{gabe} is a sub-graph of the Delaunay triangulation\cite{GGExpected}, and \ac{rng} is a subset of \ac{gabe} \cite{GGExpected}, and as such they are both well described and understood graphs many of the same properties as the Delaunay triangulation. \ac{cldp} on the other hand is not a graph, but rather an algorithm that takes an already existing graph and makes sure its planar, which, according to \cite{practical} is less likely to make the graph disconnected than \ac{gabe} and \ac{rng}. It is therefore harder to reason about most probable maximum number of neighbours for \ac{cldp}. 
 
 \tikfig{graph_comparison}{\ref{fig:rng1} and \ref{fig:rng2} are examples of the \ac{rng}, while \ref{fig:gabe1} and \ref{fig:gabe2} are examples of the \ac{gabe}. This figure is inspired by figure~7 in \cite{GeoSpanners}.}
 
-Delaunay graphs have been found to have an expected maximum degree of $\theta(\log n / \log \log n)$ \cite{delExpected}, and furthermore that that \ac{gabe} has a maximum degree of $\theta(\log n / \log \log n)$, or, as the authors put it, there exists a constant $a$ and constant $b$ such that 
+In the Delaunay graph there is an edge $\overline{vu}$ between two points $v$ and $u$ if and only if there is a closed disc $C$ with $v$ and $u$ on the boundry and no point on the inside of $C$ \cite{CompuGeo}. From this it is clear that in theory there is no upper limit on how many neighbours a point can have in the Delaunay graph, since an infinite number of nodes could be placedd on the border of $C$. However, this is clearly a degernate case, and we must therefore instead try to reason about the expected maximum degree, and doubly true when we are talking about the \ac{gabe} and the \ac{rng}.
+
+Delaunay graphs have been found to have an expected maximum degree of $\Theta(\log n / \log \log n)$ \cite{delExpected}, and furthermore that that \ac{gabe} has an expected maximum degree of $\Theta(\log n / \log \log n)$ \cite{GGExpected}, or, as the authors in \cite{GGExpected} puts it, there exists a constant $a$ and $b$ such that if $\delta$ is the maximum degree of the \ac{gabe} then 
 $$
 \lim_{n \rightarrow \infty} Pr\left({\Delta \in \left[\frac{a\log n}{\log \log n}, \frac{b\log n}{\log \log n}\right]}\right) = 1
 $$
@@ -111,9 +113,11 @@ One way of exploiting routing between \acp{ch} is to use the \ac{rdg}:
 \item[The \ac{rdg}:] The \ac{rdg} is a graph scheme that employs \acp{ch} based planar graph solution. After having found the set $C$ of \acp{ch}, each $ch \in C$ calculates its local Delaunay edges on the set $C$, and then confers with its one-hop \ac{ch} neighbours to check which Delaunay edges are valid. Besides being planar and computable in a distributed manner, the \ac{rdg} is also a spanner, which means that using it will only make the route a constant times longer than the optimal route \cite{GeoSpanners}.
 \end{description}
 
+\hide{
 \subsection{Multiple-level graphs}
 A logical extension to the Two-level graph is the multiple-level graph. In the multiple-level graph the $[n]$th level contains the location of the nodes on the $[n-1]$th level, for $n \geq 3$. The selection for each level can be done similar to when dealing with second-level graphs, with redefined neighbours    
  \todo{find article and cite}
+}
 
 \subsection{Spanners}
 \label{section:spanners}

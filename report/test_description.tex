@@ -40,13 +40,13 @@ As I have now detailed in section~\ref{section:input_parameters} which parameter
 
 \begin{description}
 \item[Movement models:] DisasterArea \cite{disasterArea} and Gauss-Markov \cite{MobilityAdHocResearch}. In practise I will create a trace using the BonnMotion tool \cite{toilers} use to create the movement files which can then be imported into ns-2.
-\item[Amount and Data-transmission type:] 500 kB, 5120 kB, 20480 kB
+\item[Amount and Data-transmission type:] 512 kB through a TCP connection
 \item[Size of simulation area:] 500 by 500 units and 1000 by 1000 units
 \item[Routing algorithms:] GOAFR \cite{gopher}, GPSR \cite{gpsr}, Greedy \cite{gopher}, DSDV \cite{DSDV}
 \item[Number of nodes:] 100 to 10000 nodes in increments of 100 nodes, giving me 100 data-points that will be used to analyse the success of the routing algorithms. 
-\item[Nodes failing:] 0\%, 10\%, 40\%
-\item[Nodes entering:] 0\%, 30\%
-\item[Time:] 10 minutes (600 seconds)
+%\item[Nodes failing:] 0\%, 10\%, 40\%
+%\item[Nodes entering:] 0\%, 30\%
+\item[Time:] 1 minute (60 seconds)
 \item[Maximum number of nodes transmitting at one time:] 30\% of the network
 \end{description}
 
@@ -131,10 +131,7 @@ also, in the following let $f$ denote the current face we are routing on.
 
 \subsection{Mobility models}
 
-
-blah blah
-
-
+For the mobility models I have only chosen to test Gauss-Markov, which I from \cite{MobilityAdHocResearch} found to be a good algorithm for simulating a movement pattern\footnote{Not to mention was implemented by the same team that build the Bonnmotion movement tool} that seems rather random. I would have liked to test the Disasster Area movement pattern found in \cite{disasterArea}, but I found it difficult to get the bonnMotion tool to generete the movement, as well as unsure on which defintions would create an interesting model for the different algorithms to be tested on\footnote{In order to create the a disaster area movment simulation several different zones have to be defined -- e.g. a zone for the disaster, a zone for the triage, treatment and so on.}. 
 
 \subsection{Limited-range spanner tests}
 \label{section:test_desc_spanners}
@@ -179,9 +176,9 @@ I will do this for all three types of graphs, and record whether or not a path e
 For each node-pair tested for the graphs I will find the total distance passed, the average distance and the average maximum and minimum distance for all the tests\footnote{I feel it is necessary to use the average since there may be outliers that easily could skew the results}. Likewise I will find the total number of hops, the average number of hops and the average maximum and minimum number of hops. Since one of the advantages of the \ac{gabe} and the \ac{rng} is that they have fewer neighbours, I will also find the total number of neighbours, the average, max- and minimum number of neighbours. I will also include the average number of connected components, which will give us an good idea of how connected the graphs are.
 
 \subsubsection{Size of the test}
-Since the node-sets that we are going to generate the graphs from are going to distributed uniformly, I feel that in order to gain a proper picture of the situation we need to generate many node-sets, so that any underlying pattern can show it self. Therefore I have decided to generate 500 different uniformly distributed node-sets. For each node-set I will then generate one non-planar graph, one \ac{gabe}, and one \ac{rng}, meaning that for each node 
+Since the node-sets that we are going to generate the graphs from are going to distributed uniformly, I feel that in order to gain a proper picture of the situation we need to generate many node-sets, so that any underlying pattern can show it self. Therefore I have decided to generate 500 different uniformly distributed node-sets. For each node-set I will then generate one non-planar graph, one \ac{gabe}, and one \ac{rng}, meaning that for each node node-category I  generate 500 graphs for the non-planar, \ac{gabe} and \ac{rng} (for a total of 1500 graphs for each - except for node-category 7500 and 10000, for which I only have been able to generate 250 for each, due to time constraints). Each node-set is then used to generate the three types of graph. For each node-set I then generate 100 node-pairs. I feel that this will give me an reasonable amount of data to analyse, while still being computable for the larger number of nodes.
 
-  which I use to generate 500 graphs for the non-planar, \ac{gabe} and \ac{rng} (for a total of 1500 graphs for each ). Each node-set is then used to generate the three types of graph. For each node-set I then generate 100 node-pairs. I feel that this will give me an reasonable amount of data to analyse, while still being computable for the larger number of nodes.
+
 
 \hide{
 %\tikgraph{avg_neigh}{caption}
