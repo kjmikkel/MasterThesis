@@ -1,9 +1,8 @@
 import os
 
 
-sizes = ["500"] #, ("1000")]
-algos = ["GOAFR"]
-#, "DSDV", "GPSR", "GOAFR"]
+sizes = ["500", "1000"]
+algos = ["GOAFR", "DSDV", "GPSR", "GOAFR"]
 time = "60"
 
 for algo in algos:
