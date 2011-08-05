@@ -209,10 +209,9 @@ $ns_ run
       algo, algo, algo, algo, algo, 
       algo, algo, algo, algo, algo, 
       algo, algo, algo, algo)
-      """
+
       f = open("test.tcl", "w")
       f.write(tcl_do)
       f.close()
       
       os.system("../ns test.tcl")
-      """
