@@ -2,12 +2,12 @@ import os
 
 
 sizes = ["500", "1000"]
-algos = ["GOAFR", "DSDV", "GPSR", "GOAFR"]
+algos = ["GREEDY", "GOAFR", "GPSR", "DSDV"]
 time = "60"
 
 for algo in algos:
   for size in sizes:
-    for i in xrange(1):
+    for i in xrange(100):
       nn = str(100 * (i + 1))
 
       tcl_do = """ #author: Thomas Ogilvie 
