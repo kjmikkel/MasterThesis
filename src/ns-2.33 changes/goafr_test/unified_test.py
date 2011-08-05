@@ -10,6 +10,10 @@ for algo in algos:
     for i in xrange(100):
       nn = str(100 * (i + 1))
 
+      if os.path.exists("../../../src/Traces/%s/%s-%s.tr" % (algo, nn, size)):
+        print "../../../src/Traces/%s/%s-%s.tr there" % (algo, nn, size)
+        continue
+
       tcl_do = """ #author: Thomas Ogilvie 
 # sample tcl script showing the use of %s and HLS (hierarchical location service)
 
@@ -202,10 +206,10 @@ $ns_ run
       algo, algo, algo, algo, algo, 
       algo, algo, algo, algo, algo, 
       algo, algo, algo, algo)
- 
-   #   print tcl_do
+      """
       f = open("test.tcl", "w")
       f.write(tcl_do)
       f.close()
       
       os.system("../ns test.tcl")
+      """
