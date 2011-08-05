@@ -10,9 +10,12 @@ for algo in algos:
     for i in xrange(100):
       nn = str(100 * (i + 1))
 
-      if os.path.exists("../../../src/Traces/%s/%s-%s.tr" % (algo, nn, size)):
-        print "../../../src/Traces/%s/%s-%s.tr there" % (algo, nn, size)
-        continue
+      filename = "../../../src/Traces/%s/%s-%s.tr" % (algo, nn, size)
+      if os.path.exists(filename):
+        statinfo = os.stat(filename)
+        if statinfo.st_size > 0:
+          print filename
+          continue
 
       tcl_do = """ #author: Thomas Ogilvie 
 # sample tcl script showing the use of %s and HLS (hierarchical location service)
