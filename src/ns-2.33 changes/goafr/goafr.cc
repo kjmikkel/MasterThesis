@@ -62,6 +62,7 @@
 #endif
 
 #define MAX_COORD 10
+#define DEBUG 0
 
 #define BEACON_RESCHED                                                     \
            beacon_timer_->resched(bint_ + Random::uniform(2*bdesync_* bint_) - \
@@ -1511,7 +1512,6 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 								if (p==NULL) { return; }
 							}
 						TRACE_CONN(p,addr(),addr(),HDR_IP(p)->daddr());
-						fprintf(stderr, "before drop\n");
 						drop(p, DROP_RTR_NO_ROUTE);
 						return;
 					}
@@ -1520,8 +1520,8 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 					cmh->size() -= hdr_size(p); // strip data header
 					goafrh->mode_ = GOAFRH_DATA_PERI;
 					cmh->size() += hdr_size(p); // add peri header
-
-					trace((char*)"Start Peri from node %d", mn_->address());
+					if (DEBUG)
+						trace((char*)"Start Peri from node %d", mn_->address());
 
 					// mark point of entry into peri data mode
 					double myx, myy, myz;
@@ -1673,7 +1673,8 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
 			cmh->size() -= hdr_size(p); // strip data peri header
 			goafrh->mode_ = GOAFRH_DATA_GREEDY;
-			trace((char*)"Back to Greedy\n");
+			if (DEBUG)
+			  trace((char*)"Back to Greedy");
 			cmh->size() += hdr_size(p); // strip data goafr header
 			goafrh->nhops_ = 1;
 			goafrh->currhop_ = 1;
@@ -1699,7 +1700,8 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 		
 			// We record when we arrive at a node that is closer to the destination than the current best
 			if (new_distance < old_distance) {	
-				trace((char*)"Change best point from %d, %3.f to %d %3.f\n", goafrh->perips_.ip, old_distance, mn_->address(), new_distance);
+				if (DEBUG)
+				  trace((char*)"Change best point from %d, %3.f to %d %3.f", goafrh->perips_.ip, old_distance, mn_->address(), new_distance);
 				goafrh->perips_.ip = mn_->address();
 				goafrh->perips_.x = myx;
 				goafrh->perips_.y = myy;
@@ -1727,8 +1729,8 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 
 					if (!p->greedy_start && (goafrh->peript_.ip == mn_->address() || distance_to_point < 2) && !p->reversed()) {
 						// We have returned to the start point, and we have not reversed our direction, we then go forward -- GOAFR
-
-						trace((char*)"Start the advance from %d to %d.", mn_->address(), goafrh->perips_.ip);
+						if (DEBUG)
+						  trace((char*)"Start the advance from %d to %d.", mn_->address(), goafrh->perips_.ip);
 						goafrh->mode_ = GOAFRH_DATA_ADVANCE; // put packet in advance mode
 						// Set the next hop
 						goafrh->nhops_ = 1;
@@ -1807,7 +1809,8 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 						ntab_->counter_clock = true; // next peri -> route counterclockwise
 						cmh->size() -= hdr_size(p); // strip data peri header
 						goafrh->mode_ = GOAFRH_DATA_GREEDY;
-						trace((char*)"Back to Greedy\n");
+						if (DEBUG)
+	                      trace((char*)"Back to Greedy");
 						cmh->size() += hdr_size(p); // strip data goafr header
 						goafrh->currhop_ = 0;
 						goafrh->nhops_ = 0;
@@ -1866,10 +1869,12 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 
 		// first of all, look if we're neighbor to dst - just in case
 	    if ( (ne = ntab_->ent_finddst(iph->daddr())) != NULL) {
-			trace((char*)"Advanced to _%d_", goafrh->perips_.ip);
+			if (DEBUG)
+  			  trace((char*)"Advanced to _%d_", goafrh->perips_.ip);
 			cmh->size() -= hdr_size(p); // strip data peri header
 			goafrh->mode_ = GOAFRH_DATA_GREEDY;
-			trace((char*)"Back to Greedy\n");
+			if (DEBUG)
+			  trace((char*)"Back to Greedy");
 			cmh->size() += hdr_size(p); // strip data goafr header
 			goafrh->nhops_ = 1;
 			goafrh->currhop_ = 1;
@@ -1891,11 +1896,13 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 
 			// Cutoff function, when arrive at the closest node, so we go back to business as usual
 			if (mn_->address() == goafrh->perips_.ip || pt_distance < 5) {
-				trace((char*)"Advanced to _%d_", goafrh->perips_.ip);
+				if (DEBUG)
+				  trace((char*)"Advanced to _%d_", goafrh->perips_.ip);
 				cmh->size() -= hdr_size(p); // strip data peri header
 				goafrh->mode_ = GOAFRH_DATA_GREEDY;
 				cmh->size() += hdr_size(p); // add data goafr header
-				trace((char*)"Back to Greedy\n");
+				if (DEBUG)
+				  trace((char*)"Back to Greedy");
 
 				/*
 				 always add back (- - is +) 12 bytes: if use_implicit_beacon_,
@@ -1957,7 +1964,8 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 								locservice_->dropPacketCallback(p);
 								if (p==NULL) { return; }
 							}
-						trace((char*)"Advance drop at node %d, best node is %d", mn_->address(), goafrh->perips_.ip);
+						if (DEBUG)
+					      trace((char*)"Advance drop at node %d, best node is %d", mn_->address(), goafrh->perips_.ip);
 
 						drop(p, DROP_RTR_NO_ROUTE);
 						return;
@@ -2009,13 +2017,15 @@ GOAFR_Agent::forwardPacket(Packet *p, int rtxflag /*= 0*/) {
 							 myx              , myy              , myz              ) < 5) {
 					// am I the final waypoint?
 					if (goafrh->currhop_ == (goafrh->nhops_-1)) {
-						trace((char*)"Advanced to _%d_", goafrh->perips_.ip);
+						if (DEBUG)
+						  trace((char*)"Advanced to _%d_", goafrh->perips_.ip);
 						// yes! return packet to greedy mode
 						ntab_->counter_clock = true; // next peri -> route counterclockwise
 						cmh->size() -= hdr_size(p); // strip data peri header
 						goafrh->mode_ = GOAFRH_DATA_GREEDY;
 						cmh->size() += hdr_size(p); // strip data goafr header
-						trace((char*)"Back to Greedy\n");
+						if (DEBUG)
+						  trace((char*)"Back to Greedy");
 
 						goafrh->currhop_ = 0;
 						goafrh->nhops_ = 0;
