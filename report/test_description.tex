@@ -39,7 +39,7 @@ In order to perform the tests I will need to define the parameters and their ran
 As I have now detailed in section~\ref{section:input_parameters} which parameters it would be useful to vary, I will in this subsection detail the actual value of the different parameters. 
 
 \begin{description}
-\item[Movement models:] DisasterArea \cite{disasterArea} and Gauss-Markov \cite{MobilityAdHocResearch}. In practise I will create a trace using the BonnMotion tool \cite{toilers} use to create the movement files which can then be imported into ns-2.
+\item[Movement models:] \hide{DisasterArea \cite{disasterArea} and} Gauss-Markov \cite{MobilityAdHocResearch} with the trace created through the use of the BonnMotion tool \cite{toilers} use to create the movement files which can then be imported into ns-2\footnote{For the script that generates the movement files, please see \texttt{src/MotionCode/Gauss-Markov.py}}.
 \item[Amount and Data-transmission type:] 512 kB through a TCP connection
 \item[Size of simulation area:] 500 by 500 units and 1000 by 1000 units
 \item[Routing algorithms:] GOAFR \cite{gopher}, GPSR \cite{gpsr}, Greedy \cite{gopher}, DSDV \cite{DSDV}
@@ -47,10 +47,8 @@ As I have now detailed in section~\ref{section:input_parameters} which parameter
 %\item[Nodes failing:] 0\%, 10\%, 40\%
 %\item[Nodes entering:] 0\%, 30\%
 \item[Time:] 1 minute (60 seconds)
-\item[Maximum number of nodes transmitting at one time:] 33\% of the network
+\item[Amount of nodes transmitting:] 33\% of the network
 \end{description}
-
-Not all combinations are going to be tried, since this would create far too many tests to feasibly to test or analyse. However, some of these are going to be combined. For instance it would be preferable to do different data-transmissions during the life time of the network.\todo{finish this up}
 
 \subsection{Routing algorithm description}
 \label{section:routing_algorithm}
