@@ -73,7 +73,7 @@ Since DD is a pull algorithm it might be especially useful in sensor networks.}
 {Geometrical routing uses the location of the current node and the location of the sink. There exist many different kinds of routing algorithms, but common for them is that unlike the greedy routing technique, they are allowed to transmit the message to a node that is further away from the sink than the current node. This flexibility allows the geometrical algorithms to find a path to the sink. An often used technique is to explore the face of the graph`-
 
 An example of a Geometrical algorithm could be the OFR \cite{gopher} routing algorithm, which uses the line-segments between the sink and the source to find which faces in the graph it needs to route to eventually arrive at the sink}
-{gopher+, gopher, gpsr}
+{gpsr, gopher+, gopher}
 
 \route{Shortest path} 
       {The shortest path technique uses distributed versions of shortest-path algorithms in order to find shortest-path from either one node to another, or from all nodes to all other nodes. As one might imagine, this approach has problems in mobile networks, where the structure of the graph can be in constant flux, and where these values often have to be updated. Examples of distributed shortest path algorithms include Distributed Bellman-Ford}
