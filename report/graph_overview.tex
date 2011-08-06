@@ -59,7 +59,7 @@ The \ac{gabe} is a sub-graph of the Delaunay triangulation\cite{GGExpected}, and
 
 In the Delaunay graph there is an edge $\overline{vu}$ between two points $v$ and $u$ if and only if there is a closed disc $C$ with $v$ and $u$ on the boundry and no point on the inside of $C$ \cite{CompuGeo}. From this it is clear that in theory there is no upper limit on how many neighbours a point can have in the Delaunay graph, since an infinite number of nodes could be placedd on the border of $C$. However, this is clearly a degernate case, and we must therefore instead try to reason about the expected maximum degree, and doubly true when we are talking about the \ac{gabe} and the \ac{rng}.
 
-Delaunay graphs have been found to have an expected maximum degree of $\Theta(\log n / \log \log n)$ \cite{delExpected}, and furthermore that that \ac{gabe} has an expected maximum degree of $\Theta(\log n / \log \log n)$ \cite{GGExpected}, or, as the authors in \cite{GGExpected} puts it, there exists a constant $a$ and $b$ such that if $\delta$ is the maximum degree of the \ac{gabe} then 
+Delaunay graphs have been found to have an expected maximum degree of $\Theta(\log n / \log \log n)$ \cite{delExpected}, and furthermore that that \ac{gabe} has an expected maximum degree of $\Theta(\log n / \log \log n)$ \cite{GGExpected}, or, as the authors in \cite{GGExpected} puts it, there exists a constant $a$ and $b$ such that if $\Delta$ is the maximum degree of the \ac{gabe} then 
 $$
 \lim_{n \rightarrow \infty} Pr\left({\Delta \in \left[\frac{a\log n}{\log \log n}, \frac{b\log n}{\log \log n}\right]}\right) = 1
 $$
@@ -67,8 +67,8 @@ and for \ac{gabe} $a = 1/12$ and $b = 1$, for uniform distributions \cite{GGExpe
 
 Since the \ac{rng} is a subset of the \ac{gabe}, it can at most have as many neighbours. A comparison between the \ac{gabe} and the \ac{rng} is illustrated in figure~\ref{fig:graph_comparison} and figure~\ref{fig:gg-rng-example-big}. For more on the difference between the \ac{gabe} and the \ac{rng} in practise see section~\ref{section:spanners} on p.~\pageref{section:spanners}.
 
-%\tikfig{gg-rng-example-big}{In the following examples all the nodes have the same transmission radius. In figure~\ref{fig:norm_graph} we see the non-planar graph. In figure~\ref{fig:gg_graph} we see the \ac{gabe} for the same set of points, clearly being planar and with far less edges, and in figure~\ref{fig:rng_graph} we see the \ac{rng} graph, which on closer inspection turns out to be a subset of the \ref{fig:gg_graph}. For comparison we have the Minimum Spanning tree in figure~\ref{fig:mst}}
-\todo{unhide when we have to print}
+\tikfig{gg-rng-example-big}{In the following examples all the nodes have the same transmission radius. In figure~\ref{fig:norm_graph} we see the non-planar graph. In figure~\ref{fig:gg_graph} we see the \ac{gabe} for the same set of points, clearly being planar and with far less edges, and in figure~\ref{fig:rng_graph} we see the \ac{rng} graph, which on closer inspection turns out to be a subset of the \ref{fig:gg_graph}. For comparison we have the Minimum Spanning tree in figure~\ref{fig:mst}}
+%\todo{unhide when we have to print}
 
 It is not immediately apparent how one would compare \ac{gabe} and \ac{rng} to \ac{cldp} on a theoretical level, since \ac{cldp} is effected on the run-time behaviour of the transmission between the nodes. While I could implement \ac{cldp} in practise and compare the results to the non-planar graphs and \ac{gabe} and \ac{rng} I have chosen not to do this, as I feel it would be to much work when figuring in the relative obscureness of \ac{cldp} compared to \ac{gabe} and the \ac{rng}.  
 
@@ -76,7 +76,7 @@ Neither the \ac{manet} or the \ac{anet} can be said to be entirely static. Even 
 
 To complicate matter further different nodes can in practise have different communications radius as exemplified in figure~\ref{fig:node_different_radius}, which shows us that a node needs to confirm that it indeed has a bidirectional link to each of its adjacent nodes, and cannot in practise take it for granted.
 
-\tikfig{different_radius}{A node with different broadcast ranges. The first solid circle is the default broadcast range of node a, which does not reach node b. The second circle is the maximum range that a can broadcast, which does reach node b.}
+\tikfig{different_radius}{A node with different broadcast ranges. The first solid circle is the default broadcast range of node $a$, which does not reach node $b$. The second circle is the maximum range that node $a$ can broadcast, which does reach node $b$.}
 
 Likewise it is important to remember that a node in practise might be able to adjust its communications range (at a higher energy cost). See figure~\ref{fig:different_radius}
 
