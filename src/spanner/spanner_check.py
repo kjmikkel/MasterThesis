@@ -1,5 +1,5 @@
-import os, sys, random, copy, math, json, pickle
-from multiprocessing import Process
+import os, sys, random, copy, math, json, pickle, multiprocessing
+from multiprocessing import Pool
 from decimal import *
 from datetime import datetime
 # I define the precision of the decimal numbers
@@ -54,23 +54,23 @@ class results_container:
     self.min_value = 0
     self.max_value = 0
 
-    self.min_unit_value = 0
-    self.max_unit_value = 0
+    self.min_unit_value = 10000
+    self.max_unit_value = -1
 
     self.num_errors = 0
     self.legal_empty = 0
 
-    # Statistics about edges - implement this!
-    self.edges = []
+    # Statistics about
     self.edge_number = 0
+    self.average_edges = []
     self.average_neighbours = 0
     self.max_neighbours = 0
     self.min_neighbours = 0
 
     self.total_length = 0
 
-    self.scc = [] # Strongly connected components
-    self.number_scc = 0
+    self.cc = [] # Connected components
+    self.number_cc = 0
 
   def get_min_internal(self, min_dist):
     return min(min_dist)
@@ -114,37 +114,27 @@ class results_container:
     self.max_unit_value = self.get_unit_max()
     
     # Edges:
-    self.edge_number = sum(self.edges) / 2
-    self.average_neighbours = (self.edge_number * 1.0) / len(self.edges) * 1.0
-    self.max_neighbours = max(self.edges)
-    self.min_neighbours = min(self.edges)
+    self.edge_number = self.edge_number / 2
+    self.average_neighbours = sum(self.average_edges) * 1.0 / len(self.average_edges) * 1.0
+    # CC
+    self.number_cc = (sum(self.cc) * 1.0) / len(self.cc) * 1.0 # Connected components
 
-    # SCC
-    print self.scc
-    self.number_scc = (sum(self.scc) * 1.0) / len(self.scc) * 1.0 # Strongly connected components
+  def get_latex_values(self):
+    self.finalize()
 
-  def print_latex(self):
-
-    newline = '\\\\\n'
+    distance = (c_round(self.distance_value), c_round(self.max_value), c_round(self.min_value), c_round(self.average_distance))
+    unit_distance = (str(self.unit_distance_value), c_round(self.max_unit_value), c_round(self.min_unit_value), c_round(self.average_unit_distance))
+    neighbours = (c_round(self.max_neighbours), c_round(self.min_neighbours), c_round(self.average_neighbours))
     
-    string  = '\\begin{tabular}{lll}\n'
-    string += ' & Distance & Unit Distance' + newline
-    string += 'Total: & ' + c_round(self.distance_value) + ' & ' + str(self.unit_distance_value) +  newline
-    string += 'Average: & ' + c_round(self.average_distance) + ' & ' + c_round(self.average_unit_distance) + newline
-    string += 'Min value: & ' + c_round(self.min_value) + ' & ' + str(self.min_unit_value) + newline
-    string += 'Max value: & ' + c_round(self.max_value) + ' & ' + str(self.max_unit_value) + newline
-    string += '\\hline\n'
-    string += 'Number of missing paths: & ' + str(self.num_errors) + ' &' + newline
-    string += '\\end{tabular}' + newline
-    string += 'Total number of edges: ' + str(self.edge_number) + newline
-    string += 'Total length of graphs: ' + c_round(self.total_length) + newline
-    string += 'Average number of strongly connected components: ' + c_round(self.number_scc) + newline
-    string += 'Average numbers of neighbours: ' + str(self.average_neighbours) + newline
-    string += 'Minimum number of neighbours: ' + str(self.max_neighbours) + newline
-    string += 'Maximum number of neighbours: ' + str(self.min_neighbours) + newline
-
-    
-    return string 
+    return_dict = {}
+    return_dict["distance"] = distance
+    return_dict["unit"] = unit_distance
+    return_dict["error"] = str(self.num_errors)
+    return_dict["total_length"] = c_round(self.total_length)
+    return_dict["num_edges"] = str(self.edge_number)
+    return_dict["CC"] = str(self.number_cc)
+ 
+    return return_dict
 
   def __str__(self):
     string =  'Name: ' + self.name + '\n'
@@ -166,7 +156,7 @@ def ftd(num):
   return Decimal(str(num))
 
 def c_round(num):
-  return "%.4f" % num
+  return "%.2f" % num
 
 def load_pickle_file(file_name):
   result = None
@@ -267,7 +257,6 @@ def make_node_pairs(number_of_points, num, number_tests, from_val, to_val):
     (_ , set_container) = make_graph.MST_Kruskal(non_planar_graph)
     nodes = non_planar_graph.keys()
 
-  #  num_time1 = datetime.now()
     # We find out how many sets we are working with
     num_sets_dict = {}
     set_len = 0
@@ -279,26 +268,15 @@ def make_node_pairs(number_of_points, num, number_tests, from_val, to_val):
       
       if set_len >= 5:
         break
- #   num_time2 = datetime.now()
- #   test_time = num_time2 - num_time1
 
 
     node_pairs_to_check = []
     if set_len < 5:
-  #    num_time1 = datetime.now()
+      print "advanced"
       node_pairs_to_check = advanced_node_pairs(number_of_points, set_container, nodes)
-  #    num_time2 = datetime.now()
-  #    advanced = num_time2 - num_time1
     else:
- #     num_time1 = datetime.now()
       node_pairs_to_check = brute_force_node_pairs(number_of_points, set_container, nodes)
- #     num_time2 = datetime.now()
- #     brute = num_time2 - num_time1
 
-#    print "Test time: \t\t" + str(test_time)
-#    print "Advanced: \t\t" + str(advanced)
-#    print "Bruteforce: \t\t" + str(brute)
-#    print "Test + Advanced: \t" + str(test_time + advanced) + ", less?: " + str((test_time + advanced) < brute)  
     save_pickle_file(node_pair_location + point_str + "node_pair_" + str(graph_index + 1), node_pairs_to_check)
     
 
@@ -403,59 +381,63 @@ def advanced_node_pairs(number_tests, set_container, nodes):
   return node_pairs_to_check
  
 
-def do_test(number_of_points, num, number_tests, from_val, to_val):
+def do_test((number_of_points, num, number_tests, from_val, to_val)):
   point_str = str(number_of_points) + '/'
   for graph_index in range(from_val, to_val):
     index_str = str(graph_index + 1)  
 
-    if os.path.exists(results_rng_location + point_str + rng_placement + rng_filename + index_str + ".pickle"):
-      continue
-
     if graph_index % 10 == 0 and graph_index > 0:
       print 'Made ' + str(graph_index) + ' tests.'
-
 
     node_pairs_to_check = load_pickle_file(node_pair_location + point_str + 'node_pair_' + str(graph_index + 1))
 
     # We perform the actual tests
     
     # Start Non-planar
+ 
     load_filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
     save_filename = results_non_location + point_str + non_planar_placement + non_planar_filename + index_str
-    perform_tests(load_filename, save_filename, node_pairs_to_check)
+    if not os.path.exists(save_filename + ".pickle"): 
+      perform_tests(load_filename, save_filename, node_pairs_to_check)
     # End non-planar
 
     # Start Gabriel Graph
+
     load_filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
     save_filename = results_gg_location + point_str + gg_placement + gg_filename + index_str
-    perform_tests(load_filename, save_filename, node_pairs_to_check)
+    if not os.path.exists(save_filename + ".pickle"):
+      perform_tests(load_filename, save_filename, node_pairs_to_check)
     # End Gabriel Graph
 
     # Start RNG 
     load_filename = rng_f + point_str + rng_placement + rng_filename + index_str
     save_filename = results_rng_location + point_str + rng_placement + rng_filename + index_str
-    perform_tests(load_filename, save_filename, node_pairs_to_check)
-    # End RNG    
+    if not os.path.exists(save_filename + ".pickle"):
+      print "Do", save_filename
+      perform_tests(load_filename, save_filename, node_pairs_to_check)
+    # End RNG
+
+    if to_val > 140 and to_val < 145:
+      print "done one in the zone"
 
 def perform_tests(load_graph_name, save_data_name, node_pairs):
     graph = load_pickle_file(load_graph_name)
     local_node_pairs = copy.deepcopy(node_pairs)
 
-    results                        = do_actual_test(graph, local_node_pairs) 
-    (neighbours, graph_distance)   = get_edge_data(graph)   
+    results                            = do_actual_test(graph, local_node_pairs) 
+    (neighbour_data, graph_distance)   = get_edge_data(graph)   
 
-    # We find all the Strongly Connected Components
+    # We find all the Connected Components
     (_ , set_container) = make_graph.MST_Kruskal(graph)
 
-    strong_dict = {}
+    cc_dict = {}
     for node in set_container.keys():
       set_tuple = tuple(set_container[node])
-      strong_dict[set_tuple] = 1
+      cc_dict[set_tuple] = 1
     
-    num_scc = len(strong_dict.keys())  
+    num_cc = len(cc_dict.keys())  
     
-
-    save_pickle_file(save_data_name, (results, neighbours, graph_distance, num_scc))
+    save_pickle_file(save_data_name, (results, neighbour_data, graph_distance, num_cc))
 
 def get_edge_data(graph):
     nodes = graph.keys()
@@ -469,24 +451,35 @@ def get_edge_data(graph):
         total_length += neighbours[inner_node]
 
     total_length /= 2
-    return (neigh_list, total_length)
+    
+    total_number = sum(neigh_list)
+    neigh_max = max(neigh_list)
+    neigh_min = min(neigh_list)
+    neigh_avg = total_number / len(neigh_list)
+    neigh_data = (total_number, neigh_max, neigh_min, neigh_avg)
+    
+    return (neigh_data, total_length)
         
 def do_actual_test(graph, node_pairs):
   results = []
   for pair in node_pairs:
     (start_node, end_node) = pair 
     
-    (D, P, Path) = dijkstra.shortestPath(graph, start_node, end_node)  
-    (D_unit, P_unit, Path_unit) = dijkstra.shortestUnitPath(graph, start_node, end_node)
+    (D, _, Path) = dijkstra.shortestPath(graph, start_node, end_node)  
+    (D_unit, _, _) = dijkstra.shortestUnitPath(graph, start_node, end_node)
 
     if len(Path) > 0:
-      distance = D[end_node]
+      try:
+        distance = D[end_node]
+      except KeyError:
+        print D, end_node
       unit_distance = D_unit[end_node]
     else:
       distance = -1 
       unit_distance = -1
     
-    results.append((distance, Path, unit_distance, Path_unit))
+    result = (distance, len(Path) - 1, unit_distance)
+    results.append(result)
   
   return results
   
@@ -505,9 +498,10 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
       print 'Collected ' + str(result_index) + ' of the results'
     
     filename = results_non_location + point_str + non_planar_placement + non_planar_filename + index_str
-    graph_distance = load_pickle_file(filename)[0]      
-    init_missing_paths = [True for i in range(0, len(graph_distance))]
-    new_paths = container_analysis(non_planar_container, filename, init_missing_paths)
+    initial_results = load_pickle_file(filename)[0]
+    initial_paths = [True for i in range(0, len(initial_results))]
+
+    new_paths = container_analysis(non_planar_container, filename, initial_paths)
 
     filename = results_gg_location + point_str + gg_placement + gg_filename + index_str    
     container_analysis(gg_container, filename, new_paths)
@@ -528,21 +522,34 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
   
   filename = results_rng_location + point_str + 'rng_results'
   save_pickle_file(filename, rng_container)
-  
+  """ 
   if debug:
     print non_planar_container
     print '***'
     print gg_container
     print '***'
     print rng_container  
+  """
 
 def container_analysis(container, filename, paths):
-  graph_results = load_pickle_file(filename)      
-  
-  results = graph_results[0]
-  container.edges.extend(graph_results[1])
-  container.total_length += graph_results[2]
-  container.scc.append(graph_results[3])
+  try:
+    (main_results, neighbours, graph_distance, num_cc) = load_pickle_file(filename)
+    (total_number, neigh_max, neigh_min, neigh_avg) = neighbours
+  except ValueError:
+   print filename
+   index = 0
+   for item in load_pickle_file(filename): 
+     print "**" + str(index) +"**: " + str(item)
+     print "------------------------------------"
+     index += 1
+ 
+  container.edge_number += total_number
+  container.max_neighbours = max(neigh_max, container.max_neighbours)
+  container.min_neighbours = min(neigh_min, container.min_neighbours)
+  container.average_edges.extend(neigh_avg)
+
+  container.total_length += graph_distance
+  container.cc.append(num_cc)
 
   old_missing_path = copy.deepcopy(paths)  
   
@@ -554,39 +561,37 @@ def container_analysis(container, filename, paths):
 
   missing_path = []
 
-  for result_index in range(0, len(results)):
-    result = results[result_index]
+  for result_index in range(0, len(main_results)):
+    result = main_results[result_index]
+    (local_distance, path_length, local_unit_distance) = result
 
-    (local_distance, path, local_unit_distance, unit_path) = result
-
-    if len(path) == 0 and len(unit_path) == 0:
+    if path_length == 0:
 
       # if there was not an error in the graphs before this one, then we up the number of empty paths       
       if not old_missing_path[result_index]:
-        print result
         empty += 1
       
       # Regardless of what happened above, we need to mention that there is a missing path here
       missing_path.append(True)
       # And we note that there is an empty path
       legal_empty += 1
-    elif len(path) == 0 and len(unit_path) > 0:
+    elif path_length == 0 and local_unit_distance > 0:
       print 'Error 1'
-      raise BaseException, 'Path error, Unit path not the same as path. Unit path: ' + len(unit_path) + ', path: ' + len(path)
-    elif len(path) > 0 and len(unit_path) == 0:
+      raise BaseException, 'Path error, Unit path not the same as path. Unit path:' + len(unit_path) + ', path: ' + len(path)
+    elif path_length > 0 and local_unit_distance == 0:
       print 'Error 2'
       raise BaseException, 'Path error, Path not the same as unit path. Unit path: ' + len(unit_path) + ', path: ' + len(path)
     else:
-      # We record that we can reach the point - so no there is no missing path
+       # We record that we can reach the point - so no there is no missing path
       missing_path.append(False)
   
       container.distance.append(local_distance)
       container.unit_distance.append(local_unit_distance)
   
   # Append the results to the container
-
   container.num_errors += empty
   container.legal_empty += legal_empty
+
   return missing_path
 
 def save_file(file_name, data):
@@ -607,43 +612,52 @@ def print_latex_results(number_of_points):
   filename = results_rng_location + point_str + 'rng_results'
   rng_results = load_pickle_file(filename)
 
-  print 'Normal graph'
-  graph_latex = graph_results.print_latex()
-  save_file(latex_location + 'graph_results_' + point_str[0:-1], graph_latex) 
+  newline = "\\\\\n"
+  graph_latex = graph_results.get_latex_values()
+  gg_latex = gg_results.get_latex_values()
+  rng_latex = rng_results.get_latex_values()
 
-  print 'Gabriel graph'
-  gg_latex = gg_results.print_latex()
-  save_file(latex_location + 'gg_results_' + point_str[0:-1], gg_latex) 
+  graph_dist_list = graph_latex["distance"]
+  gg_dist_list = gg_latex["distance"]
+  rng_dist_list = rng_latex["distance"]
 
-  print 'RN graph'
-  rng_latex = rng_results.print_latex()
-  save_file(latex_location + 'rng_results_' + point_str[0:-1], rng_latex)
-
-  print 'Total results'
-  graph_distance = graph_results.distance_value * 1.0
-  gg_distance    = gg_results.distance_value * 1.0
-  rng_distance   = rng_results.distance_value * 1.0
-
-  graph_gg =  gg_distance / graph_distance
-  graph_rng = rng_distance / graph_distance
+  graph_unit_list = graph_latex["unit"]
+  gg_unit_list = gg_latex["unit"]
+  rng_unit_list = rng_latex["unit"]
 
   graph_unit_distance = graph_results.unit_distance_value * 1.0
   gg_unit_distance = gg_results.unit_distance_value * 1.0
   rng_unit_distance = rng_results.unit_distance_value * 1.0
 
-  graph_gg_unit  = gg_unit_distance  / graph_unit_distance
-  graph_rng_unit = rng_unit_distance / graph_unit_distance
+  graph_distance = graph_results.distance_value * 1.0
+  gg_distance    = gg_results.distance_value * 1.0
+  rng_distance   = rng_results.distance_value * 1.0
+  
+  graph_gg =  c_round(gg_distance / graph_distance * 100.00)
+  graph_rng = c_round(rng_distance / graph_distance * 100.00)
+  
+  graph_gg_unit  = c_round((gg_unit_distance  / graph_unit_distance) * 100.00)
+  graph_rng_unit = c_round((rng_unit_distance / graph_unit_distance) * 100.00)
 
-  newline = '\\\\\n'
-  line   = '\\hline\n'
-  string = '\\begin{tabular}{l|c|c|}' + '\n'
-  string += ' & Gabriel Graph & RNG' + newline
-  string += line
-  string += 'Distance: & ' + c_round(graph_gg) + ' & ' + c_round(graph_rng) + newline
-  string += 'Unit Distance: & ' + c_round(graph_gg_unit) + ' & ' + c_round(graph_rng_unit) + newline
-  string += '\\end{tabular}'  
+  latex_table =  "\\begin{tabular}{ccrrrr}\n"
+  latex_table += "\\multicolumn{2}{}{}        & Length of graph: & Max node-pair: & Min node-pair: & Avg node-pair" + newline
+  latex_table += "\\multirow{3}{*}{Distance}   & NML & %s & %s & %s & %s%s" % (graph_dist_list[0], graph_dist_list[1], graph_dist_list[2], graph_dist_list[3], newline) 
+  latex_table += "                            & GG  &  %s & %s & %s & %s%s" % (gg_dist_list[0], gg_dist_list[1], gg_dist_list[2], gg_dist_list[3], newline)
+  latex_table += "                            & RNG & %s & %s & %s & %s%s" % (rng_dist_list[0], rng_dist_list[1], rng_dist_list[2], rng_dist_list[3], newline) 
+  latex_table += "\\hline \n"
+  latex_table += "Unit      & NML & %s\phantom{.00} & %s & %s & %s%s" % (graph_unit_list[0], graph_unit_list[1], graph_unit_list[2], graph_unit_list[3], newline)  
+  latex_table += "Distance  & GG  & %s\phantom{.00} & %s & %s & %s%s" % (gg_unit_list[0], gg_unit_list[1], gg_unit_list[2], gg_unit_list[3], newline)  
+  latex_table += "          & RNG & %s\phantom{.00} & %s & %s & %s%s" % (rng_unit_list[0], rng_unit_list[1], rng_unit_list[2], rng_unit_list[3], newline)
+  latex_table += "\hline\n" 
+  latex_table += "\hline\n"
+  latex_table += "             &     & Distance: & Unit Distance:" + newline 
+  latex_table += "Percentage   & NML & 100.00 \% & 100,00 \%" + newline
+  latex_table += "of the       & GG  & %s \\%% & %s \\%%%s" % (graph_gg, graph_gg_unit, newline)
+  latex_table += "normal graph & RNG & %s \\%% %s \\%%\n" % (graph_rng, graph_rng_unit)
+  latex_table += "\end{tabular}"
 
-  save_file(latex_location + 'spanner_' + point_str[0:-1], string)
+  save_file(latex_location + 'graph_results_' + point_str[0:-1], latex_table)
+
   
 def do_integrity_test(point_list, node_pairs):
   (normal_graph, tree) = make_graph.SciPy_KDTree(point_list, 20)
@@ -668,25 +682,16 @@ def do_integrity_test(point_list, node_pairs):
   non_planar_container.finalize()
   gg_container.finalize()
   rng_container.finalize()
-  
-  if debug:
-    print non_planar_container
-    print '***'
-    print gg_container
-    print '***'
-    print rng_container
 
 def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state):	
   do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, 0, num_graphs)	
 
 
 def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state, from_val, to_val):	
-
+  
   """
   A single function call to tie the entire test stack together and to make it easier to parameterise
-  """
 
-  """
   Quick reference for state:
   0 or below: Do everything
   1: Don't do point generation
@@ -697,7 +702,10 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
   
 
   All of the options are culimative, so if state is 3, then you won't generate pointsets, make the graphs or node pairs
-  """  
+  """
+
+  num_range = 7
+  
   print "Working on " + str(point_num)
   if start_state < 1:
     generate_point_sets(point_num, num_graphs, max_values)
@@ -712,7 +720,13 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
     print 'Made node pairs'
 
   if (start_state <= 3) and (end_state >= 3):
-    do_test(point_num, num_graphs, pr_graph_test, from_val, to_val)
+    pool = Pool(processes=multiprocessing.cpu_count())
+    list_parameter = []
+    for i in range(0, 250):
+      list_parameter.append((point_num, num_graphs, pr_graph_test, i, i + 1))
+
+    #print list_parameter
+    pool.map(do_test, list_parameter)
     print 'Done results'
     
   if (start_state <= 4) and (end_state >= 4):
@@ -733,8 +747,7 @@ def eq(points):
   2: Don't do graph generation
   3: Don't make node pairs
   4: Don't find the results
-  5 or above: Don't analyse results - just print the LaTeX code
-"""
+  5 or above: Don't analyse results - just print the LaTeX code"""
 
 # point_num num_graphs pr_graphs_test max_values cut_off state
 #do_suite(10, 2, 30, 20, 15, 0)
@@ -764,67 +777,20 @@ end_state = 2
 #do_suite(2500,  number_tests, pr_test, eq(2500),  radio_range, start_state, end_state)
 #do_suite(5000,  number_tests, pr_test, eq(5000),  radio_range, start_state, end_state)
 #do_suite(7500,  number_tests, pr_test, eq(7500),  radio_range, start_state, end_state)
-step = 500 / 7
-
-"""
-p1 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, 1, step))
-p2 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step, step * 2))
-p3 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 2, step * 3))
-p4 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 3, step * 4))
-p5 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 4, step * 5))
-p6 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 5, step * 6))
-p7 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 6, step * 7 + 3))
-
-p1.start()
-p2.start()
-p3.start()
-p4.start()
-p5.start()
-p6.start()
-p7.start()
-
-p1.join()
-p2.join()
-p3.join()
-p4.join()
-p5.join()
-p6.join()
-p7.join()
-"""
+num_to_do = 250
+step = num_to_do / 7
+mod = num_to_do % 7
 
 start_state = 3
 end_state = 3
-for num_nodes in [100, 250, 500, 1000, 2500, 5000, 7500, 10000]:
-  print "******* %s *******" % num_nodes
-  p1 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, step))
-  p2 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step, step * 2))
-  p3 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 2, step * 3))
-  p4 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 3, step * 4))
-  p5 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 4, step * 5))
-  p6 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 5, step * 6))
-  p7 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 6, step * 7 + 3))
 
-  p1.start()
-  p2.start()
-  p3.start()
-  p4.start()
-  p5.start()
-  p6.start()
-  p7.start()
-
-  p1.join()
-  p2.join()
-  p3.join()
-  p4.join()
-  p5.join()
-  p6.join()
-  p7.join()
-
-start_state = 3
-end_state = 8
-
-for num_nodes in [100, 250, 500, 1000, 2500, 5000, 7500, 10000]:
-  do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 1, number_tests)
+"""
+for num_nodes in [100, 250, 500, 1000, 2500]:
+  do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
+"""
+  
+for num_nodes in [7500]:
+  do_suite(num_nodes, num_to_do, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, num_to_do)
 
 """
 point_list = [(0,0), (20, 0), (4, -5), (15, -5)]
