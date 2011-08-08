@@ -5,13 +5,20 @@
 \colorlet{circle area}{gray!20}
 
 \def\sourceSink{{(0.75, 2.5)/s}, {(5, 3)/t}}
-\def\blankNodes{{(1.3, 2.3)/a}, {(3, 1.5)/c}, {(5, 2.5)/f}, {(5.5, 1.5)/g}, {(5.6, 2.6)/i}}
+
+\def\blackNodes{{(1.3, 2.0)/a}, {(2.5, 1.5)/c}, {(3.1, 1.4)/e}, {(1.7, 2.5)/j}, {(1.6, 3.0)/k}, {(2.1, 2.8)/l}, {(1.1, 1.4)/m}, {(0.6, 1.6)/n}, {(1.6, 1.1)/o}, {(2.6, 2.4)/q}}
+
+\def\whiteNodes{{(4.8, 2.3)/f}, {(5.5, 1.5)/g}, {(5.6, 2.6)/i}, {(6.6, 2.6)/r}, {(6.9, 2.2)/u}, {(6.4, 1.45)/v}, {(6.2, 0.9)/x}}
+
 \def\clusterHeads{{(2, 2)/CHb}, {(6.1, 2)/CHh}}
+
 \def\gatewayNodes{{(3.7, 2)/Gd}, {(4.3, 2)/Ge}}
 
 \def\radius{2cm}
 
-\def\connect{s/a, a/CHb, CHb/c, c/Gd, Gd/Ge, Ge/f, f/g, g/CHh, CHh/i, i/t}
+\def\connect{s/a, a/CHb, CHb/c, c/e, e/Gd, Gd/Ge, Ge/f, f/g, g/CHh, CHh/i, i/t}
+
+\def\extraConnect{CHb/j, j/k, j/l, k/l, CHb/q, a/m, m/n, m/o, CHh/v, v/x, CHh/u, CHh/r, u/r}
 
 \tikzset{
   filled/.style={fill=circle area, draw=circle edge, thick},
@@ -22,31 +29,38 @@
 
 \tikzstyle{edge} = [draw, thick, -]
 \tikzstyle{vertex}=[circle,fill=black!25,minimum size=10pt,inner sep=0pt]
-\tikzstyle{blank}=[circle,fill=white!25,minimum size=10pt,inner sep=0pt]
+\tikzstyle{white}=[circle,fill=white!25,minimum size=10pt,inner sep=0pt]
+\tikzstyle{black}=[circle,fill=black!100, minimum size=10pt, inner sep=0pt]
 \tikzstyle{clusterHead}=[rectangle,fill=gray!25,minimum size=10pt,inner sep=0pt]
 \tikzstyle{gateway}=[diamond,fill=black!50,minimum size=10pt,inner sep=0pt]
 \tikzstyle{invis-vertex}=[circle,fill=white!100,minimum size=0pt, inner sep=0pt]
-
 \tikzstyle{selected edge} = [draw, line width=5pt,-,gray!50]
 \tikzstyle{edge} = [draw, thick, -]
 
 \begin{tikzpicture} 
   % The source and the sink
   \foreach \pos/\name in \sourceSink {
+    \node[invis-vertex] (\name-) at \pos {};
     \node[vertex] (\name) at \pos {$\name$};
   }
 
   % The rest of the nodes
-  \foreach \pos/\name in \blankNodes {
+  \foreach \pos/\name in \whiteNodes {
     \node[invis-vertex] (\name) at \pos {};
     \draw[outline] \pos circle (5pt);
-    \node[blank] () at \pos {};
+    \node[white] () at \pos {};
+  }
+
+  \foreach \pos/\name in \blackNodes {
+    \node[invis-vertex] (\name) at \pos {};
+    \draw[outline] \pos circle (5pt);
+    \node[black] () at \pos {};
   }
 
   % The cluster heads
   \foreach \pos/\name in \clusterHeads {
+    \node[invis-vertex] (\name-) at \pos {};
     \node[clusterHead] (\name) at \pos {CH};
-    \draw[outline] \pos circle (\radius);
   }
 
   % The gateway nodes
@@ -55,8 +69,21 @@
     \node[gateway] () at \pos {};
   }
 
+  % The connections between them
+  \begin{pgfonlayer}{background}
+    \foreach \source/\sink in \connect
+      \path[selected edge] (\source) -- (\sink);
+
+    \foreach \source/\sink in {s-/a, a/CHb-, CHb-/c, g/CHh-, i/t-}
+      \path[selected edge] (\source) -- (\sink);
+  \end{pgfonlayer}
+
   % All the connections
-  \foreach \source/\sink in \connect
+  \foreach \source/\sink in \connect {
     \path[edge] (\source) -- (\sink);
-       
+    }
+
+  \foreach \source/\sink in \extraConnect
+    \path[edge] (\source) -- (\sink);
+
 \end{tikzpicture}
