@@ -2,12 +2,12 @@ import os
 
 
 sizes = ["500", "1000"]
-algos = ["GREEDY", "GOAFR", "GPSR", "DSDV"]
+algos = ["GREEDY", "GPSR", "GOAFR", "DSDV"]
 time = "60"
 
 for algo in algos:
   for size in sizes:
-    for i in xrange(100):
+    for i in xrange(30):
       nn = str(100 * (i + 1))
 
       filename = "../../../src/Traces/%s/%s-%s.tr" % (algo, nn, size)
