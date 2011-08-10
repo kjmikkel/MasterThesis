@@ -36,35 +36,35 @@ BLANK	= # make a blank space.  DO NOT add anything to this line
 CC	= gcc-4.3
 CPP	= g++-4.3
 LINK	= $(CPP)
-LINK_SHLIB = gcc -shared
+LINK_SHLIB = ${CC} -shared ${CFLAGS} ${LDFLAGS}
 MKDEP	= ./conf/mkdep
-TCLSH	= /home/mikkel/Documents/MasterThesis/ns-allinone-2.33/bin/tclsh8.4
-TCL2C	= ../tclcl-1.19/tcl2c++
+TCLSH	= @V_TCLSH@
+TCL2C	= @V_TCL2CPP@
 AR	= ar rc $(BLANK)
 
-RANLIB	= ranlib
-INSTALL	= /usr/bin/install -c
+RANLIB	= @V_RANLIB@
+INSTALL	= @INSTALL@
 LN	= ln
 TEST	= test
 RM	= rm -f
 MV      = mv
-PERL	= /usr/bin/perl
+PERL	= @PERL@
 
 # for diffusion
 #DIFF_INCLUDES = "./diffusion3/main ./diffusion3/lib ./diffusion3/nr ./diffusion3/ns"
 
-CCOPT	=  -Wall 
-STATIC	= 
+CCOPT	= @V_CCOPT@ 
+STATIC	= @V_STATIC@
 #LDFLAGS	= $(STATIC)
-LDFLAGS	=  -Wl,-export-dynamic 
+LDFLAGS	=  -Wl,--export-dynamic 
 LDOUT	= -o $(BLANK)
 
-DEFINE	= -DTCP_DELAY_BIND_ALL -DNO_TK -DTCLCL_CLASSINSTVAR  -DNDEBUG -DLINUX_TCP_HEADER -DUSE_SHM -DHAVE_LIBTCLCL -DHAVE_TCLCL_H -DHAVE_LIBOTCL1_13 -DHAVE_OTCL_H -DHAVE_LIBTK8_4 -DHAVE_TK_H -DHAVE_LIBTCL8_4 -DHAVE_TCL_H  -DHAVE_CONFIG_H -DNS_DIFFUSION -DSMAC_NO_SYNC -DCPP_NAMESPACE=std -DUSE_SINGLE_ADDRESS_SPACE -Drng_test
+DEFINE	= -DTCP_DELAY_BIND_ALL -DNO_TK @V_DEFINE@ @V_DEFINES@ -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE_URL=\"\" -DSTDC_HEADERS=1 -DHAVE_SYS_TYPES_H=1 -DHAVE_SYS_STAT_H=1 -DHAVE_STDLIB_H=1 -DHAVE_STRING_H=1 -DHAVE_MEMORY_H=1 -DHAVE_STRINGS_H=1 -DHAVE_INTTYPES_H=1 -DHAVE_STDINT_H=1 -DHAVE_UNISTD_H=1 -DHAVE_LIMITS_H=1 -DHAVE_UNISTD_H=1 -DHAVE_SYS_PARAM_H=1 -DPEEK_XCLOSEIM=1 -D_LARGEFILE64_SOURCE=1 -DTCL_WIDE_INT_IS_LONG=1 -DHAVE_GETCWD=1 -DHAVE_OPENDIR=1 -DHAVE_STRSTR=1 -DHAVE_STRTOL=1 -DHAVE_STRTOLL=1 -DHAVE_STRTOULL=1 -DHAVE_TMPNAM=1 -DHAVE_WAITPID=1 -DUSE_TERMIOS=1 -DHAVE_SYS_TIME_H=1 -DTIME_WITH_SYS_TIME=1 -DHAVE_STRUCT_TM_TM_ZONE=1 -DHAVE_TM_ZONE=1 -DHAVE_GMTIME_R=1 -DHAVE_LOCALTIME_R=1 -DHAVE_TM_GMTOFF=1 -DHAVE_TIMEZONE_VAR=1 -DHAVE_STRUCT_STAT_ST_BLKSIZE=1 -DHAVE_ST_BLKSIZE=1 -DHAVE_SIGNED_CHAR=1 -DHAVE_LANGINFO=1 -DHAVE_SYS_IOCTL_H=1 -DNS_DIFFUSION -DSMAC_NO_SYNC -DCPP_NAMESPACE=@CPP_NAMESPACE@ -DUSE_SINGLE_ADDRESS_SPACE -Drng_test
 
 INCLUDES = \
-	-I.  \
+	-I. @V_INCLUDE_X11@ \
 	-I. \
-	-I/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/tclcl-1.19 -I/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/otcl -I/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/include -I/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/include -I/usr/include/pcap \
+	@V_INCLUDES@ \
 	-I./tcp -I./sctp -I./common -I./link -I./queue \
 	-I./adc -I./apps -I./mac -I./mobile -I./trace \
 	-I./routing -I./tools -I./classifier -I./mcast \
@@ -76,11 +76,11 @@ INCLUDES = \
 
 
 LIB	= \
-	-L/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/tclcl-1.19 -ltclcl -L/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/otcl -lotcl -L/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/lib -ltk8.4 -L/home/mikkel/Documents/MasterThesis/ns-allinone-2.33/lib -ltcl8.4 \
-	-lXext -lX11 \
-	 -lnsl -ldl \
-	-lm -lm 
-#	-L${exec_prefix}/lib \
+	@V_LIBS@ \
+	@V_LIB_X11@ \
+	@V_LIB@ \
+	-lm 
+#	-L/usr/local/lib \
 
 CFLAGS	+= $(CCOPT) $(DEFINE) 
 
@@ -101,7 +101,7 @@ CFLAGS	+= $(CCOPT) $(DEFINE)
 GEN_DIR	= gen/
 LIB_DIR	= lib/
 NS	= ns
-NSLIB   = libns.so
+NSLIB   = @NSLIB@
 NSX	= nsx
 NSE	= nse
 NSTK = nstk
@@ -160,7 +160,7 @@ NS_TCL_LIB_STL = tcl/lib/ns-diffusion.tcl \
 
 OBJ_CC = \
 	tools/random.o tools/rng.o tools/ranvar.o common/misc.o common/timer-handler.o \
-	common/scheduler.o common/object.o common/point.o common/ellipsis.o common/packet.o \
+	common/scheduler.o common/object.o common/packet.o common/point.o common/ellipsis.o\
 	common/ip.o routing/route.o common/connector.o common/ttl.o \
 	trace/trace.o trace/trace-ip.o \
 	classifier/classifier.o classifier/classifier-addr.o \
@@ -338,9 +338,9 @@ OBJ_CC = \
 	\
 	gpsr/gpsr.o \
 	greedy/greedy.o\
-	goafr/goafr.o\
+	gopher/gopher.o\
 	\
-	$(OBJ_STL)
+	@V_STLOBJ@
 
 
 # don't allow comments to follow continuation lines
@@ -394,7 +394,7 @@ SUBDIRS=\
 	indep-utils/webtrace-conv/nlanr \
 	indep-utils/webtrace-conv/ucb
 
-BUILD_NSE = 
+BUILD_NSE = @build_nse@
 
 all: $(NS) $(BUILD_NSE) $(NSTK) all-recursive Makefile
 
@@ -419,7 +419,7 @@ $(NSLIB): $(OBJ) common/tclAppInit.o
 		-Wl,--enable-auto-import \
 		-Wl,--out-implib=$@.a \
 		-Wl,--whole-archive $^ \
-		-Wl,--no-whole-archive  
+		-Wl,--no-whole-archive @V_IMPORT_LIBS@ 
 
 $(NS): $(NSLIB) common/main-modular.cc 
 	$(LINK) $(NS_CPPFLAGS) $(LDFLAGS) $(LDOUT)$@ common/main-modular.cc $(NS_LIBS)
@@ -432,6 +432,8 @@ $(NS): $(OBJ) common/tclAppInit.o common/main-monolithic.o
 	$(LINK) $(LDFLAGS) $(LDOUT)$@ $^ $(LIB)
 
 endif 
+
+
 
 Makefile: Makefile.in
 	@echo "Makefile.in is newer than Makefile."
@@ -522,22 +524,22 @@ NS_TCL_LIB = \
 	tcl/lib/ns-srcrt.tcl \
 	tcl/mcast/ns-lms.tcl \
 	tcl/lib/ns-qsnode.tcl \
-	$(NS_TCL_LIB_STL)
+	@V_NS_TCL_LIB_STL@
 
 $(GEN_DIR)ns_tcl.cc: $(NS_TCL_LIB)
-	$(TCLSH) bin/tcl-expand.tcl tcl/lib/ns-lib.tcl $(NS_TCL_LIB_STL) | $(TCL2C) et_ns_lib > $@
+	$(TCLSH) bin/tcl-expand.tcl tcl/lib/ns-lib.tcl @V_NS_TCL_LIB_STL@ | $(TCL2C) et_ns_lib > $@
 
 $(GEN_DIR)version.c: VERSION
 	$(RM) $@
 	$(TCLSH) bin/string2c.tcl version_string < VERSION > $@
 
-$(GEN_DIR)ptypes.cc: common/ptypes2tcl common/packet.h common/ellipsis.h
+$(GEN_DIR)ptypes.cc: common/ptypes2tcl common/packet.h
 	./common/ptypes2tcl > $@
 
 common/ptypes2tcl: common/ptypes2tcl.o
 	$(LINK) $(LDFLAGS) $(LDOUT)$@ common/ptypes2tcl.o
 
-common/ptypes2tcl.o: common/ptypes2tcl.cc common/packet.h common/ellipsis.h
+common/ptypes2tcl.o: common/ptypes2tcl.cc common/packet.h
 
 dirs:
 	for d in $(DESTDIR)$(MANDEST)/man1; do \
