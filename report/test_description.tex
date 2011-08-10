@@ -22,7 +22,7 @@ In order to perform the tests I will need to define the parameters and their ran
 \begin{description}
 \item[Movement model:] The topology is clearly going to be influenced by the way that the nodes move, therefore it would be interesting to test out several models, to see the strengths and weaknesses of the different routing algorithms.
 
-\item[Routing Algorithms] 
+7\item[Routing Algorithms] 
 
 \item[Amount and data-transmission type:] In real world situations there will be different levels of traffic on the network, and therefore to test it we must likewise simulate these differences. The choice of transmission protocol is also important.
 
@@ -147,7 +147,7 @@ In order to do this test I will first have to make several decisions:
 \end{itemize}
 
 I have not encountered any specific point clustering algorithm in the literature besides the various mobility models (see \cite{disasterArea, MobilityAdHocResearch}) which has lead me to place the nodes uniformly in the plane. The justification of this was both the fact that part of this investigation was an experimental look into how the non-planar graph would behave compared to the \ac{gabe} and the \ac{rng}, and not just about \acp{manet}. In retrospect I can see that using data from the mobility model would proper would have given a better picture and would most likely have made it possible for me to cut down on the number of graphs that would have to have been generated (since the graphs would be representative of the the mobility model, and not just uniformly distributed). See section~\ref{section:future_work} for my recommendation for future comparisons between the graphs.   
-Since I have chosen to uniformly distribute the nodes I will need a large number of tests in order for the underlying properties of the three types of graphs to emerge. Therefore I will therefore have to limit the number of node-categories so that I will be able to process all the tests. I will therefore chose to limit myself to 8 node-categories with the following number of nodes: 100, 250, 500, 1000, 2500, 5000, 7500 and 10000 nodes.
+Since I have chosen to uniformly distribute the nodes I will need a large number of tests in order for the underlying properties of the three types of graphs to emerge. Therefore I will therefore have to limit the number of node-categories so that I will be able to process all the tests. I will therefore chose to limit myself to 7 node-categories with the following number of nodes: 100, 250, 500, 1000, 2500, 5000 and 7500 nodes.
 
 I feel this is a good compromise between having a reasonable number of data-points and big enough spread, while still being able to compute them in a reasonable amount of time. The nodes are going to be placed uniformly in the plane, with the lower bound of their coordinates being 0, and the upper bound depending on the number of points in the graph. No two points will have same the coordinates. 
 
@@ -160,9 +160,9 @@ x &=& \sqrt{100 * num}
 \end{eqnarray}
 meaning that in practise the graphs are squares in the plane with the following dimensions, which will also be the upper limits on their coordinates:
 
-\begin{tabular}{lrrrrrrrr}
-Number of nodes: & 100 & 250 & 500 & 1000 & 2500 & 5000 & 7500 & 10000 \\
-Width/height:    & 100 & 158 & 223 &  316 &  500 &  707 &  866 &  1000 
+\begin{tabular}{lrrrrrrr}
+Number of nodes: & 100 & 250 & 500 & 1000 & 2500 & 5000 & 7500 \\
+Width/height:    & 100 & 158 & 223 &  316 &  500 &  707 &  866  
 \end{tabular} 
 
 \subsubsection{Tests to be performed}
@@ -178,61 +178,3 @@ Since the node-sets that we are going to generate the graphs from are going to d
 
 
 
-\hide{
-%\tikgraph{avg_neigh}{caption}
-
-\begin{figure}
-\centering
-\begin{tikzpicture}
-\begin{axis}[xlabel=Number of nodes in graph, ylabel=Average number of neighbours]
-\addplot+[only marks] coordinates{
-(100, 20) (150, 8) (250, 12) (500, 9) (1000, 3)
-};
-\legend{ddd}
-\end{axis}
-\end{tikzpicture}
-\caption{Example}
-\end{figure}
-
-
-\begin{tikzpicture}
-\begin{loglogaxis}[xlabel=Cost,ylabel=Error]
-
-\addplot coordinates {
-(5,
-8.31160034e-02)
-(17,
-2.54685628e-02)
-(49,
-7.40715288e-03)
-(129,
-2.10192154e-03)
-(321,
-5.87352989e-04)
-(769,
-1.62269942e-04)
-(1793, 4.44248889e-05)
-(4097, 1.20714122e-05)
-(9217, 3.26101452e-06)
-};
-\addplot coordinates {
-(7,
-8.47178381e-02)
-(31,
-3.04409349e-02)
-(111,
-1.02214539e-02)
-(351,
-3.30346265e-03)
-(1023, 1.03886535e-03)
-(2815, 3.19646457e-04)
-(7423, 9.65789766e-05)
-(18943, 2.87339125e-05)
-(47103, 8.43749881e-06)
-};
-\legend{Case 1,Case 2}
-\end{loglogaxis}
-\end{tikzpicture}
-\caption{A larger example}
-\end{figure}
-}
