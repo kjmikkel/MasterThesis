@@ -558,7 +558,7 @@ def container_analysis(container, filename, paths):
   container.edge_number += total_number
   container.max_neighbours = max(neigh_max, container.max_neighbours)
   container.min_neighbours = min(neigh_min, container.min_neighbours)
-  container.average_edges.extend(neigh_avg)
+  container.average_edges.append(neigh_avg)
 
   container.total_length += graph_distance
   container.cc.append(num_cc)
@@ -745,6 +745,52 @@ def do_integrity_test(point_list, node_pairs):
   gg_container.finalize()
   rng_container.finalize()
 
+def make_point(num, filename):
+  graph_results = load_pickle_file(filename)
+  return "\t(%s, %s)\n" % (str(num), graph_results.average_neighbours) 
+
+def make_result_graphs(num_points_range):
+  
+  graph  = "\\begin{figure}\n"
+  graph += "\\centering\n"
+  graph += "\\begin{tikzpicture}\n"
+  graph += "\\begin{axis}[xlabel=Number of nodes in graph, ylabel=Average number of neighbours, legend style={
+cells={anchor=east},
+legend pos=outer north east,
+}]\n"
+
+  default = "\\addplot+[only marks] coordinates{\n"
+  non_planar = default
+  gg = default
+  rng = default
+
+  for num in num_points_range:
+    point_str = str(num) + "/"
+    
+    filename = results_non_location + point_str + 'graph_results' 
+    non_planar += make_point(num, filename)
+
+    filename = results_gg_location + point_str + 'gg_results'
+    gg += make_point(num, filename)
+  
+    filename = results_rng_location + point_str + 'rng_results'
+    rng += make_point(num, filename)
+  
+  non_planar += "};\n"
+  gg += "};\n"
+  rng += "};\n"
+  
+  graph += non_planar
+  graph += gg
+  graph += rng
+  graph += "\\legend{Non-planar, Gabriel, Relative Neighbourhood}\n"
+  graph += "\\end{tikzpicture}\n"
+  graph += "\\end{axis}\n"
+  graph += "\\caption{}"
+  graph += "\\end{figure}\n"
+    
+  save_file(latex_location + "avg_neighbour" , graph)
+
 def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state):	
   do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, 0, num_graphs)	
 
@@ -765,8 +811,8 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
   All of the options are culimative, so if state is 3, then you won't generate pointsets, make the graphs or node pairs
   """
 
-  num_range = 7
-  
+  print start_state
+
   print "Working on " + str(point_num)
   if start_state < 1:
     generate_point_sets(point_num, num_graphs, max_values)
@@ -798,6 +844,7 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
     print_latex_results(point_num)
     print 'Printed LaTeX file'
 
+
 def eq(points):
   return round(math.sqrt(100 * points))
 
@@ -813,29 +860,26 @@ def eq(points):
 # point_num num_graphs pr_graphs_test max_values cut_off state
 #do_suite(10, 2, 30, 20, 15, 0)
 
-start_state = 1
-end_state = 1
-number_tests = 1
 pr_test = 100
 radio_range = 20
-for number_index in [100, 250, 500, 1000, 2500, 5000, 7500, 10000]:
-  do_suite(number_index,  number_tests, pr_test, eq(number_index),  radio_range, start_state, end_state, 0, 1)
 
-start_state = 2
-end_state = 2
 
 num_to_do = 250
 step = num_to_do / 7
 mod = num_to_do % 7
 step = 500 / 7
 
-start_state = 3
-end_state = 3
+start_state = 8
+end_state = 8
+number_tests = 500
 
 """
 for num_nodes in [100, 250, 500, 1000, 2500]:
   do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
+
+
+for num_nodes in [5000, 7500]:
+  do_suite(num_nodes, num_to_do, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
 """
-  
-for num_nodes in [7500]:
-  do_suite(num_nodes, num_to_do, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, num_to_do)
+
+make_result_graphs([100, 250, 500, 1000, 2500, 5000, 7500])
