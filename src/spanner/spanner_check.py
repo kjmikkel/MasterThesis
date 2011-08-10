@@ -113,15 +113,20 @@ class results_container:
 
     self.min_unit_value = self.get_unit_min()
     self.max_unit_value = self.get_unit_max()
-    
+
+    self.distance = []
+    self.unit_distance = []
+
     # Edges:
     self.edge_number = self.edge_number / 2
     self.average_neighbours = sum(self.average_edges) * 1.0 / len(self.average_edges) * 1.0
+    self.average_edges = []
     # CC
     self.number_cc = (sum(self.cc) * 1.0) / len(self.cc) * 1.0 # Connected components
+    self.cc = []
 
   def get_latex_values(self):
-    self.finalize()
+  #  self.finalize()
 
     distance = (c_round(self.distance_value), c_round(self.max_value), c_round(self.min_value), c_round(self.average_distance))
     unit_distance = (str(self.unit_distance_value), c_round(self.max_unit_value), c_round(self.min_unit_value), c_round(self.average_unit_distance))
@@ -747,45 +752,76 @@ def do_integrity_test(point_list, node_pairs):
 
 def make_point(num, filename):
   graph_results = load_pickle_file(filename)
-  return "\t(%s, %s)\n" % (str(num), graph_results.average_neighbours) 
+  return ("\t(%s, %s)\n" % (str(num), graph_results.average_neighbours), "\t(%s, %s)\n" % (str(num), graph_results.average_unit_distance)) 
 
 def make_result_graphs(num_points_range):
   
-  graph  = "\\begin{figure}\n"
-  graph += "\\centering\n"
-  graph += "\\begin{tikzpicture}\n"
-  graph += "\\begin{axis}[xlabel=Number of nodes in graph, ylabel=Average number of neighbours, legend style={
-cells={anchor=east},
-legend pos=outer north east,
-}]\n"
+  default_1 = "\\addplot+[only marks, color=%s, mark=%s] coordinates{\n"
+  default_2 = "\\addplot[color=%s,mark=%s] coordinates{\n"
 
-  default = "\\addplot+[only marks] coordinates{\n"
-  non_planar = default
-  gg = default
-  rng = default
+  non_planar = default_2 % ("red", "x")
+  gg = default_2 % ("blue", "*")
+  rng = default_2 % ("black", "+")
+
+  non_planar_unit = default_2 % ("red", "square*")
+  gg_unit = default_2 % ("blue", "@" )
+  rng_unit = default_2 % ("black", "|")
 
   for num in num_points_range:
     point_str = str(num) + "/"
     
     filename = results_non_location + point_str + 'graph_results' 
-    non_planar += make_point(num, filename)
+    (neighbour, distance) = make_point(num, filename)
+    non_planar += neighbour
+    non_planar_unit += distance
 
     filename = results_gg_location + point_str + 'gg_results'
-    gg += make_point(num, filename)
+    (neighbour, distance) = make_point(num, filename)
+    gg += neighbour
+    gg_unit += distance
   
     filename = results_rng_location + point_str + 'rng_results'
-    rng += make_point(num, filename)
-  
+    (neighbour, distance) = make_point(num, filename)
+    rng += neighbour
+    rng_unit += distance
+
   non_planar += "};\n"
+  non_planar_unit += "};\n"
   gg += "};\n"
+  gg_unit += "};\n"
   rng += "};\n"
-  
+  rng_unit += "};\n"
+
+  axis = "semilogxaxis"
+
+  tics = ""
+  tic_vals = ""
+  for num in num_points_range:
+    tics += "%s" % num
+    tic_vals += "$%s$" % num
+    if num != num_points_range[-1]:
+      tics += ", "
+      tic_vals += ", "
+
+  width = "0.8\linewidth"
+
+  graph  = "\\begin{figure}\n"
+  graph += "\\centering\n"
+  graph += "\\begin{tikzpicture}\n"
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}}"
+  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, legend columns=4,width=%s, axis y line*=left, xlabel=Number of nodes in graph, ylabel=Average number of neighbours]\n" % (axis, tics, tic_vals, width)  
   graph += non_planar
   graph += gg
   graph += rng
   graph += "\\legend{Non-planar, Gabriel, Relative Neighbourhood}\n"
+  graph += "\\end{%s}\n" % axis
+  graph += "\\begin{%s}[width=%s, legend columns=4, scale only axis, axis y line=right, axis x line=none, ylabel=Average number of hops]" % (axis, width)
+  graph += non_planar_unit
+  graph += gg_unit
+  graph += rng_unit
+  graph += "\\legend{Non-planar, Gabriel, Relative Neighbourhood}\n"
+  graph += "\\end{%s}\n" % axis
   graph += "\\end{tikzpicture}\n"
-  graph += "\\end{axis}\n"
   graph += "\\caption{}"
   graph += "\\end{figure}\n"
     
@@ -869,10 +905,9 @@ step = num_to_do / 7
 mod = num_to_do % 7
 step = 500 / 7
 
-start_state = 8
+start_state = 5
 end_state = 8
 number_tests = 500
-
 """
 for num_nodes in [100, 250, 500, 1000, 2500]:
   do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
