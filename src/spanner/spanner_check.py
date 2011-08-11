@@ -658,19 +658,19 @@ def print_latex_results(number_of_points):
 
   latex_table =  "\\begin{tabular}{ccrrrr}\n"
   latex_table += "\\multicolumn{2}{}{}        & Length of graph: & Max node-pair: & Min node-pair: & Avg node-pair" + newline
-  latex_table += "\\multirow{3}{*}{Distance}   & NML & %s & %s & %s & %s%s" % (graph_dist_list[0], graph_dist_list[1], graph_dist_list[2], graph_dist_list[3], newline) 
+  latex_table += "\\multirow{3}{*}{Distance}  & NML & %s & %s & %s & %s%s " % (graph_dist_list[0], graph_dist_list[1], graph_dist_list[2], graph_dist_list[3], newline) 
   latex_table += "                            & GG  &  %s & %s & %s & %s%s" % (gg_dist_list[0], gg_dist_list[1], gg_dist_list[2], gg_dist_list[3], newline)
-  latex_table += "                            & RNG & %s & %s & %s & %s%s" % (rng_dist_list[0], rng_dist_list[1], rng_dist_list[2], rng_dist_list[3], newline) 
+  latex_table += "                            & RNG & %s & %s & %s & %s%s " % (rng_dist_list[0], rng_dist_list[1], rng_dist_list[2], rng_dist_list[3], newline) 
   latex_table += "\\hline \n"
   latex_table += "Unit      & NML & %s\phantom{.00} & %s & %s & %s%s" % (graph_unit_list[0], graph_unit_list[1], graph_unit_list[2], graph_unit_list[3], newline)  
   latex_table += "Distance  & GG  & %s\phantom{.00} & %s & %s & %s%s" % (gg_unit_list[0], gg_unit_list[1], gg_unit_list[2], gg_unit_list[3], newline)  
   latex_table += "          & RNG & %s\phantom{.00} & %s & %s & %s%s" % (rng_unit_list[0], rng_unit_list[1], rng_unit_list[2], rng_unit_list[3], newline)
   latex_table += "\hline\n" 
   latex_table += "\hline\n"
-  latex_table += "             &     & Distance: & Unit Distance:" + newline 
-  latex_table += "Percentage   & NML & 100.00 \% & 100,00 \%" + newline
-  latex_table += "of the       & GG  & %s \\%% & %s \\%%%s" % (graph_gg, graph_gg_unit, newline)
-  latex_table += "normal graph & RNG & %s \\%% %s \\%%\n" % (graph_rng, graph_rng_unit)
+  latex_table += "               &     & Distance: & Unit Distance: &   " + newline 
+  latex_table += "Percentage     & NML & 100.00 \% & 100.00 \%      &   " + newline
+  latex_table += "compared to the& GG  & %s \\%%   & %s \\%%        & %s" % (graph_gg, graph_gg_unit, newline)
+  latex_table += "normal graph   & RNG & %s \\%%   & %s \\%%        & \n" % (graph_rng, graph_rng_unit)
   latex_table += "\end{tabular}"
 
   save_file(latex_location + 'graph_results_' + point_str[0:-1], latex_table)
@@ -692,7 +692,6 @@ def make_pgf_graph(item_list, plot, legend):
   return latex_graph
 
 def print_graphs(number_list):
-
   graph_avg = ""
   gg_avg = ""
   rng_avg = ""
@@ -752,20 +751,136 @@ def do_integrity_test(point_list, node_pairs):
 
 def make_point(num, filename):
   graph_results = load_pickle_file(filename)
-  return ("\t(%s, %s)\n" % (str(num), graph_results.average_neighbours), "\t(%s, %s)\n" % (str(num), graph_results.average_unit_distance)) 
+  
+  avg = graph_results.average_neighbours
+  max_val = graph_results.max_neighbours
+  min_val = graph_results.min_neighbours
+  avg_neigh = "\t(%s, %s)\n" % (num, avg)    # +- (%s, %s)\n" % (num, avg, max_val - avg, min_val)
+  
+  avg = graph_results.average_unit_distance
+  max_val = graph_results.max_unit_value
+  min_val = graph_results.min_unit_value
+  
+  avg_unit = "\t(%s, %s)\n" % (num, avg)    # +- (%s, %s)\n" % (num, avg, max_val - avg, min_val)
+  return (avg_neigh, avg_unit) 
+
+
+def make_point_distance_hops(num):
+  point_str = str(num) + "/"
+
+  filename = results_non_location + point_str + 'graph_results' 
+  graph_result = load_pickle_file(filename)
+
+  filename = results_non_location + point_str + 'gg_results' 
+  gg_result = load_pickle_file(filename)
+
+  filename = results_non_location + point_str + 'rng_results' 
+  rng_result = load_pickle_file(filename)
+  
+  graph_distance = graph_result.distance_value
+  gg_distance    = gg_result.distance_value
+  rng_distance   = rng_result.distance_value
+
+  graph_distance_unit = graph_result.unit_distance_value
+  gg_distance_unit    = gg_result.unit_distance_value
+  rng_distance_unit   = rng_result.unit_distance_value
+
+  gg_percent = (gg_distance * 1.0 / graph_distance) * 100
+  rng_percent = (rng_distance * 1.0 / graph_distance) * 100
+
+  gg_unit_percent = (gg_distance_unit * 1.0 / graph_distance_unit) * 100
+  rng_unit_percent = (rng_distance_unit * 1.0 / graph_distance_unit) * 100
+  
+  todo = [gg_percent, rng_percent, gg_unit_percent, rng_unit_percent]
+  
+  val_list = []
+
+  for val in todo:
+    val_list.append("(%s, %s)\n" % (num, val))
+
+  return val_list
 
 def make_result_graphs(num_points_range):
+  make_distance_hops(num_points_range)
+  make_neigh_hops(num_points_range)
+
+def make_distance_hops(num_points_range):
+  default_1 = "\\addplot[color=%s, mark=%s, densely dashed] coordinates{\n" 
+  default_2 = "\\addplot[color=%s, mark=%s] coordinates{                \n" 
+
+  gg_distance  = default_1 % ("blue", "*")
+  rng_distance = default_1 % ("black", "triangle*")
+
+  gg_distance_unit  = default_2 % ("blue", "o" )
+  rng_distance_unit = default_2 % ("black", "triangle")
+
+  for num in num_points_range:
+    (gg_dist, rng_dist, gg_dist_unit, rng_dist_unit) = make_point_distance_hops(num)
+    
+    gg_distance  += gg_dist
+    rng_distance += rng_dist
+
+    gg_distance_unit  += gg_dist_unit
+    rng_distance_unit += rng_dist_unit
+
+  gg_distance  += "};\n"
+  rng_distance += "};\n"
+
+  gg_distance_unit  += "};\n"
+  rng_distance_unit += "};\n"
+
+  axis = "semilogxaxis"
+
+  xticks = ""
+  xtick_vals = ""
+  for num in xrange(7501):
+    if num > 0 and (num % 100 == 0 or num == 250): 
+      xticks += "%s" % num
+      if num in num_points_range:
+        xtick_vals += "$%s$" % num
+      else:
+        xtick_vals += ""
+      if num != num_points_range[-1]:
+        xticks += ", "
+        xtick_vals += ", "
+
+  y_left  = "\% of euclidian distance traversed compared to non-planar graph"
+  y_right = "\% of hops compared to non-planar graph"
+
+  width = "0.8\linewidth"
+
+  graph = "\\begin{tikzpicture}\n"
+
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}, }\n"
+  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, legend columns=4,width=%s, xlabel=Number of nodes in the graph, ylabel=%s]\n" % (axis, xticks, xtick_vals, width, y_left)  
+  graph += gg_distance
+  graph += rng_distance
+  graph += "\\legend{Gabriel, Relative Neighbourhood}\n"
+  graph += "\\end{%s}\n\n" % axis
+
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.20)},anchor=north}}\n"
+  graph += "\\begin{%s}[scale only axis, width=%s, legend columns=4, axis y line=right, axis x line=none, ylabel=%s]\n" % (axis, width, y_right)
+  graph += gg_distance_unit
+  graph += rng_distance_unit
+  graph += "\\legend{Gabriel, Relative Neighbourhood}\n"
+  graph += "\\end{%s}\n" % axis
+
+  graph += "\\end{tikzpicture}\n"
+    
+  save_file(latex_location + "dist_percent" , graph)
   
-  default_1 = "\\addplot+[only marks, color=%s, mark=%s] coordinates{\n"
-  default_2 = "\\addplot[color=%s,mark=%s] coordinates{\n"
 
-  non_planar = default_2 % ("red", "x")
+def make_neigh_hops(num_points_range):  
+  default_1 = "\\addplot[color=%s, mark=%s] coordinates{                \n" #[error bars/.cd, y dir=both,y explicit] coordinates{\n"
+  default_2 = "\\addplot[color=%s, mark=%s, densely dashed] coordinates{\n" #[error bars/.cd, y dir=both,y explicit] coordinates{\n"
+
+  non_planar = default_2 % ("red", "square*")
   gg = default_2 % ("blue", "*")
-  rng = default_2 % ("black", "+")
+  rng = default_2 % ("black", "triangle*")
 
-  non_planar_unit = default_2 % ("red", "square*")
-  gg_unit = default_2 % ("blue", "@" )
-  rng_unit = default_2 % ("black", "|")
+  non_planar_unit = default_1 % ("red", "square")
+  gg_unit = default_1 % ("blue", "o" )
+  rng_unit = default_1 % ("black", "triangle")
 
   for num in num_points_range:
     point_str = str(num) + "/"
@@ -794,36 +909,57 @@ def make_result_graphs(num_points_range):
 
   axis = "semilogxaxis"
 
-  tics = ""
-  tic_vals = ""
-  for num in num_points_range:
-    tics += "%s" % num
-    tic_vals += "$%s$" % num
-    if num != num_points_range[-1]:
-      tics += ", "
-      tic_vals += ", "
+  xticks = ""
+  xtick_vals = ""
+  for num in xrange(7501):
+    if num > 0 and (num % 100 == 0 or num == 250): 
+      xticks += "%s" % num
+      if num in num_points_range:
+        xtick_vals += "$%s$" % num
+      else:
+        xtick_vals += ""
+      if num != num_points_range[-1]:
+        xticks += ", "
+        xtick_vals += ", "
+
+  yticks_one = "1,...,12"
+  ytick_vals_one = "1,...,12"
+
+  yticks_two = ""
+  ytick_vals_two = ""
+  max_val = 66
+  for num in xrange(max_val + 1):
+    if num > 0 and num % 1 == 0: 
+      yticks_two += "%s" % num
+      if num % 10 == 0:
+        ytick_vals_two += "$%s$" % num
+      else:
+        ytick_vals_two += ""
+      if num != max_val:
+        yticks_two += ", "
+        ytick_vals_two += ", "
 
   width = "0.8\linewidth"
 
-  graph  = "\\begin{figure}\n"
-  graph += "\\centering\n"
-  graph += "\\begin{tikzpicture}\n"
-  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}}"
-  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, legend columns=4,width=%s, axis y line*=left, xlabel=Number of nodes in graph, ylabel=Average number of neighbours]\n" % (axis, tics, tic_vals, width)  
+  graph = "\\begin{tikzpicture}\n"
+
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}, }\n"
+  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, ytick={%s}, yticklabels={%s}, legend columns=4,width=%s, axis y line*=left, xlabel=Number of nodes in the graph, ylabel=Average number of neighbours]\n" % (axis, xticks, xtick_vals, yticks_one, ytick_vals_one, width)  
   graph += non_planar
   graph += gg
   graph += rng
   graph += "\\legend{Non-planar, Gabriel, Relative Neighbourhood}\n"
-  graph += "\\end{%s}\n" % axis
-  graph += "\\begin{%s}[width=%s, legend columns=4, scale only axis, axis y line=right, axis x line=none, ylabel=Average number of hops]" % (axis, width)
+  graph += "\\end{%s}\n\n" % axis
+
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.20)},anchor=north}}\n"
+  graph += "\\begin{%s}[scale only axis, ytick={%s}, yticklabels={%s}, width=%s, legend columns=4, axis y line=right, axis x line=none, ylabel=Average number of hops]\n" % (axis, yticks_two, ytick_vals_two, width)
   graph += non_planar_unit
   graph += gg_unit
   graph += rng_unit
   graph += "\\legend{Non-planar, Gabriel, Relative Neighbourhood}\n"
   graph += "\\end{%s}\n" % axis
+
   graph += "\\end{tikzpicture}\n"
-  graph += "\\caption{}"
-  graph += "\\end{figure}\n"
     
   save_file(latex_location + "avg_neighbour" , graph)
 
@@ -908,13 +1044,13 @@ step = 500 / 7
 start_state = 5
 end_state = 8
 number_tests = 500
-"""
+
 for num_nodes in [100, 250, 500, 1000, 2500]:
   do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
 
 
 for num_nodes in [5000, 7500]:
   do_suite(num_nodes, num_to_do, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
-"""
+
 
 make_result_graphs([100, 250, 500, 1000, 2500, 5000, 7500])
