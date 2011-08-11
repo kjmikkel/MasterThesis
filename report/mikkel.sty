@@ -137,6 +137,23 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \end{figure}
 }
 
+\newcommand{\graphResult}[3]{
+\begin{figure}
+\centering
+\input{results/#1.tex}
+\caption{\label{graph:#3}#2}
+\end{figure}
+}
+
+\newcommand{\tableResult}[3]{
+\begin{figure}
+\scriptsize{
+\input{results/#1.tex}
+}
+\caption{\label{table:#3}#2}
+\end{figure}
+}
+
 \newcommand{\tigz}[1]{\input{figures/tikz/#1.tex}}
 \newcommand{\figref}[1]{see figure~\ref{#1}}
 
