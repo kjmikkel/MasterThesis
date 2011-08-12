@@ -43,7 +43,7 @@ As I have now detailed in section~\ref{section:input_parameters} which parameter
 \item[Amount and Data-transmission type:] 512 kB through a TCP connection
 \item[Size of simulation area:] 500 by 500 units and 1000 by 1000 units
 \item[Routing algorithms:] GOAFR \cite{gopher}, GPSR \cite{gpsr}, Greedy \cite{gopher}, DSDV \cite{DSDV}
-\item[Number of nodes:] 100 to 10000 nodes in increments of 100 nodes, giving me 100 data-points that will be used to analyse the success of the routing algorithms. 
+\item[Number of nodes:] 100 to 3000 nodes in increments of 100 nodes, giving me 30 data-points that will be used to analyse the success of the routing algorithms. 
 %\item[Nodes failing:] 0\%, 10\%, 40\%
 %\item[Nodes entering:] 0\%, 30\%
 \item[Time:] 1 minute (60 seconds)
@@ -100,7 +100,7 @@ Due to time constraints I have only been able to implement GOAFR in ns-2, and so
 
 \subsubsection{GPSR}
 \tikfig{gpsr}
-{A demonstration of the GPSR routing algorithm. The grey background with grey nodes indicates when the GPSR algorithms is in the Greedy phase and the the black nodes with the black background indicates when the algorithm is running in perimiter phase}
+{A demonstration of the GPSR routing algorithm. The grey background with grey nodes indicates when the GPSR algorithms is in the Greedy phase and the the black nodes with the black background indicates when the algorithm is running in perimeter phase}
 
 \label{section:gpsr}
 Greedy Perimeter Stateless Routing is a routing algorithm that uses a hybrid of Greedy routing and face routing. The idea is to use Greedy routing as much as possible, and only use the face routing recover from situations where it reaches a situation where the Greedy routing fails. The algorithm will use the right-hand-rule (see section~\ref{right-hand rule} on p. \pageref{right-hand rule}) to route the messages in perimeter mode to ensure they stay within the same face. I base all the description in this subsection on \cite{gpsr}.
@@ -129,7 +129,14 @@ also, in the following let $f$ denote the current face we are routing on.
 
 \subsection{Mobility models}
 
-For the mobility models I have only chosen to test Gauss-Markov, which I from \cite{MobilityAdHocResearch} found to be a good algorithm for simulating a movement pattern\footnote{Not to mention was implemented by the same team that build the Bonnmotion movement tool} that seems rather random. I would have liked to test the Disasster Area movement pattern found in \cite{disasterArea}, but I found it difficult to get the bonnMotion tool to generete the movement, as well as unsure on which defintions would create an interesting model for the different algorithms to be tested on\footnote{In order to create the a disaster area movment simulation several different zones have to be defined -- e.g. a zone for the disaster, a zone for the triage, treatment and so on.}. 
+For the mobility models I have only chosen to test Gauss-Markov, which I from \cite{MobilityAdHocResearch} found to be a good algorithm for simulating a movement pattern\footnote{Not to mention was implemented by the same team that build the Bonnmotion movement tool} that seems rather random. I would have liked to test the Disasster Area movement pattern found in \cite{disasterArea}, but I found it difficult to get the bonnMotion tool to generate the movement, as well as unsure on which definitions would create an interesting model for the different algorithms to be tested on\footnote{In order to create the a disaster area movement simulation several different zones have to be defined -- e.g. a zone for the disaster, a zone for the triage, treatment and so on.}. 
+
+The script I have used to create the needed ns-2 mobility data can be found in the \texttt{src/MotionCode} directory.
+
+\subsection{Traffic}
+I chose the TCP connection on the ground that I would like to stress tests the different routing algorithms, and since TCP requires more back-and-forth than UDP (and is necessary for transfer of files, and not just steaming of video/audio or the state of a multi-player game).
+
+Ns-2.33 comes with its own Traffic generation program cbrgen.tcl\footnote{Located in the \texttt{indep-utils/cmu-scen-gen} directory}, that I have used to generate the traffic for these tests. The script I have used to create the needed ns-2 traffic files can be found in the \texttt{src/Traffic} folder.
 
 \subsection{Limited-range spanner tests}
 \label{section:test_desc_spanners}
