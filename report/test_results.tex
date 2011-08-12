@@ -2,20 +2,25 @@
 \label{section:test_results}
 In this section I will present the test results. I will start by discussing my test methodology, then the hardware/software specifications, and then I will show the test results themselves, and then round off by an analysis of the results 
 
-\subsection{Test methodology}
-I have performed each test 10 times and take the average of the values, in order to ensure that we avoid random fluctuations of the underling system.
-
 \subsection{Hardware/Software specifications}
 
 \subsection{Test results}
+From the spanner tests performed in 
 
-\subsubsection{Average number of hops compared with average number of neighbours}
+\subsubsection{Hop/neighbour comparison}
+\label{section:hop_neighbour_comparison}
 \graphResult{spanner/avg_neighbour}{The solid lines indicates the average number of hops the shortest path takes from the source to the sink, and belongs to the y-axis on the right. The dashed lines indicates the average number of neighbours, and belongs to the y-axis on the left. The x-axis has been made logarithmic in order to give a better view of the results for a smaller number of nodes.}{avg_neighbour}
 
 As we can see from figure~\ref{graph:avg_neighbour}, it is clear that the average number of the smallest number of hops from the source to the sink increases as the number of nodes in the graph increases. It is also clear that it is the non-planar graph which has the smallest average number of hops required, while the \ac{rng} has the largest. Comparing these results with the average number of neighbours it is however very interesting to see that while the average number of neighbours keeps increasing for the non-planar graph, it is completely stable for the \ac{rng} and, except for the number of neighbours for 100 nodes, the \ac{gabe}, which agrees with the discussion in section~\ref{del_gabe_rng_neigh} on p. \pageref{del_gabe_rng_neigh}. 
 
-\subsubsection{}
+\subsubsection{Graph Distance Comparison}
+\label{section:graph_distance_comparison}
 
+\graphResult{spanner/dist_percent}{The dashed lines indicates the percentage of the total distance for the \ac{gabe} and the \ac{rng}, compared to the non-planar graph, and belongs to the y-axis on the left. The solid lines is the same, just for hops instead of distance and belongs to the y-axis on the right. The x-axis has been made logarithmic in order to give a better view of the results for a smaller number of nodes.}{dist_percent}
+
+From figure~\ref{graph:dist_percent} we can see that not surprisingly that the \ac{gabe} is closer to the non-planar graph is much better than the \ac{rng}. More importantly we also see that euclidean distance traversed for both graphs is more closer to the distance traversed in the non-planar graph, compared to the number of hops. It is interesting to note, that even though the denstiy of the graphs are kept steedy, as the number of nodes grow both the \ac{gabe} and the \ac{rng} edges asymptoticly closer to the non-planar graph. 
+
+\subsubsection{}
 
 \tableResult{spanner/graph_results_100}{}{}
 \tableResult{spanner/graph_results_250}{}{}
@@ -25,9 +30,9 @@ As we can see from figure~\ref{graph:avg_neighbour}, it is clear that the averag
 \tableResult{spanner/graph_results_5000}{}{}
 \tableResult{spanner/graph_results_7500}{}{}
 
-\graphResult{spanner/dist_percent}{The dashed lines indicates the percentage of the total distance for the \ac{gabe} and the \ac{rng}, compared to the non-planar graph, and belongs to the y-axis on the left. The solid lines is the same, just for hops instead of distance and belongs to the y-axis on the right. The x-axis has been made logarithmic in order to give a better view of the results for a smaller number of nodes.}{dist_percent}
 
-From figure~\ref{graph:dist_percent} we can see that not surprisingly that the \ac{gabe} is closer to the non-planar graph is much better than the \ac{rng}. More importantly we also see that euclidean distance traversed for both graphs is more closer to the distance traversed in the non-planar graph, compared to the number of hops.
+
+
 
 \subsection{Test analysis}
 
