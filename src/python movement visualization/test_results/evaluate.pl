@@ -954,10 +954,9 @@ if ($noFiles == 0){ usage(); }else{
 	}
 
          if (($protocol eq "GOAFR") && ($pkt_ttl =~ /^(\d+) [\d\s]+/o)) {
-	  my $id = (pkt_src, pkt_dst, pkt_uid)
-	    
+	  my $id = ($pkt_src, $pkt_dst, $pkt_uid);
 
-	  my $pkt_type     = $1;
+	  my $pkt_type = $1;
           my $flowid = "$pkt_src->$pkt_dst/$pkt_uid";
 	  # Packet Statistics
 	  if ($layer eq "RTR") {
@@ -966,7 +965,6 @@ if ($noFiles == 0){ usage(); }else{
 	    if ($op eq 'f') { $stats{$protocol}{$GOAFRTYPE[$pkt_type]}{forw}++; }
 	    if ($op eq 's') { $stats{$protocol}{$GOAFRTYPE[$pkt_type]}{send}++; }
 	  }
-	  
 
 
 	  if ($op eq 'D') {
