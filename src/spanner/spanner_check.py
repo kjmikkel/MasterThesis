@@ -74,10 +74,26 @@ class results_container:
     self.number_cc = 0
 
   def get_min_internal(self, min_dist):
-    return min(min_dist)
+    pr_test = len(min_dist) / 500
+    min_list = []
+    for i in range(500):
+      min_list.append(min(min_dist[i * pr_test: (i + 1) * pr_test - 1]))
+      
+    min_sum = sum(min_list)
+    min_result = (min_sum * 1.0) / (500 * 1.0)
+    print min_result
+    return min_result
 
   def get_max_internal(self, max_dist):
-    return max(max_dist)
+    pr_test = len(max_dist) / 500
+    max_list = []
+    for i in range(500):
+      max_list.append(max(max_dist[i * pr_test: (i + 1) * pr_test - 1]))
+      
+    max_sum = sum(max_list)
+    max_result = (max_sum * 1.0) / (500 * 1.0)
+    print max_result
+    return max_result
 
   def get_min(self):
     return self.get_min_internal(self.distance)
@@ -254,21 +270,27 @@ def generate_graphs(number_of_points, number_of_graphs, cutoff_distance):
     filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
     save_pickle_file(filename, g_graph)
             
-def make_node_pairs(number_of_points, num, number_tests, from_val, to_val):
+def make_node_pairs((number_of_points, num, number_tests, from_val, to_val)):
   point_str = str(number_of_points) + '/'
 
-  for graph_index in range(from_val - 1, to_val	):
+  for graph_index in range(from_val, to_val):
     
     if graph_index % 10 == 0 and graph_index > 0:
       print 'Made node pairs for ' + str(graph_index) + ' tests.'
-	
+
+    # If the file already exist we just cut it down to the right size
     if os.path.exists(node_pair_location + point_str + "node_pair_" + str(graph_index + 1) + ".pickle"):
+      save_filename = node_pair_location + point_str + "node_pair_" + str(graph_index + 1)
+      data = load_pickle_file(save_filename)
+      data = data[0:number_tests]
+      save_pickle_file(save_filename, data)
       continue
 
     node_pairs_to_check = []
     
     index_str = str(graph_index + 1)
     filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
+   
     non_planar_graph = load_pickle_file(filename)
 
     (_ , set_container) = make_graph.MST_Kruskal(non_planar_graph)
@@ -286,13 +308,11 @@ def make_node_pairs(number_of_points, num, number_tests, from_val, to_val):
       if set_len >= 5:
         break
 
-
     node_pairs_to_check = []
     if set_len < 5:
-      print "advanced"
-      node_pairs_to_check = advanced_node_pairs(number_of_points, set_container, nodes)
+      node_pairs_to_check = advanced_node_pairs(number_tests, set_container, nodes)
     else:
-      node_pairs_to_check = brute_force_node_pairs(number_of_points, set_container, nodes)
+      node_pairs_to_check = brute_force_node_pairs(number_tests, set_container, nodes)
 
     save_pickle_file(node_pair_location + point_str + "node_pair_" + str(graph_index + 1), node_pairs_to_check)
     
@@ -340,10 +360,6 @@ def advanced_node_pairs(number_tests, set_container, nodes):
   node_pairs_to_check = []
 
   for test_index in range(0, number_tests):
-    """
-    if test_index % 10 == 0:
-    print 'Made ' + str(test_index) + ' out of ' + str(number_tests)
-    """
     # We must ensure the pair is not replicated
     new_pair = False
     num_failure = 1000
@@ -416,6 +432,8 @@ def do_test((number_of_points, num, number_tests, from_val, to_val)):
     save_filename = results_non_location + point_str + non_planar_placement + non_planar_filename + index_str
     if not os.path.exists(save_filename + ".pickle"): 
       perform_tests(load_filename, save_filename, node_pairs_to_check)
+    else:
+      cutdown(save_filename, number_tests)
     # End non-planar
 
     # Start Gabriel Graph
@@ -424,18 +442,25 @@ def do_test((number_of_points, num, number_tests, from_val, to_val)):
     save_filename = results_gg_location + point_str + gg_placement + gg_filename + index_str
     if not os.path.exists(save_filename + ".pickle"):
       perform_tests(load_filename, save_filename, node_pairs_to_check)
+    else:
+      cutdown(save_filename, number_tests)
     # End Gabriel Graph
 
     # Start RNG 
     load_filename = rng_f + point_str + rng_placement + rng_filename + index_str
     save_filename = results_rng_location + point_str + rng_placement + rng_filename + index_str
     if not os.path.exists(save_filename + ".pickle"):
-      print "Do", save_filename
       perform_tests(load_filename, save_filename, node_pairs_to_check)
+    else:
+      cutdown(save_filename, number_tests)
     # End RNG
 
-    if to_val > 140 and to_val < 145:
-      print "done one in the zone"
+def cutdown(save_filename, number_tests):
+  data = load_pickle_file(save_filename)
+  (results, neighbour_data, graph_distance, num_cc) = data
+  results = results[0:number_tests]
+  data = (results, neighbour_data, graph_distance, num_cc)
+  save_pickle_file(save_filename, data)
 
 def perform_tests(load_graph_name, save_data_name, node_pairs):
     graph = load_pickle_file(load_graph_name)
@@ -451,7 +476,7 @@ def perform_tests(load_graph_name, save_data_name, node_pairs):
     for node in set_container.keys():
       set_tuple = tuple(set_container[node])
       cc_dict[set_tuple] = 1
-    
+     
     num_cc = len(cc_dict.keys())  
     
     save_pickle_file(save_data_name, (results, neighbour_data, graph_distance, num_cc))
@@ -482,14 +507,15 @@ def do_actual_test(graph, node_pairs):
   for pair in node_pairs:
     (start_node, end_node) = pair 
     
-    (D, _, Path) = dijkstra.shortestPath(graph, start_node, end_node)  
+    (D, _, Path)   = dijkstra.shortestPath(    graph, start_node, end_node)  
     (D_unit, _, _) = dijkstra.shortestUnitPath(graph, start_node, end_node)
 
     if len(Path) > 0:
       try:
         distance = D[end_node]
       except KeyError:
-        print D, end_node
+        print "Key error"
+        print D, start_node, end_node, Path
       unit_distance = D_unit[end_node]
     else:
       distance = -1 
@@ -656,6 +682,12 @@ def print_latex_results(number_of_points):
   graph_gg_unit  = c_round((gg_unit_distance  / graph_unit_distance) * 100.00)
   graph_rng_unit = c_round((rng_unit_distance / graph_unit_distance) * 100.00)
 
+  graph_cc = graph_latex["CC"]
+
+  graph_error = graph_latex["error"]
+  gg_error    = gg_latex["error"]
+  rng_error   = rng_latex["error"]
+
   latex_table =  "\\begin{tabular}{ccrrrr}\n"
   latex_table += "\\multicolumn{2}{}{}        & Length of graph: & Max node-pair: & Min node-pair: & Avg node-pair" + newline
   latex_table += "\\multirow{3}{*}{Distance}  & NML & %s & %s & %s & %s%s " % (graph_dist_list[0], graph_dist_list[1], graph_dist_list[2], graph_dist_list[3], newline) 
@@ -667,10 +699,12 @@ def print_latex_results(number_of_points):
   latex_table += "          & RNG & %s\phantom{.00} & %s & %s & %s%s" % (rng_unit_list[0], rng_unit_list[1], rng_unit_list[2], rng_unit_list[3], newline)
   latex_table += "\hline\n" 
   latex_table += "\hline\n"
-  latex_table += "               &     & Distance: & Unit Distance: &   " + newline 
-  latex_table += "Percentage     & NML & 100.00 \% & 100.00 \%      &   " + newline
-  latex_table += "compared to the& GG  & %s \\%%   & %s \\%%        & %s" % (graph_gg, graph_gg_unit, newline)
-  latex_table += "normal graph   & RNG & %s \\%%   & %s \\%%        & \n" % (graph_rng, graph_rng_unit)
+  latex_table += "               &     & Distance:   & Unit Distance: & %s &  %s %s" % ("\multicolumn{1}{||c}{}", "\# Missing paths", newline) 
+  latex_table += "Percentage     & NML & 100.00 \\%% & 100.00 \\%%    & %s &  %s %s" % ("\multicolumn{1}{||c}{NML}", gg_error, newline)
+  latex_table += "compared to the& GG  & %s     \\%% & %s \\%%        & %s &  %s %s" % (graph_gg, graph_gg_unit,  "\multicolumn{1}{||c}{GG}" , gg_error, newline)
+  latex_table += "normal graph   & RNG & %s     \\%% & %s \\%%        & %s &  %s %s" % (graph_rng, graph_rng_unit,"\multicolumn{1}{||c}{RNG}", rng_error, newline)
+  latex_table += "\hline\n"
+  latex_table += "\# Connected Components: & %s \n" % graph_cc
   latex_table += "\end{tabular}"
 
   save_file(latex_location + 'graph_results_' + point_str[0:-1], latex_table)
@@ -805,14 +839,15 @@ def make_result_graphs(num_points_range):
   make_neigh_hops(num_points_range)
 
 def make_distance_hops(num_points_range):
-  default_1 = "\\addplot[color=%s, mark=%s, densely dashed] coordinates{\n" 
-  default_2 = "\\addplot[color=%s, mark=%s] coordinates{                \n" 
+  default_1 = "\\addplot[color=%s, mark=%s] coordinates{                \n" 
+  default_2 = "\\addplot[color=%s, mark=%s, densely dashed] coordinates{\n" 
 
   gg_distance  = default_1 % ("blue", "*")
   rng_distance = default_1 % ("black", "triangle*")
 
   gg_distance_unit  = default_2 % ("blue", "o" )
   rng_distance_unit = default_2 % ("black", "triangle")
+
 
   for num in num_points_range:
     (gg_dist, rng_dist, gg_dist_unit, rng_dist_unit) = make_point_distance_hops(num)
@@ -823,28 +858,43 @@ def make_distance_hops(num_points_range):
     gg_distance_unit  += gg_dist_unit
     rng_distance_unit += rng_dist_unit
 
-  gg_distance  += "};\n"
-  rng_distance += "};\n"
+  gg_legend = "}; \\addlegendentry{Gabriel Graph %s}\n"
+  rng_legend = "}; \\addlegendentry{Relative Neighbourhood Graph %s}\n"
 
-  gg_distance_unit  += "};\n"
-  rng_distance_unit += "};\n"
+  gg_distance  += gg_legend % "euclidian"
+  rng_distance += rng_legend % "euclidian"
 
-  axis = "semilogxaxis"
+  gg_distance_unit  += gg_legend % "hops"
+  rng_distance_unit += rng_legend % "hops"
+
+#  axis = "semilogxaxis"
+  axis = "axis"
 
   xticks = ""
   xtick_vals = ""
   for num in xrange(7501):
-    if num > 0 and (num % 100 == 0 or num == 250): 
+    if num > 0 and (num % 100 == 0): 
       xticks += "%s" % num
-      if num in num_points_range:
+      if (num == 1000 or num % 2500 == 0):
         xtick_vals += "$%s$" % num
       else:
         xtick_vals += ""
       if num != num_points_range[-1]:
-        xticks += ", "
+        xticks     += ", "
         xtick_vals += ", "
 
-  y_left  = "\% of euclidian distance traversed compared to non-planar graph"
+  yticks      = ""
+  ytick_vals  = ""
+  max_val = 240
+  for num in xrange(max_val + 1):
+    if num >= 100 and num % 10 == 0:
+      yticks     += "%s" % num
+      ytick_vals += "%s" % num
+      if num != max_val:
+        yticks     += ", "
+        ytick_vals += ", "
+
+  y_left  = "\% compared to non-planar graph"
   y_right = "\% of hops compared to non-planar graph"
 
   width = "0.8\linewidth"
@@ -852,35 +902,35 @@ def make_distance_hops(num_points_range):
   graph = "\\begin{tikzpicture}\n"
 
   graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}, }\n"
-  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, legend columns=4,width=%s, xlabel=Number of nodes in the graph, ylabel=%s]\n" % (axis, xticks, xtick_vals, width, y_left)  
+  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, ytick={%s}, yticklabels={%s}, transpose legend, legend columns=2, width=%s, xlabel=Number of nodes in the graph, ylabel=%s]\n" % (axis, xticks, xtick_vals, yticks, ytick_vals, width, y_left)
+#  graph += "\\addlegendimage{legend image code/.code=}\n\\addlegendentry{Distance(Left axis)}"
   graph += gg_distance
   graph += rng_distance
-  graph += "\\legend{Gabriel, Relative Neighbourhood}\n"
-  graph += "\\end{%s}\n\n" % axis
-
-  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.20)},anchor=north}}\n"
-  graph += "\\begin{%s}[scale only axis, width=%s, legend columns=4, axis y line=right, axis x line=none, ylabel=%s]\n" % (axis, width, y_right)
   graph += gg_distance_unit
   graph += rng_distance_unit
-  graph += "\\legend{Gabriel, Relative Neighbourhood}\n"
+  """
+  graph += "\\end{%s}\n\n" % axis
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.2)},anchor=north}}\n"
+  graph += "\\begin{%s}[scale only axis, width=%s, transpose legend, legend columns=2, axis y line=right, axis x line=none, ylabel=%s]\n" % (axis, width, y_right)
+  graph += "\\addlegendimage{legend image code/.code=}\n\\addlegendentry{Hops (Right axis)}"
+  """
   graph += "\\end{%s}\n" % axis
-
   graph += "\\end{tikzpicture}\n"
     
   save_file(latex_location + "dist_percent" , graph)
   
 
 def make_neigh_hops(num_points_range):  
-  default_1 = "\\addplot[color=%s, mark=%s] coordinates{                \n" #[error bars/.cd, y dir=both,y explicit] coordinates{\n"
-  default_2 = "\\addplot[color=%s, mark=%s, densely dashed] coordinates{\n" #[error bars/.cd, y dir=both,y explicit] coordinates{\n"
+  default_1 = "\\addplot[color=%s, mark=%s] coordinates{                \n" 
+  default_2 = "\\addplot[color=%s, mark=%s, densely dashed] coordinates{\n" 
 
-  non_planar = default_2 % ("red", "square*")
-  gg = default_2 % ("blue", "*")
-  rng = default_2 % ("black", "triangle*")
+  non_planar = default_1 % ("red", "square*")
+  gg = default_1 % ("blue", "*")
+  rng = default_1 % ("black", "triangle*")
 
-  non_planar_unit = default_1 % ("red", "square")
-  gg_unit = default_1 % ("blue", "o" )
-  rng_unit = default_1 % ("black", "triangle")
+  non_planar_unit = default_2 % ("red", "square")
+  gg_unit = default_2 % ("blue", "o" )
+  rng_unit = default_2 % ("black", "triangle")
 
   for num in num_points_range:
     point_str = str(num) + "/"
@@ -900,21 +950,27 @@ def make_neigh_hops(num_points_range):
     rng += neighbour
     rng_unit += distance
 
-  non_planar += "};\n"
-  non_planar_unit += "};\n"
-  gg += "};\n"
-  gg_unit += "};\n"
-  rng += "};\n"
-  rng_unit += "};\n"
+    
+  planar_legend = "}; \\addlegendentry{Non-Planar Graph}\n"
+  gg_legend = "}; \\addlegendentry{Gabriel Graph}\n"
+  rng_legend = "}; \\addlegendentry{Relative Neighbourhood Graph}\n"
 
-  axis = "semilogxaxis"
+  non_planar      += planar_legend
+  non_planar_unit += planar_legend 
+  gg      += gg_legend
+  gg_unit += gg_legend
+  rng      += rng_legend
+  rng_unit += rng_legend
+
+ # axis = "semilogxaxis"
+  axis = "axis"
 
   xticks = ""
   xtick_vals = ""
   for num in xrange(7501):
-    if num > 0 and (num % 100 == 0 or num == 250): 
+    if num > 0 and num % 100 == 0: 
       xticks += "%s" % num
-      if num in num_points_range:
+      if (num == 1000 or num % 2500 == 0):
         xtick_vals += "$%s$" % num
       else:
         xtick_vals += ""
@@ -943,20 +999,20 @@ def make_neigh_hops(num_points_range):
 
   graph = "\\begin{tikzpicture}\n"
 
-  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}, }\n"
-  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, ytick={%s}, yticklabels={%s}, legend columns=4,width=%s, axis y line*=left, xlabel=Number of nodes in the graph, ylabel=Average number of neighbours]\n" % (axis, xticks, xtick_vals, yticks_one, ytick_vals_one, width)  
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.30)},anchor=south}, }\n"
+  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, ytick={%s}, yticklabels={%s}, transpose legend, legend columns=2, width=%s, axis y line*=left, xlabel=Number of nodes in the graph, ylabel=Average number of neighbours]\n" % (axis, xticks, xtick_vals, yticks_one, ytick_vals_one, width)  
+  graph += "\\addlegendimage{legend image code/.code=}\n\\addlegendentry{Neighbours (Left axis)}"
   graph += non_planar
   graph += gg
   graph += rng
-  graph += "\\legend{Non-planar, Gabriel, Relative Neighbourhood}\n"
   graph += "\\end{%s}\n\n" % axis
 
-  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.20)},anchor=north}}\n"
-  graph += "\\begin{%s}[scale only axis, ytick={%s}, yticklabels={%s}, width=%s, legend columns=4, axis y line=right, axis x line=none, ylabel=Average number of hops]\n" % (axis, yticks_two, ytick_vals_two, width)
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.2)},anchor=north}}\n"
+  graph += "\\begin{%s}[scale only axis, ytick={%s}, yticklabels={%s}, width=%s, transpose legend, legend columns=3, axis y line=right, axis x line=none, ylabel=Average number of hops]\n" % (axis, yticks_two, ytick_vals_two, width)
+  graph += "\\addlegendimage{legend image code/.code=}\n\\addlegendentry{Hops (Right axis)}"
   graph += non_planar_unit
   graph += gg_unit
   graph += rng_unit
-  graph += "\\legend{Non-planar, Gabriel, Relative Neighbourhood}\n"
   graph += "\\end{%s}\n" % axis
 
   graph += "\\end{tikzpicture}\n"
@@ -995,16 +1051,20 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
     print 'Made graphs'
   
   if (start_state <= 2) and (end_state >= 2):
-    make_node_pairs(point_num, num_graphs, pr_graph_test, from_val, to_val)
+    pool = Pool(processes=multiprocessing.cpu_count() - 2)
+    list_parameter = []
+    for i in range(0, num_graphs):
+      list_parameter.append((point_num, num_graphs, pr_graph_test, i, i + 1))
+
+    pool.map(make_node_pairs, list_parameter)
     print 'Made node pairs'
 
   if (start_state <= 3) and (end_state >= 3):
-    pool = Pool(processes=multiprocessing.cpu_count())
+    pool = Pool(processes=multiprocessing.cpu_count() - 2)
     list_parameter = []
-    for i in range(0, 250):
+    for i in range(0, num_graphs):
       list_parameter.append((point_num, num_graphs, pr_graph_test, i, i + 1))
 
-    #print list_parameter
     pool.map(do_test, list_parameter)
     print 'Done results'
     
@@ -1041,16 +1101,11 @@ step = num_to_do / 7
 mod = num_to_do % 7
 step = 500 / 7
 
-start_state = 5
-end_state = 8
+start_state = 2
+end_state = 5
 number_tests = 500
 
-for num_nodes in [100, 250, 500, 1000, 2500]:
+for num_nodes in [100, 250, 1000, 500, 2500, 5000, 7500, 10000]:
   do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
 
-
-for num_nodes in [5000, 7500]:
-  do_suite(num_nodes, num_to_do, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
-
-
-make_result_graphs([100, 250, 500, 1000, 2500, 5000, 7500])
+make_result_graphs([100, 250, 500, 1000, 2500, 5000, 7500, 10000])
