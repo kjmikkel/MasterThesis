@@ -45,28 +45,27 @@ def Dijkstra(G,start,end=None):
   compute shortest paths even for some graphs with negative
   edges, and will raise an exception if it discovers that
   a negative edge has caused it to make a mistake.
-	"""
+  """
 
   D = {}	# dictionary of final distances
   P = {}	# dictionary of predecessors
   Q = priorityDictionary()   # est.dist. of non-final vert.
   Q[start] = 0
-  	
-  for v in Q:
-    D[v] = Q[v]
-   # if v == end: break
-    try: 		
+  
+  while len(Q) > 0:
+    for v in Q:
+      D[v] = Q[v]
+      if v == end: break
+		
       for w in G[v]:
         vwLength = D[v] + G[v][w]
         if w in D:
           if vwLength < D[w]:
-            raise ValueError, "Dijkstra: found better path to already-final vertex"
-        elif w not in Q or vwLength < Q[w]:
+	    raise ValueError, "Dijkstra: found better path to already-final vertex"
+        elif w not in Q or vwLength < Q[w]: 
           Q[w] = vwLength
-          P[w] = v
-    except KeyError:
-      print G, start, end
-      raise KeyError, "error"
+	  P[w] = v
+
     return (D,P)
 
 def UnitDijkstra(G,start,end=None):
@@ -80,7 +79,7 @@ def UnitDijkstra(G,start,end=None):
 	
   for v in Q:
     D[v] = Q[v]
-#    if v == end: break
+    if v == end: break
 		
     for w in G[v]:
       vwLength = D[v] + 1
@@ -90,7 +89,7 @@ def UnitDijkstra(G,start,end=None):
       elif w not in Q or vwLength < Q[w]: 
         Q[w] = vwLength
 	P[w] = v
-	
+
   return (D,P)
 
 def shortestPathCheap(P, start, end):
@@ -119,7 +118,7 @@ def shortestPath(G, start, end):
   Modified to also return distance 
   """
 
-  D,P = Dijkstra(G, start, end)
+  (D, P) = Dijkstra(G, start, end)
   Path = shortestPathCheap(P, start, end)
   return (D, P, Path)
 
