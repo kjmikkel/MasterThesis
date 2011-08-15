@@ -2,31 +2,33 @@
 \label{section:test_results}
 In this section I will present the test results. I will start by discussing my test methodology, then the hardware/software specifications, and then I will show the test results themselves, and then round off by an analysis of the results 
 
-\subsection{Test results}
-From the spanner tests performed in 
+\subsection{Spanner test results}
+In this section I will willl describe some of the important results I have found in the Limited-range spanner test. The tables themselves can be found in section \ref{limited-range_spanner_appendix} on p.~\pageref{limited-range_spanner_appendix}.
+
+First of all we must check whether or not the results are worth checking in the first place. From table~\ref{table:analysis_100}-\ref{table:analysis_7500} we can see that at most we are dealing with at most $1.32$ different connected components and that in no case have we beenm able to detect if the either the \ac{gabe} or the \ac{rng} has cut off all paths between two nodes, if it existed in the non-planar graph. 
+
+The relatively low average number of connected components is a good indicator that the returned tests are of decent quality, as there must have been many different paths, of varying length, to choose from.
+
+As expected, since they all follow the \ac{uga}\footnote{See section~\ref{section:apply_uga} on p. \pageref{section:apply_uga}.}, if there is a path between two nodes in the non-planar graph, then a path can also be found in the \ac{gabe} or the \ac{rng}, since all the ``error'' counts are zero in the tables.
+
+Since one of the stark secondary differences between the planar and the non-planar graphs is the differences in neighbours, I have chosen to illustrate the development of this compared to the average smallets number of hops between two nodes in section~\ref{section:hop_neighbour_comparison} and figure~\ref{graph:avg_neighbour}. Furthermore, I have compared the average distance and the average number of hops in section~\ref{section:graph_distance_comparison} and figure~\ref{graph:dist_percent}, since this are the values that will let us test whether there may be any spanner-like relationship between the non-planar, the \ac{gabe} and the \ac{rng}.
 
 \subsubsection{Hop/neighbour comparison}
 \label{section:hop_neighbour_comparison}
-\graphResult{spanner/avg_neighbour}{The solid lines indicates the average number of hops the shortest path takes from the source to the sink, and belongs to the y-axis on the right. The dashed lines indicates the average number of neighbours, and belongs to the y-axis on the left.}{avg_neighbour}
+\graphResult{spanner/avg_neighbour}{The solid lines indicates the average neighbours and belongs to the y-axis on the left. The dashed lines indicates the average number of hops from the source to the sink, and belongs to the y-axis on the right.}{avg_neighbour}
 
 As we can see from figure~\ref{graph:avg_neighbour}, it is clear that the average number of the smallest number of hops from the source to the sink increases as the number of nodes in the graph increases. It is also clear that it is the non-planar graph which has the smallest average number of hops required, while the \ac{rng} has the largest. Comparing these results with the average number of neighbours it is however very interesting to see that while the average number of neighbours keeps increasing for the non-planar graph, it is completely stable for the \ac{rng} and, except for the number of neighbours for 100 nodes, the \ac{gabe}, which agrees with the discussion in section~\ref{del_gabe_rng_neigh} on p. \pageref{del_gabe_rng_neigh}. 
 
 \subsubsection{Graph Distance Comparison}
 \label{section:graph_distance_comparison}
 
-\graphResult{spanner/dist_percent}{The dashed lines indicates the percentage of the total distance for the \ac{gabe} and the \ac{rng}, compared to the non-planar graph, and belongs to the y-axis on the left. The solid lines is the same, just for hops instead of distance and belongs to the y-axis on the right.}{dist_percent}
+\graphResult{spanner/dist_percent}{The solid lines indicates the percentage of the total distance traversed for the \ac{gabe} and the \ac{rng}, compared to the non-planar graph, while the dashed lines indicates the same, but for hops instead of euclidian distance. The non-planar graph has been omited as it in both cases would be a straight line at $100\%$.}{dist_percent}
 
 From figure~\ref{graph:dist_percent} we can see that not surprisingly that the \ac{gabe} is closer to the non-planar graph is much better than the \ac{rng}. More importantly we also see that euclidean distance traversed for both graphs is more closer to the distance traversed in the non-planar graph, compared to the number of hops. It is interesting to note, that even though the denstiy of the graphs are kept steedy, as the number of nodes grow both the \ac{gabe} and the \ac{rng} edges asymptoticly closer to the non-planar graph. 
 
-\subsubsection{}
+\subsection{}
 
-\tableResult{spanner/graph_results_100}{The graph analysis from 100 nodes}{analysis_100}
-\tableResult{spanner/graph_results_250}{The graph analysis from 250 nodes}{analysis_250}
-\tableResult{spanner/graph_results_500}{The graph analysis from 500 nodes}{analysis_500}
-\tableResult{spanner/graph_results_1000}{The graph analysis from 1000 nodes}{analysis_1000}
-\tableResult{spanner/graph_results_2500}{The graph analysis from 2500 nodes}{analysis_2500}
-\tableResult{spanner/graph_results_5000}{The graph analysis from 5000 nodes}{analysis_5000}
-\tableResult{spanner/graph_results_7500}{The graph analysis from 7500 nodes}{analysis_7500}
+
 
 
 
