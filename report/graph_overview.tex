@@ -57,9 +57,7 @@ The \ac{gabe} is a sub-graph of the Delaunay triangulation\cite{GGExpected}, and
 
 \tikfig{graph_comparison}{\ref{fig:rng1} and \ref{fig:rng2} are examples of the \ac{rng}, while \ref{fig:gabe1} and \ref{fig:gabe2} are examples of the \ac{gabe}. This figure is inspired by figure~7 in \cite{GeoSpanners}.}
 
-In the Delaunay graph there is an edge $\overline{vu}$ between two points $v$ and $u$ if and only if there is a closed disc $C$ with $v$ and $u$ on the boundry and no point on the inside of $C$ \cite{CompuGeo}. From this it is clear that in theory there is no upper limit on how many neighbours a point can have in the Delaunay graph, since an infinite number of nodes could be placedd on the border of $C$. However, this is clearly a degernate case, and we must therefore instead try to reason about the expected maximum degree, and doubly true when we are talking about the \ac{gabe} and the \ac{rng}.
-
-Delaunay graphs have been found to have an expected maximum degree of $\Theta(\log n / \log \log n)$ \cite{delExpected}, and furthermore that that \ac{gabe} has an expected maximum degree of $\Theta(\log n / \log \log n)$ \cite{GGExpected}, or, as the authors in \cite{GGExpected} puts it, there exists a constant $a$ and $b$ such that if $\Delta$ is the maximum degree of the \ac{gabe} then 
+Delaunay graphs have been found to have an expected maximum degree of $\Theta(\log n / \log \log n)$ \cite{delExpected} --- where $\log$ is the natural logorithm, and furthermore that that \ac{gabe} has an expected maximum degree of $\Theta(\log n / \log \log n)$ \cite{GGExpected}, or, as the authors in \cite{GGExpected} puts it, there exists a constant $a$ and $b$ such that if $\Delta$ is the maximum degree of the \ac{gabe} then 
 $$
 \lim_{n \rightarrow \infty} Pr\left({\Delta \in \left[\frac{a\log n}{\log \log n}, \frac{b\log n}{\log \log n}\right]}\right) = 1
 $$
@@ -76,7 +74,7 @@ Neither the \ac{manet} or the \ac{anet} can be said to be entirely static. Even 
 
 To complicate matter further different nodes can in practise have different communications radius as exemplified in figure~\ref{fig:node_different_radius}, which shows us that a node needs to confirm that it indeed has a bidirectional link to each of its adjacent nodes, and cannot in practise take it for granted.
 
-\tikfig{different_radius}{A node with different broadcast ranges. The first solid circle is the default broadcast range of node $a$, which does not reach node $b$. The second circle is the maximum range that node $a$ can broadcast, which does reach node $b$.}
+\tikfig{different_radius}{A node with different broadcast ranges. The first solid circle is the default broadcast range of node $u$, which does not reach node $v$. The second circle is the maximum range that node $u$ can broadcast, which does reach node $v$.}
 
 Likewise it is important to remember that a node in practise might be able to adjust its communications range (at a higher energy cost). See figure~\ref{fig:different_radius}
 
