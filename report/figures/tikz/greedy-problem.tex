@@ -14,6 +14,7 @@
 \tikzstyle{edge} = [draw, thick, -]
 \tikzstyle{vertex}=[circle,fill=black!25,minimum size=10pt,inner sep=0pt]
 
+\tikzstyle{invis-vertex}=[circle,fill=white!100,minimum size=0pt, inner sep=0pt]
 \tikzstyle{selected edge} = [draw,line width=5pt,-,gray!50]
 \tikzstyle{ignored edge} = [draw,line width=5pt,-,black!20]
 
@@ -21,15 +22,16 @@
   % We put this last to ensure that it is not overwritten
   \draw[outline] {(4, 0) circle (2cm)} node {};
 
-  \foreach \pos/\name in {{(0, 0)/s}, {(2, 0)/a}, {(0.5, 2)/d}, {(2, 1.8)/e},  {(1, 1.2)/b}, {(1, -1.2)/c}, {(4,0)/t}}
+  \foreach \pos/\name in {{(0, 0)/s}, {(2, 0)/a}, {(0.5, 2)/d}, {(2, 1.8)/e},  {(1, 1.2)/b}, {(1, -1.2)/c}, {(4,0)/t}} {
+    \node[invis-vertex] (\name-) at \pos {};
     \node[vertex] (\name) at \pos {$\name$};
-      
+    }  
   \foreach \source/\sink in {s/a, s/d, a/b, a/c, b/t, c/t, d/e, e/t} 
     \path[edge] (\source) -- (\sink); 
 
   \begin{pgfonlayer}{background}
     \foreach \source/ \dest in {s/a}
-      \path[selected edge] (\source) -- (\dest);
+      \path[selected edge] (\source-) -- (\dest-);
   \end{pgfonlayer}
 
 \end{tikzpicture}
