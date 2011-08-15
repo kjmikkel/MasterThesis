@@ -50,8 +50,7 @@ I have found the following general methods for making the planar graphs:
 \item[The \ac{cldp}:] \ac{cldp} works by having each node uses \emph{the right-hand-rule}\label{right-hand rule}\footnote{The right-hand-rule states that for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started.} and checks whether or not any of its links crosses/is crossed by another edge. In other words, \ac{cldp} first builds up a graph that may be non-planar, and then in a distributed manner finds and removes edges that makes the graph non-planar without disconnecting parts of graph (as the paper accuses both \ac{gabe} and \ac{rng} of). \ac{cldp} is not dependent on the Unit graph assumption \cite{practical}. 
 \end{description}
 
-Both the \ac{gabe} and the \ac{rng} are based on the \ac{uga}, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}.
-
+Both the \ac{gabe} and the \ac{rng} are based on the \ac{uga}, and can therefore have problems in real world situations, accidentally removing edges that should otherwise have been there\cite{practical}. \label{del_gabe_rng_neigh}
 
 The \ac{gabe} is a sub-graph of the Delaunay triangulation\cite{GGExpected}, and \ac{rng} is a subset of \ac{gabe} \cite{GGExpected}, and as such they are both well described and understood graphs many of the same properties as the Delaunay triangulation. \ac{cldp} on the other hand is not a graph, but rather an algorithm that takes an already existing graph and makes sure its planar, which, according to \cite{practical} is less likely to make the graph disconnected than \ac{gabe} and \ac{rng}. It is therefore harder to reason about most probable maximum number of neighbours for \ac{cldp}. 
 

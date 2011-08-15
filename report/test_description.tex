@@ -22,7 +22,7 @@ In order to perform the tests I will need to define the parameters and their ran
 \begin{description}
 \item[Movement model:] The topology is clearly going to be influenced by the way that the nodes move, therefore it would be interesting to test out several models, to see the strengths and weaknesses of the different routing algorithms.
 
-\item[Routing Algorithms] 
+7\item[Routing Algorithms] 
 
 \item[Amount and data-transmission type:] In real world situations there will be different levels of traffic on the network, and therefore to test it we must likewise simulate these differences. The choice of transmission protocol is also important.
 
@@ -43,7 +43,7 @@ As I have now detailed in section~\ref{section:input_parameters} which parameter
 \item[Amount and Data-transmission type:] 512 kB through a TCP connection
 \item[Size of simulation area:] 500 by 500 units and 1000 by 1000 units
 \item[Routing algorithms:] GOAFR \cite{gopher}, GPSR \cite{gpsr}, Greedy \cite{gopher}, DSDV \cite{DSDV}
-\item[Number of nodes:] 100 to 10000 nodes in increments of 100 nodes, giving me 100 data-points that will be used to analyse the success of the routing algorithms. 
+\item[Number of nodes:] 100 to 3000 nodes in increments of 100 nodes, giving me 30 data-points that will be used to analyse the success of the routing algorithms. 
 %\item[Nodes failing:] 0\%, 10\%, 40\%
 %\item[Nodes entering:] 0\%, 30\%
 \item[Time:] 1 minute (60 seconds)
@@ -100,7 +100,7 @@ Due to time constraints I have only been able to implement GOAFR in ns-2, and so
 
 \subsubsection{GPSR}
 \tikfig{gpsr}
-{A demonstration of the GPSR routing algorithm. The grey background with grey nodes indicates when the GPSR algorithms is in the Greedy phase and the the black nodes with the black background indicates when the algorithm is running in perimiter phase}
+{A demonstration of the GPSR routing algorithm. The grey background with grey nodes indicates when the GPSR algorithms is in the Greedy phase and the the black nodes with the black background indicates when the algorithm is running in perimeter phase}
 
 \label{section:gpsr}
 Greedy Perimeter Stateless Routing is a routing algorithm that uses a hybrid of Greedy routing and face routing. The idea is to use Greedy routing as much as possible, and only use the face routing recover from situations where it reaches a situation where the Greedy routing fails. The algorithm will use the right-hand-rule (see section~\ref{right-hand rule} on p. \pageref{right-hand rule}) to route the messages in perimeter mode to ensure they stay within the same face. I base all the description in this subsection on \cite{gpsr}.
@@ -129,7 +129,14 @@ also, in the following let $f$ denote the current face we are routing on.
 
 \subsection{Mobility models}
 
-For the mobility models I have only chosen to test Gauss-Markov, which I from \cite{MobilityAdHocResearch} found to be a good algorithm for simulating a movement pattern\footnote{Not to mention was implemented by the same team that build the Bonnmotion movement tool} that seems rather random. I would have liked to test the Disasster Area movement pattern found in \cite{disasterArea}, but I found it difficult to get the bonnMotion tool to generete the movement, as well as unsure on which defintions would create an interesting model for the different algorithms to be tested on\footnote{In order to create the a disaster area movment simulation several different zones have to be defined -- e.g. a zone for the disaster, a zone for the triage, treatment and so on.}. 
+For the mobility models I have only chosen to test Gauss-Markov, which I from \cite{MobilityAdHocResearch} found to be a good algorithm for simulating a movement pattern\footnote{Not to mention was implemented by the same team that build the Bonnmotion movement tool} that seems rather random. I would have liked to test the Disasster Area movement pattern found in \cite{disasterArea}, but I found it difficult to get the bonnMotion tool to generate the movement, as well as unsure on which definitions would create an interesting model for the different algorithms to be tested on\footnote{In order to create the a disaster area movement simulation several different zones have to be defined -- e.g. a zone for the disaster, a zone for the triage, treatment and so on.}. 
+
+The script I have used to create the needed ns-2 mobility data can be found in the \texttt{src/MotionCode} directory.
+
+\subsection{Traffic}
+I chose the TCP connection on the ground that I would like to stress tests the different routing algorithms, and since TCP requires more back-and-forth than UDP (and is necessary for transfer of files, and not just steaming of video/audio or the state of a multi-player game).
+
+Ns-2.33 comes with its own Traffic generation program cbrgen.tcl\footnote{Located in the \texttt{indep-utils/cmu-scen-gen} directory}, that I have used to generate the traffic for these tests. The script I have used to create the needed ns-2 traffic files can be found in the \texttt{src/Traffic} folder.
 
 \subsection{Limited-range spanner tests}
 \label{section:test_desc_spanners}
@@ -147,7 +154,7 @@ In order to do this test I will first have to make several decisions:
 \end{itemize}
 
 I have not encountered any specific point clustering algorithm in the literature besides the various mobility models (see \cite{disasterArea, MobilityAdHocResearch}) which has lead me to place the nodes uniformly in the plane. The justification of this was both the fact that part of this investigation was an experimental look into how the non-planar graph would behave compared to the \ac{gabe} and the \ac{rng}, and not just about \acp{manet}. In retrospect I can see that using data from the mobility model would proper would have given a better picture and would most likely have made it possible for me to cut down on the number of graphs that would have to have been generated (since the graphs would be representative of the the mobility model, and not just uniformly distributed). See section~\ref{section:future_work} for my recommendation for future comparisons between the graphs.   
-Since I have chosen to uniformly distribute the nodes I will need a large number of tests in order for the underlying properties of the three types of graphs to emerge. Therefore I will therefore have to limit the number of node-categories so that I will be able to process all the tests. I will therefore chose to limit myself to 8 node-categories with the following number of nodes: 100, 250, 500, 1000, 2500, 5000, 7500 and 10000 nodes.
+Since I have chosen to uniformly distribute the nodes I will need a large number of tests in order for the underlying properties of the three types of graphs to emerge. Therefore I will therefore have to limit the number of node-categories so that I will be able to process all the tests. I will therefore chose to limit myself to 7 node-categories with the following number of nodes: 100, 250, 500, 1000, 2500, 5000 and 7500 nodes.
 
 I feel this is a good compromise between having a reasonable number of data-points and big enough spread, while still being able to compute them in a reasonable amount of time. The nodes are going to be placed uniformly in the plane, with the lower bound of their coordinates being 0, and the upper bound depending on the number of points in the graph. No two points will have same the coordinates. 
 
@@ -160,9 +167,9 @@ x &=& \sqrt{100 * num}
 \end{eqnarray}
 meaning that in practise the graphs are squares in the plane with the following dimensions, which will also be the upper limits on their coordinates:
 
-\begin{tabular}{lrrrrrrrr}
-Number of nodes: & 100 & 250 & 500 & 1000 & 2500 & 5000 & 7500 & 10000 \\
-Width/height:    & 100 & 158 & 223 &  316 &  500 &  707 &  866 &  1000 
+\begin{tabular}{lrrrrrrr}
+Number of nodes: & 100 & 250 & 500 & 1000 & 2500 & 5000 & 7500 \\
+Width/height:    & 100 & 158 & 223 &  316 &  500 &  707 &  866  
 \end{tabular} 
 
 \subsubsection{Tests to be performed}
@@ -178,61 +185,3 @@ Since the node-sets that we are going to generate the graphs from are going to d
 
 
 
-\hide{
-%\tikgraph{avg_neigh}{caption}
-
-\begin{figure}
-\centering
-\begin{tikzpicture}
-\begin{axis}[xlabel=Number of nodes in graph, ylabel=Average number of neighbours]
-\addplot+[only marks] coordinates{
-(100, 20) (150, 8) (250, 12) (500, 9) (1000, 3)
-};
-\legend{ddd}
-\end{axis}
-\end{tikzpicture}
-\caption{Example}
-\end{figure}
-
-
-\begin{tikzpicture}
-\begin{loglogaxis}[xlabel=Cost,ylabel=Error]
-
-\addplot coordinates {
-(5,
-8.31160034e-02)
-(17,
-2.54685628e-02)
-(49,
-7.40715288e-03)
-(129,
-2.10192154e-03)
-(321,
-5.87352989e-04)
-(769,
-1.62269942e-04)
-(1793, 4.44248889e-05)
-(4097, 1.20714122e-05)
-(9217, 3.26101452e-06)
-};
-\addplot coordinates {
-(7,
-8.47178381e-02)
-(31,
-3.04409349e-02)
-(111,
-1.02214539e-02)
-(351,
-3.30346265e-03)
-(1023, 1.03886535e-03)
-(2815, 3.19646457e-04)
-(7423, 9.65789766e-05)
-(18943, 2.87339125e-05)
-(47103, 8.43749881e-06)
-};
-\legend{Case 1,Case 2}
-\end{loglogaxis}
-\end{tikzpicture}
-\caption{A larger example}
-\end{figure}
-}

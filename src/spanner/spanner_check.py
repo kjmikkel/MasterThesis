@@ -1,5 +1,5 @@
-import os, sys, random, copy, math, json, pickle
-from multiprocessing import Process
+import os, sys, random, copy, math, json, pickle, multiprocessing
+from multiprocessing import Pool
 from decimal import *
 from datetime import datetime
 
@@ -55,15 +55,15 @@ class results_container:
     self.min_value = 0
     self.max_value = 0
 
-    self.min_unit_value = 0
-    self.max_unit_value = 0
+    self.min_unit_value = 10000
+    self.max_unit_value = -1
 
     self.num_errors = 0
     self.legal_empty = 0
 
     # Statistics about
-    self.edges = []
     self.edge_number = 0
+    self.average_edges = []
     self.average_neighbours = 0
     self.max_neighbours = 0
     self.min_neighbours = 0
@@ -113,18 +113,20 @@ class results_container:
 
     self.min_unit_value = self.get_unit_min()
     self.max_unit_value = self.get_unit_max()
-    
-    # Edges:
-    self.edge_number = sum(self.edges) / 2
-    self.average_neighbours = (self.edge_number * 1.0) / len(self.edges) * 1.0
-    self.max_neighbours = max(self.edges)
-    self.min_neighbours = min(self.edges)
 
+    self.distance = []
+    self.unit_distance = []
+
+    # Edges:
+    self.edge_number = self.edge_number / 2
+    self.average_neighbours = sum(self.average_edges) * 1.0 / len(self.average_edges) * 1.0
+    self.average_edges = []
     # CC
     self.number_cc = (sum(self.cc) * 1.0) / len(self.cc) * 1.0 # Connected components
+    self.cc = []
 
   def get_latex_values(self):
-    self.finalize()
+  #  self.finalize()
 
     distance = (c_round(self.distance_value), c_round(self.max_value), c_round(self.min_value), c_round(self.average_distance))
     unit_distance = (str(self.unit_distance_value), c_round(self.max_unit_value), c_round(self.min_unit_value), c_round(self.average_unit_distance))
@@ -396,46 +398,51 @@ def advanced_node_pairs(number_tests, set_container, nodes):
   return node_pairs_to_check
  
 
-def do_test(number_of_points, num, number_tests, from_val, to_val):
+def do_test((number_of_points, num, number_tests, from_val, to_val)):
   point_str = str(number_of_points) + '/'
   for graph_index in range(from_val, to_val):
     index_str = str(graph_index + 1)  
 
- #   if os.path.exists(results_rng_location + point_str + rng_placement + rng_filename + index_str + ".pickle"):
- #     continue
-
     if graph_index % 10 == 0 and graph_index > 0:
       print 'Made ' + str(graph_index) + ' tests.'
-
 
     node_pairs_to_check = load_pickle_file(node_pair_location + point_str + 'node_pair_' + str(graph_index + 1))
 
     # We perform the actual tests
     
     # Start Non-planar
+ 
     load_filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
     save_filename = results_non_location + point_str + non_planar_placement + non_planar_filename + index_str
-    perform_tests(load_filename, save_filename, node_pairs_to_check)
+    if not os.path.exists(save_filename + ".pickle"): 
+      perform_tests(load_filename, save_filename, node_pairs_to_check)
     # End non-planar
 
     # Start Gabriel Graph
+
     load_filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
     save_filename = results_gg_location + point_str + gg_placement + gg_filename + index_str
-    perform_tests(load_filename, save_filename, node_pairs_to_check)
+    if not os.path.exists(save_filename + ".pickle"):
+      perform_tests(load_filename, save_filename, node_pairs_to_check)
     # End Gabriel Graph
 
     # Start RNG 
     load_filename = rng_f + point_str + rng_placement + rng_filename + index_str
     save_filename = results_rng_location + point_str + rng_placement + rng_filename + index_str
-    perform_tests(load_filename, save_filename, node_pairs_to_check)
-    # End RNG    
+    if not os.path.exists(save_filename + ".pickle"):
+      print "Do", save_filename
+      perform_tests(load_filename, save_filename, node_pairs_to_check)
+    # End RNG
+
+    if to_val > 140 and to_val < 145:
+      print "done one in the zone"
 
 def perform_tests(load_graph_name, save_data_name, node_pairs):
     graph = load_pickle_file(load_graph_name)
     local_node_pairs = copy.deepcopy(node_pairs)
 
-    results                        = do_actual_test(graph, local_node_pairs) 
-    (neighbours, graph_distance)   = get_edge_data(graph)   
+    results                            = do_actual_test(graph, local_node_pairs) 
+    (neighbour_data, graph_distance)   = get_edge_data(graph)   
 
     # We find all the Connected Components
     (_ , set_container) = make_graph.MST_Kruskal(graph)
@@ -447,7 +454,7 @@ def perform_tests(load_graph_name, save_data_name, node_pairs):
     
     num_cc = len(cc_dict.keys())  
     
-    save_pickle_file(save_data_name, (results, neighbours, graph_distance, num_cc))
+    save_pickle_file(save_data_name, (results, neighbour_data, graph_distance, num_cc))
 
 def get_edge_data(graph):
     nodes = graph.keys()
@@ -461,7 +468,14 @@ def get_edge_data(graph):
         total_length += neighbours[inner_node]
 
     total_length /= 2
-    return (neigh_list, total_length)
+    
+    total_number = sum(neigh_list)
+    neigh_max = max(neigh_list)
+    neigh_min = min(neigh_list)
+    neigh_avg = total_number / len(neigh_list)
+    neigh_data = (total_number, neigh_max, neigh_min, neigh_avg)
+    
+    return (neigh_data, total_length)
         
 def do_actual_test(graph, node_pairs):
   results = []
@@ -525,17 +539,19 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
   
   filename = results_rng_location + point_str + 'rng_results'
   save_pickle_file(filename, rng_container)
-  
+  """ 
   if debug:
     print non_planar_container
     print '***'
     print gg_container
     print '***'
     print rng_container  
+  """
 
 def container_analysis(container, filename, paths):
   try:
     (main_results, neighbours, graph_distance, num_cc) = load_pickle_file(filename)
+    (total_number, neigh_max, neigh_min, neigh_avg) = neighbours
   except ValueError:
    print filename
    index = 0
@@ -544,7 +560,11 @@ def container_analysis(container, filename, paths):
      print "------------------------------------"
      index += 1
  
-  container.edges.extend(neighbours)
+  container.edge_number += total_number
+  container.max_neighbours = max(neigh_max, container.max_neighbours)
+  container.min_neighbours = min(neigh_min, container.min_neighbours)
+  container.average_edges.append(neigh_avg)
+
   container.total_length += graph_distance
   container.cc.append(num_cc)
 
@@ -562,7 +582,7 @@ def container_analysis(container, filename, paths):
     result = main_results[result_index]
     (local_distance, path_length, local_unit_distance) = result
 
-    if len(path) == 0 and len(unit_path) == 0:
+    if path_length == 0:
 
       # if there was not an error in the graphs before this one, then we up the number of empty paths       
       if not old_missing_path[result_index]:
@@ -638,19 +658,19 @@ def print_latex_results(number_of_points):
 
   latex_table =  "\\begin{tabular}{ccrrrr}\n"
   latex_table += "\\multicolumn{2}{}{}        & Length of graph: & Max node-pair: & Min node-pair: & Avg node-pair" + newline
-  latex_table += "\\multirow{3}{*}{Distance}   & NML & %s & %s & %s & %s%s" % (graph_dist_list[0], graph_dist_list[1], graph_dist_list[2], graph_dist_list[3], newline) 
+  latex_table += "\\multirow{3}{*}{Distance}  & NML & %s & %s & %s & %s%s " % (graph_dist_list[0], graph_dist_list[1], graph_dist_list[2], graph_dist_list[3], newline) 
   latex_table += "                            & GG  &  %s & %s & %s & %s%s" % (gg_dist_list[0], gg_dist_list[1], gg_dist_list[2], gg_dist_list[3], newline)
-  latex_table += "                            & RNG & %s & %s & %s & %s%s" % (rng_dist_list[0], rng_dist_list[1], rng_dist_list[2], rng_dist_list[3], newline) 
+  latex_table += "                            & RNG & %s & %s & %s & %s%s " % (rng_dist_list[0], rng_dist_list[1], rng_dist_list[2], rng_dist_list[3], newline) 
   latex_table += "\\hline \n"
   latex_table += "Unit      & NML & %s\phantom{.00} & %s & %s & %s%s" % (graph_unit_list[0], graph_unit_list[1], graph_unit_list[2], graph_unit_list[3], newline)  
   latex_table += "Distance  & GG  & %s\phantom{.00} & %s & %s & %s%s" % (gg_unit_list[0], gg_unit_list[1], gg_unit_list[2], gg_unit_list[3], newline)  
   latex_table += "          & RNG & %s\phantom{.00} & %s & %s & %s%s" % (rng_unit_list[0], rng_unit_list[1], rng_unit_list[2], rng_unit_list[3], newline)
   latex_table += "\hline\n" 
   latex_table += "\hline\n"
-  latex_table += "             &     & Distance: & Unit Distance:" + newline 
-  latex_table += "Percentage   & NML & 100.00 \% & 100,00 \%" + newline
-  latex_table += "of the       & GG  & %s \\%% & %s \\%%%s" % (graph_gg, graph_gg_unit, newline)
-  latex_table += "normal graph & RNG & %s \\%% %s \\%%\n" % (graph_rng, graph_rng_unit)
+  latex_table += "               &     & Distance: & Unit Distance: &   " + newline 
+  latex_table += "Percentage     & NML & 100.00 \% & 100.00 \%      &   " + newline
+  latex_table += "compared to the& GG  & %s \\%%   & %s \\%%        & %s" % (graph_gg, graph_gg_unit, newline)
+  latex_table += "normal graph   & RNG & %s \\%%   & %s \\%%        & \n" % (graph_rng, graph_rng_unit)
   latex_table += "\end{tabular}"
 
   save_file(latex_location + 'graph_results_' + point_str[0:-1], latex_table)
@@ -672,7 +692,6 @@ def make_pgf_graph(item_list, plot, legend):
   return latex_graph
 
 def print_graphs(number_list):
-
   graph_avg = ""
   gg_avg = ""
   rng_avg = ""
@@ -729,19 +748,226 @@ def do_integrity_test(point_list, node_pairs):
   non_planar_container.finalize()
   gg_container.finalize()
   rng_container.finalize()
+
+def make_point(num, filename):
+  graph_results = load_pickle_file(filename)
   
-  if debug:
-    print non_planar_container
-    print '***'
-    print gg_container
-    print '***'
-    print rng_container
+  avg = graph_results.average_neighbours
+  max_val = graph_results.max_neighbours
+  min_val = graph_results.min_neighbours
+  avg_neigh = "\t(%s, %s)\n" % (num, avg)    # +- (%s, %s)\n" % (num, avg, max_val - avg, min_val)
+  
+  avg = graph_results.average_unit_distance
+  max_val = graph_results.max_unit_value
+  min_val = graph_results.min_unit_value
+  
+  avg_unit = "\t(%s, %s)\n" % (num, avg)    # +- (%s, %s)\n" % (num, avg, max_val - avg, min_val)
+  return (avg_neigh, avg_unit) 
+
+
+def make_point_distance_hops(num):
+  point_str = str(num) + "/"
+
+  filename = results_non_location + point_str + 'graph_results' 
+  graph_result = load_pickle_file(filename)
+
+  filename = results_non_location + point_str + 'gg_results' 
+  gg_result = load_pickle_file(filename)
+
+  filename = results_non_location + point_str + 'rng_results' 
+  rng_result = load_pickle_file(filename)
+  
+  graph_distance = graph_result.distance_value
+  gg_distance    = gg_result.distance_value
+  rng_distance   = rng_result.distance_value
+
+  graph_distance_unit = graph_result.unit_distance_value
+  gg_distance_unit    = gg_result.unit_distance_value
+  rng_distance_unit   = rng_result.unit_distance_value
+
+  gg_percent = (gg_distance * 1.0 / graph_distance) * 100
+  rng_percent = (rng_distance * 1.0 / graph_distance) * 100
+
+  gg_unit_percent = (gg_distance_unit * 1.0 / graph_distance_unit) * 100
+  rng_unit_percent = (rng_distance_unit * 1.0 / graph_distance_unit) * 100
+  
+  todo = [gg_percent, rng_percent, gg_unit_percent, rng_unit_percent]
+  
+  val_list = []
+
+  for val in todo:
+    val_list.append("(%s, %s)\n" % (num, val))
+
+  return val_list
+
+def make_result_graphs(num_points_range):
+  make_distance_hops(num_points_range)
+  make_neigh_hops(num_points_range)
+
+def make_distance_hops(num_points_range):
+  default_1 = "\\addplot[color=%s, mark=%s, densely dashed] coordinates{\n" 
+  default_2 = "\\addplot[color=%s, mark=%s] coordinates{                \n" 
+
+  gg_distance  = default_1 % ("blue", "*")
+  rng_distance = default_1 % ("black", "triangle*")
+
+  gg_distance_unit  = default_2 % ("blue", "o" )
+  rng_distance_unit = default_2 % ("black", "triangle")
+
+  for num in num_points_range:
+    (gg_dist, rng_dist, gg_dist_unit, rng_dist_unit) = make_point_distance_hops(num)
+    
+    gg_distance  += gg_dist
+    rng_distance += rng_dist
+
+    gg_distance_unit  += gg_dist_unit
+    rng_distance_unit += rng_dist_unit
+
+  gg_distance  += "};\n"
+  rng_distance += "};\n"
+
+  gg_distance_unit  += "};\n"
+  rng_distance_unit += "};\n"
+
+  axis = "semilogxaxis"
+
+  xticks = ""
+  xtick_vals = ""
+  for num in xrange(7501):
+    if num > 0 and (num % 100 == 0 or num == 250): 
+      xticks += "%s" % num
+      if num in num_points_range:
+        xtick_vals += "$%s$" % num
+      else:
+        xtick_vals += ""
+      if num != num_points_range[-1]:
+        xticks += ", "
+        xtick_vals += ", "
+
+  y_left  = "\% of euclidian distance traversed compared to non-planar graph"
+  y_right = "\% of hops compared to non-planar graph"
+
+  width = "0.8\linewidth"
+
+  graph = "\\begin{tikzpicture}\n"
+
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}, }\n"
+  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, legend columns=4,width=%s, xlabel=Number of nodes in the graph, ylabel=%s]\n" % (axis, xticks, xtick_vals, width, y_left)  
+  graph += gg_distance
+  graph += rng_distance
+  graph += "\\legend{Gabriel, Relative Neighbourhood}\n"
+  graph += "\\end{%s}\n\n" % axis
+
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.20)},anchor=north}}\n"
+  graph += "\\begin{%s}[scale only axis, width=%s, legend columns=4, axis y line=right, axis x line=none, ylabel=%s]\n" % (axis, width, y_right)
+  graph += gg_distance_unit
+  graph += rng_distance_unit
+  graph += "\\legend{Gabriel, Relative Neighbourhood}\n"
+  graph += "\\end{%s}\n" % axis
+
+  graph += "\\end{tikzpicture}\n"
+    
+  save_file(latex_location + "dist_percent" , graph)
+  
+
+def make_neigh_hops(num_points_range):  
+  default_1 = "\\addplot[color=%s, mark=%s] coordinates{                \n" #[error bars/.cd, y dir=both,y explicit] coordinates{\n"
+  default_2 = "\\addplot[color=%s, mark=%s, densely dashed] coordinates{\n" #[error bars/.cd, y dir=both,y explicit] coordinates{\n"
+
+  non_planar = default_2 % ("red", "square*")
+  gg = default_2 % ("blue", "*")
+  rng = default_2 % ("black", "triangle*")
+
+  non_planar_unit = default_1 % ("red", "square")
+  gg_unit = default_1 % ("blue", "o" )
+  rng_unit = default_1 % ("black", "triangle")
+
+  for num in num_points_range:
+    point_str = str(num) + "/"
+    
+    filename = results_non_location + point_str + 'graph_results' 
+    (neighbour, distance) = make_point(num, filename)
+    non_planar += neighbour
+    non_planar_unit += distance
+
+    filename = results_gg_location + point_str + 'gg_results'
+    (neighbour, distance) = make_point(num, filename)
+    gg += neighbour
+    gg_unit += distance
+  
+    filename = results_rng_location + point_str + 'rng_results'
+    (neighbour, distance) = make_point(num, filename)
+    rng += neighbour
+    rng_unit += distance
+
+  non_planar += "};\n"
+  non_planar_unit += "};\n"
+  gg += "};\n"
+  gg_unit += "};\n"
+  rng += "};\n"
+  rng_unit += "};\n"
+
+  axis = "semilogxaxis"
+
+  xticks = ""
+  xtick_vals = ""
+  for num in xrange(7501):
+    if num > 0 and (num % 100 == 0 or num == 250): 
+      xticks += "%s" % num
+      if num in num_points_range:
+        xtick_vals += "$%s$" % num
+      else:
+        xtick_vals += ""
+      if num != num_points_range[-1]:
+        xticks += ", "
+        xtick_vals += ", "
+
+  yticks_one = "1,...,12"
+  ytick_vals_one = "1,...,12"
+
+  yticks_two = ""
+  ytick_vals_two = ""
+  max_val = 66
+  for num in xrange(max_val + 1):
+    if num > 0 and num % 1 == 0: 
+      yticks_two += "%s" % num
+      if num % 10 == 0:
+        ytick_vals_two += "$%s$" % num
+      else:
+        ytick_vals_two += ""
+      if num != max_val:
+        yticks_two += ", "
+        ytick_vals_two += ", "
+
+  width = "0.8\linewidth"
+
+  graph = "\\begin{tikzpicture}\n"
+
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}, }\n"
+  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, ytick={%s}, yticklabels={%s}, legend columns=4,width=%s, axis y line*=left, xlabel=Number of nodes in the graph, ylabel=Average number of neighbours]\n" % (axis, xticks, xtick_vals, yticks_one, ytick_vals_one, width)  
+  graph += non_planar
+  graph += gg
+  graph += rng
+  graph += "\\legend{Non-planar, Gabriel, Relative Neighbourhood}\n"
+  graph += "\\end{%s}\n\n" % axis
+
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.20)},anchor=north}}\n"
+  graph += "\\begin{%s}[scale only axis, ytick={%s}, yticklabels={%s}, width=%s, legend columns=4, axis y line=right, axis x line=none, ylabel=Average number of hops]\n" % (axis, yticks_two, ytick_vals_two, width)
+  graph += non_planar_unit
+  graph += gg_unit
+  graph += rng_unit
+  graph += "\\legend{Non-planar, Gabriel, Relative Neighbourhood}\n"
+  graph += "\\end{%s}\n" % axis
+
+  graph += "\\end{tikzpicture}\n"
+    
+  save_file(latex_location + "avg_neighbour" , graph)
 
 def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state):	
   do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, 0, num_graphs)	
 
 def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state, from_val, to_val):	
-
+  
   """
   A single function call to tie the entire test stack together and to make it easier to parameterise
 
@@ -755,7 +981,10 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
   
 
   All of the options are culimative, so if state is 3, then you won't generate pointsets, make the graphs or node pairs
-  """  
+  """
+
+  print start_state
+
   print "Working on " + str(point_num)
   if start_state < 1:
     generate_point_sets(point_num, num_graphs, max_values)
@@ -770,7 +999,13 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
     print 'Made node pairs'
 
   if (start_state <= 3) and (end_state >= 3):
-    do_test(point_num, num_graphs, pr_graph_test, from_val, to_val)
+    pool = Pool(processes=multiprocessing.cpu_count())
+    list_parameter = []
+    for i in range(0, 250):
+      list_parameter.append((point_num, num_graphs, pr_graph_test, i, i + 1))
+
+    #print list_parameter
+    pool.map(do_test, list_parameter)
     print 'Done results'
     
   if (start_state <= 4) and (end_state >= 4):
@@ -780,6 +1015,7 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
   if (start_state <= 5) and (end_state >= 5):
     print_latex_results(point_num)
     print 'Printed LaTeX file'
+
 
 def eq(points):
   return round(math.sqrt(100 * points))
@@ -791,102 +1027,30 @@ def eq(points):
   2: Don't do graph generation
   3: Don't make node pairs
   4: Don't find the results
-  5 or above: Don't analyse results - just print the LaTeX code
-"""
+  5 or above: Don't analyse results - just print the LaTeX code"""
 
 # point_num num_graphs pr_graphs_test max_values cut_off state
 #do_suite(10, 2, 30, 20, 15, 0)
 
-start_state = 1
-end_state = 1
-number_tests = 1
 pr_test = 100
 radio_range = 20
-for number_index in [100, 250, 500, 1000, 2500, 5000, 7500, 10000]:
-  do_suite(number_index,  number_tests, pr_test, eq(number_index),  radio_range, start_state, end_state, 0, 1)
 
-start_state = 2
-end_state = 3
 
-#for number_index in [100, 250, 500, 1000, 2500, 5000, 7500, 10000]:
-#  do_suite(number_index,  number_tests, pr_test, eq(number_index),  radio_range, start_state, end_state, 0, number_tests)
-
+num_to_do = 250
+step = num_to_do / 7
+mod = num_to_do % 7
 step = 500 / 7
-"""
-p1 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, 1, step))
-p2 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step, step * 2))
-p3 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 2, step * 3))
-p4 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 3, step * 4))
-p5 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 4, step * 5))
-p6 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 5, step * 6))
-p7 = Process(target=do_suite, args=(10000, number_tests, pr_test, eq(10000), radio_range, start_state, end_state, step * 6, step * 7 + 3))
 
-p1.start()
-p2.start()
-p3.start()
-p4.start()
-p5.start()
-p6.start()
-p7.start()
-
-p1.join()
-p2.join()
-p3.join()
-p4.join()
-p5.join()
-p6.join()
-p7.join()
-"""
-
-start_state = 3
-end_state = 3
-"""
-for num_nodes in [100, 250, 500, 1000, 2500, 5000, 7500, 10000]:
-  p1 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 1, step))
-  p2 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step, step * 2))
-  p3 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 2, step * 3))
-  p4 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 3, step * 4))
-  p5 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 4, step * 5))
-  p6 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 5, step * 6))
-  p7 = Process(target=do_suite, args=(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, step * 6, step * 7 + 3))
-
-  p1.start()
-  p2.start()
-  p3.start()
-  p4.start()
-  p5.start()
-  p6.start()
-  p7.start()
-
-  p1.join()
-  p2.join()
-  p3.join()
-  p4.join()
-  p5.join()
-  p6.join()
-  p7.join()
-"""
-
-start_state = 3
+start_state = 5
 end_state = 8
+number_tests = 500
 
-#for num_nodes in [250, 500, 1000, 2500]: #, 5000, 7500, 10000]:
-#  do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
+for num_nodes in [100, 250, 500, 1000, 2500]:
+  do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
 
-#print_graphs([250, 500])
 
-"""
-point_list = [(0,0), (20, 0), (4, -5), (15, -5)]
-node_pairs = [((0,0), (20, 0))] 
-do_integrity_test(point_list, node_pairs)
+for num_nodes in [5000, 7500]:
+  do_suite(num_nodes, num_to_do, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
 
-print ''
-print '-----------'
-print '***********'
-print '-----------'
-print ''
 
-point_list = [(0,0), (-4, -5), (1, -10), (5, -10), (10, -10), (18, -5), (15, 0)]
-node_pairs = [((0,0), (15, 0))]
-do_integrity_test(point_list, node_pairs)
-"""
+make_result_graphs([100, 250, 500, 1000, 2500, 5000, 7500])
