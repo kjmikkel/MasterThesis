@@ -1,7 +1,7 @@
 \colorlet{circle edge}{black!50}
 \colorlet{circle area}{gray!20}
 
-\def\scale{0.62}
+\def\scale{0.65}
 \def\plist{{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}}
 
 \tikzset{
@@ -21,7 +21,7 @@
   \foreach \pos/\name in \plist {
     \node[vertex] () at \pos {};
   }
-  \node[vertex] (a) at (0, 2) {$a$};
+  \node[vertex] (a) at (0, 2) {$u$};
 \end{tikzpicture}}
 % Remove empty line
 \subfloat[Connection graph]{\label{fig:connec}

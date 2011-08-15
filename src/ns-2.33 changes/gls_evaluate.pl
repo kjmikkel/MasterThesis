@@ -88,8 +88,9 @@ my $mac = "NONE";
 #
 # Lookup Tables
 #
-my @LOCSTYPE = ("QUERY ", "REPLY ", "DATA  ", "UPDATE", "UPDACK", "BEACON", "BCNREQ");
-my @GPSRTYPE = ("GREEDY", "PERI  ", "PROBE ", "BEACON", "BCNREQ");
+my @LOCSTYPE = ("QUERY ", "REPLY ", "DATA    ", "UPDATE", "UPDACK", "BEACON", "BCNREQ");
+my @GPSRTYPE = ("GREEDY", "PERI  ", "PROBE   ", "BEACON", "BCNREQ");
+my @GOAFRTYPE= ("GREEDY", "PERI  ", "ADVANCE ", "PROBE ", "BEACON", "BCNREQ");
 my @CBFTYPE  = ("DATA  ", "RCPT  ", "RTF   ", "CTF   ", "REC   ", "ACT   ");
 my @DSRTYPE  = ("RTREQ ", "RTRPLY", "RTERR ", "RTRQER", "RTRPER");
 my @PINGTYPE = ("Ping", "Echo", "TOTAL ");
@@ -373,6 +374,7 @@ if ($noFiles == 0){ usage(); }else{
 	else {
 	  if (uc($ptype1) eq "CBF") { $cause1 = $CBFTYPE[$psub1]; }
 	  elsif (uc($ptype1) eq "GPSR") { $cause1 = $GPSRTYPE[$psub1]; }
+          elsif (uc($ptype1) eq "GOAFR") {$cause1 = $GOAFRTYPE[$psub1]; }
 	  elsif (uc($ptype1) eq "LOCS") { $cause1 = $LOCSTYPE[$psub1]; }
 	  elsif (uc($ptype1) eq "PING") { $cause1 = $PINGTYPE[$psub1]; }
 	  else { $cause1 = "UK/$ptype1"; }
@@ -381,6 +383,7 @@ if ($noFiles == 0){ usage(); }else{
 	else {
 	  if (uc($ptype2) eq "CBF") { $cause2 = $CBFTYPE[$psub2]; }
 	  elsif (uc($ptype2) eq "GPSR") { $cause2 = $GPSRTYPE[$psub2]; }
+  	  elsif (uc($ptype2) eq "GOAFR") { $cause2 = $GOAFRTYPE[$psub2]; }
 	  elsif (uc($ptype2) eq "LOCS") { $cause2 = $LOCSTYPE[$psub2]; }
 	  elsif (uc($ptype2) eq "PING") { $cause2 = $PINGTYPE[$psub2]; }
 	  else { $cause2 = "UK/$ptype2"; }
@@ -541,6 +544,25 @@ if ($noFiles == 0){ usage(); }else{
 	  if ($op eq 'D') {
 	    my $reason = "$layer/$drop_rsn";
 	    $drops{$reason}{$GPSRTYPE[$pkt_type]}++;
+	  }
+	  next;
+	}
+
+	if (($protocol eq "GOAFR") && 
+	    ($subline =~ /^(\d+) \d+ \[\S+ \S+\]/o)) {
+	  my $pkt_type     = $1;
+
+	  # Packet Statistics
+	  if ($layer eq "RTR") {
+	    if ($op eq 'D') { $stats{$protocol}{$GOAFRTYPE[$pkt_type]}{drop}++; }
+	    if ($op eq 'r') { $stats{$protocol}{$GOAFRTYPE[$pkt_type]}{recv}++; }
+	    if ($op eq 'f') { $stats{$protocol}{$GOAFRTYPE[$pkt_type]}{forw}++; }
+	    if ($op eq 's') { $stats{$protocol}{$GOAFRTYPE[$pkt_type]}{send}++; }
+	  }
+
+	  if ($op eq 'D') {
+	    my $reason = "$layer/$drop_rsn";
+	    $drops{$reason}{$GOAFRTYPE[$pkt_type]}++;
 	  }
 	  next;
 	}
@@ -1426,7 +1448,10 @@ sub printWKGLSstats {
     $avgage = $cache_statistic{totalage} / $lookup{cache_lookups};
   }
   print "Cache Lookups   : $lookup{cache_lookups} min age $cache_statistic{minage}, max age $cache_statistic{maxage}, avg age $avgage\n";
-  $avgage = $reply_statistic{totalage} / $lookup{reply_receive};
+  $avgage = 0;
+  if ($lookup{reply_receive} != 0) {
+    $avgage = $reply_statistic{totalage} / $lookup{reply_receive};
+  }
   print "Requests send   : $lookup{request_send} \n";
   print "Replies received: $lookup{reply_receive} min age $reply_statistic{minage}, max age $reply_statistic{maxage}, avg age $avgage\n";
   my $failure_rate = ($lookup{queries} - $lookup{cache_lookups} - $lookup{reply_receive}) / $lookup{queries};

@@ -22,7 +22,7 @@
 \usepackage{lscape}
 \usepackage{pdflscape}
 \usepackage{verbatim}
-\usepackage{caption}
+\usepackage[small]{caption}
 \usepackage{afterpage}
 \usepackage{fancyhdr}
 \usepackage{subfig}
@@ -76,8 +76,8 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \newcommand{\eqn}[1]{\begin{eqnarray}#1\end{eqnarray}}
 
 %Fixme's
-%\newcommand{\todo}[1]{}
-\newcommand{\todo}[1]{\fxfatal{#1}}
+\newcommand{\todo}[1]{}
+%\newcommand{\todo}[1]{\fxfatal{#1}}
 \newcommand{\todoNote}[2]{\fxnote{#1}{#2}}
 \newcommand{\justify}[1]{\texttt{Write a justification for this}\fxfatal{Write a justification for this: #1}}
 \newcommand{\cinclude}[1]{
