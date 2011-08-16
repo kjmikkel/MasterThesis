@@ -24,18 +24,26 @@ gg_filename = 'gg_graph_'
 rng_placement = 'RNG graphs/'
 rng_filename = 'rng_graph_'
 
+mst_placement = 'MST graphs'
+mst_filename  = 'mst_graph_'
+
 non_planar_f = 'Graphs/'
 gabriel_graph_f = 'Graphs/'  
 rng_f = 'Graphs/' 
+mst_f = 'Graphs/'
 
 results_non_location = 'Results/' 
 results_gg_location = 'Results/' 
 results_rng_location = 'Results/' 
+results_mst_location = 'Results/'
+
 
 latex_location = '../../report/results/spanner/'
 node_pair_location = "Node pairs/"
 
 debug = True
+
+cpu_modifier = 2
 
 """ 
 Container class to have a bit more structured data transference from the results
@@ -136,6 +144,7 @@ class results_container:
     # Edges:
     self.edge_number = self.edge_number / 2
     self.average_neighbours = sum(self.average_edges) * 1.0 / len(self.average_edges) * 1.0
+    print self.average_edges
     self.average_edges = []
     # CC
     self.number_cc = (sum(self.cc) * 1.0) / len(self.cc) * 1.0 # Connected components
@@ -236,8 +245,8 @@ def generate_point_sets(number_of_points, num_pointset, max_values):
     filename = point_set_location + point_str + point_filename + str(num + 1)
     save_pickle_file(filename, data)
 
-def generate_graphs(number_of_points, number_of_graphs, cutoff_distance):
-  for graph_index in range(0, number_of_graphs):
+def generate_graphs(number_of_points, number_of_graphs, cutoff_distance, from_val, to_val):
+  for graph_index in range(from_val, to_val):
     point_str = str(number_of_points) + '/'
 
     if graph_index % 10 == 0 and graph_index > 0:
@@ -248,28 +257,36 @@ def generate_graphs(number_of_points, number_of_graphs, cutoff_distance):
     filename = point_set_location + point_str + point_filename + index_str
     new_data = load_pickle_file(filename)
 
-    tree = make_graph.SciPy_KDTree(new_data)
-    
-    normal_graph = make_graph.make_non_planar_graph(new_data, cutoff_distance, tree)
     filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
-    save_pickle_file(filename, normal_graph) 
+    if not os.path.exists(filename):
+      tree = make_graph.SciPy_KDTree(new_data)   
+      normal_graph = make_graph.make_non_planar_graph(new_data, cutoff_distance, tree)
+      save_pickle_file(filename, normal_graph) 
 
-    if number_of_points > 2500:
-      rn_graph = make_graph.rn_graph_kdtree(new_data, tree, cutoff_distance)
-    else:
-      rn_graph = make_graph.rn_graph_brute(new_data, cutoff_distance)
+    filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
+    if not os.path.exists(filename):
+      if number_of_points > 2500:
+        g_graph = make_graph.gabriel_graph_kdtree(new_data, tree, cutoff_distance)
+      else:
+        g_graph = make_graph.gabriel_graph_brute(new_data, cutoff_distance)
+  
+      save_pickle_file(filename, g_graph)
 
     filename = rng_f + point_str + rng_placement + rng_filename + index_str
-    save_pickle_file(filename, rn_graph)
- 
-    if number_of_points > 2500:
-      g_graph = make_graph.gabriel_graph_kdtree(new_data, tree, cutoff_distance)
-    else:
-      g_graph = make_graph.gabriel_graph_brute(new_data, cutoff_distance)
-  
-    filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
-    save_pickle_file(filename, g_graph)
-            
+    if not os.path.exists(filename): 
+      if number_of_points > 2500:
+        rn_graph = make_graph.rn_graph_kdtree(new_data, tree, cutoff_distance)
+      else:
+        rn_graph = make_graph.rn_graph_brute(new_data, cutoff_distance)
+      save_pickle_file(filename, rn_graph)
+
+    filename = mst_f + point_str + mst_placement + mst_filename + index_str
+    if not os.path.exists(filename):
+      load_filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
+      non_planar_graph = load_pickle_file(load_filename)
+      (graph , set_container) = make_graph.MST_Kruskal(non_planar_graph)
+      save_pickle_file(filename, graph)
+      
 def make_node_pairs((number_of_points, num, number_tests, from_val, to_val)):
   point_str = str(number_of_points) + '/'
 
@@ -433,17 +450,16 @@ def do_test((number_of_points, num, number_tests, from_val, to_val)):
     if not os.path.exists(save_filename + ".pickle"): 
       perform_tests(load_filename, save_filename, node_pairs_to_check)
     else:
-      cutdown(save_filename, number_tests)
+      cutdown(load_filename, save_filename, number_tests)
     # End non-planar
 
     # Start Gabriel Graph
-
     load_filename = gabriel_graph_f + point_str + gg_placement + gg_filename + index_str
     save_filename = results_gg_location + point_str + gg_placement + gg_filename + index_str
     if not os.path.exists(save_filename + ".pickle"):
       perform_tests(load_filename, save_filename, node_pairs_to_check)
     else:
-      cutdown(save_filename, number_tests)
+      cutdown(load_filename, save_filename, number_tests)
     # End Gabriel Graph
 
     # Start RNG 
@@ -452,14 +468,28 @@ def do_test((number_of_points, num, number_tests, from_val, to_val)):
     if not os.path.exists(save_filename + ".pickle"):
       perform_tests(load_filename, save_filename, node_pairs_to_check)
     else:
-      cutdown(save_filename, number_tests)
+      cutdown(load_filename, save_filename, number_tests)
     # End RNG
 
-def cutdown(save_filename, number_tests):
+    # Start MST
+    load_filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
+    save_filename = results_mst_location + point_str + mst_placement + mst_filename + index_str
+    if not os.path.exists(save_filename + ".pickle"):
+      perform_tests(load_filename, save_filename, node_pairs_to_check)
+    else:
+      cutdown(load_filename, save_filename, number_tests)
+    # End MST
+
+def cutdown(load_graph_name, save_filename, number_tests):
   data = load_pickle_file(save_filename)
-  (results, neighbour_data, graph_distance, num_cc) = data
+  (results, _, _, num_cc) = data
   results = results[0:number_tests]
+  
+  graph = load_pickle_file(load_graph_name)
+  (neighbour_data, graph_distance)   = get_edge_data(graph)   
+  
   data = (results, neighbour_data, graph_distance, num_cc)
+  
   save_pickle_file(save_filename, data)
 
 def perform_tests(load_graph_name, save_data_name, node_pairs):
@@ -494,10 +524,10 @@ def get_edge_data(graph):
 
     total_length /= 2
     
-    total_number = sum(neigh_list)
+    total_number = sum(neigh_list) * 1.0
     neigh_max = max(neigh_list)
     neigh_min = min(neigh_list)
-    neigh_avg = total_number / len(neigh_list)
+    neigh_avg = total_number / len(neigh_list) * 1.0
     neigh_data = (total_number, neigh_max, neigh_min, neigh_avg)
     
     return (neigh_data, total_length)
@@ -531,6 +561,7 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
   non_planar_container = results_container('Non-planar')
   gg_container         = results_container('Gabriel Graph')
   rng_container        = results_container('Relative Neighbourhood Graph')
+  #mst_container       = resulst_container('Minimum Spanning Graph')
 
   point_str = str(number_of_points) + '/'
   
@@ -552,10 +583,14 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
     filename = results_rng_location + point_str + rng_placement + rng_filename + index_str
     container_analysis(rng_container, filename, new_paths)
 
+    filename = results_mst_location + point_str + mst_placement + mst_filename + index_str
+   # container_analysis(mst_container, filename, new_paths)
+
   # I save the results so they are independent of LaTeX code we are going to generate
   non_planar_container.finalize()
   gg_container.finalize()
   rng_container.finalize()
+ # mst.containwer.finalize()
   
   filename = results_non_location + point_str + 'graph_results'
   save_pickle_file(filename, non_planar_container)
@@ -565,14 +600,9 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
   
   filename = results_rng_location + point_str + 'rng_results'
   save_pickle_file(filename, rng_container)
-  """ 
-  if debug:
-    print non_planar_container
-    print '***'
-    print gg_container
-    print '***'
-    print rng_container  
-  """
+
+  filename = results_mst_locaiton + point_str + 'mst_results'
+# save_pickle_file(filename, mst_container)
 
 def container_analysis(container, filename, paths):
   try:
@@ -872,7 +902,7 @@ def make_distance_hops(num_points_range):
 
   xticks = ""
   xtick_vals = ""
-  for num in xrange(7501):
+  for num in xrange(10001):
     if num > 0 and (num % 100 == 0): 
       xticks += "%s" % num
       if (num == 1000 or num % 2500 == 0):
@@ -967,7 +997,7 @@ def make_neigh_hops(num_points_range):
 
   xticks = ""
   xtick_vals = ""
-  for num in xrange(7501):
+  for num in xrange(10001):
     if num > 0 and num % 100 == 0: 
       xticks += "%s" % num
       if (num == 1000 or num % 2500 == 0):
@@ -1047,11 +1077,16 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
     print "Generated Pointsets"
 
   if (start_state <= 1) and (end_state >= 1):
-    generate_graphs(point_num, num_graphs, cut_off)
+    pool = Pool(processes=multiprocessing.cpu_count() - cpu_modifier)
+    list_parameter = []
+    for i in range(0, num_graphs):
+      list_parameter.append((point_num, num_graphs, cut_off, i, i + 1)) 
+
+    pool.map(generate_graphs, list_parameter)
     print 'Made graphs'
   
   if (start_state <= 2) and (end_state >= 2):
-    pool = Pool(processes=multiprocessing.cpu_count() - 2)
+    pool = Pool(processes=multiprocessing.cpu_count() - cpu_modifier)
     list_parameter = []
     for i in range(0, num_graphs):
       list_parameter.append((point_num, num_graphs, pr_graph_test, i, i + 1))
@@ -1060,7 +1095,7 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
     print 'Made node pairs'
 
   if (start_state <= 3) and (end_state >= 3):
-    pool = Pool(processes=multiprocessing.cpu_count() - 2)
+    pool = Pool(processes=multiprocessing.cpu_count() - cpu_modifier)
     list_parameter = []
     for i in range(0, num_graphs):
       list_parameter.append((point_num, num_graphs, pr_graph_test, i, i + 1))
@@ -1095,13 +1130,7 @@ def eq(points):
 pr_test = 100
 radio_range = 20
 
-
-num_to_do = 250
-step = num_to_do / 7
-mod = num_to_do % 7
-step = 500 / 7
-
-start_state = 2
+start_state = 3
 end_state = 5
 number_tests = 500
 
