@@ -146,12 +146,12 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 }
 
 \newcommand{\tableResult}[3]{
-\begin{figure}
-\scriptsize{
+\begin{table}
+\tiny{
 \input{results/#1.tex}
 }
 \caption{\label{table:#3}#2}
-\end{figure}
+\end{table}
 }
 
 \newcommand{\tigz}[1]{\input{figures/tikz/#1.tex}}
