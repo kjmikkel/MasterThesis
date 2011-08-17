@@ -1,4 +1,4 @@
-import os, sys, random, copy, math, json, pickle, multiprocessing
+import os, sys, random, copy, math, json, pickle, multiprocessing, re
 from multiprocessing import Pool
 from decimal import *
 from datetime import datetime
@@ -55,15 +55,17 @@ class results_container:
     self.distance = []
     self.distance_value = 0
     self.average_distance = 0
+    self.std_deviation = 0
 
     self.unit_distance = []
     self.unit_distance_value = 0
     self.average_unit_distance = 0
+    self.std_unit_deviation = 0
 
     self.min_value = 0
     self.max_value = 0
 
-    self.min_unit_value = 10000
+    self.min_unit_value = 10001
     self.max_unit_value = -1
 
     self.num_errors = 0
@@ -73,8 +75,12 @@ class results_container:
     self.edge_number = 0
     self.average_edges = []
     self.average_neighbours = 0
+    
     self.max_neighbours = 0
-    self.min_neighbours = 0
+    self.max_neighbours_list = []
+    
+    self.min_neighbours = 10001
+    self.min_neighbours_list = []
 
     self.total_length = 0
 
@@ -89,7 +95,6 @@ class results_container:
       
     min_sum = sum(min_list)
     min_result = (min_sum * 1.0) / (500 * 1.0)
-    print min_result
     return min_result
 
   def get_max_internal(self, max_dist):
@@ -100,8 +105,17 @@ class results_container:
       
     max_sum = sum(max_list)
     max_result = (max_sum * 1.0) / (500 * 1.0)
-    print max_result
     return max_result
+
+  def sample_deviation(self, sample_list):
+    mean = sum(sample_list) * 1.0 / len(sample_list) * 1.0
+
+    accum = 0
+    for val in sample_list:
+      diff = val - mean
+      accum += diff * diff
+  
+    return math.sqrt(accum / len(sample_list))
 
   def get_min(self):
     return self.get_min_internal(self.distance)
@@ -129,8 +143,10 @@ class results_container:
     self.unit_distance_value = self.get_unit_distance()
 
     self.average_distance = (self.distance_value * 1.0) / divide_value
-
     self.average_unit_distance = (self.unit_distance_value * 1.0) / divide_value
+
+    self.std_deviation = self.sample_deviation(self.distance)
+    self.std_unit_deviation = self.sample_deviation(self.unit_distance)
 
     self.min_value = self.get_min()
     self.max_value = self.get_max()
@@ -144,7 +160,14 @@ class results_container:
     # Edges:
     self.edge_number = self.edge_number / 2
     self.average_neighbours = sum(self.average_edges) * 1.0 / len(self.average_edges) * 1.0
-    print self.average_edges
+    self.neighbours_std_devi = self.sample_deviation(self.average_edges)    
+
+    self.max_neighbours = sum(self.max_neighbours_list) / len(self.max_neighbours_list)
+    self.max_neighbours_list = []
+
+    self.min_neighbours = sum(self.min_neighbours_list) / len(self.min_neighbours_list)
+    self.min_neighbours_list = []
+
     self.average_edges = []
     # CC
     self.number_cc = (sum(self.cc) * 1.0) / len(self.cc) * 1.0 # Connected components
@@ -153,18 +176,18 @@ class results_container:
   def get_latex_values(self):
   #  self.finalize()
 
-    distance = (c_round(self.distance_value), c_round(self.max_value), c_round(self.min_value), c_round(self.average_distance))
-    unit_distance = (str(self.unit_distance_value), c_round(self.max_unit_value), c_round(self.min_unit_value), c_round(self.average_unit_distance))
-    neighbours = (c_round(self.max_neighbours), c_round(self.min_neighbours), c_round(self.average_neighbours))
+    distance      = (c_round(self.distance_value),      c_round(self.average_distance),   c_round(self.max_value),      c_round(self.min_value), c_round(self.std_deviation))
+    unit_distance = (self.unit_distance_value, c_round(self.average_unit_distance), c_round(self.max_unit_value), c_round(self.min_unit_value), c_round(self.std_unit_deviation))
+    neighbours    = (c_round(self.average_neighbours),  c_round(self.max_neighbours),     c_round(self.min_neighbours), c_round(self.neighbours_std_devi))
     
     return_dict = {}
-    return_dict["distance"] = distance
-    return_dict["unit"] = unit_distance
-    return_dict["error"] = str(self.num_errors)
+    return_dict["distance"]     = distance
+    return_dict["unit"]         = unit_distance
+    return_dict["error"]        = str(self.num_errors)
     return_dict["total_length"] = c_round(self.total_length)
-    return_dict["num_edges"] = str(self.edge_number)
-    return_dict["neighbours"] = neighbours
-    return_dict["CC"] = str(self.number_cc)
+    return_dict["num_edges"]    = str(self.edge_number)
+    return_dict["neighbours"]   = neighbours
+    return_dict["CC"]           = str(self.number_cc)
  
     return return_dict
 
@@ -472,12 +495,14 @@ def do_test((number_of_points, num, number_tests, from_val, to_val)):
     # End RNG
 
     # Start MST
+    """
     load_filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
     save_filename = results_mst_location + point_str + mst_placement + mst_filename + index_str
     if not os.path.exists(save_filename + ".pickle"):
       perform_tests(load_filename, save_filename, node_pairs_to_check)
     else:
       cutdown(load_filename, save_filename, number_tests)
+    """
     # End MST
 
 def cutdown(load_graph_name, save_filename, number_tests):
@@ -601,7 +626,7 @@ def analyse_results(number_of_points, num_results, pr_graph_test):
   filename = results_rng_location + point_str + 'rng_results'
   save_pickle_file(filename, rng_container)
 
-  filename = results_mst_locaiton + point_str + 'mst_results'
+  filename = results_mst_location + point_str + 'mst_results'
 # save_pickle_file(filename, mst_container)
 
 def container_analysis(container, filename, paths):
@@ -617,8 +642,8 @@ def container_analysis(container, filename, paths):
      index += 1
  
   container.edge_number += total_number
-  container.max_neighbours = max(neigh_max, container.max_neighbours)
-  container.min_neighbours = min(neigh_min, container.min_neighbours)
+  container.max_neighbours_list.append(neigh_max)
+  container.min_neighbours_list.append(neigh_min)
   container.average_edges.append(neigh_avg)
 
   container.total_length += graph_distance
@@ -698,6 +723,10 @@ def print_latex_results(number_of_points):
   gg_unit_list = gg_latex["unit"]
   rng_unit_list = rng_latex["unit"]
 
+  graph_neigh_list = graph_latex["neighbours"]
+  gg_neigh_list    = gg_latex["neighbours"]
+  rng_neigh_list   = rng_latex["neighbours"]
+
   graph_unit_distance = graph_results.unit_distance_value * 1.0
   gg_unit_distance = gg_results.unit_distance_value * 1.0
   rng_unit_distance = rng_results.unit_distance_value * 1.0
@@ -718,26 +747,36 @@ def print_latex_results(number_of_points):
   gg_error    = gg_latex["error"]
   rng_error   = rng_latex["error"]
 
-  latex_table =  "\\begin{tabular}{ccrrrr}\n"
-  latex_table += "\\multicolumn{2}{}{}        & Length of graph: & Max node-pair: & Min node-pair: & Avg node-pair" + newline
-  latex_table += "\\multirow{3}{*}{Distance}  & NML & %s & %s & %s & %s%s " % (graph_dist_list[0], graph_dist_list[1], graph_dist_list[2], graph_dist_list[3], newline) 
-  latex_table += "                            & GG  &  %s & %s & %s & %s%s" % (gg_dist_list[0], gg_dist_list[1], gg_dist_list[2], gg_dist_list[3], newline)
-  latex_table += "                            & RNG & %s & %s & %s & %s%s " % (rng_dist_list[0], rng_dist_list[1], rng_dist_list[2], rng_dist_list[3], newline) 
+  latex_table =  "\\begin{tabular}{ccrrrrr}\n"
+  latex_table += "\\multicolumn{2}{}{}                 & Length of graph: & Avg node-pair & Max node-pair: & Min node-pair: & Std Deviation: " + newline
+  latex_table += "\\multirow{3}{*}{Distance}     & NML & %s & %s & %s & %s & %s %s" % (graph_dist_list[0], graph_dist_list[1], graph_dist_list[2], graph_dist_list[3], graph_dist_list[4], newline) 
+  latex_table += "                               & GG  & %s & %s & %s & %s & %s %s" % (gg_dist_list[0], gg_dist_list[1], gg_dist_list[2], gg_dist_list[3], gg_dist_list[4], newline)
+  latex_table += "                               & RNG & %s & %s & %s & %s & %s %s" % (rng_dist_list[0], rng_dist_list[1], rng_dist_list[2], rng_dist_list[3], rng_dist_list[4], newline) 
   latex_table += "\\hline \n"
-  latex_table += "Unit      & NML & %s\phantom{.00} & %s & %s & %s%s" % (graph_unit_list[0], graph_unit_list[1], graph_unit_list[2], graph_unit_list[3], newline)  
-  latex_table += "Distance  & GG  & %s\phantom{.00} & %s & %s & %s%s" % (gg_unit_list[0], gg_unit_list[1], gg_unit_list[2], gg_unit_list[3], newline)  
-  latex_table += "          & RNG & %s\phantom{.00} & %s & %s & %s%s" % (rng_unit_list[0], rng_unit_list[1], rng_unit_list[2], rng_unit_list[3], newline)
+  latex_table += "\multirow{3}{*}{Unit Distance} & NML & %s\phantom{.00} & %s & %s & %s & %s %s" % (graph_unit_list[0], graph_unit_list[1], graph_unit_list[2], graph_unit_list[3], graph_unit_list[4], newline)  
+  latex_table += "                               & GG  & %s\phantom{.00} & %s & %s & %s & %s %s" % (gg_unit_list[0], gg_unit_list[1], gg_unit_list[2], gg_unit_list[3], gg_unit_list[4], newline)  
+  latex_table += "                               & RNG & %s\phantom{.00} & %s & %s & %s & %s %s" % (rng_unit_list[0], rng_unit_list[1], rng_unit_list[2], rng_unit_list[3], rng_unit_list[4], newline)
   latex_table += "\hline\n" 
   latex_table += "\hline\n"
-  latex_table += "               &     & Distance:   & Unit Distance: & %s &  %s %s" % ("\multicolumn{1}{||c}{}", "\# Missing paths", newline) 
-  latex_table += "Percentage     & NML & 100.00 \\%% & 100.00 \\%%    & %s &  %s %s" % ("\multicolumn{1}{||c}{NML}", gg_error, newline)
-  latex_table += "compared to the& GG  & %s     \\%% & %s \\%%        & %s &  %s %s" % (graph_gg, graph_gg_unit,  "\multicolumn{1}{||c}{GG}" , gg_error, newline)
-  latex_table += "normal graph   & RNG & %s     \\%% & %s \\%%        & %s &  %s %s" % (graph_rng, graph_rng_unit,"\multicolumn{1}{||c}{RNG}", rng_error, newline)
+  latex_table += "                            &     & Distance:   & Unit Distance: & %s &  %s %s" % ("\multicolumn{1}{||c}{}", "\# Missing paths", newline) 
+  latex_table += "Percentage                  & NML & 100.00 \\%% & 100.00 \\%%    & %s &  %s %s" % ("\multicolumn{1}{||c}{NML}", gg_error, newline)
+  latex_table += "compared to the             & GG  & %s     \\%% & %s \\%%        & %s &  %s %s" % (graph_gg, graph_gg_unit,  "\multicolumn{1}{||c}{GG}" , gg_error, newline)
+  latex_table += "normal graph                & RNG & %s     \\%% & %s \\%%        & %s &  %s %s" % (graph_rng, graph_rng_unit,"\multicolumn{1}{||c}{RNG}", rng_error, newline)
+  latex_table += "\hline\hline\n"
   latex_table += "\hline\n"
   latex_table += "\# Connected Components: & %s \n" % graph_cc
   latex_table += "\end{tabular}"
 
   save_file(latex_location + 'graph_results_' + point_str[0:-1], latex_table)
+
+  latex_table =  "\\begin{tabular}{ccrrrrr}\n"
+  latex_table += "\\multicolumn{2}{}{}              &  Avg Neighbours & Max Neighbours & Min Neighbours & Std. Deviation " + newline
+  latex_table += "\multirow{3}{*}{Neighbours} & NML &  %s             & %s             & %s             & %s %s" % (graph_neigh_list[0], graph_neigh_list[1], graph_neigh_list[2], graph_neigh_list[3], newline)
+  latex_table += "                            & GG  &  %s             & %s             & %s             & %s %s" % (gg_neigh_list[0]   , gg_neigh_list[1]   , gg_neigh_list[2]   , gg_neigh_list[3], newline)
+  latex_table += "                            & RNG &  %s             & %s             & %s             & %s %s" % (rng_neigh_list[0]  , rng_neigh_list[1]  , rng_neigh_list[2]  , rng_neigh_list[3], "\n")
+  latex_table += "\\end{tabular}"
+
+  save_file(latex_location + "neighbour_results_" + point_str[0:-1], latex_table)
 
 def make_pgf_graph(item_list, plot, legend):
   latex_graph = ""
@@ -755,7 +794,7 @@ def make_pgf_graph(item_list, plot, legend):
 
   return latex_graph
 
-def print_graphs(number_list):
+def print_graphs(number_list, std):
   graph_avg = ""
   gg_avg = ""
   rng_avg = ""
@@ -780,10 +819,15 @@ def print_graphs(number_list):
     graph_neighbours = graph_latex["neighbours"]
     gg_neighbours    = gg_latex["neighbours"]
     rng_neighbours   = rng_latex["neighbours"]
-
-    graph_avg += "(%s, %s) " % (number, graph_neighbours[2])
-    gg_avg    += "(%s, %s) " % (number, gg_neighbours[2])
-    rng_avg   += "(%s, %s) " % (number, rng_neighbours[2])
+    
+    if not std:
+      graph_avg += "(%s, %s)" % (number, graph_neighbours[0], graph_neighbours[3])
+      gg_avg    += "(%s, %s)" % (number, gg_neighbours[0],    gg_neighbours[3])
+      rng_avg   += "(%s, %s)" % (number, rng_neighbours[0],   rng_neighbours[3])
+    else:
+      graph_avg += "(%s, %s)" % (number, graph_neighbours[0], graph_neighbours[3], graph_neighbours[3])
+      gg_avg    += "(%s, %s)" % (number, gg_neighbours[0],    gg_neighbours[3],    gg_neighbours[3])
+      rng_avg   += "(%s, %s)" % (number, rng_neighbours[0],   rng_neighbours[3],   rng_neighbours[3])
 
   avg_neigh_graph = make_pgf_graph([graph_avg, gg_avg, rng_avg], "addplot+[only marks] coordinates", "Non-planar, Gabriel Graph, RNG")
   save_file(graph_folder + "avg_neigh", avg_neigh_graph)
@@ -813,32 +857,37 @@ def do_integrity_test(point_list, node_pairs):
   gg_container.finalize()
   rng_container.finalize()
 
-def make_point(num, filename):
+def make_point(num, filename, std_devi):
   graph_results = load_pickle_file(filename)
   
-  avg = graph_results.average_neighbours
-  max_val = graph_results.max_neighbours
-  min_val = graph_results.min_neighbours
-  avg_neigh = "\t(%s, %s)\n" % (num, avg)    # +- (%s, %s)\n" % (num, avg, max_val - avg, min_val)
+  avg       = c_round(graph_results.average_neighbours)
+  std_devi  = c_round(graph_results.neighbours_std_devi)
+  if not std_devi:
+    avg_neigh = "\t(%s, %s)\n" % (num, avg)
+  else:
+    avg_neigh = "\t(%s, %s)  +- (%s, %s)\n" % (num, avg, std_devi, std_devi)
   
-  avg = graph_results.average_unit_distance
-  max_val = graph_results.max_unit_value
-  min_val = graph_results.min_unit_value
+  avg      = c_round(graph_results.average_unit_distance)
+  std_devi = c_round(graph_results.std_unit_deviation)
+
+  if not std_devi:
+    avg_unit = "\t(%s, %s)\n" % (num, avg)
+  else:
+    avg_unit = "\t(%s, %s) +- (%s, %s)\n" % (num, avg, std_devi, std_devi)
   
-  avg_unit = "\t(%s, %s)\n" % (num, avg)    # +- (%s, %s)\n" % (num, avg, max_val - avg, min_val)
   return (avg_neigh, avg_unit) 
 
 
 def make_point_distance_hops(num):
   point_str = str(num) + "/"
 
-  filename = results_non_location + point_str + 'graph_results' 
+  filename     = results_non_location + point_str + 'graph_results' 
   graph_result = load_pickle_file(filename)
 
-  filename = results_non_location + point_str + 'gg_results' 
+  filename  = results_non_location + point_str + 'gg_results' 
   gg_result = load_pickle_file(filename)
 
-  filename = results_non_location + point_str + 'rng_results' 
+  filename   = results_non_location + point_str + 'rng_results' 
   rng_result = load_pickle_file(filename)
   
   graph_distance = graph_result.distance_value
@@ -849,11 +898,11 @@ def make_point_distance_hops(num):
   gg_distance_unit    = gg_result.unit_distance_value
   rng_distance_unit   = rng_result.unit_distance_value
 
-  gg_percent = (gg_distance * 1.0 / graph_distance) * 100
-  rng_percent = (rng_distance * 1.0 / graph_distance) * 100
+  gg_percent  = c_round((gg_distance * 1.0 / graph_distance) * 100)
+  rng_percent = c_round((rng_distance * 1.0 / graph_distance) * 100)
 
-  gg_unit_percent = (gg_distance_unit * 1.0 / graph_distance_unit) * 100
-  rng_unit_percent = (rng_distance_unit * 1.0 / graph_distance_unit) * 100
+  gg_unit_percent  = c_round((gg_distance_unit * 1.0 / graph_distance_unit) * 100)
+  rng_unit_percent = c_round((rng_distance_unit * 1.0 / graph_distance_unit) * 100)
   
   todo = [gg_percent, rng_percent, gg_unit_percent, rng_unit_percent]
   
@@ -861,7 +910,7 @@ def make_point_distance_hops(num):
 
   for val in todo:
     val_list.append("(%s, %s)\n" % (num, val))
-
+  
   return val_list
 
 def make_result_graphs(num_points_range):
@@ -902,14 +951,15 @@ def make_distance_hops(num_points_range):
 
   xticks = ""
   xtick_vals = ""
-  for num in xrange(10001):
+  max_val = 10001
+  for num in xrange(max_val):
     if num > 0 and (num % 100 == 0): 
       xticks += "%s" % num
       if (num == 1000 or num % 2500 == 0):
         xtick_vals += "$%s$" % num
       else:
         xtick_vals += ""
-      if num != num_points_range[-1]:
+      if num != max_val - 1:
         xticks     += ", "
         xtick_vals += ", "
 
@@ -933,7 +983,6 @@ def make_distance_hops(num_points_range):
 
   graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}, }\n"
   graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, ytick={%s}, yticklabels={%s}, transpose legend, legend columns=2, width=%s, xlabel=Number of nodes in the graph, ylabel=%s]\n" % (axis, xticks, xtick_vals, yticks, ytick_vals, width, y_left)
-#  graph += "\\addlegendimage{legend image code/.code=}\n\\addlegendentry{Distance(Left axis)}"
   graph += gg_distance
   graph += rng_distance
   graph += gg_distance_unit
@@ -951,8 +1000,8 @@ def make_distance_hops(num_points_range):
   
 
 def make_neigh_hops(num_points_range):  
-  default_1 = "\\addplot[color=%s, mark=%s] coordinates{                \n" 
-  default_2 = "\\addplot[color=%s, mark=%s, densely dashed] coordinates{\n" 
+  default_1 = "\\addplot[color=%s, mark=%s]plot[error bars/.cd,y dir=both,y explicit] coordinates{\n" 
+  default_2 = "\\addplot[color=%s, mark=%s, densely dashed]plot[error bars/.cd,y dir=both,y explicit] coordinates{\n" 
 
   non_planar = default_1 % ("red", "square*")
   gg = default_1 % ("blue", "*")
@@ -966,17 +1015,17 @@ def make_neigh_hops(num_points_range):
     point_str = str(num) + "/"
     
     filename = results_non_location + point_str + 'graph_results' 
-    (neighbour, distance) = make_point(num, filename)
+    (neighbour, distance) = make_point(num, filename, False)
     non_planar += neighbour
     non_planar_unit += distance
 
     filename = results_gg_location + point_str + 'gg_results'
-    (neighbour, distance) = make_point(num, filename)
+    (neighbour, distance) = make_point(num, filename, False)
     gg += neighbour
     gg_unit += distance
   
     filename = results_rng_location + point_str + 'rng_results'
-    (neighbour, distance) = make_point(num, filename)
+    (neighbour, distance) = make_point(num, filename, False)
     rng += neighbour
     rng_unit += distance
 
@@ -997,14 +1046,15 @@ def make_neigh_hops(num_points_range):
 
   xticks = ""
   xtick_vals = ""
-  for num in xrange(10001):
+  max_val = 10001
+  for num in xrange(max_val):
     if num > 0 and num % 100 == 0: 
       xticks += "%s" % num
-      if (num == 1000 or num % 2500 == 0):
+      if (num % 2500 == 0 or num == 100):
         xtick_vals += "$%s$" % num
       else:
         xtick_vals += ""
-      if num != num_points_range[-1]:
+      if num != max_val - 1:
         xticks += ", "
         xtick_vals += ", "
 
@@ -1013,7 +1063,7 @@ def make_neigh_hops(num_points_range):
 
   yticks_two = ""
   ytick_vals_two = ""
-  max_val = 66
+  max_val = 100
   for num in xrange(max_val + 1):
     if num > 0 and num % 1 == 0: 
       yticks_two += "%s" % num
@@ -1031,7 +1081,7 @@ def make_neigh_hops(num_points_range):
 
   graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.30)},anchor=south}, }\n"
   graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, ytick={%s}, yticklabels={%s}, transpose legend, legend columns=2, width=%s, axis y line*=left, xlabel=Number of nodes in the graph, ylabel=Average number of neighbours]\n" % (axis, xticks, xtick_vals, yticks_one, ytick_vals_one, width)  
-  graph += "\\addlegendimage{legend image code/.code=}\n\\addlegendentry{Neighbours (Left axis)}"
+  graph += "\\addlegendimage{legend image code/.code=}\n\\addlegendentry{Neighbours (Left axis)}\n"
   graph += non_planar
   graph += gg
   graph += rng
@@ -1039,7 +1089,7 @@ def make_neigh_hops(num_points_range):
 
   graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.2)},anchor=north}}\n"
   graph += "\\begin{%s}[scale only axis, ytick={%s}, yticklabels={%s}, width=%s, transpose legend, legend columns=3, axis y line=right, axis x line=none, ylabel=Average number of hops]\n" % (axis, yticks_two, ytick_vals_two, width)
-  graph += "\\addlegendimage{legend image code/.code=}\n\\addlegendentry{Hops (Right axis)}"
+  graph += "\\addlegendimage{legend image code/.code=}\n\\addlegendentry{Hops (Right axis)}\n"
   graph += non_planar_unit
   graph += gg_unit
   graph += rng_unit
@@ -1049,10 +1099,36 @@ def make_neigh_hops(num_points_range):
     
   save_file(latex_location + "avg_neighbour" , graph)
 
-def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state):	
-  do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, 0, num_graphs)	
+def motion_points(point_num, graph_num, max_values):
+  bonn_dir = "../../bonnmotion-1.5a/bin/"
+  os.chdir(bonn_dir)
 
-def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state, from_val, to_val):	
+  name = "GaussMarkov-Movement_test_nodes-%s" % (point_num)
+  os.system("./bm -f %s GaussMarkov -i 60 -n %s -x %s -y %s -z 0 -d %s -q 25" % (name, graph_num, max_values, max_values, graph_num))
+  os.system("gzip -df %s.movements.gz" % name)
+  bonn_file = open(name + ".movements", "r")
+  
+  point_mvt = []
+  coor = re.compile("\d+.\d+ (\d+.\d+) (\d+.\d+)")
+  for i in xrange(point_num):
+    line = bonn_file.readline()
+    point_mvt.append(coor.findall(line))
+
+  movement_lists = []
+  for i in xrange(graph_num):
+    accum_list = []
+    print i
+    for mvt_list in point_mvt:
+      print mvt_list
+      accum_list.append(mvt_list[i])
+    
+    print accum_list
+    movement_lists.append(accum_list)
+
+def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state, normal):	
+  do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state, normal, 0, num_graphs)	
+
+def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_state, end_state, normal, from_val, to_val):	
   
   """
   A single function call to tie the entire test stack together and to make it easier to parameterise
@@ -1073,7 +1149,10 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
 
   print "Working on " + str(point_num)
   if start_state < 1:
-    generate_point_sets(point_num, num_graphs, max_values)
+    if normal:
+      generate_point_sets(point_num, num_graphs, max_values)
+    else:
+      motion_points(point_num, num_graphs, max_values)
     print "Generated Pointsets"
 
   if (start_state <= 1) and (end_state >= 1):
@@ -1111,7 +1190,6 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
     print_latex_results(point_num)
     print 'Printed LaTeX file'
 
-
 def eq(points):
   return round(math.sqrt(100 * points))
 
@@ -1131,10 +1209,16 @@ pr_test = 100
 radio_range = 20
 
 start_state = 3
-end_state = 5
+end_state = 6
 number_tests = 500
 
-for num_nodes in [100, 250, 1000, 500, 2500, 5000, 7500, 10000]:
-  do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, 0, number_tests)
+test_num = [100, 250, 500, 1000, 2500, 5000, 7500, 10000]
 
-make_result_graphs([100, 250, 500, 1000, 2500, 5000, 7500, 10000])
+#for num_nodes in test_num:
+ # do_suite(num_nodes, 12, pr_test, eq(num_nodes), radio_range, start_state, end_state, False, 0, number_tests)
+
+
+for num_nodes in [10000]:    #test_num:
+  do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, True, 0, number_tests)
+
+make_result_graphs(test_num)
