@@ -1,4 +1,4 @@
-\documentclass[A4, 12pt, english, draft]{article}
+\documentclass[A4, 12pt, english]{article}
 \usepackage{mikkel}
 \usepackage[ruled, vlined]{algorithm2e}
 \input comment.sty
@@ -34,12 +34,13 @@ A \ac{manet} is a network of moving nodes that without human intervention can cr
 
 In this thesis I will give an overview of the elements required to create a \ac{manet} and several already existing solutions that fulfil these requirements. 
 
-Furthermore I will give a performance evaluation of my own implementation of the GOAFR algorithm\cite{gopher} compared to several other algorithms. I will also perform a comparison between the average distance  of two nodes in randomly generated non-planar graphs, compared to the \ac{gabe}\  and the \ac{rng} \cite{RNG}, compared to the average number of neighbours and edges in the graph.
+Furthermore, I will give a performance evaluation of my own implementation of the GOAFR algorithm \cite{gopher} compared to several other algorithms. I will also perform a comparison between the average distance  of two nodes in randomly generated non-planar graphs, compared to the \ac{gabe} \cite{gabe1, gabe2} and the \ac{rng} \cite{RNG}, compared to the average number of neighbours in the graph.
 }
 
 \clearpage
 
 \tableofcontents
+
 \cinclude{introduction} 
 \cinclude{fundamentals}
 \cinclude{graph_overview}
@@ -52,6 +53,7 @@ Furthermore I will give a performance evaluation of my own implementation of the
 
 \appendix
 \cinclude{appendix}
+
 
 \bibliographystyle{plain}
 \bibliography{references}{}
