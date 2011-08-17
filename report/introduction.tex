@@ -19,10 +19,10 @@ An alternative could be to manually create a wired network, but this can be very
  
 There are numerous aspects to create a proper \ac{manet} or \ac{anet}, but two of the major topics of research are how to create the network topology, and how to route the messages, so that the network maximises its lifetime (since nodes will fail when their power supply is exhausted). Unsurprisingly designing a proper \ac{manet} is more difficult than a \ac{anet}, since nodes can join and leave a \ac{manet} with an ease that is not possible in an \ac{anet}. 
 
-\subsection{Expectations to the Reader}
+\subsection{Expectations to the reader}
 I expect the reader to have a university level understanding of Computer Networking\footnote{For instance having read \cite{ComNet} or similar}, especially when it comes to understanding the building blocks of the network stack, as well as the most common problems with wireless networks. I also expect the reader to have an university level understanding of Algorithms (Having read \cite{algo} or similar) and graph theory.
 
-\subsection{Scope and Limitations}
+\subsection{Scope and limitations}
 While important in a real world application, I will in this thesis not concern myself overly much with security, neither in the form of the authentication, anonymity of the sender or ensuring that the individual nodes are not misbehaving, or behaving maliciously. For a treatment of security see \cite{trustedRouting}. Furthermore, I will not try to solve the problem of sending a message from a source to a sink if they cannot be connected by a path.I will furthermore assume that all nodes have the same broadcast radius unless explicitly specified.
 
 \subsection{Anatomy of a \ac{manet}}
@@ -51,7 +51,7 @@ In this thesis I have decided to focus on the routing protocol and the routing g
 For this project I have read the following articles for background information: ``A Survey on Wireless Mesh Networks'' \cite{martinWirelessSurvey}, ``Mesh networks: commodity multihop ad hoc networks''\cite{martinMeshnetwork} \todo{continue to include the articles you have read and are useful, but that have not been included directly}
 }
 
-\subsection{Source Code and Test Data}
+\subsection{Source code and test data}
 \label{section:source_code}
 The source code, report and test data can be found in my GitHub repository at \url{https://github.com/kjmikkel/MasterThesis} and is released under the \todo{add license the stuff is released under}.
 The python scrips I used to generate and tests the graphs can be found at \texttt{src/spanner/spanner\_check.py} along with the data (see the README for explanation) and \texttt{src/spanner/graph\_support} All requirements in the code is mentioned in the README file.\\
