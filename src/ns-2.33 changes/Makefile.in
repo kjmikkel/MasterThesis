@@ -34,7 +34,7 @@ BLANK	= # make a blank space.  DO NOT add anything to this line
 
 # The following will be redefined under Windows (see WIN32 lable below)
 CC	= gcc-4.3
-CPP	= g++-4.3
+CPP	= g++
 LINK	= $(CPP)
 LINK_SHLIB = @SHLIB_LD@
 MKDEP	= ./conf/mkdep
@@ -338,7 +338,7 @@ OBJ_CC = \
 	\
 	gpsr/gpsr.o \
 	greedy/greedy.o\
-	gopher/gopher.o\
+	goafr/goafr.o\
 	\
 	@V_STLOBJ@
 

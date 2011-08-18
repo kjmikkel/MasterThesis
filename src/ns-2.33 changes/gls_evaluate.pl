@@ -545,7 +545,7 @@ if ($noFiles == 0){ usage(); }else{
 	    my $reason = "$layer/$drop_rsn";
 	    $drops{$reason}{$GPSRTYPE[$pkt_type]}++;
 	  }
-	  next;
+
 	}
 
 	if (($protocol eq "GOAFR") && 
@@ -824,6 +824,7 @@ sub printDelivery {
   print "Delivery Statistics:\n\n";
 
   foreach my $type (keys %delivery) {
+    print $type
 
     my ($var,$cnt) = (0,0);
     my $average = calcPercent($delivery{$type}{sends},$delivery{$type}{recv});
@@ -961,6 +962,8 @@ sub evalPacketFlows {
   foreach my $type (keys %PKT) {
 
     foreach my $flowid (keys %{$PKT{$type}}) {
+
+      print $type, $flowid;
 
       if ($PKT{$type}{$flowid}->{reached}) {
 
@@ -1475,8 +1478,6 @@ sub printWKGLSstats {
 #################
 # end wk's subs
 
-
-
 sub printStatistics {
 
   print "\nStatistics:\n";
@@ -1486,7 +1487,7 @@ sub printStatistics {
   printSpeed();
   print "----------\n\n";
 
-  printWKGLSstats();
+  #printWKGLSstats();
 
   printDelivery();
   printPktStats();
