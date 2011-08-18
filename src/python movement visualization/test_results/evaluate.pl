@@ -4,6 +4,7 @@
 # edited version by wk to adapt to hls
 
 use strict;
+#use JSON;
 use List::Util qw[min max];
 
 # Switches - to check
@@ -152,6 +153,7 @@ my @HLSTYPE  = ("empty", "UPDATE","REQUEST","REPLY","CCREQ","CCREPLY","CIREQU","
 # end HLS
 my @LOCSTYPE = ("QUERY ", "REPLY ", "DATA  ", "UPDATE", "UPDACK", "BEACON", "BCNREQ");
 my @GPSRTYPE =  ("GREEDY", "PERI  ",            "PROBE ", "BEACON", "BCNREQ");
+my @GREEDYTYPE = ("GREEDY",                     "PROBE ", "BEACON", "BCNREQ");
 my @GOAFRTYPE = ("GOAFR",  "PERI  ", "ADVANCE",	"PROBE ", "BEACON", "BCNREQ");
 my @CBFTYPE  = ("DATA  ", "RCPT  ", "RTF   ", "CTF   ", "REC   ", "ACT   ");
 my @DSRTYPE  = ("RTREQ ", "RTRPLY", "RTERR ", "RTRQER", "RTRPER");
@@ -163,6 +165,7 @@ my @SPEEDS   = (0,10,30,50);
 # Main
 #
 parseCmdLine();
+
 if ($noFiles == 0){ usage(); }else{
 
   #
@@ -754,6 +757,7 @@ if ($noFiles == 0){ usage(); }else{
 	else {
 	  if (uc($ptype1) eq "CBF") { $cause1 = $CBFTYPE[$psub1]; }
 	  elsif (uc($ptype1) eq "GPSR") { $cause1 = $GPSRTYPE[$psub1]; }
+	  elsif (uc($ptype1) eq "GREEDY") {$cause1 = $GREEDYTYPE[$psub1];}
 	  elsif (uc($ptype1) eq "GOAFR") {$cause1 = $GOAFRTYPE[$psub1];}
 	  elsif (uc($ptype1) eq "LOCS") { $cause1 = $LOCSTYPE[$psub1]; }
 	  elsif (uc($ptype1) eq "HLS") { $cause1 = $HLSTYPE[$psub1]; }
@@ -764,6 +768,7 @@ if ($noFiles == 0){ usage(); }else{
 	else {
 	  if (uc($ptype2) eq "CBF") { $cause2 = $CBFTYPE[$psub2]; }
 	  elsif (uc($ptype2) eq "GPSR") { $cause2 = $GPSRTYPE[$psub2]; }
+	  elsif (uc($ptype2) eq "GREEDY") {$cause2 = $GREEDYTYPE[$psub2]; }
 	  elsif (uc($ptype2) eq "GOAFR") {$cause2 = $GOAFRTYPE[$psub2];}
 	  elsif (uc($ptype2) eq "LOCS") { $cause2 = $LOCSTYPE[$psub2]; }
 	  elsif (uc($ptype2) eq "HLS") { $cause2 = $HLSTYPE[$psub2];}
@@ -985,6 +990,38 @@ if ($noFiles == 0){ usage(); }else{
 	  next;
 	}
 
+         if (($protocol eq "GREEDY") && ($pkt_ttl =~ /^(\d+) [\d\s]+/o)) {
+	  my $id = ($pkt_src, $pkt_dst, $pkt_uid);
+
+	  my $pkt_type = $1;
+          my $flowid = "$pkt_src->$pkt_dst/$pkt_uid";
+	  # Packet Statistics
+	  if ($layer eq "RTR") {
+	    if ($op eq 'D') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{drop}++; }
+	    if ($op eq 'r') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{recv}++; }
+	    if ($op eq 'f') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{forw}++; }
+	    if ($op eq 's') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{send}++; }
+	  }
+
+
+	  if ($op eq 'D') {
+	    my $reason = "$layer/$drop_rsn";
+	    $drops{$reason}{$GREEDYTYPE[$pkt_type]}++;
+	  }
+
+	  if ($node == $PKT{$GREEDYTYPE[$pkt_type]}{$flowid}->{dst}) {
+		if ($PKT{$GREEDYTYPE[$pkt_type]}{$flowid}->{reached} == 0) {
+		  $PKT{$GREEDYTYPE[$pkt_type]}{$flowid}->{reached}  = 1;
+		  $PKT{$GREEDYTYPE[$pkt_type]}{$flowid}->{taken}    = $LOOKUP{$pkt_uid}->{taken};
+		  $PKT{$GREEDYTYPE[$pkt_type]}{$flowid}->{shortest} = $LOOKUP{$pkt_uid}->{shortest};
+		  $PKT{$GREEDYTYPE[$pkt_type]}{$flowid}{end}    = $time;
+		  $PKT{$GREEDYTYPE[$pkt_type]}{$flowid}{endTTL} = $pkt_ttl-1;
+		}
+	      }
+
+	  next;
+	}
+	
 	if (($protocol eq "GPSR") && ($pkt_ttl =~ /^(\d+) [\d\s]+/o)) {
 	  my $pkt_type     = $1;
 	  my $flowid = "$pkt_src->$pkt_dst/$pkt_uid";
@@ -1003,14 +1040,18 @@ if ($noFiles == 0){ usage(); }else{
 	  }
 
 	  if ($node == $PKT{$GPSRTYPE[$pkt_type]}{$flowid}->{dst}) {
-		if ($PKT{$GPSRTYPE[$pkt_type]}{$flowid}->{reached} == 0) {
+	    if ($PKT{$GPSRTYPE[$pkt_type]}{$flowid}->{reached} == 0) {
 		  $PKT{$GPSRTYPE[$pkt_type]}{$flowid}->{reached}  = 1;
 		  $PKT{$GPSRTYPE[$pkt_type]}{$flowid}->{taken}    = $LOOKUP{$pkt_uid}->{taken};
 		  $PKT{$GPSRTYPE[$pkt_type]}{$flowid}->{shortest} = $LOOKUP{$pkt_uid}->{shortest};
 		  $PKT{$GPSRTYPE[$pkt_type]}{$flowid}{end}    = $time;
 		  $PKT{$GPSRTYPE[$pkt_type]}{$flowid}{endTTL} = $pkt_ttl-1;
 		}
-	      }
+	      } 
+	  elsif ($op == 's' and $node == $pkt_src) {
+	    $PKT{$GPSRTYPE[$pkt_type]}{$flowid}{reached} = 0;
+	  }
+
 	  next;
 	}
 
@@ -1246,6 +1287,7 @@ sub evalDelivery {
     foreach my $flowid (keys %{$PKT{$type}}) {
       $delivery{$type}{sends}++;
       $sends++;
+      
       if ($PKT{$type}{$flowid}->{reached}) {
 	$delivery{$type}{recv}++;
 	$recv++;
@@ -1270,7 +1312,6 @@ sub printDelivery {
   my $debug = 0;
 
   print "Delivery Statistics:\n\n";
-  print %delivery;
 
   foreach my $type (keys %delivery) {
 
@@ -2260,6 +2301,36 @@ sub printSpeed {
   printf ("Nodes moved at max. %i m/s (Average: %7.3f m/s)\n",$speed{max},$speed{avg});
 }
 
+sub do_tests {
+  # $GOAFR = ();
+  # $GPSR = ();
+  # $GREEDY = ();
+  # $DSR = ();
+
+  my $directory = '/tmp';
+  opendir (DIR, $directory) or die $!;
+#  get_all_files(DIR);
+}
+
+sub get_all_files {
+  my $DIR = $_[0];
+
+}
+
+sub do_individual_tests {
+  my $filename = $_[0];
+  
+  $filename =~ /^(\d+)-(\d+).tr/o;
+  
+  my $nn = $0;
+  my $size = $1;
+  
+
+  my $num_nodes = 0;
+#  my $send = $delivery{$type}{sends};
+ # my $recv = $delivery{$type}{recv};
+}
+
 sub printStatistics {
 
   print "\nStatistics:\n";
@@ -2272,7 +2343,7 @@ sub printStatistics {
   #wk
   #printHLS();
   #end wk
-  printAdvance();
+#  printAdvance();
   printDelivery();
   printPktStats();
   printDrops();
@@ -2291,4 +2362,39 @@ sub printStatistics {
   # Enduring Plots
   printLatencySpectrum();
   printDeliveryCount();
+}
+
+
+sub save_results {
+  my $send = 0;
+  my $recv = 0;
+
+  foreach my $protocol (sort keys %stats) {
+    foreach my $type (sort keys %{$stats{$protocol}}) {
+      $send = $stats{$protocol}{$type}{send}
+      $recv = $stats{$protocol}{$type}{recv}
+    }
+  }
+
+  @hops_taken = ();
+  @time_taken = ();
+
+  foreach my $type (sort keys %PKT){
+    if (exists %PKT[$type]{}) {
+      foreach my $flow_id (sort keys %PKT{$ping_type}) {
+	if (%PKT[$type]{$flow_id}->{reached} = 1) {
+	  
+	  # The number of hops required for the message to arrive
+	  push(@hops_taken, %PKT[$type]{$flow_id}->{taken});
+	
+	  # Time required for sending the message
+	  my $start = %PKT[$type]{$flow_id}->{start};
+	  my $end   = %PKT[$type]{$flow_id}->{end};
+	  my $time = $end - $start;
+	  push(@time_taken, $time);
+	}
+      }
+    }
+  }
+
 }
