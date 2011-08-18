@@ -110,14 +110,15 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 \newcommand{\includeTable}[1]{
 \subsection{#1}
 \label{table:#1}
+\tinysize{
 \include{./data/tables/#1}
+}
 }
 
 \newcommand{\route}[3]
 {
-\item[#1:] #2
-
-\texttt{References:} \cite{#3}
+\item[#1:] \cite{#3} 
+#2
 }
 
 
