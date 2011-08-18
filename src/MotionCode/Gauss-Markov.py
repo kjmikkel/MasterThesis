@@ -1,15 +1,29 @@
-import os
+import os, re
+"""
+os.chdir("../Processed Motion/GaussMarkov/")
+files = os.listdir(os.getcwd())
+m = re.compile("(\d+)-(\d+)-1.0")
+for f in files:
+  res = m.search(f)
+  if res:
+    new_name = "GaussMarkov-%s-%s-0.ns_movements" % (res.group(1), res.group(2))
+    os.system("mv %s %s" % (f, new_name))
 
+"""
 os.chdir("../../bonnmotion-1.5a/bin/")
-size_option = [500, 1000]
-
+size_option = [100, 250]
 for size in size_option:
-  for i in xrange(100):
-    nodes = 100 * (i + 1)
-    name = "GaussMarkov-%s-%s" % (nodes, size)
-    os.system("./bm -f %s GaussMarkov -i 60 -n %s -x %s -y %s -z 0 -d 60" % (name, nodes, size, size))
-    os.system("./bm NSFile -f %s" % name)
-    os.system("mv %s.ns_params ../../src/Parameters\ for\ Motion/GaussMarkov/." % name)
-    os.system("mv %s.params ../../src/Parameters\ for\ Motion/GaussMarkov/." % name)
-    os.system("mv %s.ns_movements ../../src/Processed\ Motion/GaussMarkov/." % name)
+  for j in xrange(2):
+    for i in xrange(50):
+      nodes = 10 * (i + 1)
+      max_speed = 2
+      name = "GaussMarkov-%s-%s-%s" % (nodes, size, j)
+      if os.path.exists(name):
+        continue
 
+      os.system("./bm -f %s GaussMarkov -i 120 -n %s -x %s -y %s -z 0 -d 60 -h %s -u %s" % (name, nodes, size, size, max_speed, 1))
+
+      os.system("./bm NSFile -f %s" % name)
+      os.system("mv %s.ns_params ../../src/Parameters\ for\ Motion/GaussMarkov/." % name)
+      os.system("mv %s.params ../../src/Parameters\ for\ Motion/GaussMarkov/." % name)
+      os.system("mv %s.ns_movements ../../src/Processed\ Motion/GaussMarkov/." % name)
