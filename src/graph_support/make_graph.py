@@ -301,7 +301,8 @@ def SciPy_KDTree(points):
 def make_non_planar_graph(points, cutoff_distance, tree):
   # Now we make the actuall graph
   neighbours = tree.query_ball_point(points, cutoff_distance)
- 
+  
+  result = {}
   for entry_num in range(0, len(points)):
     point = points[entry_num]
     local_neighbours = neighbours[entry_num]
@@ -318,4 +319,4 @@ def make_non_planar_graph(points, cutoff_distance, tree):
     
     result[point] = local_result
 
-  return (result, tree)
+  return result
