@@ -162,10 +162,10 @@ class results_container:
     self.average_neighbours = sum(self.average_edges) * 1.0 / len(self.average_edges) * 1.0
     self.neighbours_std_devi = self.sample_deviation(self.average_edges)    
 
-    self.max_neighbours = sum(self.max_neighbours_list) / len(self.max_neighbours_list)
+    self.max_neighbours = sum(self.max_neighbours_list) * 1.0 / len(self.max_neighbours_list) * 1.0
     self.max_neighbours_list = []
 
-    self.min_neighbours = sum(self.min_neighbours_list) / len(self.min_neighbours_list)
+    self.min_neighbours = sum(self.min_neighbours_list) * 1.0 / len(self.min_neighbours_list) * 1.0
     self.min_neighbours_list = []
 
     self.average_edges = []
@@ -238,11 +238,19 @@ def save_json_file(file_name, data):
     json.dumps(data, f)
 
 def generate_point_sets(number_of_points, num_pointset, max_values):
+      
   random.seed()
   
   point_str = str(number_of_points) + '/'
 
   for num in range(0, num_pointset):
+    filename = point_set_location + point_str + point_filename + str(num + 1)
+
+    if os.path.exists(filename):
+      continue
+
+
+
     # We must ensure that all points are uniqe
     used_points = {}
     data = []
@@ -268,7 +276,7 @@ def generate_point_sets(number_of_points, num_pointset, max_values):
     filename = point_set_location + point_str + point_filename + str(num + 1)
     save_pickle_file(filename, data)
 
-def generate_graphs(number_of_points, number_of_graphs, cutoff_distance, from_val, to_val):
+def generate_graphs((number_of_points, number_of_graphs, cutoff_distance, from_val, to_val)):
   for graph_index in range(from_val, to_val):
     point_str = str(number_of_points) + '/'
 
@@ -282,7 +290,7 @@ def generate_graphs(number_of_points, number_of_graphs, cutoff_distance, from_va
 
     filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
     if not os.path.exists(filename):
-      tree = make_graph.SciPy_KDTree(new_data)   
+      tree = make_graph.SciPy_KDTree(new_data) 
       normal_graph = make_graph.make_non_planar_graph(new_data, cutoff_distance, tree)
       save_pickle_file(filename, normal_graph) 
 
@@ -302,14 +310,15 @@ def generate_graphs(number_of_points, number_of_graphs, cutoff_distance, from_va
       else:
         rn_graph = make_graph.rn_graph_brute(new_data, cutoff_distance)
       save_pickle_file(filename, rn_graph)
-
+    """
     filename = mst_f + point_str + mst_placement + mst_filename + index_str
     if not os.path.exists(filename):
       load_filename = non_planar_f + point_str + non_planar_placement + non_planar_filename + index_str
       non_planar_graph = load_pickle_file(load_filename)
       (graph , set_container) = make_graph.MST_Kruskal(non_planar_graph)
       save_pickle_file(filename, graph)
-      
+    """
+
 def make_node_pairs((number_of_points, num, number_tests, from_val, to_val)):
   point_str = str(number_of_points) + '/'
 
@@ -749,7 +758,7 @@ def print_latex_results(number_of_points):
 
   latex_table =  "\\begin{tabular}{ccrrrrr}\n"
   latex_table += "\\multicolumn{2}{}{}                 & Length of graph: & Avg node-pair & Max node-pair: & Min node-pair: & Std Deviation: " + newline
-  latex_table += "\\multirow{3}{*}{Distance}     & NML & %s & %s & %s & %s & %s %s" % (graph_dist_list[0], graph_dist_list[1], graph_dist_list[2], graph_dist_list[3], graph_dist_list[4], newline) 
+  latex_table += "\\multirow{3}{*}{Eucldian Distance}  & NML & %s & %s & %s & %s & %s %s" % (graph_dist_list[0], graph_dist_list[1], graph_dist_list[2], graph_dist_list[3], graph_dist_list[4], newline) 
   latex_table += "                               & GG  & %s & %s & %s & %s & %s %s" % (gg_dist_list[0], gg_dist_list[1], gg_dist_list[2], gg_dist_list[3], gg_dist_list[4], newline)
   latex_table += "                               & RNG & %s & %s & %s & %s & %s %s" % (rng_dist_list[0], rng_dist_list[1], rng_dist_list[2], rng_dist_list[3], rng_dist_list[4], newline) 
   latex_table += "\\hline \n"
@@ -763,8 +772,8 @@ def print_latex_results(number_of_points):
   latex_table += "compared to the             & GG  & %s     \\%% & %s \\%%        & %s &  %s %s" % (graph_gg, graph_gg_unit,  "\multicolumn{1}{||c}{GG}" , gg_error, newline)
   latex_table += "normal graph                & RNG & %s     \\%% & %s \\%%        & %s &  %s %s" % (graph_rng, graph_rng_unit,"\multicolumn{1}{||c}{RNG}", rng_error, newline)
   latex_table += "\hline\hline\n"
-  latex_table += "\hline\n"
-  latex_table += "\# Connected Components: & %s \n" % graph_cc
+  latex_table += "\# Connected " + newline 
+  latex_table += "Components:                 & %s\n "% graph_cc
   latex_table += "\end{tabular}"
 
   save_file(latex_location + 'graph_results_' + point_str[0:-1], latex_table)
@@ -857,12 +866,13 @@ def do_integrity_test(point_list, node_pairs):
   gg_container.finalize()
   rng_container.finalize()
 
-def make_point(num, filename, std_devi):
+def make_point(num, filename, std_devi_bool):
   graph_results = load_pickle_file(filename)
   
   avg       = c_round(graph_results.average_neighbours)
   std_devi  = c_round(graph_results.neighbours_std_devi)
-  if not std_devi:
+  
+  if not std_devi_bool:
     avg_neigh = "\t(%s, %s)\n" % (num, avg)
   else:
     avg_neigh = "\t(%s, %s)  +- (%s, %s)\n" % (num, avg, std_devi, std_devi)
@@ -870,7 +880,7 @@ def make_point(num, filename, std_devi):
   avg      = c_round(graph_results.average_unit_distance)
   std_devi = c_round(graph_results.std_unit_deviation)
 
-  if not std_devi:
+  if not std_devi_bool:
     avg_unit = "\t(%s, %s)\n" % (num, avg)
   else:
     avg_unit = "\t(%s, %s) +- (%s, %s)\n" % (num, avg, std_devi, std_devi)
@@ -953,9 +963,9 @@ def make_distance_hops(num_points_range):
   xtick_vals = ""
   max_val = 10001
   for num in xrange(max_val):
-    if num > 0 and (num % 100 == 0): 
+    if num > 0 and (num % 100 == 0 or num == 50): 
       xticks += "%s" % num
-      if (num == 1000 or num % 2500 == 0):
+      if (num == 1000 or num % 2500 == 0 or num == 50):
         xtick_vals += "$%s$" % num
       else:
         xtick_vals += ""
@@ -980,28 +990,40 @@ def make_distance_hops(num_points_range):
   width = "0.8\linewidth"
 
   graph = "\\begin{tikzpicture}\n"
-
-  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}, }\n"
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}}\n"
   graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, ytick={%s}, yticklabels={%s}, transpose legend, legend columns=2, width=%s, xlabel=Number of nodes in the graph, ylabel=%s]\n" % (axis, xticks, xtick_vals, yticks, ytick_vals, width, y_left)
   graph += gg_distance
   graph += rng_distance
   graph += gg_distance_unit
   graph += rng_distance_unit
-  """
-  graph += "\\end{%s}\n\n" % axis
-  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.2)},anchor=north}}\n"
-  graph += "\\begin{%s}[scale only axis, width=%s, transpose legend, legend columns=2, axis y line=right, axis x line=none, ylabel=%s]\n" % (axis, width, y_right)
-  graph += "\\addlegendimage{legend image code/.code=}\n\\addlegendentry{Hops (Right axis)}"
-  """
   graph += "\\end{%s}\n" % axis
   graph += "\\end{tikzpicture}\n"
     
   save_file(latex_location + "dist_percent" , graph)
-  
 
+  graph = "\\begin{tikzpicture}\n"
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}}\n"
+  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, transpose legend, legend columns=2, width=%s, xlabel=Number of nodes in the graph, ylabel=%s]\n" % (axis, xticks, xtick_vals, width, y_left)
+  graph += gg_distance
+  graph += rng_distance
+  graph += "\\end{%s}\n" % axis
+  graph += "\\end{tikzpicture}\n"
+
+  save_file(latex_location + "euclid_distance", graph)
+
+  graph = "\\begin{tikzpicture}\n"
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}}\n"
+  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, transpose legend, legend columns=2, width=%s, xlabel=Number of nodes in the graph, ylabel=%s]\n" % (axis, xticks, xtick_vals, width, y_left)
+  graph += gg_distance_unit
+  graph += rng_distance_unit
+  graph += "\\end{%s}\n" % axis
+  graph += "\\end{tikzpicture}\n"
+
+  save_file(latex_location + "unit_distance", graph)
+ 
 def make_neigh_hops(num_points_range):  
-  default_1 = "\\addplot[color=%s, mark=%s]plot[error bars/.cd,y dir=both,y explicit] coordinates{\n" 
-  default_2 = "\\addplot[color=%s, mark=%s, densely dashed]plot[error bars/.cd,y dir=both,y explicit] coordinates{\n" 
+  default_1 = "\\addplot[color=%s, mark=%s] coordinates{\n" # plot[error bars/.cd,y dir=both,y explicit] coordinates{\n" 
+  default_2 = "\\addplot[color=%s, mark=%s, densely dashed] coordinates{\n"  #  plot[error bars/.cd,y dir=both,y explicit] coordinates{\n" 
 
   non_planar = default_1 % ("red", "square*")
   gg = default_1 % ("blue", "*")
@@ -1079,7 +1101,7 @@ def make_neigh_hops(num_points_range):
 
   graph = "\\begin{tikzpicture}\n"
 
-  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.30)},anchor=south}, }\n"
+  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.30)},anchor=south}}\n"
   graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, ytick={%s}, yticklabels={%s}, transpose legend, legend columns=2, width=%s, axis y line*=left, xlabel=Number of nodes in the graph, ylabel=Average number of neighbours]\n" % (axis, xticks, xtick_vals, yticks_one, ytick_vals_one, width)  
   graph += "\\addlegendimage{legend image code/.code=}\n\\addlegendentry{Neighbours (Left axis)}\n"
   graph += non_planar
@@ -1162,6 +1184,7 @@ def do_suite(point_num, num_graphs, pr_graph_test, max_values, cut_off, start_st
       list_parameter.append((point_num, num_graphs, cut_off, i, i + 1)) 
 
     pool.map(generate_graphs, list_parameter)
+    
     print 'Made graphs'
   
   if (start_state <= 2) and (end_state >= 2):
@@ -1208,17 +1231,17 @@ def eq(points):
 pr_test = 100
 radio_range = 20
 
-start_state = 3
+start_state = 5
 end_state = 6
 number_tests = 500
 
-test_num = [100, 250, 500, 1000, 2500, 5000, 7500, 10000]
+test_num = [50, 100, 250, 500, 1000, 2500, 5000, 7500, 10000]
 
 #for num_nodes in test_num:
  # do_suite(num_nodes, 12, pr_test, eq(num_nodes), radio_range, start_state, end_state, False, 0, number_tests)
 
 
-for num_nodes in [10000]:    #test_num:
+for num_nodes in test_num:
   do_suite(num_nodes, number_tests, pr_test, eq(num_nodes), radio_range, start_state, end_state, True, 0, number_tests)
 
 make_result_graphs(test_num)
