@@ -1,23 +1,18 @@
-import os
+import os, multiprocessing
+from multiprocessing import Pool
 
+def do_test((j, i, algo, size)):
+  nn = str(10 * (i + 1))
 
-sizes = ["500", "1000"]
-algos = ["GREEDY", "GPSR", "GOAFR", "DSDV"]
-time = "60"
+  filename = "../../../src/Traces/%s/%s-%s-%s.tr" % (algo, nn, size, j)
+  if os.path.exists(filename):
+    statinfo = os.stat(filename)
+    if statinfo.st_size > 0:
+      return
+  
+  output_name = "%s-%s-%s-%s.tr" % (algo, nn, size, j)
 
-for algo in algos:
-  for size in sizes:
-    for i in xrange(30):
-      nn = str(100 * (i + 1))
-
-      filename = "../../../src/Traces/%s/%s-%s.tr" % (algo, nn, size)
-      if os.path.exists(filename):
-        statinfo = os.stat(filename)
-        if statinfo.st_size > 0:
-          print filename
-          continue
-
-      tcl_do = """ #author: Thomas Ogilvie 
+  tcl_do = """ #author: Thomas Ogilvie 
 # sample tcl script showing the use of %s and HLS (hierarchical location service)
 
 ## %s Options
@@ -66,12 +61,12 @@ set val(rtrtrc)         ON ;# Trace Routing Agent
 set val(mactrc)         ON ;# Trace MAC Layer 
 set val(movtrc)         ON ;# Trace Movement 
 
-set val(param)          \"../../../src/Parameters\ for\ Motion/GaussMarkov/GaussMarkov-%s-%s.ns_params\"
+set val(param)          \"../../../src/Parameters\ for\ Motion/GaussMarkov/GaussMarkov-%s-%s-%s.ns_params\"
 set val(lt)	        \"\" 
-set val(cp)		\"../../../src/Traffic/Trace/Traffic-%s.tcl\" 
-set val(sc)		\"../../../src/Processed\ Motion/GaussMarkov/GaussMarkov-%s-%s.ns_movements\"  
+set val(cp)		\"../../../src/Traffic/Trace/Traffic-%s-%s.tcl\" 
+set val(sc)		\"../../../src/Processed\ Motion/GaussMarkov/GaussMarkov-%s-%s-%s.ns_movements\"  
 puts $val(cp)
-set val(out)            \"../../../src/Traces/%s/%s-%s.tr\"
+set val(out)            \"../../../src/Traces/temp/%s\"
 
 source $val(param)
 
@@ -198,20 +193,40 @@ $ns_ run
       # Ad hoc Algorithm
       algo, 
       # Params
-      nn, size,
+      nn, size, j,
       # Traffic
-      nn,
+      nn, j,
       # Motion
-      nn, size,
+      nn, size, j,
       #Output
-      algo, nn, size,
+      output_name,
       # Agents
       algo, algo, algo, algo, algo, 
       algo, algo, algo, algo, algo, 
       algo, algo, algo, algo)
 
-      f = open("test.tcl", "w")
-      f.write(tcl_do)
-      f.close()
+  filename = "test_%s_%s_%s-%s.tcl" % (i, algo, size, j)
+  f = open(filename, "w")
+  f.write(tcl_do)
+  f.close()
       
-      os.system("../ns test.tcl")
+  os.system("../ns %s" % filename)
+  os.system("rm %s" % filename)
+  os.system("mv ../../../src/Traces/temp/%s ../../../src/Traces/%s/%s"  % (output_name, algo, output_name))
+
+sizes = ["100", "250"]
+algos = ["GOAFR", "GREEDY", "GPSR"]
+time = "60"
+
+pool = Pool(2)
+for j in xrange(2):
+  for i in xrange(10):
+    list_param = []
+    for size in sizes:
+      for algo in algos:
+        list_param.append((j, i, algo, size))
+     
+#    for param in list_param:
+ #     do_test(param)
+    pool.map(do_test, list_param)
+
