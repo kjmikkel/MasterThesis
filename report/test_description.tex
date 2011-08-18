@@ -124,7 +124,7 @@ I have not been able to find any real theretical results in either \cite{gpsr} o
 As specified before DSDV uses a distributed version of Bellman-Ford routing algorithm to find the fewest number of hops between itself and any other node. For this end, each node retain a routing table, with now and again is refreshed. The only theoretical result I have been able to find is that DSDV garuntees loop-free routing \cite{DSDV}.
 
 \subsection{Mobility models}
-\label{section:mobilty_model}
+\label{section:mobility_model}
 For the mobility models I have only chosen to test Gauss-Markov, which I from \cite{MobilityAdHocResearch} found to be a good algorithm for simulating a movement pattern\footnote{Implemented by the same team that build the BonnMotion movement tool} that seems rather random. I would have liked to test the Disaster Area movement pattern found in \cite{disasterArea}, but I found it difficult to get the BonnMotion tool to generate the movement, as well as unsure on which definitions would create an interesting model for the different algorithms to be tested on\footnote{In order to create a disaster area movement simulation several different zones have to be defined -- e.g. a zone for the disaster, a zone for the triage, treatment and so on.}. 
 
 The script I have used to create the needed ns-2 mobility data can be found in the \texttt{src/MotionCode} directory.
@@ -160,13 +160,14 @@ Since we are dealing with limited-range spanners, the value of the node density 
 \frac{num}{x^2} &=& 0.01 \Leftrightarrow\\
 x &=& \sqrt{100 * num}  
 }
-meaning that in practise the graphs are squares in the plane with the following dimensions, which will also be the upper limits on their coordinates:
-\tiny{
+meaning that in practise the graphs are squares in the plane with the following dimensions, which will also be the upper limits on their coordinates:\\
+{\tiny
 \begin{tabular}{lrrrrrrrrr}
 Number of nodes: & 50 & 100 & 250 & 500 & 1000 & 2500 & 5000 & 7500 & 10000 \\
 Width/height:    & 71 & 100 & 158 & 223 &  316 &  500 &  707 &  866 & 1000 
 \end{tabular} 
 }
+
 \subsubsection{Tests to be performed}
 \label{section:spanner_tests_performed}
 In order to check the limited-range spanner for the three graphs, I will randomly pick two different nodes, a \emph{node-pair}, that are connected in the non-planar graph and record the shortest number of hops (the \emph{Unit distance}), as well as the shortest distance based on the weight between the two nodes (the \emph{Euclidean distance}). I feel both values are worth finding, as the number of hops is directly applicable to \acp{manet}, while the Euclidean distance is interesting from a more theoretical perspective, and will therefore also be recorded.
