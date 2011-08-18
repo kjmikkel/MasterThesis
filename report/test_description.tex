@@ -5,107 +5,97 @@ In this section I will describe which metrics I am going to use to compare the d
 
 \subsection{Metrics}
 
-The metrics I will measure in the tests will be 
+The metrics I will measure in the tests will be the following
 \begin{description}
-\item[Number of hops:] The number of hops from the source to the sink. For this I will measure the maximum number of hops, the minimum number of hops, as well as the average. I feel the number of hops is the most important metric, since it both details how many nodes that have to expend energy before the message arrives at the node, how long it takes for the message to arrive at its destination, and how great the risk is that the network topology will make it impossible for the message to arrive (assuming, of course, that the message could arrive when it was sent).
+\item[Number of hops:] The number of hops from the source to the sink. For this I will measure the maximum number of hops, the minimum number of hops, as well as the average. Since each hop made means that a new node will have to expend energy and processing power, which will also greatly influence the time it will take for the message to arrive at its destination, and incease the risk is that the network topology will make it impossible for the message to arrive.
 
-\item[Time:] The amount of time spent sending the message from the source to the sink. I will likewise measure the maximum, minimum and average time spent. It is clear that the faster a message arrives at its sink, the better.
+\item[Time:] The amount of time spent sending the message from the source to the sink. 
 
-\item[Percentages of successfully arrived messages:] While most routing algorithms guarantees that the message will always arrive, this is not always the case . The best example of a routing algorithm that does not have this guarantee is the greedy routing algorithm (see section~\ref{section:greedy} p. \pageref{section:greedy}). Also, since we are trying to simulate mobile nodes with limited energy storage, critical parts of the topology may be fail, making it impossible for the message to arrive.
+\item[Percentages of successfully arrived messages:] While most routing algorithms guarantee that the message will always arrive, this is not always the case. The best example of a routing algorithm that does not have this guarantee is the greedy routing algorithm (see section~\ref{section:greedy}), and I therefore feel this is a very interesting metric.
 \end{description}
 
-For the number of hops and the  amount of time I will record the maximum, the minimum and the average value. The main value for comparison will be the average value, but I feel that recording both the maximum and the minimum values will give me better information about the average.
+For the number of hops and the amount of time the maximum, the minimum and the average value is recorded, and the standard deviation will be calculated. The main value for comparison will be the average value, but the others will be interesting for to identify outliners and see how representative the values are.
 
 \subsection{Input parameters}
 \label{section:input_parameters}
-In order to perform the tests I will need to define the parameters and their range for the different tests.
+The parameters and their range for the different tests are as follows:
 \begin{description}
-\item[Movement model:] The topology is clearly going to be influenced by the way that the nodes move, therefore it would be interesting to test out several models, to see the strengths and weaknesses of the different routing algorithms.
+\item[Routing Algorithms:] Since the purpose of this test is to test different routing algorithms, we must pick a subset of the available algorithms. I have choosen the following algorithms: GOAFR \cite{gopher}, GPSR \cite{gpsr}, Greedy routing \cite{gopher}, and DSDV \cite{DSDV} --- a mix of several categories (see section~\ref{section:cat_routing} and section~\ref{section:routing_algorithm} for more about these algorithms).
 
-\item[Routing Algorithms] 
+\item[Movement model:] The topology is clearly going to be influenced by the way that the nodes move, therefore it would be interesting to test out several models, to see the strengths and weaknesses of the different routing algorithms. In practice I will use  the Gauss-Markov \cite{MobilityAdHocResearch} with the trace created through the use of the BonnMotion tool \cite{toilers} use to create the movement files which can then be imported into ns-2\footnote{For the script that generates the movement files, please see \texttt{src/MotionCode/Gauss-Markov.py}}. The nodes will move for 1 min (60 seconds) before the recording of their locations will begin, introducing a greater element of randomization. See section~\ref{section:mobility_model} for more details about Gauss-Markov.
 
-\item[Amount and data-transmission type:] In real world situations there will be different levels of traffic on the network, and therefore to test it we must likewise simulate these differences. The choice of transmission protocol is also important.
+\item[Amount and data-transmission type:] In real world situations there will be different levels of traffic on the network, and therefore to test it we must likewise simulate these differences. The choice of transmission protocol is also important. In practice I will try to transmit 512 kB through a TCP connection. In order not to swamp the network in traffic, only 33\% of the nodes will ever communicate. See section~\ref{section:traffic_model} for more information on how they were generated.
 
-\item[Size of the simulation area:] The size of the simulation area has a direct influence on how far apart the nodes can move and how many nodes are needed for a given node density. Everything else being equal, a larger simulation area will make the network less robust.
+\item[Size of the simulation area:] The size of the simulation area has a direct influence on how far apart the nodes can move and how many nodes are needed for a given node density. Everything else being equal, a larger simulation area will make the network less robust. In practice I will create two different playing fields, one that is 500 by 500 units and one that is 1000 by 1000 units.
 
-\item[Number of nodes:] It is clear that denser node distribution, everything else being equal, will give a more robust network.
+\item[Number of nodes:] It is clear that denser node distribution, everything else being equal, will give a more robust network. In practice I will have node-sets of 100 to 3000 nodes in increments of 100 nodes, giving me 30 data-points that will be used to analyse the success of the different routing algorithms.  
 
-\item[Percentage of nodes failing/leaving the network:] Since we are dealing with a \ac{manet}, it is clear that a nodes may leave the network or fail (either due to equipment failure or lack of power). 
-
-\item[Percentage of nodes entering the network:] In a \ac{manet} we have to assume that nodes can enter the network.
+\item[Time simulated:] There is a clear need to balance the time we want to simulate with the time it will take to execute. I have found 1 minute (60 seconds) to be a good compromise --- this figure will be used both to generate the traffic as well as the mobility.
 \end{description}
 
-\subsection{Actual parameters}
-As I have now detailed in section~\ref{section:input_parameters} which parameters it would be useful to vary, I will in this subsection detail the actual value of the different parameters. 
-
-\begin{description}
-\item[Movement models:] \hide{DisasterArea \cite{disasterArea} and} Gauss-Markov \cite{MobilityAdHocResearch} with the trace created through the use of the BonnMotion tool \cite{toilers} use to create the movement files which can then be imported into ns-2\footnote{For the script that generates the movement files, please see \texttt{src/MotionCode/Gauss-Markov.py}}.
-\item[Amount and Data-transmission type:] 512 kB through a TCP connection
-\item[Size of simulation area:] 500 by 500 units and 1000 by 1000 units
-\item[Routing algorithms:] GOAFR \cite{gopher}, GPSR \cite{gpsr}, Greedy \cite{gopher}, DSDV \cite{DSDV}
-\item[Number of nodes:] 100 to 3000 nodes in increments of 100 nodes, giving me 30 data-points that will be used to analyse the success of the routing algorithms. 
-%\item[Nodes failing:] 0\%, 10\%, 40\%
-%\item[Nodes entering:] 0\%, 30\%
-\item[Time:] 1 minute (60 seconds)
-\item[Amount of nodes transmitting:] 33\% of the network
-\end{description}
 
 \subsection{Routing algorithm description}
 \label{section:routing_algorithm}
 In this description of the chosen routing algorithms, I will assume by default that there exists a path from the source to the sink, and if needed I will detail how the algorithm handles the cases where no such path exists.
 
-Since I have already explained how the Greedy routing works in \ref{section:greedy}.
+Since I have already explained how the Greedy routing works in \ref{section:greedy}, I will not repeat it here.
 
 \subsubsection{GOAFR and GOAFR+}
 
-GOAFR \cite{gopher} (Greedy Other Adaptive Face Routing) and GOAFR+ \cite{gopher+} (a refinement on GOAFR) are multi-stage geometrical algorithms. The algorithms are based on Greedy routing (see section~\ref{section:greedy} on p. \pageref{section:greedy}) and Adaptive Face Routing, with an adaptive ellipse $\epsilon$ as the boundary for the message. The description in the following paragraphs uses information from \cite{gopher}.
+\tikfig{gopher}{Here we see a representation of the GOAFR with its ellipse. In this example $s$ and $t$ are the nodes that wants to communiate, and therefore acts as the forci for the ellipse. It is clear from this image that the ellipse is quite large (and in fact almost circular) compared to the distance between the source and the sink. From this it should be easy to see that for dense graphs there is not much of a chance for the message to go outside the ellipse due to the large amount of wiggle room, while still being able to avoid bad edge conditions.}
 
-As an integral part of the algorithm, GOAFR includes an ellipsis $\epsilon$ that that the message has to keep inside, in order to avoid having the message going astray. $\epsilon$ is created so that its forci are the source $s$ and the sink $t$, and so that its semi-major axis starts out being $2 * |\overline{st}|$. Using the formula for forci
+GOAFR \cite{gopher} (Greedy Other Adaptive Face Routing) and GOAFR+ \cite{gopher+} (a refinement on GOAFR) are multi-stage geometrical algorithms. The algorithms are based on Greedy routing (see section~\ref{section:greedy}) and Adaptive Face Routing, with an adaptive ellipse $\varepsilon$ as the boundary for the message. The description in the following is based on \cite{gopher}.
+
+As an integral part of the algorithm, GOAFR includes an ellipse $\varepsilon$ that the message has to inside, in order to avoid having the message going astray. $\varepsilon$ is created so that its forci are the source $s$ and the sink $t$, and so that its semi-major axis starts out being $2 * |\overline{st}|$. While it is not detailed in \cite{gopher} it is likely that the ellipse was chosen since it is inheiriently based on two points in the plane (the forci), the major and minor axis can be expanded independtly of each other. 
+
+Finding out whether a point is inside an ellipse is also very easy. If we let $x$ be the node we want to check, and $p, q$ be the foci of the ellipse, then $x$ is inside the ellipse iff $\overline{|xp|} + \overline{|xq|}$ is less than the major axis.
+
+Using the formula for forci
 \eqa{
 F = \sqrt{j^2 - n^2}
 }
 where $F$ is the distance from each forci to the centre, $j$ is the semi-major axis (major radius), and $n$ is semi-minor axis (minor radius) so in this case we have
 \eqa{
-F &=& \sqrt{j^2 - n^2}\\
-\frac{|\overline{st}|}{2} &=& \sqrt{j^2 - n^2}\\
-\left(\frac{|\overline{st}|}{2}\right)^2 &=& j^2 - n^2\\
-n^2 &=& j^2 - \left(\frac{|\overline{st}|}{2}\right)^2\\
-n &=& \sqrt{j^2 - \left(\frac{|\overline{st}|}{2}\right)^2}\\
+\frac{|\overline{st}|}{2} &=& \sqrt{j^2 - n^2} \Leftrightarrow\\
+ n &=& \sqrt{j^2 - \left(\frac{|\overline{st}|}{2}\right)^2}
 }
-which we then can use to calculate the semi-minor axis. Depending on the execution of GOAFR the major axis of $\epsilon$ might grow, as detailed in the next two paragraphs.
+which we then can use to calculate the semi-minor axis. For an illustration of the ellipse, see figure~\ref{fig:gopher}. Depending on the execution of GOAFR the major axis of $\varepsilon$ might grow, as detailed in the next two paragraphs. 
 
-Having thus laid the groundwork I can now describe GOAFR:
+Having thus laid the groundwork I can now describe GOAFR. Unless otherwise specified, once a step has been comleted, then algorithm will go to the next step.
 \begin{enumerate}
-\item Make the ellipsis based on the sink and the source.
-\item Perform Greedy routing as described in section~\ref{section:greedy} on p. \pageref{section:greedy}. If the greedy algorithm sends the message beyond the bound of $\epsilon$, then the longest axis of $\epsilon$ is doubled. If the message arrives at the sink, then the message is handed over to the node and the algorithm terminates. If the message arrives at a local minimum (see section~\ref{section:greedy} for an explanation), go to step 3.
-\item Since we have arrived at a node $u$ local minimum, we first store $u$ as both $u_{local min}$ and as $u_{closest node}$ in the message header, to indicate that it is both the node we started routing around the face as, but also the node that is closest to the sink. We then use Adaptive Face routing (which uses the right-hand rule --- see section~\ref{right-hand-rule} on p. \pageref{right-hand-rule}) to traverse the face, and for each node $v$ we encounter we check to see if it is closer to the sink than the current value of $u_{closest node}$, if so, we set $u_{closest node}$ to be $v$. 
+\item Make the ellipse based on the sink and the source.
 
-If the message is about to go outside of $\epsilon$ for the first time, then the message reverses direction and the message tries to traverse the face in the other direction (skipping past $u_{local min}$) without stopping). If the message encounters $\epsilon$ for the second time, then the longest axis of $\epsilon$ is doubled and the message is forwarded as normal.
+\item Perform Greedy routing as described in section~\ref{section:greedy} on p. \pageref{section:greedy}. If the greedy algorithm sends the message beyond the bound of $\varepsilon$, then the longest axis of $\varepsilon$ is doubled. If the message arrives at the sink, then the message is handed over to the node and the algorithm terminates. Otherwise we have reached a local minimum (see section~\ref{section:greedy} for an explanation). 
 
-At some point the message will either arrive back at $u_{local min}$ or find the sink. If the message arrives back at $u_{local min}$ after having gone outside $\epsilon$ an even number of times, we then go to step 4. If the message arrives at the sink, then the message is handed over to the sink and the algorithm terminates.
-\item The message is now forwarded to $u_{closest node}$ we found in the last step, by using the same face routing as before. Once we arrive at $u_{closest node}$ we go to step 2.
+\item Since we have arrived at a local minimum $u$, we first store $u$ as both $u_{local\_min}$ and as $u_{closest\_node}$ in the message header, to indicate that it is both the node we started routing around the face as, but also the node that is closest to the sink. We then use Adaptive Face routing (which uses the right-hand rule --- see section~\ref{right-hand-rule}) to traverse the face, and for each node $v$ we encounter we check to see if it is closer to the sink than the current value of $u_{closest\_node}$, if so, we set $u_{closest\_node}$ to be $v$. 
+
+If the message is about to go outside of $\varepsilon$ for the first time, then the message reverses direction and the message tries to traverse the face in the other direction (skipping past $u_{local\_min}$) without stopping). If the message encounters $\varepsilon$ for the second time, then the longest axis of $\varepsilon$ is doubled and the message is forwarded as normal.
+
+At some point the message will either arrive back at $u_{local\_min}$ or find the sink. If the message arrives at the sink, then the message is handed over to the sink and the algorithm terminates. If the message arrives back at $u_{local\_min}$ after having gone outside $\varepsilon$ an even number of times, we go to the next step.
+
+\item The message is now forwarded to $u_{closest\_node}$ we found in the last step, by using the same face routing as before. Once we arrive at $u_{closest\_node}$ we go to step 2.
 \end{enumerate}
 
-GOAFR+ works similarly to GOAFR, with the difference being the introduction of 2 variables $p$ and $q$. While doing the adaptive face routing from the local minimum node $u_{local min}$, the algorithm keeps track of how many nodes encountered that are closer to the sink than $u_{local min}$ in the variable $p$ and how many are farther away from the sink than $u_{local min}$ in the variable $q$.
+GOAFR+ works similarly to GOAFR, with the difference being the introduction of two variables $m$ and $n$. While doing the adaptive face routing from the local minimum node $u_{local\_ min}$, the algorithm keeps track of how many nodes encountered that are closer to the sink than $u_{local min}$ in the variable $m$ and how many nodes are farther away from the sink than $u_{local\_min}$ in the variable $n$.
 A special action is then taken if
 \begin{enumerate}
-\item If the message arrives at the edge of $\epsilon$ for the first time, then the message turns back and explores the face in the other direction. 
-\item If the message arrives at the edge of $\epsilon$ for the second time, and no nodes have been found to be closer to the sink than $x$, then the major axis of $\epsilon$ is doubled. Otherwise the message is sent to the node closest to the sink and the greedy routing is resumed.
-\item If at any point $p > \rho q$, where $\rho$ is a constant defined before routing starts, then route the message to the node closest to the sink and begin greedy routing again.
+\item If the message arrives at the edge of $\varepsilon$ for the first time, then the message turns back and explores the face in the other direction. 
+\item If the message arrives at the edge of $\varepsilon$ for the second time, and no nodes have been found to be closer to the sink than $x$, then the major axis of $\varepsilon$ is doubled. Otherwise the message is sent to the node closest to the sink and the greedy routing is resumed.
+\item If at any point $m > \rho n$, where $\rho$ is a constant defined before routing starts, then route the message to the node closest to the sink and begin greedy routing again.
 \end{enumerate}
 
-Both GOAFR and GOAFR+ has proved to be theoretical asymptotically worst-case optimal and average-case efficient. Due to space demands I will not try to prove these claims here, but will instead refer the interested reader to \cite{gopher+, gopher}.
+Both GOAFR and GOAFR+ have been proved that if $|p^*|$ is the distance of the optimal euclidian path, and $c$ is the fixed major axis length of the elipse, then GOAFR will reach the sink after traversing at most $O(c^2)$ edges and will at most have a cost of $O(c^2(p^*))$ for distance. From \cite{asymp} we learn that any geometric routing algorithm has an edge cost of  $\Omega(c^2)$, and therefore GOAFR is both theoretical asymptotically worst-case optimal and average-case efficient. Due to space demands I will not try to prove these claims here, but will instead refer the interested reader to \cite{gopher+, asymp, gopher}.
 
 Due to time constraints I have only been able to implement GOAFR in ns-2, and so will only use that in the tests.
 
 \subsubsection{GPSR}
 \tikfig{gpsr}
-{A demonstration of the GPSR routing algorithm. The grey background with grey nodes indicates when the GPSR algorithms is in the Greedy phase and the the black nodes with the black background indicates when the algorithm is running in perimeter phase}
+{A demonstration of the GPSR routing algorithm. The grey background with grey nodes indicates when the GPSR algorithms is in the Greedy phase and the black nodes with the black background indicates when the algorithm is running in perimeter phase. In this case there is no switch of parimiters.}
 
 \label{section:gpsr}
-Greedy Perimeter Stateless Routing is a routing algorithm that uses a hybrid of Greedy routing and face routing. The idea is to use Greedy routing as much as possible, and only use the face routing recover from situations where it reaches a situation where the Greedy routing fails. The algorithm will use the right-hand-rule (see section~\ref{right-hand-rule} on p. \pageref{right-hand-rule}) to route the messages in perimeter mode to ensure they stay within the same face. I base all the description in this subsection on \cite{gpsr}.
+Greedy Perimeter Stateless Routing is a routing algorithm that uses a hybrid of Greedy routing and face routing. The idea is to use Greedy routing as much as possible, and only use the face routing recover from situations where it reaches a situation where the Greedy routing fails. The algorithm will use the right-hand-rule (see section~\ref{right-hand-rule}) to route the messages in perimeter mode to ensure they stay within the same face. The description here is based on \cite{gpsr}.
 
-If we let $x$ be the point where the Greedy routing fails, and $t$ be the sink, then the gist of the perimeter routing is to route through the faces that are intersected by the line-segment $\overline{xt}$, in order to find a point that is closer to $t$ than $x$, and possibly recover. In order to do this the algorithm will explore each face sequentially, moving on to the next face when it encounters a node or, more likely, an edge that is intersected by $\overline{xt}$. 
+If we let $x$ be the point where the Greedy routing fails, and $t$ be the sink, then the gist of the perimeter routing is to route through the faces that are intersected by the line-segment $\overline{xt}$, in order to find a point that is closer to $t$ than $x$, and possibly recover. In order to do this the algorithm will explore each face sequentially, moving on to the next face when it encounters a node or, more likely, an edge that is intersected by $\overline{xt}$. For an example of routing see figure~\ref{fig:gpsr}. 
 
 In order for the routing to work the algorithm relies on 4 values:
 \begin{description}
@@ -115,28 +105,35 @@ In order for the routing to work the algorithm relies on 4 values:
 \item[$e_0$:] The first edge the message traversed on the current face. This is used as the termination condition for the perimeter exploration in the case where $t$ is unreachable. 
 \end{description}
 
-also, in the following let $f$ denote the current face we are routing on.
+Also, in the following let $f$ denote the current face we are routing on. Unless otherwise specified, the algorithm will always go to the next step once it has completed a step.
 
 \begin{enumerate}
-\item The algorithm begins with greedy routing until it either reaches the sink, in which case it terminates, or it reaches a local minimum and therefore fails. In the case of failure the message enters perimeter mode and goes to step 2.
-0\item The message will enter perimeter routing and record its current node as both $L_p$ and $L_f$, and store the line-segment $\overline{L_pt}$, which we will use throughout our routing. The edge counter-clockwise to $L_p$ is stored in $e_0$. The algorithm goes to step 3
-\item Let $p$ be the current node, if $|\overline{pt}| < |\overline{L_pt}|$ we have reached a node closer to the sink than the local minimum, and we continue with our Greedy routing --- the algorithm goes to step 1. If on the other hand $p$ is farther away from the sink than $L_p$, the message is transferred to the counter-clockwise node $q$ on $f$. If $\overline{pq} == e_0$ then we have come full circle, and there exist no path to the sink $t$, so drop the message. If on the other hand either $q$ or $\overline{pq}$ is intersected by $\overline{L_pt}$, then transmit the message to $q$ and go to step 4, otherwise just transmit the message and go to step 3.
+\item The algorithm begins with greedy routing until it either reaches the sink, in which case it terminates, or it reaches a local minimum and therefore fails. In the case of failure the message enters perimeter mode.
+
+\item The message will begin perimeter routing and record its current node as both $L_p$ and $L_f$, and store the line-segment $\overline{L_pt}$, which we will use throughout our routing. The edge counter-clockwise to $L_p$ is stored in $e_0$.
+
+\item Let $p$ be the current node. If $|\overline{pt}| < |\overline{L_pt}|$ we have reached a node closer to the sink than the local minimum, and we continue with our Greedy routing --- the algorithm goes to step 1. If on the other hand $p$ is farther away from the sink than $L_p$, the message is transferred to the counter-clockwise node $q$ on $f$. If $\overline{pq}$ is the same edge as $e_0$ then we have come full circle, and there exist no path to the sink $t$, so drop the message. If on the other hand either $q$ or $\overline{pq}$ is intersected by $\overline{L_pt}$, then transmit the message to $q$ and go to step 4, otherwise just transmit the message and go to step 3.
+
 \item Let $p$ be the current node. Set $L_f$ to $p$ and switch to the next face. Let $q$ be the counter-clockwise neighbour of $p$ on the new face and set $e_0$ to $\overline{pq}$. Go to step 3. 
 \end{enumerate}
 
+I have not been able to find any real theretical results in either \cite{gpsr} or any of the literature I have read.
+
 \subsubsection{DSDV}
 
+As specified before DSDV uses a distributed version of Bellman-Ford routing algorithm to find the fewest number of hops between itself and any other node. For this end, each node retain a routing table, with now and again is refreshed. The only theoretical result I have been able to find is that DSDV garuntees loop-free routing \cite{DSDV}.
 
 \subsection{Mobility models}
-
-For the mobility models I have only chosen to test Gauss-Markov, which I from \cite{MobilityAdHocResearch} found to be a good algorithm for simulating a movement pattern\footnote{Not to mention was implemented by the same team that build the Bonnmotion movement tool} that seems rather random. I would have liked to test the Disaster Area movement pattern found in \cite{disasterArea}, but I found it difficult to get the bonnMotion tool to generate the movement, as well as unsure on which definitions would create an interesting model for the different algorithms to be tested on\footnote{In order to create the a disaster area movement simulation several different zones have to be defined -- e.g. a zone for the disaster, a zone for the triage, treatment and so on.}. 
+\label{section:mobilty_model}
+For the mobility models I have only chosen to test Gauss-Markov, which I from \cite{MobilityAdHocResearch} found to be a good algorithm for simulating a movement pattern\footnote{Implemented by the same team that build the BonnMotion movement tool} that seems rather random. I would have liked to test the Disaster Area movement pattern found in \cite{disasterArea}, but I found it difficult to get the BonnMotion tool to generate the movement, as well as unsure on which definitions would create an interesting model for the different algorithms to be tested on\footnote{In order to create a disaster area movement simulation several different zones have to be defined -- e.g. a zone for the disaster, a zone for the triage, treatment and so on.}. 
 
 The script I have used to create the needed ns-2 mobility data can be found in the \texttt{src/MotionCode} directory.
 
 \subsection{Traffic}
-I chose the TCP connection on the ground that I would like to stress tests the different routing algorithms, and since TCP requires more back-and-forth than UDP (and is necessary for transfer of files, and not just steaming of video/audio or the state of a multi-player game).
+\label{section:traffic_model}
+I chose the TCP connection on the ground that I would like to stress test the different routing algorithms, and since TCP requires more back-and-forth than UDP (and is necessary for transfer of files, and not just steaming of video/audio or the state of a multi-player game).
 
-Ns-2.33 comes with its own Traffic generation program cbrgen.tcl\footnote{Located in the \texttt{indep-utils/cmu-scen-gen} directory}, that I have used to generate the traffic for these tests. The script I have used to create the needed ns-2 traffic files can be found in the \texttt{src/Traffic} folder.
+Ns-2.33 comes with its own Traffic generation program cbrgen.tcl\footnote{Located in the \texttt{ns-2.33/indep-utils/cmu-scen-gen} directory in the ns-allinone-2.33 directory}, that I have used to generate the traffic for these tests. The ns-2 documentation is very lacking in its description, but inspection of the code shows that it creates a connection uniformally between $0.0$ and $180.0$. I have however modified the script so that it can take any time. The modified version of the script can be found at \texttt{src/ns-2.33 changes/cbrgen.tcl}. The script I have used to create the needed ns-2 traffic files can be found in the \texttt{src/Traffic} folder.
 
 \subsection{Limited-range spanner tests}
 \label{section:test_desc_spanners}
@@ -154,24 +151,22 @@ In order to do this test I will first have to make several decisions:
 \end{itemize}
 
 I have not encountered any specific point clustering algorithm in the literature besides the various mobility models (see \cite{disasterArea, MobilityAdHocResearch}) which has lead me to place the nodes uniformly in the plane. The justification of this was both the fact that part of this investigation was an experimental look into how the non-planar graph would behave compared to the \ac{gabe} and the \ac{rng}, and not just about \acp{manet}. In retrospect I can see that using data from the mobility model would proper would have given a better picture and would most likely have made it possible for me to cut down on the number of graphs that would have to have been generated (since the graphs would be representative of the the mobility model, and not just uniformly distributed). See section~\ref{section:future_work} for my recommendation for future comparisons between the graphs.   
-Since I have chosen to uniformly distribute the nodes I will need a large number of tests in order for the underlying properties of the three types of graphs to emerge. Therefore I will therefore have to limit the number of node-categories so that I will be able to process all the tests. I will therefore chose to limit myself to 7 node-categories with the following number of nodes: 100, 250, 500, 1000, 2500, 5000 and 7500 nodes.
+Since I have chosen to uniformly distribute the nodes I will need a large number of tests in order for the underlying properties of the three types of graphs to emerge. Therefore I will therefore have to limit the number of node-categories so that I will be able to process all the tests. I will therefore chose to limit myself to 9 node-categories with the following number of nodes: 50, 100, 250, 500, 1000, 2500, 5000, 7500 and 10000 nodes.
 
 I feel this is a good compromise between having a reasonable number of data-points and big enough spread, while still being able to compute them in a reasonable amount of time. The nodes are going to be placed uniformly in the plane, with the lower bound of their coordinates being 0, and the upper bound depending on the number of points in the graph. No two points will have same the coordinates. 
 
 Since we are dealing with limited-range spanners, the value of the node density and the radio-range of the nodes becomes important\footnote{If I had made the choice to use the mobility models or a cluster node algorithm, these factors would still have an impact, but properly less}. Different densities and radio-ranges would heavily influence the outcome of the results, as a high node density/radio-range would favour the non-planar graph over the two other graph types, while a low density/radio-range would create heavily disconnected graphs in all three cases. Since having many disconnected graphs would make testing difficult, I have tried to find combination that would give me a low number of connected components pr. node-set, while still keeping the density reasonably low. From several experiments this let me to a density of 0.01 nodes pr. square unit and a radio range of 20 units, and make the space the nodes are placed over a function of the number of nodes. Specifiably, if we let $x$ be the length of the sides in a square and $num$ be the number of nodes, then we have that the density is
-\begin{eqnarray}
-\frac{num}{x^2} &=& 0.01 \\
-0.01 * x^2 &=& num \\
-x^2 &=& 100 * num\\
+\eqa{
+\frac{num}{x^2} &=& 0.01 \Leftrightarrow\\
 x &=& \sqrt{100 * num}  
-\end{eqnarray}
+}
 meaning that in practise the graphs are squares in the plane with the following dimensions, which will also be the upper limits on their coordinates:
-
-\begin{tabular}{lrrrrrrr}
-Number of nodes: & 100 & 250 & 500 & 1000 & 2500 & 5000 & 7500 \\
-Width/height:    & 100 & 158 & 223 &  316 &  500 &  707 &  866  
+\tiny{
+\begin{tabular}{lrrrrrrrrr}
+Number of nodes: & 50 & 100 & 250 & 500 & 1000 & 2500 & 5000 & 7500 & 10000 \\
+Width/height:    & 71 & 100 & 158 & 223 &  316 &  500 &  707 &  866 & 1000 
 \end{tabular} 
-
+}
 \subsubsection{Tests to be performed}
 \label{section:spanner_tests_performed}
 In order to check the limited-range spanner for the three graphs, I will randomly pick two different nodes, a \emph{node-pair}, that are connected in the non-planar graph and record the shortest number of hops (the \emph{Unit distance}), as well as the shortest distance based on the weight between the two nodes (the \emph{Euclidean distance}). I feel both values are worth finding, as the number of hops is directly applicable to \acp{manet}, while the Euclidean distance is interesting from a more theoretical perspective, and will therefore also be recorded.
@@ -184,12 +179,12 @@ In both cases I will use Dijkstra's algorithm to find the smallest Euclidean/Uni
 For each node-pair tested for the graphs I will find the total distance passed for all the node-pairs, the average distance, the average maximum and minimum distance for all the tests\footnote{I feel it is necessary to use the average since there may be outliers that easily could skew the results} and lastly the standard deviation\footnote{For the same reasons as I included the average minimum and maximum}. Likewise I will find the total unit distance, the average unit distance, the average maximum and minimum unit distance and standard deviation. Since one of the advantages of the \ac{gabe} and the \ac{rng} is that they have fewer neighbours, I will also find the total number of neighbours, the average, max- and minimum number of neighbours and standard deviation. I will also include the average number of connected components (across all the 500 non-planar graphs), which will tell us how connected the graphs are.
 
 \subsubsection{Size of the test}
-Since the node-sets that we are going to generate the graphs from are going to distributed uniformly, I feel that in order to gain a proper picture of the situation we need to generate many node-sets, so that any underlying pattern can show it self. Therefore I have decided to generate 500 different uniformly distributed node-sets. For each node-set I will then generate one non-planar graph, one \ac{gabe}, and one \ac{rng}, meaning that for each node node-category I  generate 500 graphs for the non-planar, \ac{gabe} and \ac{rng} (for a total of 1500 graphs for each - except for node-category 7500 and 10000, for which I only have been able to generate 250 for each, due to time constraints). Each node-set is then used to generate the three types of graph. For each node-set I then generate 100 node-pairs. I feel that this will give me an reasonable amount of data to analyse, while still being computable for the larger number of nodes.
+Since the node-sets that we are going to generate the graphs from are going to distributed uniformly, I feel that in order to gain a proper picture of the situation we need to generate many node-sets, so that any underlying pattern can show it self. Therefore I have decided to generate 500 different uniformly distributed node-sets. For each node-set I will then generate one non-planar graph, one \ac{gabe}, and one \ac{rng}, meaning that for each node node-category I  generate 500 graphs for the non-planar, \ac{gabe} and \ac{rng} (for a total of 1500 graphs for each. Each node-set is then used to generate the three types of graph. For each node-set I then generate 100 node-pairs. I feel that this will give me an reasonable amount of data to analyse, while still being computable for the larger number of nodes.
 
 \subsection{Network simulators}
 \label{section:network_simulators}
 
-In order to perform my network tests, I will need a network simulator. I have chosen not to make my own, since it will take too much time, and will make it much harder to compare my results with that of others. I have been able to identify 4 big network simulators: ns-2, ns-3, GloMoSim and the Opnet Modeler.
+In order to perform a emperical evaluation, a network simulator is needed. I have chosen not to make my own, since it would take too much time, and would make it much harder to compare my results with other results. I have been able to identify four big network simulators: ns-2, ns-3, GloMoSim and the Opnet Modeler.
 
 \begin{description}
 \item[ns-2:] ns-2 is a discrete event network simulator. The latest version I have been able to find is version 2.34 from 2009. Ns-2 uses the programming language Otcl for most of its non-core engine files --- routing algorithms and the scenario files that configures how the test is to be performed. Otherwise everything is written in C++.
@@ -198,7 +193,7 @@ In order to perform my network tests, I will need a network simulator. I have ch
 \item[Opnet Modeler:] Opnet is a commercial network simulator. Every layer of the network stack has to be modelled as a finite state machine \cite{MANcom}. 
 \end{description}
 
-From \cite{MANcom} it is clear that the Network simulators gives widely different results. Since it is not clear which of the simulators which gives the result that is closest to reality, the parameters I will have to apply to find the best network simulator are: The license of the network simulator. When it was last updated, how configurable any given simulation is, whether or not it supports wireless routing, how much memory it consumes while running, which languages are required to implement a new protocol, how many programming languages are required to implement a new scenario, and whether new routing protocols can just be plugged in, or if the entire network simulator has to be recompiled. For Configurable and memory I will use A, B and C, with A as the highest and C is the lowest, to grade them\\
+From \cite{MANcom} it is clear that the network simulators gives widely different results. Since it is not clear which of the simulators which gives the result that is closest to reality, the parameters I will have to apply to find the best network simulator are: The license of the network simulator, when it was last updated, how configurable any given simulation is, whether or not it supports wireless routing, how much memory it consumes while running, which languages are required to implement a new protocol, how many programming languages are required to implement a new scenario, and whether new routing protocols can just be plugged in, or if the entire network simulator has to be recompiled. For configurability and memory requirements I will use A, B and C, with A as the highest and C is the lowest, to grade them.\\
 \begin{scriptsize}
 \begin{minipage}{15.0cm}
 \begin{tabular}[4]{lllll}
