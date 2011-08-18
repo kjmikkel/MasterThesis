@@ -24,6 +24,6 @@ for size in size_option:
       os.system("./bm -f %s GaussMarkov -i 120 -n %s -x %s -y %s -z 0 -d 60 -h %s -u %s" % (name, nodes, size, size, max_speed, 1))
 
       os.system("./bm NSFile -f %s" % name)
-      os.system("mv %s.ns_params ../../src/Parameters\ for\ Motion/GaussMarkov/." % name)
-      os.system("mv %s.params ../../src/Parameters\ for\ Motion/GaussMarkov/." % name)
-      os.system("mv %s.ns_movements ../../src/Processed\ Motion/GaussMarkov/." % name)
+      os.system("mv %s.ns_params ../../src/Motion/Parameters\ for\ Motion/GaussMarkov/." % name)
+      os.system("mv %s.params ../../src/Motion/Parameters\ for\ Motion/GaussMarkov/." % name)
+      os.system("mv %s.ns_movements ../../src/Motion/Processed\ Motion/GaussMarkov/." % name)

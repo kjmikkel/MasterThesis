@@ -61,10 +61,10 @@ set val(rtrtrc)         ON ;# Trace Routing Agent
 set val(mactrc)         ON ;# Trace MAC Layer 
 set val(movtrc)         ON ;# Trace Movement 
 
-set val(param)          \"../../../src/Parameters\ for\ Motion/GaussMarkov/GaussMarkov-%s-%s-%s.ns_params\"
+set val(param)          \"../../../src/Motion/Parameters\ for\ Motion/GaussMarkov/GaussMarkov-%s-%s-%s.ns_params\"
 set val(lt)	        \"\" 
 set val(cp)		\"../../../src/Traffic/Trace/Traffic-%s-%s.tcl\" 
-set val(sc)		\"../../../src/Processed\ Motion/GaussMarkov/GaussMarkov-%s-%s-%s.ns_movements\"  
+set val(sc)		\"../../../src/Motion/Processed\ Motion/GaussMarkov/GaussMarkov-%s-%s-%s.ns_movements\"  
 puts $val(cp)
 set val(out)            \"../../../src/Traces/temp/%s\"
 
