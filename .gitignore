@@ -1,0 +1,10 @@
+*.aux
+*.gz
+*.bbl
+*.blg
+*.log
+*.lox
+*.toc
+*.gitignore
+*.pm
+*.pyc
