@@ -3,8 +3,9 @@
 # $Id: evaluate.pl,v 1.4 2003/01/29 18:41:05 kiess Exp $
 # edited version by wk to adapt to hls
 
+use JSON;
+use File::Basename;
 use strict;
-#use JSON;
 use List::Util qw[min max];
 
 # Switches - to check
@@ -164,6 +165,7 @@ my @SPEEDS   = (0,10,30,50);
 #
 # Main
 #
+
 parseCmdLine();
 
 if ($noFiles == 0){ usage(); }else{
@@ -964,6 +966,8 @@ if ($noFiles == 0){ usage(); }else{
 	  my $pkt_type = $1;
           my $flowid = "$pkt_src->$pkt_dst/$pkt_uid";
 	  # Packet Statistics
+
+	  $PKT{$GOAFRTYPE[$pkt_type]}{$flowid}{hops}++;
 	  if ($layer eq "RTR") {
 	    if ($op eq 'D') { $stats{$protocol}{$GOAFRTYPE[$pkt_type]}{drop}++; }
 	    if ($op eq 'r') { $stats{$protocol}{$GOAFRTYPE[$pkt_type]}{recv}++; }
@@ -971,6 +975,9 @@ if ($noFiles == 0){ usage(); }else{
 	    if ($op eq 's') { $stats{$protocol}{$GOAFRTYPE[$pkt_type]}{send}++; }
 	  }
 
+	  if ($op eq 's') {
+	    $PKT{$GOAFRTYPE[$pkt_type]}{$flowid}{hops}++;
+	  }
 
 	  if ($op eq 'D') {
 	    my $reason = "$layer/$drop_rsn";
@@ -979,6 +986,7 @@ if ($noFiles == 0){ usage(); }else{
 
 	  if ($node == $PKT{$GOAFRTYPE[$pkt_type]}{$flowid}->{dst}) {
 		if ($PKT{$GOAFRTYPE[$pkt_type]}{$flowid}->{reached} == 0) {
+		  print $LOOKUP{$pkt_uid}->{taken};
 		  $PKT{$GOAFRTYPE[$pkt_type]}{$flowid}->{reached}  = 1;
 		  $PKT{$GOAFRTYPE[$pkt_type]}{$flowid}->{taken}    = $LOOKUP{$pkt_uid}->{taken};
 		  $PKT{$GOAFRTYPE[$pkt_type]}{$flowid}->{shortest} = $LOOKUP{$pkt_uid}->{shortest};
@@ -995,12 +1003,17 @@ if ($noFiles == 0){ usage(); }else{
 
 	  my $pkt_type = $1;
           my $flowid = "$pkt_src->$pkt_dst/$pkt_uid";
+	  $PKT{$GREEDYTYPE[$pkt_type]}{$flowid}{hops}++;
 	  # Packet Statistics
 	  if ($layer eq "RTR") {
 	    if ($op eq 'D') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{drop}++; }
 	    if ($op eq 'r') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{recv}++; }
 	    if ($op eq 'f') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{forw}++; }
 	    if ($op eq 's') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{send}++; }
+	  }
+
+	  if ($op eq 's') {
+	    $PKT{$GREEDYTYPE[$pkt_type]}{$flowid}{hops}++;
 	  }
 
 
@@ -1025,7 +1038,6 @@ if ($noFiles == 0){ usage(); }else{
 	if (($protocol eq "GPSR") && ($pkt_ttl =~ /^(\d+) [\d\s]+/o)) {
 	  my $pkt_type     = $1;
 	  my $flowid = "$pkt_src->$pkt_dst/$pkt_uid";
-
 	  # Packet Statistics
 	  if ($layer eq "RTR") {
 	    if ($op eq 'D') { $stats{$protocol}{$GPSRTYPE[$pkt_type]}{drop}++; }
@@ -1034,10 +1046,15 @@ if ($noFiles == 0){ usage(); }else{
 	    if ($op eq 's') { $stats{$protocol}{$GPSRTYPE[$pkt_type]}{send}++; }
 	  }
 
+	  if ($op eq 's') {
+	    $PKT{$GPSRTYPE[$pkt_type]}{$flowid}{hops}++;
+	  }
+
 	  if ($op eq 'D') {
 	    my $reason = "$layer/$drop_rsn";
 	    $drops{$reason}{$GPSRTYPE[$pkt_type]}++;
 	  }
+
 
 	  if ($node == $PKT{$GPSRTYPE[$pkt_type]}{$flowid}->{dst}) {
 	    if ($PKT{$GPSRTYPE[$pkt_type]}{$flowid}->{reached} == 0) {
@@ -1751,7 +1768,7 @@ sub printDistanceHash {
 
 sub round {
   my $input = shift();
-  $input = $input * 100;
+   $input = $input * 100;
   $input = int($input + 0.5);
   $input = $input / 100;
 }
@@ -2370,41 +2387,46 @@ sub printStatistics {
 sub save_results {
   my $send = 0;
   my $recv = 0;
+  
+  my ($filename, $direct, $suf) = fileparse($actfile, (".tr"));
 
-  foreach my $protocol (sort keys %stats) {
-    foreach my $type (sort keys %{$stats{$protocol}}) {
-      $send = $stats{$protocol}{$type}->{send};
-      $recv = $stats{$protocol}{$type}->{recv};
-    }
+  $filename =~ /^(\w+)-/o;
+  $filename = "$1_json/$filename";
+
+  foreach my $type (keys %{$stats{$1}}) {
+    $send += $delivery{$type}{sends};
+    $recv += $delivery{$type}{recv};
   }
+ 
+  my @percent = [$recv, $send];
 
   my @hops_taken = ();
   my @time_taken = ();
 
   foreach my $type (sort keys %PKT){
     foreach my $flow_id (sort keys %{$PKT{$type}}) {
-      if ($PKT{$type}{$flow_id}{reached} eq 1) {
-	
+      if ($PKT{$type}{$flow_id}->{reached} == 1) {
+      
 	# The number of hops required for the message to arrive
-	my $hops = $PKT{$type}{$flow_id}{taken};
+	my $hops = $PKT{$type}{$flow_id}->{hops};
 	push(@hops_taken, $hops);
 	
 	# Time required for sending the message
-	my $start = $PKT{$type}{$flow_id}{start};
-	my $end   = $PKT{$type}{$flow_id}{end};
+	my $start = $PKT{$type}{$flow_id}->{start};
+	my $end   = $PKT{$type}{$flow_id}->{end};
 	my $time = $end - $start;
 	push(@time_taken, $time);
+
       }
     }
   }
 
-  my $data = (@hops_taken, @time_taken);
-  my $json_result = encode_json $data;
- 
-  my $filename = "name.json";
-  print $actfile
+  my @data = ([@hops_taken], [@time_taken], @percent);
+  my $json = JSON->new->allow_nonref;
 
-  open FILE, ">$filename" or die $!;
+  my $json_result = to_json([@data]);
+  
+  open FILE, ">$filename.json" or die $!;
   print FILE $json_result;
   close FILE;
 
