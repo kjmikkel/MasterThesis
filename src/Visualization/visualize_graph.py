@@ -56,10 +56,10 @@ def tikz_graph(graph, edge_list, point_to_name):
     x = str(point[0] / modifier)
     y = str(point[1] / modifier)
     name = point_to_name[point]
+    print name
     s += '{(' + x + ', ' + y + ')' + '/' + name + '}'
   s += '}{\n\t\\node[invis]  (\\name) at \\pos {};\n' 
   s += '\t\\node[vertex] () at \\pos {};\n'
-# s += '\t\draw[outline] {\\pos circle (' + str(cutoff_distance / modifier) +  ')} node {};\n
   s += '}' 
     
   # Now to take care of the edges
@@ -291,7 +291,79 @@ def graph_examples():
 
 def gateway_graphs():
   point_list = [0.75]
+
+def motion_points(point_num, max_values):
+  bonn_dir = "../../bonnmotion-1.5a/bin/"
+  os.chdir(bonn_dir)
+
+  max_points = 15
+
+  name = "GaussMarkov-Movement_test_nodes-%s" % (point_num)
+  os.system("./bm -f %s GaussMarkov -i 60 -n %s -x %s -y %s -z 0 -d 300 -q 10" % (name, point_num, max_values, max_values))
+  os.system("gzip -df %s.movements.gz" % name)
+  bonn_file = open(name + ".movements", "r")
+  os.chdir("../../src/Visulisation")
+  
+  
+  point_mvt = []
+  all_points = []
+  coor_pat = re.compile("\d+.\d+ (\d+.\d+) (\d+.\d+)")
+
+  for i in xrange(10):
+    line = bonn_file.readline()
+    coors = coor_pat.findall(line)
     
+    num_coors = []
+    for coor in coors:
+      num_coors.append((float(coor[0]), float(coor[1])))
+    
+    max_coor_length = min(len(num_coors), max_points)
+    num_coors = num_coors[0:max_coor_length]
+    local_mvt = []
+    
+    for coor in num_coors:
+      local_mvt.append(coor)
+      all_points.append(coor)
+
+      point_mvt.append(local_mvt)
+  
+  all_points = give_points_names(all_points)
+  
+  edge_list = []
+  neighbour_dict = {}
+
+  # make directory to turn point into name
+  point_to_name = {}
+  only_points = []
+  for entry in all_points:
+    point_to_name[entry[1]] = entry[0]
+    only_points.append(entry[1])
+
+  graph = {}
+  for p_list in point_mvt:
+    for i in xrange(len(p_list) - 1):
+      graph[p_list[i]] = {p_list[i+1]: 0}  
+
+    graph[p_list[-1]] = {}
+
+  edge_list = make_edge_list(graph)
+  print graph
+  gauss_movement = tikz_graph(graph, edge_list, point_to_name)
+  
+  start = open('graph-basis.tex', 'r')
+  begin = start.read()
+  start.close()
+  
+  begin += '\n\n'
+  begin += gauss_movement
+  save = open('test_results/test.tex', 'w')
+  save.write(begin)
+  save.flush()
+  save.close()
+
+motion_points(5, 100)  
+
+
 
 """
 make_graph_from_list('{(0,2)/a}, {(2,1)/b}, {(-2,1)/e}, {(1,-1)/c}, {(-1,-1)/d}, {(0,3)/f}, {(3,1.5)/g}, {(-3, 1.5)/j}, {(2,-2)/h}, {(-2,-2)/i}', 'peterson', 4)
