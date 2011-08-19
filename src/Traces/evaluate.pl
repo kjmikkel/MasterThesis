@@ -2362,6 +2362,8 @@ sub printStatistics {
   # Enduring Plots
   printLatencySpectrum();
   printDeliveryCount();
+
+  save_results();
 }
 
 
@@ -2371,30 +2373,39 @@ sub save_results {
 
   foreach my $protocol (sort keys %stats) {
     foreach my $type (sort keys %{$stats{$protocol}}) {
-      $send = $stats{$protocol}{$type}{send}
-      $recv = $stats{$protocol}{$type}{recv}
+      $send = $stats{$protocol}{$type}->{send};
+      $recv = $stats{$protocol}{$type}->{recv};
     }
   }
 
-  @hops_taken = ();
-  @time_taken = ();
+  my @hops_taken = ();
+  my @time_taken = ();
 
   foreach my $type (sort keys %PKT){
-    if (exists %PKT[$type]{}) {
-      foreach my $flow_id (sort keys %PKT{$ping_type}) {
-	if (%PKT[$type]{$flow_id}->{reached} = 1) {
-	  
-	  # The number of hops required for the message to arrive
-	  push(@hops_taken, %PKT[$type]{$flow_id}->{taken});
+    foreach my $flow_id (sort keys %{$PKT{$type}}) {
+      if ($PKT{$type}{$flow_id}{reached} eq 1) {
 	
-	  # Time required for sending the message
-	  my $start = %PKT[$type]{$flow_id}->{start};
-	  my $end   = %PKT[$type]{$flow_id}->{end};
-	  my $time = $end - $start;
-	  push(@time_taken, $time);
-	}
+	# The number of hops required for the message to arrive
+	my $hops = $PKT{$type}{$flow_id}{taken};
+	push(@hops_taken, $hops);
+	
+	# Time required for sending the message
+	my $start = $PKT{$type}{$flow_id}{start};
+	my $end   = $PKT{$type}{$flow_id}{end};
+	my $time = $end - $start;
+	push(@time_taken, $time);
       }
     }
   }
+
+  my $data = (@hops_taken, @time_taken);
+  my $json_result = encode_json $data;
+ 
+  my $filename = "name.json";
+  print $actfile
+
+  open FILE, ">$filename" or die $!;
+  print FILE $json_result;
+  close FILE;
 
 }
