@@ -72,7 +72,7 @@ To complicate matter further different nodes can in practise have different comm
 Likewise it is important to remember that a node in practise might be able to adjust its communications range (at a higher energy cost). See figure~\ref{fig:different_radius}
 
 \subsubsection{The \ac{cldp}}
-Having mentioned both the \ac{gabe} and the \ac{rng}, both of which uses the \ac{uga}, I feel it would be amiss not to mention at least one variation that does not use the \ac{uga}. The only one I have been able to find is the \ac{cldp}.
+Having mentioned both the \ac{gabe} and the \ac{rng}, both of which uses the \ac{uga}, it would be amiss not to mention at least one variation that does not use the \ac{uga}. The only one I have been able to find is the \ac{cldp}.
  
 The \ac{cldp} works by first building a graph that may be non-planar, and then have each node in the network identify which edges overlaps, and then use a distributed algorithm to attempt to fix it:
 
@@ -137,6 +137,6 @@ If we were given a set of nodes in the plane, and told to create the graph that 
 
 When trying to apply spanners to \acp{manet} we have to remember that each node has a limited broadcast range, creating an upper bound on the length of an edge. Depending on the scheme and the hardware of the node, each edge may cost the same, no matter its length (since messages are not sent as directed beams, but rather transmitted omni-directionally), or there may be an option to increase the radius of the signal for an additional cost. In the following I will assume the fixed cost-model, as it is far more likely to be used than variable-cost model. Because of these differences in spanners for the \acp{manet}, I will therefore use the term \emph{limited-range spanner} to distinguish them from the concept as it is normally used. 
 
-Since I have been unable to find empirical data detailing the effectiveness of either the \acp{gabe} or \acp{rng} compared the to the non-planar graph, I have decided to empirically test the three different graph types. I will do so for a single-level graph and will therefore not be including the \ac{rdg} --- interested parties should consult \cite{GeoSpanners} for a comparison between the \ac{gabe} and the \ac{rdg}. Also I will not test the effectiveness of the \ac{cldp}, as I feel it would require too much time to implement, and that its missing the theoretical background that makes both the \ac{gabe} and the \ac{rng} interesting.
+Since I have been unable to find empirical data detailing the effectiveness of either the \acp{gabe} or \acp{rng} compared the to the non-planar graph, I have decided to empirically test the three different graph types. I will do so for a single-level graph and will therefore not be including the \ac{rdg} --- interested parties should consult \cite{GeoSpanners} for a comparison between the \ac{gabe} and the \ac{rdg}. Also I will not test the effectiveness of the \ac{cldp}, as it would require too much time to implement, and that its missing the theoretical background that makes both the \ac{gabe} and the \ac{rng} interesting.
 
 For more information about the setup of this test see section \ref{section:test_desc_spanners} and section \ref{section:test_results_spanners} for the results.
