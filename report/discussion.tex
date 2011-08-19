@@ -7,7 +7,7 @@ From the results presented in section~\ref{section:test_results}, it becomes cle
 
 The question is then which of these graphs would be optimal in a \ac{manet}. As mentioned earlier the problem with having many neighbours is not the cost in transmitting (that value is fixed by using the \ac{uga}), but rather the bookkeeping involved in remembering all the neighbours, and picking one when sending a message. Given this I would argue that having an average 10 or more neighbours are not acceptable, when alternatives with only around 2 or 3 exist. However, it is also clear that there is a clear cost of minimum number of hops when looking at figure~\ref{graph:avg_neighbour} and figure~\ref{graph:dist_percent}, which clearly shows us that the \ac{gabe} and \ac{rng} requires far more hops on average to get from the source to the sink than the non-planar graph. Given their planar nature, this is not surprising. 
 
-Based on this I would recommend using the \ac{gabe}, since it reduces the average number of neighbours with an average that, regardless of the number of nodes in the graph, lies very close to 3 with a very small standard deviation\footnote{See table~\ref{table:neigh_100} through table~\ref{table:neigh_10000} on p. \pageref{table:neigh_100}}, while having requiring fewer hops on average compared to the \ac{rng}, as seen in both figure~\ref{graph:avg_neighbour} figure~\ref{graph:dist_percent}.
+Based on this I would recommend using the \ac{gabe}, since it reduces the average number of neighbours with an average that, regardless of the number of nodes in the graph, lies very close to 3 with a very small standard deviation\footnote{See table~\ref{table:neigh_50} through table~\ref{table:neigh_10000}}, while having requiring fewer hops on average compared to the \ac{rng}, as seen in both figure~\ref{graph:avg_neighbour} figure~\ref{graph:dist_percent}.
 
 \subsection{Spanner-like properties of the \ac{gabe} and the \ac{rng}}
 
@@ -20,7 +20,7 @@ In figure~\ref{graph:dist_percent} and figure~\ref{graph:euclid_distance} we cle
 
 \graphResult{spanner/unit_distance}{A closer look at the unit distance compared to the non-planar graph. Uses the same data as figure~\ref{graph:dist_percent}}{unit_distance}
 
-From figure~\ref{graph:dist_percent} and figure~\ref{graph:unit_distance} we can clearly see from the number of hops (the dashed lines), that they seem to be slowly converging. However, we can also see that if we consult table~\ref{table:analysis_100}-\ref{table:analysis_10000} that the standard deviation is also increasing as the number of nodes increases (and clearly to the advantage of the average maximum values). However, since something very similar is happening to the non-planar graph, this is somewhat lessened.
+From figure~\ref{graph:dist_percent} and figure~\ref{graph:unit_distance} we can clearly see from the number of hops (the dashed lines), that they seem to be slowly converging. However, we can also see that if we consult table~\ref{table:analysis_50}-\ref{table:analysis_10000} that the standard deviation is also increasing as the number of nodes increases (and clearly to the advantage of the average maximum values). However, since something very similar is happening to the non-planar graph, this is somewhat lessened.
 
 \subsubsection{Spanner conclusion}
 

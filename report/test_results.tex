@@ -5,7 +5,7 @@ In this section I will present the test results. I will start by discussing my t
 \subsection{Spanner test results}
 In this section I will  describe some of the important results I have found in the Limited-range spanner test. The distance/hops results can be found in section \ref{limited_range_spanner_distance_appendix} and the neighbour results can be found in section~\ref{limited_range_spanner_neighbour_appendix}.
 
-First of all we must check whether or not the results are worth checking in the first place. From table~\ref{table:analysis_100}-\ref{table:analysis_10000} we can see that at most we are dealing with at most $1.32$ different connected components and that in no case have we been able to detect if the either the \ac{gabe} or the \ac{rng} has cut off all paths between two nodes, if it existed in the non-planar graph. 
+First of all we must check whether or not the results are worth checking in the first place. From table~\ref{table:analysis_50} through table~\ref{table:analysis_10000} we can see that at most we are dealing with at most $1.32$ different connected components and that in no case have we been able to detect if the either the \ac{gabe} or the \ac{rng} has cut off all paths between two nodes, if it existed in the non-planar graph. 
 
 The relatively low average number of connected components is a good indicator that the returned tests are of decent quality, as there must have been many different paths, of varying length, to choose from.
 
@@ -17,7 +17,7 @@ Since one of the stark secondary differences between the planar and the non-plan
 \label{section:hop_neighbour_comparison}
 \graphResult{spanner/avg_neighbour}{The solid lines indicates the average neighbours and belongs to the y-axis on the left. The dashed lines indicates the average number of hops from the source to the sink, and belongs to the y-axis on the right.}{avg_neighbour}
 
-As we can see from figure~\ref{graph:avg_neighbour}, it is clear that the average number of the smallest number of hops from the source to the sink increases as the number of nodes in the graph increases. It is also clear that it is the non-planar graph which has the smallest average number of hops required, while the \ac{rng} has the largest. Comparing these results with the average number of neighbours it is however very interesting to see that while the average number of neighbours keeps increasing for the non-planar graph, it is completely stable for the \ac{rng} and, except for the number of neighbours for 100 nodes, the \ac{gabe}, which agrees with the discussion in section~\ref{del_gabe_rng_neigh} on p. \pageref{del_gabe_rng_neigh}. 
+As we can see from figure~\ref{graph:avg_neighbour}, it is clear that the average number of the smallest number of hops from the source to the sink increases as the number of nodes in the graph increases. It is also clear that it is the non-planar graph which has the smallest average number of hops required, while the \ac{rng} has the largest. Comparing these results with the average number of neighbours it is however very interesting to see that while the average number of neighbours keeps increasing for the non-planar graph, it is completely stable for the \ac{rng} and, except for the number of neighbours for 50 and 100 nodes, the \ac{gabe}, which agrees with the discussion in section~\ref{del_gabe_rng_neigh} on p. \pageref{del_gabe_rng_neigh}. 
 
 \subsubsection{Graph Distance Comparison}
 \label{section:graph_distance_comparison}
