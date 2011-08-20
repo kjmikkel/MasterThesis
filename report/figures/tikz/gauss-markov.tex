@@ -1,0 +1,122 @@
+\pgfdeclarelayer{last}
+\pgfdeclarelayer{background}
+\pgfsetlayers{last,background,main}
+
+\colorlet{circle edge}{black!50}
+\colorlet{circle area}{gray!20}
+\def\scale{0.14}
+
+\tikzset{
+  filled/.style={fill=circle area, draw=circle edge, thick},
+  outline/.style={draw=circle edge, thick}
+  }
+
+\setlength{\parskip}{5mm}
+
+\tikzstyle{edge} = [draw, thick, -]
+\tikzstyle{invis}=[circle,fill=white!100,minimum size =0pt,inner sep=0pt]
+\tikzstyle{vertex}=[circle,fill=black!25,minimum size=5pt,inner sep=0pt]
+\tikzstyle{selected edge} = [draw, line width=2cm,-,gray!20] 
+\tikzstyle{real edge} = [draw, line width=2pt,-, gray!70]
+\tikzstyle{back_edge_10} = [draw, line width=5pt,-,black!10]
+\tikzstyle{back_edge_20} = [draw, line width=5pt,-,black!20]
+\tikzstyle{back_edge_30} = [draw, line width=5pt,-,black!30]
+\tikzstyle{back_edge_40} = [draw, line width=5pt,-,black!40]
+\tikzstyle{back_edge_50} = [draw, line width=5pt,-,black!50]
+\tikzstyle{back_edge_60} = [draw, line width=5pt,-,black!60]
+\tikzstyle{back_edge_70} = [draw, line width=5pt,-,black!70]
+\tikzstyle{back_edge_80} = [draw, line width=5pt,-,black!80]
+\tikzstyle{back_edge_90} = [draw, line width=5pt,-,black!90]
+\tikzstyle{back_edge_100} = [draw, line width=5pt,-,black!100]
+
+\def\edgeLista{a/b, b/c, c/d, d/e, e/f, f/g, g/h, h/i, i/j, j/k, k/l, l/m, m/n, n/o}
+\def\edgeListb{p/q, q/r, r/s, s/t, t/u, u/v, v/w, w/x, x/y, y/z, z/a2, a2/b2, b2/c2, c2/d2}
+\def\edgeListc{e2/f2, f2/g2, g2/h2, h2/i2, i2/j2, j2/k2, k2/l2, l2/m2, m2/n2, n2/o2, o2/p2, p2/q2, q2/r2, r2/s2}
+\def\edgeListd{t2/u2, u2/v2, v2/w2, w2/x2, x2/y2, y2/z2, z2/a3, a3/b3, b3/c3, c3/d3, d3/e3, e3/f3, f3/g3, g3/h3}
+\def\edgeListe{i3/j3, j3/k3, k3/l3, l3/m3, m3/n3, n3/o3, o3/p3, p3/q3, q3/r3, r3/s3, s3/t3, t3/u3, u3/v3, v3/w3}
+\def\edgeListf{x3/y3, y3/z3, z3/a4, a4/b4, b4/c4, c4/d4, d4/e4, e4/f4, f4/g4, g4/h4, h4/i4, i4/j4, j4/k4, k4/l4}
+\def\edgeListg{m4/n4, n4/o4, o4/p4, p4/q4, q4/r4, r4/s4, s4/t4, t4/u4, u4/v4, v4/w4, w4/x4, x4/y4, y4/z4, z4/a5}
+\def\edgeListh{b5/c5, c5/d5, d5/e5, e5/f5, f5/g5, g5/h5, h5/i5, i5/j5, j5/k5, k5/l5, l5/m5, m5/n5, n5/o5, o5/p5}
+\def\edgeListi{q5/r5, r5/s5, s5/t5, t5/u5, u5/v5, v5/w5, w5/x5, x5/y5, y5/z5, z5/a6, a6/b6, b6/c6, c6/d6, d6/e6}
+\def\edgeListj{f6/g6, g6/h6, h6/i6, i6/j6, j6/k6, k6/l6, l6/m6, m6/n6, n6/o6, o6/p6, p6/q6, q6/r6, r6/s6, s6/t6}
+
+\begin{tikzpicture}[scale=\scale]
+\foreach \pos/\name in {{(42.08, 76.93)/a}, {(37.80, 76.96)/b}, {(34.67, 78.36)/c}, {(34.63, 78.42)/d}, {(34.58, 78.52)/e}, {(34.09, 81.89)/f}, {(34.09, 82.99)/g}, {(34.73, 86.28)/h}, {(35.59, 94.45)/i}, {(35.52, 96.88)/j}, {(35.55, 100.73)/k}, {(35.58, 101.46)/l}, {(37.85, 106.52)/m}, {(40.06, 114.04)/n}, {(45.95, 100.57)/o}, {(46.41, 42.46)/p}, {(47.93, 40.54)/q}, {(48.09, 40.44)/r}, {(55.66, 37.80)/s}, {(63.23, 35.76)/t}, {(67.69, 31.52)/u}, {(79.21, 27.28)/v}, {(83.42, 23.45)/w}, {(83.08, 22.15)/x}, {(83.31, 21.57)/y}, {(85.82, 17.08)/z}, {(88.99, 12.93)/a2}, {(89.29, 12.74)/b2}, {(93.17, 9.88)/c2}, {(97.73, 16.20)/d2}, {(50.28, 94.20)/e2}, {(50.51, 93.76)/f2}, {(51.83, 92.36)/g2}, {(50.43, 86.52)/h2}, {(51.35, 81.50)/i2}, {(48.56, 75.06)/j2}, {(46.05, 65.97)/k2}, {(49.83, 61.50)/l2}, {(52.12, 60.53)/m2}, {(56.19, 60.16)/n2}, {(55.97, 57.19)/o2}, {(52.52, 52.55)/p2}, {(52.47, 52.38)/q2}, {(51.89, 50.99)/r2}, {(52.04, 43.93)/s2}, {(89.66, 83.62)/t2}, {(91.51, 82.48)/u2}, {(95.53, 79.32)/v2}, {(102.26, 79.08)/w2}, {(110.56, 81.86)/x2}, {(117.78, 82.70)/y2}, {(109.51, 82.37)/z2}, {(99.01, 81.04)/a3}, {(84.91, 77.29)/b3}, {(70.36, 73.65)/c3}, {(56.00, 78.00)/d3}, {(41.05, 79.26)/e3}, {(26.81, 83.97)/f3}, {(12.33, 80.07)/g3}, {(6.13, 79.73)/h3}, {(78.93, 46.28)/i3}, {(80.15, 48.68)/j3}, {(81.13, 51.17)/k3}, {(80.47, 52.58)/l3}, {(80.27, 53.01)/m3}, {(80.18, 53.69)/n3}, {(80.20, 54.06)/o3}, {(82.93, 57.15)/p3}, {(84.28, 60.16)/q3}, {(89.27, 64.82)/r3}, {(91.53, 68.27)/s3}, {(93.94, 71.59)/t3}, {(94.64, 71.95)/u3}, {(97.77, 69.99)/v3}, {(105.50, 72.78)/w3}, {(25.48, 98.00)/x3}, {(23.02, 90.89)/y3}, {(19.97, 84.58)/z3}, {(17.45, 85.90)/a4}, {(8.13, 86.96)/b4}, {(12.68, 87.49)/c4}, {(23.17, 98.12)/d4}, {(34.18, 108.31)/e4}, {(40.08, 116.64)/f4}, {(36.27, 108.26)/g4}, {(35.09, 97.25)/h4}, {(32.72, 82.44)/i4}, {(28.39, 74.11)/j4}, {(20.68, 61.24)/k4}, {(17.53, 46.58)/l4}, {(31.82, 31.16)/m4}, {(42.01, 22.29)/n4}, {(52.21, 13.98)/o4}, {(57.06, 0.00)/p4}, {(58.69, 12.96)/q4}, {(61.78, 27.64)/r4}, {(54.38, 39.76)/s4}, {(55.63, 53.38)/t4}, {(57.02, 68.22)/u4}, {(53.94, 82.56)/v4}, {(50.75, 95.21)/w4}, {(43.96, 108.58)/x4}, {(35.50, 120.78)/y4}, {(37.69, 113.72)/z4}, {(41.85, 105.29)/a5}, {(61.50, 53.74)/b5}, {(57.35, 39.32)/c5}, {(49.40, 26.60)/d5}, {(45.47, 12.12)/e5}, {(49.39, 26.60)/f5}, {(57.45, 35.53)/g5}, {(67.69, 42.91)/h5}, {(75.37, 45.69)/i5}, {(84.27, 52.48)/j5}, {(86.50, 61.03)/k5}, {(87.65, 72.53)/l5}, {(89.57, 87.41)/m5}, {(79.53, 98.55)/n5}, {(69.31, 109.54)/o5}, {(58.20, 119.61)/p5}, {(98.63, 90.46)/q5}, {(105.14, 83.78)/r5}, {(112.14, 83.58)/s5}, {(100.94, 86.70)/t5}, {(88.89, 95.63)/u5}, {(82.79, 101.53)/v5}, {(76.63, 115.20)/w5}, {(68.64, 102.50)/x5}, {(64.91, 97.14)/y5}, {(64.32, 96.03)/z5}, {(63.70, 92.51)/a6}, {(64.58, 88.35)/b6}, {(70.21, 83.77)/c6}, {(75.53, 78.41)/d6}, {(79.45, 73.47)/e6}, {(75.03, 32.22)/f6}, {(70.03, 30.87)/g6}, {(59.74, 33.83)/h6}, {(58.20, 34.70)/i6}, {(51.55, 35.57)/j6}, {(43.96, 35.35)/k6}, {(32.23, 35.40)/l6}, {(24.60, 38.92)/m6}, {(17.56, 42.62)/n6}, {(16.00, 42.96)/o6}, {(11.42, 45.63)/p6}, {(0.00, 47.59)/q6}, {(9.30, 49.76)/r6}, {(11.83, 50.43)/s6}, {(16.29, 50.69)/t6}} {
+	\node[invis]  (\name) at \pos {};
+	\node[vertex] () at \pos {};
+}
+
+\foreach \source/\sink in \edgeLista {
+	\path[edge] (\source) -- (\sink);
+}
+
+\foreach \source/\sink in \edgeListb {
+	\path[edge] (\source) -- (\sink);
+}
+
+\foreach \source/\sink in \edgeListc {
+	\path[edge] (\source) -- (\sink);
+}
+
+\foreach \source/\sink in \edgeListd {
+	\path[edge] (\source) -- (\sink);
+}
+
+\foreach \source/\sink in \edgeListe {
+	\path[edge] (\source) -- (\sink);
+}
+
+\foreach \source/\sink in \edgeListf {
+	\path[edge] (\source) -- (\sink);
+}
+
+\foreach \source/\sink in \edgeListg {
+	\path[edge] (\source) -- (\sink);
+}
+
+\foreach \source/\sink in \edgeListh {
+	\path[edge] (\source) -- (\sink);
+}
+
+\foreach \source/\sink in \edgeListi {
+	\path[edge] (\source) -- (\sink);
+}
+
+\foreach \source/\sink in \edgeListj {
+	\path[edge] (\source) -- (\sink);
+}
+
+\begin{pgfonlayer}{background}
+	\foreach \source/\sink in \edgeListj {
+		\path[back_edge_100] (\source) -- (\sink);
+	}
+	\foreach \source/\sink in \edgeListi {
+		\path[back_edge_90] (\source) -- (\sink);
+	}
+	\foreach \source/\sink in \edgeListh {
+		\path[back_edge_80] (\source) -- (\sink);
+	}
+	\foreach \source/\sink in \edgeListg {
+		\path[back_edge_70] (\source) -- (\sink);
+	}
+	\foreach \source/\sink in \edgeListf {
+		\path[back_edge_60] (\source) -- (\sink);
+	}
+	\foreach \source/\sink in \edgeListe {
+		\path[back_edge_50] (\source) -- (\sink);
+	}
+	\foreach \source/\sink in \edgeListd {
+		\path[back_edge_40] (\source) -- (\sink);
+	}
+	\foreach \source/\sink in \edgeListc {
+		\path[back_edge_30] (\source) -- (\sink);
+	}
+	\foreach \source/\sink in \edgeListb {
+		\path[back_edge_20] (\source) -- (\sink);
+	}
+	\foreach \source/\sink in \edgeLista {
+		\path[back_edge_10] (\source) -- (\sink);
+	}
+\end{pgfonlayer}
+
+\end{tikzpicture}
