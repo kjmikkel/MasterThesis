@@ -76,7 +76,7 @@ Having mentioned both the \ac{gabe} and the \ac{rng}, both of which uses the \ac
  
 The \ac{cldp} works by first building a graph that may be non-planar, and then have each node in the network identify which edges overlaps, and then use a distributed algorithm to attempt to fix it:
 
-After the initial graph is built, each $u$ in the graph transmits a message to each of its neighbours. Let us for the examples sake call one of its neighbours $v$, and the message it is sent $m_{\overline{uv}}$. The goal of $m_{\overline{uv}}$ is, as described above, to check if there is any edge that crosses $\overline{uv}$. $m_{\overline{uv}}$ will then traverse the graph using the \label{right-hand-rule} \emph{the right-hand-rule}\footnote{The right-hand-rule states that in routing for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started}, while recording the number of times it passes each edge.
+After the initial graph is built, each $u$ in the graph transmits a message to each of its neighbours. Let us for the examples sake call one of its neighbours $v$, and the message it is sent $m_{\overline{uv}}$. The goal of $m_{\overline{uv}}$ is, as described above, to check if there is any edge that crosses $\overline{uv}$. $m_{\overline{uv}}$ will then traverse the graph using the \label{right-hand-rule} \emph{the right-hand-rule}\footnote{The right-hand-rule states that in routing for routing graphs, if you chose to go to the right each time you have a choice, you will eventually end up where you started.}, while recording the number of times it passes each edge.
 
 Once $m_{\overline{uv}}$ arrives at a node $q$ with a rightmost neighbour $p$, it will check whether $\overline{qp}$ crosses $\overline{uv}$, if it does, then $\overline{qp}$ will be recorded as doing so. Once $m_{\overline{uv}}$ arrives back at the $u$, it goes through all the edges that crosses $\overline{uv}$, and tries to resolve the situation. The authors note that if the message has traversed an edge twice, then removing that edge could partition the graph. Therefore an edge that has been traversed twice is said to be \emph{non-removable}. If we let $e$ be the first crossed edge and $e^{\prime}$ be a line that crosses $e$, then \ac{cldp} uses the following cases to decide which edge to remove:
 \begin{description}
@@ -110,7 +110,7 @@ Using \acp{ch} we divide the communication between nodes into 3 stages:
 \begin{enumerate}
 \item From the source to the local \ac{ch} 
 \item From the local \ac{ch} to the \ac{ch} closest to the sink
-\item From the \ac{ch} closets to the sink to the sink itself\footnote{If either \ac{ch} is the sink or the source, and the first or third part is of course eliminated}.
+\item From the \ac{ch} closets to the sink to the sink itself\footnote{If either \ac{ch} is the sink or the source, and the first or third part is of course eliminated.}.
 \end{enumerate}
 See figure~\ref{fig:gateway-node} for an illustration of this.
 

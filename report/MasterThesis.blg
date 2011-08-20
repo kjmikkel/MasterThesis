@@ -1,0 +1,59 @@
+This is BibTeX, Version 0.99d (TeX Live 2011)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: MasterThesis.aux
+A level-1 auxiliary file: introduction.aux
+A level-1 auxiliary file: fundamentals.aux
+A level-1 auxiliary file: graph_overview.aux
+A level-1 auxiliary file: routing.aux
+A level-1 auxiliary file: test_description.aux
+A level-1 auxiliary file: test_results.aux
+A level-1 auxiliary file: discussion.aux
+A level-1 auxiliary file: conclusion.aux
+A level-1 auxiliary file: appendix.aux
+The style file: plain.bst
+Database file #1: references.bib
+Warning--empty booktitle in larMANET
+Warning--empty booktitle in GeoSpanners
+Warning--empty booktitle in asymp
+You've used 36 entries,
+            2118 wiz_defined-function locations,
+            743 strings with 10803 characters,
+and the built_in function-call counts, 14504 in all, are:
+= -- 1497
+> -- 666
+< -- 17
++ -- 269
+- -- 224
+* -- 1006
+:= -- 2298
+add.period$ -- 120
+call.type$ -- 36
+change.case$ -- 220
+chr.to.int$ -- 0
+cite$ -- 39
+duplicate$ -- 567
+empty$ -- 1101
+format.name$ -- 224
+if$ -- 3132
+int.to.chr$ -- 0
+int.to.str$ -- 36
+missing$ -- 36
+newline$ -- 183
+num.names$ -- 72
+pop$ -- 221
+preamble$ -- 1
+purify$ -- 184
+quote$ -- 0
+skip$ -- 431
+stack$ -- 0
+substring$ -- 984
+swap$ -- 167
+text.length$ -- 17
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 140
+warning$ -- 3
+while$ -- 148
+width$ -- 38
+write$ -- 427
+(There were 3 warnings)
