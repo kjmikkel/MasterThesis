@@ -12,6 +12,7 @@
 
 % My acronyms
 \acrodef{ch}[CH]{Cluster Head}
+\acrodef{ucg}[UCG]{Unit-complete Graph}
 \acrodef{gabe}[GG]{Gabriel Graph}
 \acrodef{udg}[UDG]{Unit Disk Graph}
 \acrodef{manet}[MANET]{Mobile Ad-Hoc Network}
@@ -34,23 +35,23 @@ A \ac{manet} is a network of moving nodes that without human intervention can cr
 
 In this thesis I will give an overview of the elements required to create a \ac{manet} and several already existing solutions that fulfil these requirements. 
 
-Furthermore, I will give a performance evaluation of my own implementation of the GOAFR algorithm \cite{gopher} compared to several other algorithms. I will also perform a comparison between the average distance  of two nodes in randomly generated non-planar graphs, compared to the \ac{gabe} \cite{gabe1, gabe2} and the \ac{rng} \cite{RNG}, compared to the average number of neighbours in the graph.
+Furthermore, I will give a performance evaluation of my own implementation of the GOAFR algorithm \cite{gopher} compared to several other algorithms. I will also perform a comparison between the average distance  of two nodes in randomly generated \acp{ucg} (graphs where two nodes are connected or not based on their distance, regardless of planarity), compared to the \ac{gabe} \cite{gabe1, gabe2} and the \ac{rng} \cite{RNG}, compared to the average number of neighbours in the graph.
 }
 
 \clearpage
 
 \tableofcontents
 
-%\cinclude{introduction} 
-%\cinclude{fundamentals}
-%\cinclude{graph_overview}
-%\cinclude{routing}
-%\cinclude{test_description} 
-%\cinclude{test_results} 
-%\cinclude{discussion} 
-%\cinclude{conclusion}
+\cinclude{introduction} 
+\cinclude{fundamentals}
+\cinclude{graph_overview}
+\cinclude{routing}
+\cinclude{test_description} 
+\cinclude{test_results} 
+\cinclude{discussion} 
+\cinclude{conclusion}
 
-\graphResult{graph/percentage_graph}{test}{}
+%\graphResult{graph/percentage_graph}{test}{}
 
 \appendix
 \cinclude{appendix}
