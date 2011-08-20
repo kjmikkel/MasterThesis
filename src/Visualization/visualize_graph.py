@@ -13,6 +13,9 @@ time_point = 1
 modifier = 1
 colour_list = webcolors.css3_names_to_hex.keys()
 
+def c_round(num):
+  return "%.2f" % num
+
 # SVG creation
 def svg_graph(name, graph, edge_list, max_x, max_y, min_x, min_y):
     fig = Fig()
@@ -56,7 +59,6 @@ def tikz_graph(graph, edge_list, point_to_name):
     x = str(point[0] / modifier)
     y = str(point[1] / modifier)
     name = point_to_name[point]
-    print name
     s += '{(' + x + ', ' + y + ')' + '/' + name + '}'
   s += '}{\n\t\\node[invis]  (\\name) at \\pos {};\n' 
   s += '\t\\node[vertex] () at \\pos {};\n'
@@ -299,12 +301,12 @@ def motion_points(point_num, max_values):
   max_points = 15
 
   name = "GaussMarkov-Movement_test_nodes-%s" % (point_num)
-  os.system("./bm -f %s GaussMarkov -i 60 -n %s -x %s -y %s -z 0 -d 300 -q 10" % (name, point_num, max_values, max_values))
-  os.system("gzip -df %s.movements.gz" % name)
+#  os.system("./bm -f %s GaussMarkov -i 60 -n %s -x %s -y %s -z 0 -d 300 -q 10" % (name, point_num, max_values, max_values))
+ # os.system("gzip -df %s.movements.gz" % name)
   bonn_file = open(name + ".movements", "r")
-  os.chdir("../../src/Visulisation")
   
-  
+  os.chdir("../../src/Visualization")
+    
   point_mvt = []
   all_points = []
   coor_pat = re.compile("\d+.\d+ (\d+.\d+) (\d+.\d+)")
@@ -325,8 +327,10 @@ def motion_points(point_num, max_values):
       local_mvt.append(coor)
       all_points.append(coor)
 
-      point_mvt.append(local_mvt)
+    point_mvt.append(local_mvt)
   
+  bonn_file.close()
+
   all_points = give_points_names(all_points)
   
   edge_list = []
@@ -339,29 +343,83 @@ def motion_points(point_num, max_values):
     point_to_name[entry[1]] = entry[0]
     only_points.append(entry[1])
 
-  graph = {}
-  for p_list in point_mvt:
-    for i in xrange(len(p_list) - 1):
-      graph[p_list[i]] = {p_list[i+1]: 0}  
+  # Make the background edges
+  pr = 100 / point_num
 
-    graph[p_list[-1]] = {}
-
-  edge_list = make_edge_list(graph)
-  print graph
-  gauss_movement = tikz_graph(graph, edge_list, point_to_name)
+  background_edges = ""
+  for i in xrange(point_num):
+    dark = pr * (i + 1)
+    background_edges += "\\tikzstyle{back_edge_%s} = [draw, line width=5pt,-,black!%s]\n" % (dark, dark)
   
+  # We create the variables we are going to use to keep it orderly
+  def_str = ""
+  for index in xrange(point_num):
+    mvt = point_mvt[index]
+    
+    temp = "\\def\\edgeList%s{" % (chr(index + 97))
+    
+    name_list = ""
+    for inner_index in xrange(len(mvt) - 1):
+      p1 = mvt[inner_index]
+      p2 = mvt[inner_index + 1]
+      
+      n1 = point_to_name[p1]
+      n2 = point_to_name[p2]
+
+      name_list += "%s/%s, " % (n1, n2)
+      
+    def_str += "%s%s}\n" % (temp, name_list[0:-2])
+ 
+  # We create the list of points
+  point_list_str = ""
+  for point in only_points:
+    point_list_str += "{(%s, %s)/%s}, " % (c_round(point[0]), c_round(point[1]), point_to_name[point])
+    
+  last_bit  = '\\foreach \\pos/\\name in {%s} {\n' % point_list_str[0:-2] 
+  last_bit += '\t\\node[invis]  (\\name) at \\pos {};\n' 
+  last_bit += '\t\\node[vertex] () at \\pos {};\n}\n\n'
+  
+  for index in xrange(point_num):
+    name   = "\\edgeList%s" % (chr(index + 97)) 
+    local  = '\\foreach \\source/\\sink in %s {\n' % name
+    local += '\t\\path[edge] (\\source) -- (\\sink);\n}\n\n'
+
+    last_bit += local
+
+  last_bit += '\\begin{pgfonlayer}{background}\n'
+ 
+  semi_local = ""
+  for index in xrange(point_num):
+    name   = "\\edgeList%s" % (chr(index + 97)) 
+    local  = '\t\\foreach \\source/\\sink in %s {\n' % name
+    local += '\t\t\\path[back_edge_%s] (\\source) -- (\\sink);\n' % (pr * (index + 1))
+    local += '\t}\n'
+
+    semi_local = local + semi_local
+
+  last_bit += semi_local
+  last_bit += '\\end{pgfonlayer}\n\n'
+  
+  graph  = "\\pgfdeclarelayer{last}\n"
+  graph += "\\pgfdeclarelayer{background}\n"
+  graph += "\\pgfsetlayers{last,background,main}\n\n"
+
   start = open('graph-basis.tex', 'r')
-  begin = start.read()
+  graph += start.read()
   start.close()
+
+  graph += background_edges + "\n"
+  graph += def_str + "\n"
+  graph += '\\begin{tikzpicture}[scale=\\scale]\n'
+  graph += last_bit
+  graph += "\\end{tikzpicture}"
   
-  begin += '\n\n'
-  begin += gauss_movement
   save = open('test_results/test.tex', 'w')
-  save.write(begin)
+  save.write(graph)
   save.flush()
   save.close()
 
-motion_points(5, 100)  
+motion_points(10, 100)  
 
 
 
