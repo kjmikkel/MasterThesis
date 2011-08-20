@@ -127,7 +127,11 @@ As specified before DSDV uses a distributed version of Bellman-Ford routing algo
 
 \subsection{Mobility models}
 \label{section:mobili-ty_model}
-For the mobility models I have only chosen to test Gauss-Markov, which I from \cite{MobilityAdHocResearch} found to be a good algorithm for simulating a movement pattern\footnote{Implemented by the same team that build the BonnMotion movement tool} that seems rather random. I would have liked to test the Disaster Area movement pattern found in \cite{disasterArea}, but I found it difficult to get the BonnMotion tool to generate the movement, as well as unsure on which definitions would create an interesting model for the different algorithms to be tested on\footnote{In order to create a disaster area movement simulation several different zones have to be defined -- e.g. a zone for the disaster, a zone for the triage, treatment and so on.}. 
+
+\tikfig{gauss-markov}{An example of 10 nodes moving around. Each node has its own colour trail to differentiate it from the others, and to show the path of the node --- the grey nodes on the trail are the various locations they were ordered to go to.}
+
+
+For the mobility models I have only chosen to test Gauss-Markov, which I from \cite{MobilityAdHocResearch} found to be a good algorithm for simulating a movement pattern\footnote{Implemented by the same team that build the BonnMotion movement tool} that seems rather random. For an example of the movment produced by Gauss-Markov please, see figure~\ref{fig:gauss-markov}\footnote{Full setup for the parameters fed into Gauss-Markov can be found in the \texttt{motion\_points} function in \texttt{src/Visualization/visualize\_graph.py}.}. I would have liked to test the Disaster Area movement pattern found in \cite{disasterArea}, but I found it difficult to get the BonnMotion tool to generate the movement, as well as unsure on which definitions would create an interesting model for the different algorithms to be tested on\footnote{In order to create a disaster area movement simulation several different zones have to be defined -- e.g. a zone for the disaster, a zone for the triage, treatment and so on.}. 
 
 The script I have used to create the needed ns-2 mobility data can be found in the \texttt{src/MotionCode} directory.
 
