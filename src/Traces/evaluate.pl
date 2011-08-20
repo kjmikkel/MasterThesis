@@ -3,7 +3,6 @@
 # $Id: evaluate.pl,v 1.4 2003/01/29 18:41:05 kiess Exp $
 # edited version by wk to adapt to hls
 
-use JSON;
 use File::Basename;
 use strict;
 use List::Util qw[min max];
