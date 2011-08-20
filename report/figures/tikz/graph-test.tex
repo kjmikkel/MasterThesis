@@ -16,7 +16,7 @@
 \tikzstyle{real edge} = [draw, line width=2pt,-, gray!70]
 
 
-\subfloat[The normal graph]{\label{fig:norm_graph}
+\subfloat[The Unit-complete graph]{\label{fig:norm_graph}
 \begin{tikzpicture}[scale=\scale]
   \foreach \pos/\name in \peterson {
     \node[vertex] (\name) at \pos {};
@@ -26,7 +26,7 @@
     \path[real edge] (\source) -- (\dest);
   }
 \end{tikzpicture}}
-\subfloat[The Gabriel graph]{\label{fig:gg_graph}
+\subfloat[The Gabriel Graph]{\label{fig:gg_graph}
 \begin{tikzpicture}[scale=\scale]
   \foreach \pos/\name in \peterson {
     \node[vertex] (\name) at \pos {};
@@ -37,7 +37,7 @@
   }
 \end{tikzpicture}}
 
-\subfloat[The RNG graph]{\label{rng_graph}
+\subfloat[The RNG]{\label{rng_graph}
 \begin{tikzpicture}[scale=\scale]
   \foreach \pos/\name in \peterson {
     \node[vertex] (\name) at \pos {};
