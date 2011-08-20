@@ -26,9 +26,8 @@
   Author: Brad Karp, Harvard University EECS, May, 1999
 
   $Id: gpsr.cc,v 1.92 2003/01/24 11:01:07 lochert Exp $
+  Modified by Mikkel Kjær Jensen, August, 2011 to GOAFR
 */
-
-// Modified by Mikkel Kjær Jensen to GOAFR
 
 // GOAFR for ns2 w/wireless extensions
 

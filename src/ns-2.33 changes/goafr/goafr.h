@@ -27,6 +27,7 @@
 
   Author: Brad Karp, Harvard University EECS, May, 1999
   $Id: goafr.h,v 1.1 2004/05/10 16:38:26 schenke Exp $
+  Modified by Mikkel Kjær Jesnen, August, 2011
 */
 using namespace std;
 
