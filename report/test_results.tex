@@ -22,7 +22,7 @@ As we can see from figure~\ref{graph:avg_neighbour}, it is clear that the averag
 \subsubsection{Graph Distance Comparison}
 \label{section:graph_distance_comparison}
 
-\graphResult{spanner/dist_percent}{The solid lines indicates the percentage of the total distance traversed for the \ac{gabe} and the \ac{rng}, compared to the \ac{ucg}, while the dashed lines indicates the same, but for hops instead of Euclidean distance. The \ac{ucg} has been omitted as it in both cases would be a straight line at $100\%$.}{dist_percent}
+\graphResult{spanner/dist_percent}{This graph show the ratio between the values from the \ac{gabe} and the \ac{rng} when compared to the values of the \ac{ucg}. The ratio's for \ac{ucg} has been omitted, since it by definition will be 1. The solid lines indicates the ratio of the total Euclidean distance, while the dashed lines indicates the ratio of total hops. The values used in the creation of this graph can be found in the spanner tables in the appendix under ``Ratio of values compared to teh UCG''}{dist_percent}
 
 From figure~\ref{graph:dist_percent} we can see that not surprisingly that the \ac{gabe} is closer to the \ac{ucg} is much better than the \ac{rng}. More importantly we also see that there is a huge difference between the Euclidean distance than the Unit distance, when compared to the results from the \ac{ucg}. It is interesting to note, that even though the density of the graphs are kept steady, as the number of nodes grows, both the \ac{gabe} and the \ac{rng} edges asymptotically closer to the \ac{ucg}. 
 
