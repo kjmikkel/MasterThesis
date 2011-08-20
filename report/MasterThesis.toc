@@ -1,4 +1,0 @@
-\select@language {english}
-\contentsline {section}{\numberline {A}Appendix}{5}
-\contentsline {subsection}{\numberline {A.1}Limited-range spanner distance results}{5}
-\contentsline {subsection}{\numberline {A.2}Limited-range spanner neighbour results}{8}
