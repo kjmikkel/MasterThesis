@@ -56,7 +56,6 @@ def tikz_graph(graph, edge_list, point_to_name):
     x = str(point[0] / modifier)
     y = str(point[1] / modifier)
     name = point_to_name[point]
-    print name
     s += '{(' + x + ', ' + y + ')' + '/' + name + '}'
   s += '}{\n\t\\node[invis]  (\\name) at \\pos {};\n' 
   s += '\t\\node[vertex] () at \\pos {};\n'
@@ -298,13 +297,13 @@ def motion_points(point_num, max_values):
 
   max_points = 15
 
-  name = "GaussMarkov-Movement_test_nodes-%s" % (point_num)
-  os.system("./bm -f %s GaussMarkov -i 60 -n %s -x %s -y %s -z 0 -d 300 -q 10" % (name, point_num, max_values, max_values))
-  os.system("gzip -df %s.movements.gz" % name)
-  bonn_file = open(name + ".movements", "r")
-  os.chdir("../../src/Visulisation")
+#  name = "GaussMarkov-Movement_test_nodes-%s" % (point_num)
+#  os.system("./bm -f %s GaussMarkov -i 60 -n %s -x %s -y %s -z 0 -d 300 -q 10" % (name, point_num, max_values, max_values))
+#  os.system("gzip -df %s.movements.gz" % name)
+#  bonn_file = open(name + ".movements", "r")
   
-  
+  os.chdir("../../src/Visualization")
+    
   point_mvt = []
   all_points = []
   coor_pat = re.compile("\d+.\d+ (\d+.\d+) (\d+.\d+)")
@@ -327,6 +326,8 @@ def motion_points(point_num, max_values):
 
       point_mvt.append(local_mvt)
   
+  bonn_file.close()
+
   all_points = give_points_names(all_points)
   
   edge_list = []
@@ -346,8 +347,16 @@ def motion_points(point_num, max_values):
 
     graph[p_list[-1]] = {}
 
+  # Make the background edges
+  pr = 100.0 / point_num
+  for i in xrange(point_num):
+    dark = pr * (i + 1)
+ 
+\tikzstyle{edgeBackground} = [draw, line width=2cm,-,gray!20] 
+    edge
+
+
   edge_list = make_edge_list(graph)
-  print graph
   gauss_movement = tikz_graph(graph, edge_list, point_to_name)
   
   start = open('graph-basis.tex', 'r')
@@ -361,7 +370,7 @@ def motion_points(point_num, max_values):
   save.flush()
   save.close()
 
-motion_points(5, 100)  
+motion_points(10, 100)  
 
 
 

@@ -10,18 +10,18 @@ for f in files:
     os.system("mv %s %s" % (f, new_name))
 
 """
-os.chdir("../../bonnmotion-1.5a/bin/")
-size_option = [100, 250]
+os.chdir("../../../bonnmotion-1.5a/bin/")
+size_option = [500, 750]
 for size in size_option:
-  for j in xrange(2):
-    for i in xrange(50):
+  for j in xrange(10):
+    for i in xrange(100):
       nodes = 10 * (i + 1)
       max_speed = 2
       name = "GaussMarkov-%s-%s-%s" % (nodes, size, j)
       if os.path.exists(name):
         continue
 
-      os.system("./bm -f %s GaussMarkov -i 120 -n %s -x %s -y %s -z 0 -d 60 -h %s -u %s" % (name, nodes, size, size, max_speed, 1))
+      os.system("./bm -f %s GaussMarkov -i 120 -n %s -x %s -y %s -z 0 -d 90 -h %s -u %s" % (name, nodes, size, size, max_speed, 1))
 
       os.system("./bm NSFile -f %s" % name)
       os.system("mv %s.ns_params ../../src/Motion/Parameters\ for\ Motion/GaussMarkov/." % name)

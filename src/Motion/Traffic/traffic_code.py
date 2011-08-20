@@ -10,13 +10,13 @@ for f in files:
   os.system("mv %s %s" % (f, new_name))
 """
 
-os.chdir("../../ns-allinone-2.33/ns-2.33/indep-utils/cmu-scen-gen/")
+os.chdir("../../../ns-allinone-2.33/ns-2.33/indep-utils/cmu-scen-gen/")
 
-for j in xrange(2):
+for j in xrange(10):
   for i in xrange(100):
     nodes = 10 * (i + 1)
     name = "Traffic-%s-%s.tcl" % (nodes, j)
     third = nodes / 3
-    os.system("../../ns cbrgen.tcl -type tcp -nn %s -seed -mc %s -max 60 > %s" % (nodes, third, name))
-    os.system("mv %s ../../../../src/Traffic/Trace/%s" % (name, name))
+    os.system("../../ns cbrgen.tcl -type tcp -nn %s -seed -mc %s -max 90 > %s" % (nodes, third, name))
+    os.system("mv %s ../../../../src/Motion/Traffic/Trace/%s" % (name, name))
 
