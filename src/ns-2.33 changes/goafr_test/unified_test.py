@@ -1,18 +1,35 @@
+# unified_test.py: Script to automaticly run several tests on the ns-2
+#Copyright (C) 2011 Mikkel Kjær Jensen (kjmikkel@gmail.com)
+#
+#This program is free software; you can redistribute it and/or
+#modify it under the terms of the GNU General Public License
+#as published by the Free Software Foundation; either version 2
+#of the License, or (at your option) any later version.
+#
+#This program is distributed in the hope that it will be useful,
+#but WITHOUT ANY WARRANTY; without even the implied warranty of
+#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#GNU General Public License for more details.
+#
+#You should have received a copy of the GNU General Public License
+#along with this program; if not, write to the Free Software
+#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 import os, multiprocessing
 from multiprocessing import Pool
 
 def do_test((j, i, algo, size)):
   nn = str(10 * (i + 1))
 
-  filename = "../../../src/Traces/%s/%s-%s-%s.tr" % (algo, nn, size, j)
+  filename = "../../../src/Traces/%s/%s-%s-%s-%s.tr" % (algo, algo, nn, size, j)
   if os.path.exists(filename):
     statinfo = os.stat(filename)
     if statinfo.st_size > 0:
       return
   
   output_name = "%s-%s-%s-%s.tr" % (algo, nn, size, j)
-
-  tcl_do = """ #author: Thomas Ogilvie 
+  if algo != "DSDV":
+    tcl_do = """ #author: Thomas Ogilvie 
 # sample tcl script showing the use of %s and HLS (hierarchical location service)
 
 ## %s Options
@@ -63,7 +80,7 @@ set val(movtrc)         ON ;# Trace Movement
 
 set val(param)          \"../../../src/Motion/Parameters\ for\ Motion/GaussMarkov/GaussMarkov-%s-%s-%s.ns_params\"
 set val(lt)	        \"\" 
-set val(cp)		\"../../../src/Traffic/Trace/Traffic-%s-%s.tcl\" 
+set val(cp)		\"../../../src/Motion/Traffic/Trace/Traffic-%s-%s-%s.tcl\" 
 set val(sc)		\"../../../src/Motion/Processed\ Motion/GaussMarkov/GaussMarkov-%s-%s-%s.ns_movements\"  
 puts $val(cp)
 set val(out)            \"../../../src/Traces/temp/%s\"
@@ -195,7 +212,7 @@ $ns_ run
       # Params
       nn, size, j,
       # Traffic
-      nn, j,
+      nn, size, j,
       # Motion
       nn, size, j,
       #Output
@@ -204,6 +221,139 @@ $ns_ run
       algo, algo, algo, algo, algo, 
       algo, algo, algo, algo, algo, 
       algo, algo, algo, algo)
+  else:
+    tcl_do = """ #author: Thomas Ogilvie 
+set val(chan)		Channel/WirelessChannel
+set val(prop)		Propagation/TwoRayGround
+set val(netif)		Phy/WirelessPhy
+set val(mac)		Mac/802_11
+set val(ifq)		Queue/DropTail/PriQueue
+set val(ll)		LL
+set val(ant)		Antenna/OmniAntenna
+set val(ifqlen)		512       ;# max packet in ifq
+set val(seed)		1.0
+set val(adhocRouting)	%s        ;# AdHoc Routing Protocol
+set val(use_gk)		0	  ;# > 0: use GridKeeper with this radius
+set val(zip)		0         ;# should trace files be zipped
+
+set val(agttrc)         ON ;# Trace Agent
+set val(rtrtrc)         ON ;# Trace Routing Agent
+set val(mactrc)         ON ;# Trace MAC Layer 
+set val(movtrc)         ON ;# Trace Movement 
+
+set val(param)          \"../../../src/Motion/Parameters\ for\ Motion/GaussMarkov/GaussMarkov-%s-%s-%s.ns_params\"
+set val(lt)	        \"\" 
+set val(cp)		\"../../../src/Motion/Traffic/Trace/Traffic-%s-%s-%s.tcl\" 
+set val(sc)		\"../../../src/Motion/Processed\ Motion/GaussMarkov/GaussMarkov-%s-%s-%s.ns_movements\"  
+puts $val(cp)
+set val(out)            \"../../../src/Traces/temp/%s\"
+
+source $val(param)
+
+# seeding RNG
+ns-random $val(seed)
+
+# create simulator instance
+set ns_		[new Simulator]
+
+$ns_ use-newtrace
+
+# Outputs nam traces 
+set nf [open trace.nam w]
+$ns_ namtrace-all $nf
+
+set loadTrace  $val(lt)
+
+set topo	[new Topography]
+$topo load_flatgrid $val(x) $val(y)
+
+set tracefd	[open $val(out) w]
+
+$ns_ trace-all $tracefd
+
+set chanl [new $val(chan)]
+
+# Create God
+set god_ [create-god $val(nn)]
+
+# Attach Trace to God
+set T [new Trace/Generic]
+$T attach $tracefd
+$T set src_ -5
+$god_ tracetarget $T
+
+#
+# Define Nodes
+#
+puts \"Configuring Nodes ($val(nn))\"
+$ns_ node-config -adhocRouting $val(adhocRouting) \\
+                 -llType $val(ll) \\
+                 -macType $val(mac) \\
+                 -ifqType $val(ifq) \\
+                 -ifqLen $val(ifqlen) \\
+                 -antType $val(ant) \\
+                 -propType $val(prop) \\
+                 -phyType $val(netif) \\
+                 -channel $chanl \\
+		 -topoInstance $topo \\
+                 -wiredRouting OFF \\
+		 -mobileIP OFF \\
+		 -agentTrace $val(agttrc) \\
+                 -routerTrace $val(rtrtrc) \\
+                 -macTrace $val(mactrc) \\
+                 -movementTrace $val(movtrc)
+
+#
+#  Create the specified number of nodes [$val(nn)] and \"attach\" them
+#  to the channel. 
+for {set i 0} {$i < $val(nn) } {incr i} {
+    set node_($i) [$ns_ node]
+        $node_($i) random-motion 0		;# disable random motion
+	set ragent [$node_($i) set ragent_]
+	$ragent install-tap [$node_($i) set mac_(0)]
+
+    if { $val(mac) == \"Mac/802_11\" } {      
+	## bind MAC load trace file
+	[$node_($i) set mac_(0)] load-trace $loadTrace
+    }
+
+    # Bring Nodes to God's Attention
+    $god_ new_node $node_($i)
+}
+
+
+source $val(sc)
+source $val(cp)
+
+#
+# Tell nodes when the simulation ends
+#
+for {set i 0} {$i < $val(nn) } {incr i} {
+    $ns_ at $val(duration).0 \"$node_($i) reset\";
+}
+
+$ns_ at  $val(duration).0002 "puts \\\"NS EXITING... $val(out)\\\" ; $ns_ halt"
+
+# A finish proc to flush traces and out call nam
+proc finish {} {
+        global ns nf
+        $ns flush-trace
+        close $nf
+        exit 0
+}
+
+puts \"Starting Simulation...\"
+$ns_ run
+""" %(# Ad hoc Algorithm
+      algo, 
+      # Params
+      nn, size, j,
+      # Traffic
+      nn, size, j,
+      # Motion
+      nn, size, j,
+      #Output
+      output_name)
 
   filename = "test_%s_%s_%s-%s.tcl" % (i, algo, size, j)
   f = open(filename, "w")
@@ -213,20 +363,23 @@ $ns_ run
   os.system("../ns %s" % filename)
   os.system("rm %s" % filename)
   os.system("mv ../../../src/Traces/temp/%s ../../../src/Traces/%s/%s"  % (output_name, algo, output_name))
-
-sizes = ["100", "250"]
+ 
+sizes = ["100", "500", "750"]
 algos = ["GOAFR", "GREEDY", "GPSR"]
-time = "60"
+exp_size = [10]
+time = "90"
 
-pool = Pool(2)
-for j in xrange(2):
-  for i in xrange(10):
+pool = Pool(1)
+
+for e_size in exp_size:    
+  for j in xrange(10):
     list_param = []
-    for size in sizes:
-      for algo in algos:
-        list_param.append((j, i, algo, size))
+    for i in xrange(e_size):
+      for size in sizes:
+        for algo in algos:
+          list_param.append((j, i, algo, size))
      
-#    for param in list_param:
- #     do_test(param)
     pool.map(do_test, list_param)
+
+
 

@@ -1,9 +1,11 @@
 #!/usr/bin/perl
+
 # -*- cperl -*-
 # $Id: evaluate.pl,v 1.4 2003/01/29 18:41:05 kiess Exp $
-# edited version by wk to adapt to hls
+# edited version by Mikkel Kjær Jensen to apply to new traces and Greedy, GPSR and GOAFR
 
 use File::Basename;
+use JSON::XS;
 use strict;
 use List::Util qw[min max];
 
@@ -966,7 +968,6 @@ if ($noFiles == 0){ usage(); }else{
           my $flowid = "$pkt_src->$pkt_dst/$pkt_uid";
 	  # Packet Statistics
 
-	  $PKT{$GOAFRTYPE[$pkt_type]}{$flowid}{hops}++;
 	  if ($layer eq "RTR") {
 	    if ($op eq 'D') { $stats{$protocol}{$GOAFRTYPE[$pkt_type]}{drop}++; }
 	    if ($op eq 'r') { $stats{$protocol}{$GOAFRTYPE[$pkt_type]}{recv}++; }
@@ -974,7 +975,7 @@ if ($noFiles == 0){ usage(); }else{
 	    if ($op eq 's') { $stats{$protocol}{$GOAFRTYPE[$pkt_type]}{send}++; }
 	  }
 
-	  if ($op eq 's') {
+	  if ($op eq 's' || $op eq 'f') {
 	    $PKT{$GOAFRTYPE[$pkt_type]}{$flowid}{hops}++;
 	  }
 
@@ -1002,7 +1003,6 @@ if ($noFiles == 0){ usage(); }else{
 
 	  my $pkt_type = $1;
           my $flowid = "$pkt_src->$pkt_dst/$pkt_uid";
-	  $PKT{$GREEDYTYPE[$pkt_type]}{$flowid}{hops}++;
 	  # Packet Statistics
 	  if ($layer eq "RTR") {
 	    if ($op eq 'D') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{drop}++; }
@@ -1011,7 +1011,7 @@ if ($noFiles == 0){ usage(); }else{
 	    if ($op eq 's') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{send}++; }
 	  }
 
-	  if ($op eq 's') {
+	  if ($op eq 's' || $op eq 'f') {
 	    $PKT{$GREEDYTYPE[$pkt_type]}{$flowid}{hops}++;
 	  }
 
@@ -1045,7 +1045,7 @@ if ($noFiles == 0){ usage(); }else{
 	    if ($op eq 's') { $stats{$protocol}{$GPSRTYPE[$pkt_type]}{send}++; }
 	  }
 
-	  if ($op eq 's') {
+	  if ($op eq 's' || $op eq 'f') {
 	    $PKT{$GPSRTYPE[$pkt_type]}{$flowid}{hops}++;
 	  }
 
@@ -2421,9 +2421,8 @@ sub save_results {
   }
 
   my @data = ([@hops_taken], [@time_taken], @percent);
-  my $json = JSON->new->allow_nonref;
-
-  my $json_result = to_json([@data]);
+ 
+  my $json_result = encode_json [@data];
   
   open FILE, ">$filename.json" or die $!;
   print FILE $json_result;
