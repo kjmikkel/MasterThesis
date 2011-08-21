@@ -29,7 +29,7 @@ def do_test((j, i, algo, size)):
     statinfo = os.stat(filename)
     if statinfo.st_size > 0:
       return
-  
+
   output_name = "%s-%s-%s-%s.tr" % (algo, nn, size, j)
   if algo != "DSDV":
     tcl_do = """ #author: Thomas Ogilvie 
@@ -312,8 +312,10 @@ $ns_ node-config -adhocRouting $val(adhocRouting) \\
 for {set i 0} {$i < $val(nn) } {incr i} {
     set node_($i) [$ns_ node]
         $node_($i) random-motion 0		;# disable random motion
-	set ragent [$node_($i) set ragent_]
-	$ragent install-tap [$node_($i) set mac_(0)]
+	
+
+       # set ragent [$node_($i) set ragent_]
+       # $ragent install-tap [$node_($i) set mac_(0)]
 
     if { $val(mac) == \"Mac/802_11\" } {      
 	## bind MAC load trace file
@@ -368,15 +370,15 @@ $ns_ run
   os.system("mv ../../../src/Traces/temp/%s ../../../src/Traces/%s/%s"  % (output_name, algo, output_name))
  
 sizes = ["100", "500", "750"]
-algos = ["GOAFR", "GREEDY", "GPSR"]
+algos = ["GOAFR", "GREEDY", "GPSR", "DSDV"]
 exp_size = [10]
 time = "90"
 
-pool = Pool(1)
+pool = Pool(5)
 
 for e_size in exp_size:    
+  list_param = []
   for j in xrange(10):
-    list_param = []
     for i in xrange(e_size):
       for size in sizes:
         for algo in algos:

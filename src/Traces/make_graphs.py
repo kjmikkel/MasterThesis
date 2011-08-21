@@ -27,50 +27,39 @@ def save_file(file_name, data):
   with open(file_name, mode='w') as f:
     f.write(data)  
 
-def find_percent_points(size, path):
+def find_value_points(size, path, indicies):
   points = ""
   for i in xrange(10):  
     nodes = (i + 1) * 10
     filename = "%s_results/%s-%s-%s.json" % (path, path, nodes, size)
-   
+    
     f = open(filename, 'r')
     json_data = f.read()
     f.close()
-    data = json.loads(json_data)
-    percent = data[0]
 
-    points += "\t(%s, %s)\n" % (nodes, percent)
+    data = json.loads(json_data)
+    if len(indicies) == 1:
+      value = data[indicies[0]]
+    else:
+      value = data[indicies[0]][indicies[1]]
+
+    points += "\t(%s, %s)\n" % (nodes, value)
 
   return points
 
-def make_percentage_graph():
-  
-  default1 = "\\addplot[color=%s, mark=%s] coordinates{                \n" 
-  default2 = "\\addplot[color=%s, mark=%s, densely dashed] coordinates{\n" 
-  
-  GPSR_100   = default1 % ("blue",  "*")
-  GOAFR_100  = default1 % ("black", "triangle*")
-  GREEDY_100 = default1 % ("red",   "square*")
+def make_graph_points(default, num, algo, indicies):
+  line_str  = default
+  line_str += find_value_points(num, algo, indicies)
+  line_str += "}; \\addlegendentry{%s %s}\n" % (num, algo)
+  return line_str
 
-  GPSR_250   = default2 % ("blue", "o")
-  GOAFR_250  = default2 % ("black", "triangle")
-  GREEDY_250 = default2 % ("red",   "square")
-
-  GPSR_100   += find_percent_points(100, "GPSR")
-  GOAFR_100  += find_percent_points(100, "GOAFR")
-  GREEDY_100 += find_percent_points(100, "GREEDY")
-
-  GPSR_250   += find_percent_points(250, "GPSR")
-  GOAFR_250  += find_percent_points(250, "GOAFR")
-  GREEDY_250 += find_percent_points(250, "GREEDY")
-
-  GPSR_100   += "}; \\addlegendentry{GPSR 100}\n"
-  GOAFR_100  += "}; \\addlegendentry{GOAFR 100}\n"
-  GREEDY_100 += "}; \\addlegendentry{GREEDY 100}\n"
-
-  GPSR_250   += "}; \\addlegendentry{GPSR 250}\n"
-  GOAFR_250  += "}; \\addlegendentry{GOAFR 250}\n"
-  GREEDY_250 += "}; \\addlegendentry{GREEDY 250}\n"
+def make_graph(name, y_left, size, indicies):
+  default_1 = "\\addplot[color=%s, mark=%s] coordinates{\n"
+ 
+  GPSR   = make_graph_points(default_1 % ("blue",  "*"),         size, "GPSR", indicies)
+  GOAFR  = make_graph_points(default_1 % ("black", "triangle*"), size, "GOAFR", indicies)
+  GREEDY = make_graph_points(default_1 % ("red",   "square*"),   size, "GREEDY", indicies)
+  DSDV   = make_graph_points(default_1 % ("green", "diamond"),   size, "DSDV"  , indicies)
 
   axis = "axis"
 
@@ -99,178 +88,37 @@ def make_percentage_graph():
       yticks     += ", "
       ytick_vals += ", "
 
-  y_left  = "\% of successfully transmitted messages"
   width = "0.8\linewidth"
   
   graph = "\\begin{tikzpicture}\n"
   graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}}\n"
-  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, ytick={%s}, yticklabels={%s}, transpose legend, legend columns=2, width=%s, xlabel=Number of nodes in the graph, ylabel=%s, legend cell align=left]\n" % (axis, xticks, xtick_vals, yticks, ytick_vals, width, y_left)
-  graph += GPSR_100
-  graph += GOAFR_100
-  graph += GREEDY_100
-  graph += GPSR_250
-  graph += GOAFR_250
-  graph += GREEDY_250
+  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, transpose legend, legend columns=2, width=%s, xlabel=Number of nodes in the graph, ylabel=%s, legend cell align=left]\n" % (axis, xticks, xtick_vals, width, y_left)
+  graph += GPSR
+  graph += GOAFR
+  graph += GREEDY
+  graph += DSDV
   graph += "\\end{%s}\n" % axis
   graph += "\\end{tikzpicture}\n"
     
-  save_file(latex_location + "percentage_graph", graph)
+  save_file(latex_location + "%s_graph_%s" % (name, size), graph)
 
-def find_hop_points(size, path):
-  points = ""
-  for i in xrange(10):  
-    nodes = (i + 1) * 10
-    filename = "%s_results/%s-%s-%s.json" % (path, path, nodes, size)
-   
-    f = open(filename, 'r')
-    json_data = f.read()
-    f.close()
-    data = json.loads(json_data)
-    avg = data[1][0]
-
-    points += "\t(%s, %s)\n" % (nodes, avg)
-
-  return points
+def make_percentage_graph():
+  name = "percentage"
+  label = "\% of successfully transmitted messages"
+  for size in [100, 500, 750]:
+    make_graph(name, label, size, [0])
 
 def make_hop_graph():
-  
-  default1 = "\\addplot[color=%s, mark=%s] coordinates{                \n" 
-  default2 = "\\addplot[color=%s, mark=%s, densely dashed] coordinates{\n" 
-  
-  GPSR_100   = default1 % ("blue",  "*")
-  GOAFR_100  = default1 % ("black", "triangle*")
-  GREEDY_100 = default1 % ("red",   "square*")
-
-  GPSR_250   = default2 % ("blue", "o")
-  GOAFR_250  = default2 % ("black", "triangle")
-  GREEDY_250 = default2 % ("red",   "square")
-
-  GPSR_100   += find_hop_points(100, "GPSR")
-  GOAFR_100  += find_hop_points(100, "GOAFR")
-  GREEDY_100 += find_hop_points(100, "GREEDY")
-
-  GPSR_250   += find_hop_points(250, "GPSR")
-  GOAFR_250  += find_hop_points(250, "GOAFR")
-  GREEDY_250 += find_hop_points(250, "GREEDY")
-
-  GPSR_100   += "}; \\addlegendentry{GPSR 100}\n"
-  GOAFR_100  += "}; \\addlegendentry{GOAFR 100}\n"
-  GREEDY_100 += "}; \\addlegendentry{GREEDY 100}\n"
-
-  GPSR_250   += "}; \\addlegendentry{GPSR 250}\n"
-  GOAFR_250  += "}; \\addlegendentry{GOAFR 250}\n"
-  GREEDY_250 += "}; \\addlegendentry{GREEDY 250}\n"
-
-  axis = "axis"
-
-  xticks = ""
-  xtick_vals = ""
-  max_val = 101
-  for num in xrange(max_val):
-    if num > 0 and (num % 1 == 0): 
-      xticks += "%s" % num
-      if (num % 10 == 0):
-        xtick_vals += "$%s$" % num
-      else:
-        xtick_vals += ""
-      if num != max_val - 1:
-        xticks     += ", "
-        xtick_vals += ", "
-
-  y_left  = "Average number of hops"
-  width = "0.8\linewidth"
-  
-  graph = "\\begin{tikzpicture}\n"
-  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}}\n"
-  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, transpose legend, legend columns=2, width=%s, xlabel=Number of nodes in the graph, ylabel=%s, legend cell align=left]\n" % (axis, xticks, xtick_vals, width, y_left)
-  graph += GPSR_100
-  graph += GOAFR_100
-  graph += GREEDY_100
-  graph += GPSR_250
-  graph += GOAFR_250
-  graph += GREEDY_250
-  graph += "\\end{%s}\n" % axis
-  graph += "\\end{tikzpicture}\n"
-    
-  save_file(latex_location + "hop_graph", graph)
-
-def find_time_points(size, path):
-  points = ""
-  for i in xrange(10):  
-    nodes = (i + 1) * 10
-    filename = "%s_results/%s-%s-%s.json" % (path, path, nodes, size)
-   
-    f = open(filename, 'r')
-    json_data = f.read()
-    f.close()
-    data = json.loads(json_data)
-    percent = data[2][0]
-
-    points += "\t(%s, %s)\n" % (nodes, percent)
-
-  return points
+  name = "hop"
+  label = "average number of hops for arrived messages"
+  for size in [100, 500, 750]:
+    make_graph(name, label, size, [1, 0])
 
 def make_time_graph():
-  
-  default1 = "\\addplot[color=%s, mark=%s] coordinates{                \n" 
-  default2 = "\\addplot[color=%s, mark=%s, densely dashed] coordinates{\n" 
-  
-  GPSR_100   = default1 % ("blue",  "*")
-  GOAFR_100  = default1 % ("black", "triangle*")
-  GREEDY_100 = default1 % ("red",   "square*")
-
-  GPSR_250   = default2 % ("blue", "o")
-  GOAFR_250  = default2 % ("black", "triangle")
-  GREEDY_250 = default2 % ("red",   "square")
-
-  GPSR_100   += find_time_points(100, "GPSR")
-  GOAFR_100  += find_time_points(100, "GOAFR")
-  GREEDY_100 += find_time_points(100, "GREEDY")
-
-  GPSR_250   += find_time_points(250, "GPSR")
-  GOAFR_250  += find_time_points(250, "GOAFR")
-  GREEDY_250 += find_time_points(250, "GREEDY")
-
-  GPSR_100   += "}; \\addlegendentry{GPSR 100}\n"
-  GOAFR_100  += "}; \\addlegendentry{GOAFR 100}\n"
-  GREEDY_100 += "}; \\addlegendentry{GREEDY 100}\n"
-
-  GPSR_250   += "}; \\addlegendentry{GPSR 250}\n"
-  GOAFR_250  += "}; \\addlegendentry{GOAFR 250}\n"
-  GREEDY_250 += "}; \\addlegendentry{GREEDY 250}\n"
-
-  axis = "axis"
-
-  xticks = ""
-  xtick_vals = ""
-  max_val = 101
-  for num in xrange(max_val):
-    if num > 0 and (num % 1 == 0): 
-      xticks += "%s" % num
-      if (num % 10 == 0):
-        xtick_vals += "$%s$" % num
-      else:
-        xtick_vals += ""
-      if num != max_val - 1:
-        xticks     += ", "
-        xtick_vals += ", "
-
-  y_left  = "Average time required to reach the destination"
-  width = "0.8\linewidth"
-  
-  graph = "\\begin{tikzpicture}\n"
-  graph += "\\pgfplotsset{every axis legend/.append style={at={(0.5,1.03)},anchor=south}}\n"
-  graph += "\\begin{%s}[scale only axis, xtick={%s}, xticklabels={%s}, transpose legend, legend columns=2, width=%s, xlabel=Number of nodes in the graph, ylabel=%s, legend cell align=left]\n" % (axis, xticks, xtick_vals, width, y_left)
-  graph += GPSR_100
-  graph += GOAFR_100
-  graph += GREEDY_100
-  graph += GPSR_250
-  graph += GOAFR_250
-  graph += GREEDY_250
-  graph += "\\end{%s}\n" % axis
-  graph += "\\end{tikzpicture}\n"
-    
-  save_file(latex_location + "time_graph", graph)
+  name = "time"
+  label = "average time for arrived messages"
+  for size in [100, 500, 750]:
+    make_graph(name, label, size, [2, 0])
 
 make_percentage_graph()
 make_hop_graph()

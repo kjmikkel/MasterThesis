@@ -1,3 +1,6 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
+
 # network_stats.py: Script to analyse the json files produced by make_json.
 #Copyright (C) 2011 Mikkel Kjær Jensen (kjmikkel@gmail.com)
 #
@@ -27,7 +30,6 @@ def sample_deviation(sample_list):
   
   return math.sqrt(accum / len(sample_list))
 
-
 def average_list(avg_list):
   return sum(avg_list) * 1.0 / len(avg_list) * 1.0
 
@@ -38,8 +40,8 @@ def average_suite(data_list, min_list, max_list):
   std_value   = sample_deviation(data_list)
   return (average, min_average, max_average, std_value)
 
-paths = ["GREEDY", "GPSR", "GOAFR"]
-sizes = [100, 250]
+paths = ["GREEDY", "GPSR", "GOAFR", "DSDV"]
+sizes = [100, 500, 750]
 
 for path in paths:
   for i in xrange(10):
@@ -56,7 +58,7 @@ for path in paths:
       min_time = []
       max_time = []
 
-      for j in xrange(2):
+      for j in xrange(10):
         filename = "%s_json/%s-%s-%s-%s.json" % (path, path, nodes, size, j)
         f = open(filename, 'r')
 	json_data = f.read()
@@ -70,7 +72,8 @@ for path in paths:
         
         hops.extend(local_hops)
 	time.extend(local_time)
-	
+	if local_time == []:
+          print filename
         min_time.append(min(local_time))
         max_time.append(max(local_time))
         
@@ -82,14 +85,16 @@ for path in paths:
       
       # Find the values:
       percent = (recv * 1.0 / sends * 1.0) * 100
+      filename = "%s_results/%s-%s-%s.json" % (path, path, nodes, size)
       
+      print filename 
       hop_data  = average_suite(hops, min_hops, max_hops)
       time_data = average_suite(time, min_time, max_time)
 
       data = (percent, hop_data, time_data)
 
       save_data = json.dumps(data)
-      filename = "%s_results/%s-%s-%s.json" % (path, path, nodes, size)
+      
       f = open(filename, "w")
       f.write(save_data)
       f.close()

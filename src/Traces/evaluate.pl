@@ -823,8 +823,10 @@ if ($noFiles == 0){ usage(); }else{
       # Line analysis
 #                    $1    -t     $2    -Hs   $3    -Hd    $4   -Ni     -Nx              -Ny              -Nz              -Ne                  -Nl  $5   -Nw  $6       -Ma      $7        -Md    $8     -Ms $9    -Mt $10   -Is $11
 
-    if($line =~ /^([srfD]) -t (\d+.\d+) -Hs (-?\d+) -Hd (-?\d+) -Ni \d+ -Nx \d+(?:.\d+)? -Ny \d+(?:.\d+)? -Nz \d+(?:.\d+)? -Ne [-]?\d+(?:.\d+)? -Nl (\w+) -Nw ([\w+-]+) -Ma (\d+(?:.\d+)?) -Md ([\d\w]+) -Ms (\d+) -Mt (\d+) -Is (-?\d+).\d+ -Id (-?\d+).\d+ -It (\w+) -Il (\d+) -If (\d+(?:.\d+)?) -Ii (\d+) -Iv ([\d\s]+) (\[[-\d\s]+\])(.*)/o) {
+    if($line =~ /^([srfD]) -t (\d+.\d+) -Hs (-?\d+) -Hd (-?\d+) -Ni \d+ -Nx \d+(?:.\d+)? -Ny \d+(?:.\d+)? -Nz \d+(?:.\d+)? -Ne [-]?\d+(?:.\d+)? -Nl (\w+) -Nw ([\w+-]+) -Ma (\d+(?:.\d+)?) -Md ([\d\w]+) -Ms (\d+) -Mt (\d+) -Is (-?\d+).\d+ -Id (-?\d+).\d+ -It (\w+) -Il (\d+) -If (\d+(?:.\d+)?) -Ii (\d+) -Iv ([\d\s]+) (\[[-\d\s]+\])?(.*)/o) {
 #-Id   $12       -It  $13  -Il $14   -If  $15           -Ii  $16  -Iv     $17     $18          $19
+
+ #                s         -t           -Hs         -Hd         -Ni 57 -Nx 32.50 -Ny 65.16 -Nz 0.00 -Ne -1.000000 -Nl RTR -Nw --- -Ma 0 -Md 0 -Ms 0 -Mt 0 -Is 57.255 -Id -1.255 -It message -Il 32 -If 0 -Ii 0 -Iv 32 
 
 	my $op           	= $1;
 	my $time         	= $2;
@@ -1066,6 +1068,43 @@ if ($noFiles == 0){ usage(); }else{
 	      } 
 	  elsif ($op == 's' and $node == $pkt_src) {
 	    $PKT{$GPSRTYPE[$pkt_type]}{$flowid}{reached} = 0;
+	  }
+
+	  next;
+	}
+
+	if ($protocol eq "message") {
+	  my $pkt_type     = $1;
+	  my $flowid = "$pkt_src->$pkt_dst/$pkt_uid";
+	  # Packet Statistics
+	  if ($layer eq "RTR") {
+	    if ($op eq 'D') { $stats{$protocol}{"transport"}{drop}++; }
+	    if ($op eq 'r') { $stats{$protocol}{"transport"}{recv}++; }
+	    if ($op eq 'f') { $stats{$protocol}{"transport"}{forw}++; }
+	    if ($op eq 's') { $stats{$protocol}{"transport"}{send}++; }
+	  }
+
+	  if ($op eq 's' || $op eq 'f') {
+	    $PKT{"transport"}{$flowid}{hops}++;
+	  }
+
+	  if ($op eq 'D') {
+	    my $reason = "$layer/$drop_rsn";
+	    $drops{$reason}{"transport"}++;
+	  }
+
+
+	  if ($node == $PKT{"transport"}{$flowid}->{dst}) {
+	    if ($PKT{"transport"}{$flowid}->{reached} == 0) {
+		  $PKT{"transport"}{$flowid}->{reached}  = 1;
+		  $PKT{"transport"}{$flowid}->{taken}    = $LOOKUP{$pkt_uid}->{taken};
+		  $PKT{"transport"}{$flowid}->{shortest} = $LOOKUP{$pkt_uid}->{shortest};
+		  $PKT{"transport"}{$flowid}{end}    = $time;
+		  $PKT{"transport"}{$flowid}{endTTL} = $pkt_ttl-1;
+		}
+	      } 
+	  elsif ($op == 's' and $node == $pkt_src) {
+	    $PKT{"transport"}{$flowid}{reached} = 0;
 	  }
 
 	  next;
@@ -2392,7 +2431,7 @@ sub save_results {
   $filename =~ /^(\w+)-/o;
   $filename = "$1_json/$filename";
 
-  foreach my $type (keys %{$stats{$1}}) {
+  foreach my $type (keys %delivery) {
     $send += $delivery{$type}{sends};
     $recv += $delivery{$type}{recv};
   }

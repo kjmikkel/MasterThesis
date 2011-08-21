@@ -26,7 +26,7 @@ def get_json(filename):
   os.system("perl evaluate.pl -f %s" % filename)
 
 pool = Pool(processes=multiprocessing.cpu_count() - 2)
-paths = ['GPSR/', "GREEDY/", "GOAFR/"]
+paths = ['GPSR/', "GREEDY/", "GOAFR/", "DSDV/"]
 for path in paths:
   listing = os.listdir(path)
   files = []
