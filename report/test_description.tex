@@ -1,9 +1,12 @@
 \section{Test description}
 \label{section:test_description}
 
-In this section the metrics  describe which metrics I am going to use to compare the different algorithms. Having specified these I will describe the tests in detail.
+In this I will describe the tests, what kind of metrics I will record, how the tests are structured and their parameters.
 
-\subsection{Metrics}
+\subsection{Routing algorithm tests}
+\label{section:routing_algo}
+
+\subsubsection{Metrics}
 
 The metrics I will measure in the tests will be the following
 \begin{description}
@@ -16,7 +19,7 @@ The metrics I will measure in the tests will be the following
 
 For the number of hops and the amount of time the maximum, the minimum and the average value is recorded, and the standard deviation will be calculated. The main value for comparison will be the average value, but the others will be interesting for to identify outliers and see how representative the values are.
 
-\subsection{Input parameters}
+\subsubsection{Input parameters}
 \label{section:input_parameters}
 The parameters and their range for the different tests are as follows:
 \begin{description}
@@ -26,21 +29,21 @@ The parameters and their range for the different tests are as follows:
 
 \item[Amount and data-transmission type:] In real world situations there will be different levels of traffic on the network, and therefore to test it we must likewise simulate these differences. The choice of transmission protocol is also important. In practice I will try to transmit 512 kB through a TCP connection. In order not to swamp the network in traffic, only 33\% of the nodes will ever communicate. See section~\ref{section:traffic_model} for more information on how they were generated.
 
-\item[Size of the simulation area:] The size of the simulation area has a direct influence on how far apart the nodes can move and how many nodes are needed for a given node density. Everything else being equal, a larger simulation area will make the network less robust. In practice I will create two different playing fields, one that is 500 by 500 units and one that is 1000 by 1000 units.
+\item[Size of the simulation area:] The size of the simulation area has a direct influence on how far apart the nodes can move and how many nodes are needed for a given node density. Everything else being equal, a larger simulation area will make the network less robust. In practice I will create three differently sized simulation areas, one that is 100 by 100 units, 500 by 500 units and one that is 750 by 750 units.
 
-\item[Number of nodes:] It is clear that denser node distribution, everything else being equal, will give a more robust network. In practice I will have node-sets of 100 to 3000 nodes in increments of 100 nodes, giving me 30 data-points that will be used to analyse the success of the different routing algorithms.  
+\item[Number of nodes:] It is clear that denser node distribution, everything else being equal, will give a more robust network. In practice I will have node-sets of 10 to 100 nodes in increments of 10 nodes, giving me 10 data-points that will be used to analyse the success of the different routing algorithms.
 
 \item[Time simulated:] There is a clear need to balance the time we want to simulate with the time it will take to execute. I have found 90 seconds to be a good compromise --- this figure will be used both to generate the traffic as well as the mobility.
 \end{description}
 
 
-\subsection{Routing algorithm description}
+\subsubsection{Routing algorithm description}
 \label{section:routing_algorithm}
 In this description of the chosen routing algorithms, I will assume by default that there exists a path from the source to the sink, and if needed I will detail how the algorithm handles the cases where no such path exists.
 
 Since I have already explained how the Greedy routing works in \ref{section:greedy}, I will not repeat it here.
 
-\subsubsection{GOAFR and GOAFR+}
+\paragraph{GOAFR and GOAFR+}
 
 \tikfig{gopher}{Here we see a representation of the GOAFR with its ellipse. In this example $s$ and $t$ are the nodes that wants to communicate, and therefore acts as the forci for the ellipse. It is clear from this image that the ellipse is quite large (and in fact almost circular) compared to the distance between the source and the sink. From this it should be easy to see that for dense graphs there is not much of a chance for the message to go outside the ellipse due to the large amount of wiggle room, while still being able to avoid bad edge conditions.}
 
@@ -90,7 +93,7 @@ Both GOAFR and GOAFR+ have been proved that if $|p^*|$ is the distance of the op
 
 Due to time constraints I have only been able to implement GOAFR in ns-2, and so will only use that in the tests.
 
-\subsubsection{GPSR}
+\paragraph{GPSR}
 \tikfig{gpsr}
 {A demonstration of the GPSR routing algorithm. The grey background with grey nodes indicates when the GPSR algorithms is in the Greedy phase and the black nodes with the black background indicates when the algorithm is running in perimeter phase. In this case there is no switch of parameters.}
 
@@ -121,72 +124,28 @@ Also, in the following let $f$ denote the current face we are routing on. Unless
 
 I have not been able to find any real theretical results in either \cite{gpsr} or any of the literature I have read.
 
-\subsubsection{DSDV}
+\paragraph{DSDV}
 
 As specified before DSDV uses a distributed version of Bellman-Ford routing algorithm to find the fewest number of hops between itself and any other node. For this end, each node retain a routing table, with now and again is refreshed. The only theoretical result I have been able to find is that DSDV garuntees loop-free routing \cite{DSDV}.
 
-\subsection{Mobility models}
+\subsubsection{Mobility models}
 \label{section:mobili-ty_model}
 
 \tikfig{gauss-markov}{An example of 10 nodes moving around. Each node has its own colour trail to differentiate it from the others, and to show the path of the node --- the grey nodes on the trail are the various locations they were ordered to go to.}
 
-For the mobility models I have only chosen to test Gauss-Markov, which I from \cite{MobilityAdHocResearch} found to be a good algorithm for simulating a movement pattern\footnote{Implemented by the same team that build the BonnMotion movement tool} that seems rather random. For an example of the movment produced by the Gauss-Markov model please, see figure~\ref{fig:gauss-markov}\footnote{Full setup for the parameters that created it can be Gauss-Markov can be found in the \texttt{motion\_points} function in \texttt{src/Visualization/visualize\_graph.py}.}. I would have liked to test the Disaster Area movement pattern found in \cite{disasterArea}, but I found it difficult to get the BonnMotion tool to generate the movement, as well as unsure on which definitions would create an interesting model for the different algorithms to be tested on\footnote{In order to create a disaster area movement simulation several different zones have to be defined -- e.g. a zone for the disaster, a zone for the triage, treatment and so on.}. 
+For the mobility models I have only chosen to test Gauss-Markov, which I from \cite{MobilityAdHocResearch} found to be a good algorithm for simulating a movement pattern\footnote{Implemented by the same team that build the BonnMotion movement tool} that seems rather random. For an example of the movment produced by the Gauss-Markov model please, see figure~\ref{fig:gauss-markov}\footnote{Full setup for the parameters that created it can be Gauss-Markov can be found in the \texttt{motion\_points} function in \texttt{src/Visualization/visualize\_graph.py}.}. I would have liked to test the Disaster Area movement pattern found in \cite{disasterArea}, but I found it difficult to get the BonnMotion tool to generate the movement, as well as unsure on which definitions would create an interesting model for the different algorithms to be tested on\footnote{In order to create a disaster area movement simulation several different zones have to be defined -- e.g. a zone for the disaster, a zone for the triage, treatment and so on.}.
 
 The script I have used to create the needed ns-2 mobility data can be found in the \texttt{src/Motion/MotionCode} directory.
 
-\subsection{Traffic}
+\subsubsection{Traffic}
 \label{section:traffic_model}
 I chose the TCP connection on the ground that I would like to stress test the different routing algorithms, and since TCP requires more back-and-forth than UDP (and is necessary for transfer of files, and not just steaming of video/audio or the state of a multi-player game).
 
 Ns-2.33 comes with its own Traffic generation program cbrgen.tcl\footnote{Located in the \texttt{ns-2.33/indep-utils/cmu-scen-gen} directory in the ns-allinone-2.33 directory.}, that I have used to generate the traffic for these tests. The ns-2 documentation is very lacking in its description, but inspection of the code shows that it creates a connection uniformally between $0.0$ and $180.0$. I have however modified the script so that it can take any time. The modified version of the script can be found at \texttt{src/ns-2.33 changes/cbrgen.tcl}. The script I have used to create the needed ns-2 traffic files can be found in the \texttt{src/Motion/Traffic} folder.
 
-\subsection{Limited-range spanner tests}
-\label{section:test_desc_spanners}
-In this section I will detail how I have chosen to set up the limited-range spanner tests for the three different graphs: \ac{ucg}, \acp{gabe} and \acp{rng}.
+In retrospect using a more advanced traffic generation utility would have been advisable, but there was little mention of it in the literature I found. I have however later found out that there exist a BonnTraffic\footnote{BonnTraffic can be found at \url{http://web.informatik.uni-bonn.de/IV/BoMoNet/} --- last accessed on the 21/8 2011.} tool, which I sadly could not get compiling in time. Another resource for traffic generation is found on the ns-2 wiki at \url{http://nsnam.isi.edu/nsnam/index.php/Contributed_Code#Topology_and_Traffic_Generation}\footnote{Last accessed on the 21/8 2011.}.
 
-\subsubsection{Creation of the graphs}
-Several graphs of different sixes must be created, as it otherwise is impossible to gain a proper perspective on how well the \ac{gabe} and the \ac{rng} stack up against the \ac{ucg}. In order to better describe the graphs, I introduce the notion of \emph{node-sets}, which is a finite set of nodes, where all nodes have a x- and y-coordinate and a transmit distance. Also of importence is the concept of \emph{node-category}, which is a set of node-sets, where all node-sets in any given node-category have the same amount of nodes in them. 
-
-In order to do this test I first have to make several decisions:
-\begin{itemize}
-\item Decide upon whether we are going to uniformly distribute the nodes or if some sort of clustering should be done. 
-\item The number of node-categories, balancing the need for data-points and their spread with the time they will take to create and analyse.
-\item The density for the node-categories --- if indeed there should be a fixed density for them, or if the density should be random.
-\item The number of grapsh and the number of tests for each graph in order to get enough test data to properly gauge the underlying data.
-\end{itemize}
-
-I have not encountered any specific point clustering algorithm in the literature besides the various mobility models (see \cite{disasterArea, MobilityAdHocResearch}) which has lead me to place the nodes uniformly in the plane. This was done out of interest of how the \ac{ucg}, the \ac{gabe} and the \ac{rng} would behave in generel, and not just in \acp{manet}. In retrospect using node-sets constructed using different  mobility models have given a better picture, and would most likely have cut down on the number of node-sets and graphs that would have had to be generated --- See section~\ref{section:future_work} for my recommendation for future comparisons between the graphs.   
-Since I have chosen to uniformly distribute the nodes I will need a large number of tests in order for the underlying properties of the three types of graphs to emerge. Therefore I will therefore have to limit the number of node-categories so that I will be able to process all the tests. I will therefore chose to limit myself to 9 node-categories with the following number of nodes: 50, 100, 250, 500, 1000, 2500, 5000, 7500 and 10000 nodes.
-
-This is a good compromise between having a reasonable number of data-points and big enough spread, while still being able to compute them in a reasonable amount of time. The nodes are going to be placed uniformly in the plane, with the lower bound of their coordinates being 0, and the upper bound depending on the number of points in the graph. No two points will have same the coordinates. 
-
-Since we are dealing with limited-range spanners (See section~\ref{section:spanners}), the value of the node density and the radio-range of the nodes becomes important\footnote{If I had made the choice to use the mobility models or a cluster node algorithm, these factors would still have an impact, but properly less.}. Different densities and radio-ranges would heavily influence the outcome of the results, as a high node density/radio-range would favour the \ac{ucg} over the two other graph types, while a low density/radio-range would create heavily disconnected graphs in all three cases. Since having many disconnected graphs would make testing difficult, I have tried to find a combination that would give me a low number of connected components pr. node-set, while still keeping the density reasonably low. From several experiments this let me to a density of 0.01 nodes pr. square unit and a radio range of 20 units, and make the space the nodes are placed over a function of the number of nodes. Specifiably, if we let $x$ be the length of the sides in a square and $num$ be the number of nodes, then we have that the density is
-\eqn{
-\frac{num}{x^2} = 0.01 \Leftrightarrow x = \sqrt{100 * num}  
-}
-meaning that in practise the graphs are squares in the plane with the following dimensions, which will also be the upper limits on their coordinates:\\
-{\tiny
-\begin{tabular}{lrrrrrrrrr}
-Number of nodes: & 50 & 100 & 250 & 500 & 1000 & 2500 & 5000 & 7500 & 10000 \\
-Width/height:    & 71 & 100 & 158 & 223 &  316 &  500 &  707 &  866 & 1000 
-\end{tabular} 
-}
-
-\subsubsection{Tests to be performed}
-\label{section:spanner_tests_performed}
-In order to check the limited-range spanner for the three graphs, I will randomly pick two different nodes, a \emph{node-pair}, that are connected in the \ac{ucg} and record the shortest number of hops (the \emph{Unit distance}), as well as the shortest distance based on the weight between the two nodes (the \emph{Euclidean distance}). Both of these values are worth finding, as the number of hops is directly applicable to \acp{manet}, while the Euclidean distance is interesting from a more theoretical perspective, and will therefore also be recorded.
-
-I will do this for all three types of graphs, and record whether or not a path exist between the node-pair in the \ac{gabe} or the \ac{rng}. If it is indeed the case that there are cases where the two alternative planar graphs removes paths, that would create an element of risk by employing them, instead of the \ac{ucg}. On these grounds I will record and display the number of missing paths the analysis is able to find.
-
-In both cases I will use Dijkstra's algorithm to find the smallest Euclidean/Unit distance. The implementation I uses is a modified version originally made by David Eppstein\footnote{dijkstra.py was found at \url{http://code.activestate.com/recipes/119466-dijkstras-algorithm-for-shortest-paths/} --- last accessed 17/8 2011. Modification was to allow to check for Unit distances without having to modify the graph weights -- see function ``UnitDijkstra''. Support library prirodict.py (also by David Eppstein, and not modified) was found at \url{http://code.activestate.com/recipes/117228/} --- last accessed 17/8 2011. The files can be found in \texttt{src/graph\_support}.}.
-
-\subsubsection{Analysis}
-For each node-pair tested for the graphs the total distance traversed between all node-pairs, the average distance, the average maximum and minimum distance for all the tests\footnote{The average value is needed since there may be outliers that easily could skew the results.} and lastly the standard deviation\footnote{For the same reasons as I included the average minimum and maximum.}. Likewise I will find the total Unit distance, as well as the average, average maximum and average minimum Unit distance and standard deviation. Since one of the advantages of the \ac{gabe} and the \ac{rng} is that they have fewer neighbours, the average, max- and minimum number of neighbours and standard deviation will be recorded. The average number of connected components (across all the 500 \acp{ucg}) will also be recorded and represented, since this the number is a good indicator of how connected the graphs are, and therefore the quality of the results.
-
-\subsubsection{Size of the test}
-Since the node-sets that we are going to generate the graphs from are going to distributed uniformly, there is a need to generate many node-sets, so that the underlying patterns can emerage. Therefore I have decided to generate 500 different uniformly distributed node-sets. For each node-set I will then generate one \ac{ucg}, one \ac{gabe}, and one \ac{rng}, meaning that for each node node-category I  generate 500 graphs for the \ac{ucg}, \ac{gabe} and \ac{rng} (for a total of 1500 graphs for each. Each node-set is then used to generate the three types of graph. For each node-set I then generate 100 node-pairs. This gives a reasonable amount of data to analyse, while still being computable for the larger number of nodes.
-
-\subsection{Network simulators}
+\subsubsection{Network simulators}
 \label{section:network_simulators}
 
 In order to perform a emperical evaluation, a network simulator is needed. I have chosen not to make my own, since it would take too much time, and would make it much harder to compare my results with other results. I have been able to identify four big network simulators: ns-2, ns-3, GloMoSim and the Opnet Modeler.
@@ -224,3 +183,52 @@ All of the simulators have simple node mobility models built-in. I have however 
 Based on the above, I have chosen to use the ns-2 simulator, since it is far more customisable than both ns-3 and GloMoSim, is Open Source and referred to in much of the literature I have read \cite{directed, gpsr, energyConservation, two-tier} and is still being supported, unlike GloMoSim. However, while the 2.34 version is the latest, I have opted to use version 2.33 from 2008, since this is the only version I have been able to find that has a working copy of GPSR\footnote{Found at \url{http://www.cn.uni-duesseldorf.de/alumni/kiess/software/hls-ns2-patch} --- last accessed 31/7 2011.} with a location system. The location system in question is the \ac{hls} which borrows many concepts from the \ac{gls} \cite{hls}. Thanks to the working version of GPSR, I have been able to comparatively quickly implement both a Greedy routing algorithm and the GOAFR routing algorithm, which I will test amongst others. 
 
 I have opted not to port the code to ns-2.34 on the grounds that I fear that I might introduce subtle bugs that might take a long time to find and correct. Since this is only one version behind the current stable release, I find this acceptable.
+
+\subsubsection{Size of test}
+In order to gain a better picture of the results I will perform each test 10 times, which in practice means that for each configuration of routing algorithm, simulation size, specific number of nodes there will be 10 tests. In total 900 tests will be performed, each with their own unique movement and traffic trace. While testing each configuartion of parameters only 10 times isn't that much, I have found that in practice the wall-clock time and hard-disk space requirements\footnote{A single test can take up to 440 MB}, this is a reasonable compromise.
+
+\subsection{Limited-range spanner tests}
+\label{section:test_desc_spanners}
+In this section I will detail how I have chosen to set up the limited-range spanner tests for the three different graphs: \ac{ucg}, \acp{gabe} and \acp{rng}.
+
+\subsubsection{Creation of the graphs}
+Several graphs of different sixes must be created, as it otherwise is impossible to gain a proper perspective on how well the \ac{gabe} and the \ac{rng} stack up against the \ac{ucg}. In order to better describe the graphs, I introduce the notion of \emph{node-sets}, which is a finite set of nodes, where all nodes have a x- and y-coordinate and a transmit distance. Also of importence is the concept of \emph{node-category}, which is a set of node-sets, where all node-sets in any given node-category have the same amount of nodes in them. 
+
+In order to do this test I first have to make several decisions:
+\begin{itemize}
+\item Decide upon whether we are going to uniformly distribute the nodes or if some sort of clustering should be done. 
+\item The number of node-categories, balancing the need for data-points and their spread with the time they will take to create and analyse.
+\item The density for the node-categories --- if indeed there should be a fixed density for them, or if the density should be random.
+\item The number of graphs and the number of tests for each graph in order to get enough test data to properly gauge the underlying data.
+\end{itemize}
+
+I have not encountered any specific point clustering algorithm in the literature besides the various mobility models (see \cite{disasterArea, MobilityAdHocResearch}) which has lead me to place the nodes uniformly in the plane. This was done out of interest of how the \ac{ucg}, the \ac{gabe} and the \ac{rng} would behave in generel, and not just in \acp{manet}. In retrospect using node-sets constructed using different  mobility models have given a better picture, and would most likely have cut down on the number of node-sets and graphs that would have had to be generated --- See section~\ref{section:future_work} for my recommendation for future comparisons between the graphs.   
+Since I have chosen to uniformly distribute the nodes I will need a large number of tests in order for the underlying properties of the three types of graphs to emerge. Therefore I will therefore have to limit the number of node-categories so that I will be able to process all the tests. I will therefore chose to limit myself to 9 node-categories with the following number of nodes: 50, 100, 250, 500, 1000, 2500, 5000, 7500 and 10000 nodes.
+
+This is a good compromise between having a reasonable number of data-points and big enough spread, while still being able to compute them in a reasonable amount of time. The nodes are going to be placed uniformly in the plane, with the lower bound of their coordinates being 0, and the upper bound depending on the number of points in the graph. No two points will have same the coordinates. 
+
+Since we are dealing with limited-range spanners (See section~\ref{section:spanners}), the value of the node density and the radio-range of the nodes becomes important\footnote{If I had made the choice to use the mobility models or a cluster node algorithm, these factors would still have an impact, but properly less.}. Different densities and radio-ranges would heavily influence the outcome of the results, as a high node density/radio-range would favour the \ac{ucg} over the two other graph types, while a low density/radio-range would create heavily disconnected graphs in all three cases. Since having many disconnected graphs would make testing difficult, I have tried to find a combination that would give me a low number of connected components pr. node-set, while still keeping the density reasonably low. From several experiments this let me to a density of 0.01 nodes pr. square unit and a radio range of 20 units, and make the space the nodes are placed over a function of the number of nodes. Specifiably, if we let $x$ be the length of the sides in a square and $num$ be the number of nodes, then we have that the density is
+\eqn{
+\frac{num}{x^2} = 0.01 \Leftrightarrow x = \sqrt{100 * num}  
+}
+meaning that in practise the graphs are squares in the plane with the following dimensions, which will also be the upper limits on their coordinates:\\
+{\tiny
+\begin{tabular}{lrrrrrrrrr}
+Number of nodes: & 50 & 100 & 250 & 500 & 1000 & 2500 & 5000 & 7500 & 10000 \\
+Width/height:    & 71 & 100 & 158 & 223 &  316 &  500 &  707 &  866 & 1000 
+\end{tabular} 
+}
+
+\subsubsection{Tests to be performed}
+\label{section:spanner_tests_performed}
+In order to check the limited-range spanner for the three graphs, I will randomly pick two different nodes, a \emph{node-pair}, that are connected in the \ac{ucg} and record the shortest number of hops (the \emph{Unit distance}), as well as the shortest distance based on the weight between the two nodes (the \emph{Euclidean distance}). Both of these values are worth finding, as the number of hops is directly applicable to \acp{manet}, while the Euclidean distance is interesting from a more theoretical perspective, and will therefore also be recorded.
+
+I will do this for all three types of graphs, and record whether or not a path exist between the node-pair in the \ac{gabe} or the \ac{rng}. If it is indeed the case that there are cases where the two alternative planar graphs removes paths, that would create an element of risk by employing them, instead of the \ac{ucg}. On these grounds I will record and display the number of missing paths the analysis is able to find.
+
+In both cases I will use Dijkstra's algorithm to find the smallest Euclidean/Unit distance. The implementation I uses is a modified version originally made by David Eppstein\footnote{dijkstra.py was found at \url{http://code.activestate.com/recipes/119466-dijkstras-algorithm-for-shortest-paths/} --- last accessed 17/8 2011. Modification was to allow to check for Unit distances without having to modify the graph weights -- see function ``UnitDijkstra''. Support library prirodict.py (also by David Eppstein, and not modified) was found at \url{http://code.activestate.com/recipes/117228/} --- last accessed 17/8 2011. The files can be found in \texttt{src/graph\_support}.}.
+
+\subsubsection{Analysis}
+For each node-pair tested for the graphs the total distance traversed between all node-pairs, the average distance, the average maximum and minimum distance for all the tests\footnote{The average value is needed since there may be outliers that easily could skew the results.} and lastly the standard deviation\footnote{For the same reasons as I included the average minimum and maximum.}. Likewise I will find the total Unit distance, as well as the average, average maximum and average minimum Unit distance and standard deviation. Since one of the advantages of the \ac{gabe} and the \ac{rng} is that they have fewer neighbours, the average, max- and minimum number of neighbours and standard deviation will be recorded. The average number of connected components (across all the 500 \acp{ucg}) will also be recorded and represented, since this the number is a good indicator of how connected the graphs are, and therefore the quality of the results.
+
+\subsubsection{Size of the test}
+Since the node-sets that we are going to generate the graphs from are going to distributed uniformly, there is a need to generate many node-sets, so that the underlying patterns can emerage. Therefore I have decided to generate 500 different uniformly distributed node-sets. For each node-set I will then generate one \ac{ucg}, one \ac{gabe}, and one \ac{rng}, meaning that for each node node-category I  generate 500 graphs for the \ac{ucg}, \ac{gabe} and \ac{rng} (for a total of 1500 graphs for each. Each node-set is then used to generate the three types of graph. For each node-set I then generate 100 node-pairs. This gives a reasonable amount of data to analyse, while still being computable for the larger number of nodes.
