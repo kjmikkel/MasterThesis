@@ -2,7 +2,22 @@
 \label{section:test_results}
 In this section I will present the test results. I will start by discussing my test methodology, then the hardware/software specifications, and then I will show the test results themselves, and then round off by an analysis of the results.
 
-\subsection{Spanner test results}
+\subsection{Routing algorithm results}
+
+\graphResult{graph/percentage_graph_100}{test}{}
+\graphResult{graph/percentage_graph_500}{test}{}
+\graphResult{graph/percentage_graph_750}{test}{}
+
+\graphResult{graph/hop_graph_100}{test}{}
+\graphResult{graph/hop_graph_500}{test}{}
+\graphResult{graph/hop_graph_750}{test}{}
+
+\graphResult{graph/time_graph_100}{test}{}
+\graphResult{graph/time_graph_500}{test}{}
+\graphResult{graph/time_graph_750}{test}{}
+
+\subsection{Limited-range spanner results}
+\label{section:test_results_spanners}
 This section describes some of the important results I have found in the limited-range spanner test. The distance/hops results can be found in section \ref{limited_range_spanner_distance_appendix} and the neighbour results can be found in section~\ref{limited_range_spanner_neighbour_appendix}.
 
 First of all we must check whether or not the results are worth checking in the first place. From table~\ref{table:analysis_50} through table~\ref{table:analysis_10000} we can see that we are dealing with at most $1.32$ different connected components and that in no case have we been able to detect if the either the \ac{gabe} or the \ac{rng} has cut off all paths between two nodes, if it existed in the \ac{ucg}. 
@@ -26,19 +41,4 @@ As we can see from figure~\ref{graph:avg_neighbour}, it is clear that the averag
 
 From figure~\ref{graph:dist_percent} we can see that not surprisingly that the \ac{gabe} is closer to the \ac{ucg} is much better than the \ac{rng}. More importantly we also see that there is a huge difference between the Euclidean distance than the Unit distance, when compared to the results from the \ac{ucg}. It is interesting to note, that even though the density of the graphs are kept steady, as the number of nodes grows, both the \ac{gabe} and the \ac{rng} edges asymptotically closer to the \ac{ucg}. 
 
-\subsection{}
 
-
-
-
-
-
-
-\subsection{Test analysis}
-
-
-I have performed these
-
-
-\subsection{}
-\label{section:test_results_spanners}
