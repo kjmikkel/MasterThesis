@@ -31,16 +31,24 @@
 \clearpage
 
 \abstract{
-A \ac{manet} is a network of moving nodes that without human intervention can crate its own topology and ensure successful routing of messages between nodes. 
+A \ac{manet} is a network of moving nodes that without human intervention can create its own network topology and ensure successful routing of messages between nodes. 
 
-In this thesis I will give an overview of the elements required to create a \ac{manet} and several already existing solutions that fulfil these requirements. 
+In this thesis I will give an overview of the elements required to create a \ac{manet} and give a short survey of several already existing solutions that can be used  
 
-Furthermore, I will give a performance evaluation of my own implementation of the GOAFR algorithm \cite{gopher} compared to several other algorithms. I will also perform a comparison between the average distance  of two nodes in randomly generated \acp{ucg} (graphs where two nodes are connected or not based on their distance, regardless of whether they make the graph non-planar or not), compared to the \ac{gabe} \cite{gabe1, gabe2} and the \ac{rng} \cite{RNG}, compared to the average number of neighbours in the graph.
+Furthermore, I will give a performance evaluation of my own implementation of the GOAFR algorithm \cite{gopher}, with I will empirical compare to the GPSR \cite{gpsr}, Greedy \cite{gopher, beyondUnit} and DSDV \cite{DSDV} routing algorithm using the ns-2 network simulator.
+
+I also perform an empirical comparison of the number of neighbours and both the Euclidean and Unit distance between two randomly chosen nodes in the \emph{\ac{ucg}} (graphs where two nodes are connected or not based on their distance, regardless of whether they make the graph non-planar or not), the \emph{\ac{gabe}}, and the \emph{\ac{rng}}. This comparison shows that the \ac{gabe} and \ac{rng}, for uniform placed nodes, has a behaviour similar to that of a spanner, and that they on average will have 3.6 and 2.5 neighbours.
 }
 
 \clearpage
+\section*{Acknowledgements}
+I would like to thank my adviser Martin Zachariasen for his guidance, advice and encouragement in writing this thesis.
+
+I would like to thank the Toilers group for making the BonnMotion Mobility trace generator available to the public.
+\clearpage
 
 \tableofcontents
+
 
 %\cinclude{introduction} 
 %\cinclude{fundamentals}
@@ -50,8 +58,6 @@ Furthermore, I will give a performance evaluation of my own implementation of th
 \cinclude{test_results} 
 %\cinclude{discussion} 
 %\cinclude{conclusion}
-
-%\graphResult{graph/percentage_graph}{test}{}
 
 \appendix
 \cinclude{appendix}
