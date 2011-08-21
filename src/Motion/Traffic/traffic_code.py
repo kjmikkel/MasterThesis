@@ -1,3 +1,6 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
+
 # traffic_code.py: Script to use ns-2 cbrgen.tcl tool to generate traffic traces
 #Copyright (C) 2011 Mikkel Kjær Jensen (kjmikkel@gmail.com)
 #

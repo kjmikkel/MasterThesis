@@ -5,7 +5,7 @@ Requirements:
 ==================
 In order to run any of the python scripts in this folder you must have Python 2.6.5 (or compatible) installed.
 
-If you want to run make_graph.py you will also have to have  installed SciPy 0.9 and NumPy 1.0.4 or at least a compatible version that supports kDTrees.
+If you want to run make_graph.py you will also have to have  installed SciPy 0.9 and NumPy 1.0.4 or a compatible version that supports kDTrees.
 
 ==================
 make_graph.py: 

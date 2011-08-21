@@ -1,3 +1,5 @@
+-*- coding: utf-8 -*-
+
 import svgfig
 from svgfig import *
 import re, io, visualize_graph

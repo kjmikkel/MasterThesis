@@ -1,3 +1,6 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
+
 # make_graphs.py: Script to create the graphs from the results of the analysed json files
 #Copyright (C) 2011 Mikkel Kjær Jensen (kjmikkel@gmail.com)
 #

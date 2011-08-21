@@ -1,3 +1,6 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
+
 # unified_test.py: Script to automaticly run several tests on the ns-2
 #Copyright (C) 2011 Mikkel Kjær Jensen (kjmikkel@gmail.com)
 #
@@ -379,7 +382,7 @@ for e_size in exp_size:
         for algo in algos:
           list_param.append((j, i, algo, size))
      
-    pool.map(do_test, list_param)
+  pool.map(do_test, list_param)
 
 
 

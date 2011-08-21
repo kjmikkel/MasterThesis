@@ -1,3 +1,6 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
+
 # Gauss-Markov.py.py: Script to use the BonnMotion tool to generate movement traces for the ns-2
 #Copyright (C) 2011 Mikkel Kjær Jensen (kjmikkel@gmail.com)
 #
