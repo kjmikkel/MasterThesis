@@ -1,6 +1,31 @@
 \section{Discussion}
 \label{section:discussion}
 
+\subsection{Routing graphs}
+
+\subsubsection{Percentage of success}
+\label{section:percent_success_routing}
+The percentage of results presented in figure~\ref{graph:percent_500} and figure~\ref{graph:percent_750} should be taken with a grain of salt as it is rather deceptive. The percentage is the result of the number of packets the routing algorithm sent out, versus how many it received. For routing algorithms such as the Greedy routing algorithm, both numbers are smaller than all the others, but its ratio of successful messages are still higher than the others most of the time --- see table~\ref{table:comm_table} for the exact values. These values do also not correspond the the number of TCP connections established, but are rather all communication of the routing algorithms (which could also explain why Greedy, GPSR and GOAFR have different results, while one should think GPSR and GOAFR could only be better than Greedy, since they have more options on how to route). I have looked over the raw traces from ns-2 and I have been unable to figure out how to extract the correct numbers. 
+
+\tableResult{graph/comm_table}{The table containing the amount of sent and received values for each of the four routing algorithms. We can easily see that the Greedy algorithm sends far less packets than the other algorithms, and since many of these arrives at their destination, the success ratio of the Greedy algorithm becomes high, while both values are small in absolute terms.}{comm_table}{\scriptsize}
+
+If I had more time a solution would be to go back and change the DSDV, Greedy, GPSR and GOAFR such that they sent a custom trace message when they started sending a message, and a custom message when it arrived at the destination node, since this would reflect the purpose of this test better.
+
+\subsubsection{Number of hops}
+From the values in figure~\ref{graph:hop_500} and figure~\ref{graph:hop_750} it is clear that for a radio range 250, every node will be able to get a hold of any other node through 2 jumps.
+The lone exception to this is the DSDV routing algorithm, which in a few cases can use its \ac{ucg} to reach a node directly. An interesting question is then what good dimensions of test area is, since an unconnected graph is worthless for testing anything else than the failure coping mechanism of routing algorithms. 
+
+\subsubsection{Time}
+Again we see that the Greedy algorithm outperforms all the others, even the GPSR and GOAFR, something one should think was impossible based on the fact that GPSR and GOAFR both should start by routing in Greedy mode, and only begin with face traversal when they arrived at a local minimum. Again I see this as a symptom of the fact that the information that has been extracted/is in the basic trace-file is lacking. 
+
+\subsubsection{Conclusion}
+From these results we can extract the following:
+\begin{itemize}
+\item For a radio range of 250 units the area needs to be bigger than 750 by 750, since otherwise the routing becomes uninteresting.
+\item In order to properly study the success rate of the routing algorithms, there will need to be more feedback from the routing algorithms, such that background transmissions does not influence the results.
+\item The focus of testing algorithms should mainly be focused on the core routing algorithm, and not on the extra data activity it creates. 
+\end{itemize}
+
 \subsection{Choice of routing graph}
 
 From the results presented in section~\ref{section:test_results}, it becomes clear that our assumption about the ad- and disadvantages of the three different types are correct. The \ac{ucg} is the one needing the fewest hops and the smallest distance on average to go from the source to the sink, but has far more neighbours than the other two. The \ac{gabe} lies in the middle between the \ac{ucg} and the \ac{rng} with regards to distance/hops, while the \ac{rng} has the fewest neighbours, but also the longest distance/hops. 
@@ -24,6 +49,4 @@ From figure~\ref{graph:dist_percent} and figure~\ref{graph:unit_distance} we can
 
 \subsubsection{Spanner conclusion}
 
-While I think that it would be too strong based on the above to conclude that the \ac{gabe} and \ac{rng} forms limited-range spanners to the limited \ac{ucg}, it is safe to conclude from the above, and the proofs for the \ac{gabe} and the \ac{rng} in \cite{spanningGG_RNG}, that for uniformly placed nodes in the plane, both the Euclidean and the Unit distance on average are so close to a spanner (even for large numbers), that it can be relied upon. 
-
-\subsection{}
+While I think that it would be too strong based on the above to conclude that the \ac{gabe} and \ac{rng} forms limited-range spanners to the limited \ac{ucg}, it is safe to conclude from the above, and the proofs for the \ac{gabe} and the \ac{rng} in \cite{spanningGG_RNG}, that for uniformly placed nodes in the plane, both the Euclidean and the Unit distance on average are so close to a spanner (even for large numbers), that it can be relied upon.

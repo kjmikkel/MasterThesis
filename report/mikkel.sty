@@ -139,17 +139,19 @@ escapeinside={\%*}{*)}          % if you want to add a comment within your code
 }
 
 \newcommand{\graphResult}[3]{
-\begin{figure}
+\begin{figure}[!hbp]
 \centering
 \input{results/#1.tex}
 \caption{\label{graph:#3}#2}
 \end{figure}
 }
 
-\newcommand{\tableResult}[3]{
-\begin{table}
-\tiny{
+\newcommand{\tableResult}[4]{
+\begin{table}[!hb]
+#4{
+\begin{center}
 \input{results/#1.tex}
+\end{center}
 }
 \caption{\label{table:#3}#2}
 \end{table}

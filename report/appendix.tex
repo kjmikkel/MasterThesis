@@ -1,29 +1,64 @@
 \section{Appendix}
 \label{section:appendix}
-\subsection{Limited-range spanner distance results}
+
+\subsection{Routing algorithm tests}
+\label{routing_raw_results}
+
+\subsubsection{Percentage table}
+\tableResult{graph/percentage_table}{This table surmises all the success percentages}{percent_table}{\normalsize}
+
+\subsubsection{Hops tables}
+\label{hops_appendix}
+
 \FloatBarrier
-\label{limited_range_spanner_distance_appendix}
-\tableResult{spanner/graph_results_50}{The distance results for 50 nodes}{analysis_50}
-\tableResult{spanner/graph_results_100}{The distance results for 100 nodes}{analysis_100}
-\tableResult{spanner/graph_results_250}{The distance results for 250 nodes}{analysis_250}
-\tableResult{spanner/graph_results_500}{The distance results for 500 nodes}{analysis_500}
-\tableResult{spanner/graph_results_1000}{The distance results for 1000 nodes}{analysis_1000}
-\tableResult{spanner/graph_results_2500}{The distance results for 2500 nodes}{analysis_2500}
-\tableResult{spanner/graph_results_5000}{The distance results for 5000 nodes}{analysis_5000}
-\tableResult{spanner/graph_results_7500}{The distance results for 7500 nodes}{analysis_7500}
-\tableResult{spanner/graph_results_10000}{The distance results for 10000 nodes}{analysis_10000}
+\tableResult{graph/hop-DSDV_table_500}{The hop table for the DSDV routing algorithm in the 500 by 500 scenario}{DSDV-hop-500}{\scriptsize}
+\tableResult{graph/hop-DSDV_table_750}{The hop table for the DSDV routing algorithm in the 750 by 750 scenario}{DSDV-hop-750}{\scriptsize}
+\tableResult{graph/hop-GREEDY_table_500}{The hop table for the Greedy routing algorithm in the 500 by 500 scenario}{GREEDY-hop-500}{\scriptsize}
+\tableResult{graph/hop-GREEDY_table_750}{The hop table for the Greedy routing algorithm in the 750 by 750 scenario}{GREEDY-hop-750}{\scriptsize}
+\tableResult{graph/hop-GPSR_table_500}{The hop table for the GPSR routing algorithm in the 500 by 500 scenario}{GPSR-hop-500}{\scriptsize}
+\tableResult{graph/hop-GPSR_table_750}{The hop table for the GPSR routing algorithm in the 750 by 750 scenario}{GPSR-hop-750}{\scriptsize}
+\tableResult{graph/hop-GOAFR_table_500}{The hop table for the GOAFR routing algorithm in the 500 by 500 scenario}{GOAFR-hop-500}{\scriptsize}
+\tableResult{graph/hop-GOAFR_table_750}{The hop table for the GOAFR routing algorithm in the 750 by 750 scenario}{GOAFR-hop-750}{\scriptsize}
 \FloatBarrier
 
-\subsection{Limited-range spanner neighbour results}
+\subsubsection{Time spent routing}
+\label{time_appendix}
+
+\FloatBarrier
+\tableResult{graph/time-DSDV_table_500}{The time table for the DSDV routing algorithm in the 500 by 500 scenario}{DSDV-time-500}{\scriptsize}
+\tableResult{graph/time-DSDV_table_750}{The time table for the DSDV routing algorithm in the 750 by 750 scenario}{DSDV-time-750}{\scriptsize}
+\tableResult{graph/time-GREEDY_table_500}{The time table for the Greedy routing algorithm in the 500 by 500 scenario}{GREEDY-time-500}{\scriptsize}
+\tableResult{graph/time-GREEDY_table_750}{The time table for the Greedy routing algorithm in the 750 by 750 scenario}{GREEDY-time-750}{\scriptsize}
+\tableResult{graph/time-GPSR_table_500}{The time table for the GPSR routing algorithm in the 500 by 500 scenario}{GPSR-time-500}{\scriptsize}
+\tableResult{graph/time-GPSR_table_750}{The time table for the GPSR routing algorithm in the 750 by 750 scenario}{GPSR-time-750}{\scriptsize}
+\tableResult{graph/time-GOAFR_table_500}{The time table for the GOAFR routing algorithm in the 500 by 500 scenario}{GOAFR-time-500}{\scriptsize}
+\tableResult{graph/time-GOAFR_table_750}{The time table for the GOAFR routing algorithm in the 750 by 750 scenario}{GOAFR-time-750}{\scriptsize}
+\FloatBarrier
+
+\subsection{Limited-range spanner results}
+\subsection{Distance results}
+\label{limited_range_spanner_distance_appendix}
+\tableResult{spanner/graph_results_50}{The distance results for 50 nodes}{analysis_50}{\tiny}
+\tableResult{spanner/graph_results_100}{The distance results for 100 nodes}{analysis_100}{\tiny}
+\tableResult{spanner/graph_results_250}{The distance results for 250 nodes}{analysis_250}{\tiny}
+\tableResult{spanner/graph_results_500}{The distance results for 500 nodes}{analysis_500}{\tiny}
+\tableResult{spanner/graph_results_1000}{The distance results for 1000 nodes}{analysis_1000}{\tiny}
+\tableResult{spanner/graph_results_2500}{The distance results for 2500 nodes}{analysis_2500}{\tiny}
+\tableResult{spanner/graph_results_5000}{The distance results for 5000 nodes}{analysis_5000}{\tiny}
+\tableResult{spanner/graph_results_7500}{The distance results for 7500 nodes}{analysis_7500}{\tiny}
+\tableResult{spanner/graph_results_10000}{The distance results for 10000 nodes}{analysis_10000}{\tiny}
+\FloatBarrier
+
+\subsubsection{Neighbour results}
 \label{limited_range_spanner_neighbour_appendix}
 \FloatBarrier
-\tableResult{spanner/neighbour_results_50}{The neighbour results for 50 nodes}{neigh_50}
-\tableResult{spanner/neighbour_results_100}{The neighbour results for 100 nodes}{neigh_100}
-\tableResult{spanner/neighbour_results_250}{The neighbour results for 250 nodes}{neigh_250}
-\tableResult{spanner/neighbour_results_500}{The neighbour results for 500 nodes}{neigh_500}
-\tableResult{spanner/neighbour_results_1000}{The neighbour results for 1000 nodes}{neigh_1000}
-\tableResult{spanner/neighbour_results_2500}{The neighbour results for 2500 nodes}{neigh_2500}
-\tableResult{spanner/neighbour_results_5000}{The neighbour results for 5000 nodes}{neigh_5000}
-\tableResult{spanner/neighbour_results_7500}{The neighbour results for 7500 nodes}{neigh_7500}
-\tableResult{spanner/neighbour_results_10000}{The neighbour results for 10000 nodes}{neigh_10000}
+\tableResult{spanner/neighbour_results_50}{The neighbour results for 50 nodes}{neigh_50}{\tiny}
+\tableResult{spanner/neighbour_results_100}{The neighbour results for 100 nodes}{neigh_100}{\tiny}
+\tableResult{spanner/neighbour_results_250}{The neighbour results for 250 nodes}{neigh_250}{\tiny}
+\tableResult{spanner/neighbour_results_500}{The neighbour results for 500 nodes}{neigh_500}{\tiny}
+\tableResult{spanner/neighbour_results_1000}{The neighbour results for 1000 nodes}{neigh_1000}{\tiny}
+\tableResult{spanner/neighbour_results_2500}{The neighbour results for 2500 nodes}{neigh_2500}{\tiny}
+\tableResult{spanner/neighbour_results_5000}{The neighbour results for 5000 nodes}{neigh_5000}{\tiny}
+\tableResult{spanner/neighbour_results_7500}{The neighbour results for 7500 nodes}{neigh_7500}{\tiny}
+\tableResult{spanner/neighbour_results_10000}{The neighbour results for 10000 nodes}{neigh_10000}{\tiny}
 \FloatBarrier

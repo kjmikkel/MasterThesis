@@ -3,19 +3,25 @@
 In this section I will present the test results. I will start by discussing my test methodology, then the hardware/software specifications, and then I will show the test results themselves, and then round off by an analysis of the results.
 
 \subsection{Routing algorithm results}
+This section shows the results I have found for the test of the 4 different routing algorithms. The raw results can be found in section~\ref{routing_raw_results}.
 
-\graphResult{graph/percentage_graph_100}{test}{}
-\graphResult{graph/percentage_graph_500}{test}{}
-\graphResult{graph/percentage_graph_750}{test}{}
+\subsubsection{Percentage of success}
+\FloatBarrier
+\graphResult{graph/percentage_graph_500}{This graph shows the percentage of success in delivering messages for the various routing algorithms for the the test on the 500 by 500 area.}{percent_500}
+\graphResult{graph/percentage_graph_750}{This graph shows the percentage of success in delivering messages for the various routing algorithms for the the test on the 750 by 750 area.}{percent_750}
+\FloatBarrier
 
-\graphResult{graph/hop_graph_100}{test}{}
-\graphResult{graph/hop_graph_500}{test}{}
-\graphResult{graph/hop_graph_750}{test}{}
+\subsubsection{Number of hops}
+\FloatBarrier
+\graphResult{graph/hop_graph_500}{This graph shows the average number of hops for the various routing algorithms. Please take note of the dip for the DSDV at 60 nodes. This graph is for the tests on the 500 by 500 area.}{hop_500}
+\graphResult{graph/hop_graph_750}{This graph shows the average number of hops for the various routing algorithms. Please take note of the dip for the DSDV at 90 nodes. This graph is for the tests on the 750 by 750 area.}{hop_750}
+\FloatBarrier
 
-\graphResult{graph/time_graph_100}{test}{}
-\graphResult{graph/time_graph_500}{test}{}
-\graphResult{graph/time_graph_750}{test}{}
-
+\subsubsection{Amount of time}
+\FloatBarrier
+\graphResult{graph/time_graph_500}{This graph shows the amount of time used for the various routing algorithms to sent successful messages. This graph is for the tests on the 500 by 500 area.}{time_500}
+\graphResult{graph/time_graph_750}{This graph shows the amount of time used for the various routing algorithms to sent successful messages. This graph is for the tests on the 750 by 750 area.}{time_750}
+\FloatBarrier
 \subsection{Limited-range spanner results}
 \label{section:test_results_spanners}
 This section describes some of the important results I have found in the limited-range spanner test. The distance/hops results can be found in section \ref{limited_range_spanner_distance_appendix} and the neighbour results can be found in section~\ref{limited_range_spanner_neighbour_appendix}.
@@ -37,7 +43,7 @@ As we can see from figure~\ref{graph:avg_neighbour}, it is clear that the averag
 \subsubsection{Graph Distance Comparison}
 \label{section:graph_distance_comparison}
 
-\graphResult{spanner/dist_percent}{This graph show the ratio between the values from the \ac{gabe} and the \ac{rng} when compared to the values of the \ac{ucg}. The ratio's for \ac{ucg} has been omitted, since it by definition will be 1. The solid lines indicates the ratio of the total Euclidean distance, while the dashed lines indicates the ratio of total hops. The values used in the creation of this graph can be found in the spanner tables in the appendix under ``Ratio of values compared to teh UCG''}{dist_percent}
+\graphResult{spanner/dist_percent}{This graph show the ratio between the values from the \ac{gabe} and the \ac{rng} when compared to the values of the \ac{ucg}. The ratio's for \ac{ucg} has been omitted, since it by definition will be 1. The solid lines indicates the ratio of the total Euclidean distance, while the dashed lines indicates the ratio of total hops. The values used in the creation of this graph can be found in the spanner tables in the appendix under ``Ratio of values compared to the UCG''}{dist_percent}
 
 From figure~\ref{graph:dist_percent} we can see that not surprisingly that the \ac{gabe} is closer to the \ac{ucg} is much better than the \ac{rng}. More importantly we also see that there is a huge difference between the Euclidean distance than the Unit distance, when compared to the results from the \ac{ucg}. It is interesting to note, that even though the density of the graphs are kept steady, as the number of nodes grows, both the \ac{gabe} and the \ac{rng} edges asymptotically closer to the \ac{ucg}. 
 
