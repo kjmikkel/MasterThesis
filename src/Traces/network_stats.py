@@ -41,7 +41,7 @@ def average_suite(data_list, min_list, max_list):
   return (average, min_average, max_average, std_value)
 
 paths = ["GREEDY", "GPSR", "GOAFR", "DSDV"]
-sizes = [100, 500, 750]
+sizes = [500, 750]
 
 for path in paths:
   for i in xrange(10):
@@ -91,7 +91,7 @@ for path in paths:
       hop_data  = average_suite(hops, min_hops, max_hops)
       time_data = average_suite(time, min_time, max_time)
 
-      data = (percent, hop_data, time_data)
+      data = (percent, hop_data, time_data, [recv, sends])
 
       save_data = json.dumps(data)
       

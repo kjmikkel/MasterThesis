@@ -21,11 +21,133 @@
 import os, json
 
 latex_location = '../../report/results/graph/'
+algos = ["DSDV", "GPSR", "GREEDY", "GOAFR"]
 
 def save_file(file_name, data):
   file_name += '.tex'
   with open(file_name, mode='w') as f:
-    f.write(data)  
+    f.write(data)     
+
+def c_round(num):
+  return "%.2f" % num
+
+def make_percent_table():
+  result_dict = {}
+
+  for algo in algos:
+    result_dict[algo] = {}
+    for size in [500, 750]:
+      result_dict[algo][size] = {}
+      for nn in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+              
+        filename = "%s_results/%s-%s-%s.json" % (algo, algo, nn, size)
+        
+        f = open(filename, 'r')
+        json_data = f.read()
+        f.close()
+        data = json.loads(json_data)
+        
+        result_dict[algo][size][nn] = c_round(float(data[0]))
+                
+  newline = "\\\\\n"
+  table  = "\\begin{tabular}{lrcccc}\n"
+  table += "Size & Num nodes & DSDV & Greedy & GPSR & GOAFR " + newline
+  
+  table_dict = {}
+  for size in [500, 750]:
+    accum = ""
+    for nn in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+      first_label = ""
+      if nn == 10:
+        first_label = "\\multirow{10}{*}{%s}" % size
+
+      DSDV   = result_dict["DSDV"][size][nn]
+      Greedy = result_dict["GREEDY"][size][nn]
+      GPSR   = result_dict["GPSR"][size][nn]
+      GOAFR  = result_dict["GOAFR"][size][nn]
+
+      accum += " %s & %s & %s \%% & %s \%% & %s \%% & %s \%% %s" % (first_label, nn, DSDV, Greedy, GPSR, GOAFR, newline)
+    table_dict[size] = accum 
+  
+  table += table_dict[500]
+  table += "\\hline\n"
+  table += table_dict[750]
+  table += "\\end{tabular}"
+
+  savename = "%spercentage_table" % (latex_location)
+  save_file(savename, table)
+
+def make_comm_table():
+  result_dict = {}
+
+  for algo in algos:
+    result_dict[algo] = {}
+    for size in [500, 750]:
+      result_dict[algo][size] = {}
+      for nn in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+              
+        filename = "%s_results/%s-%s-%s.json" % (algo, algo, nn, size)
+        
+        f = open(filename, 'r')
+        json_data = f.read()
+        f.close()
+        data = json.loads(json_data)
+        
+        result_dict[algo][size][nn] = data[3]
+                
+  newline = "\\\\\n"
+  table  = "\\begin{tabular}{lrr rr r rr r rr r rr}\n"
+  table += "Size & Num nodes & \\multicolumn{2}{c}{DSDV}&  & \\multicolumn{2}{c}{Greedy} & & \\multicolumn{2}{c}{GPSR} & & \\multicolumn{2}{c}{GOAFR} " + newline
+  table += "     &           & Recv      & Sends        &  &   Recv  & Sends             & &    Recv      & Sends      & & Recv   & Sends " + newline
+  
+  table_dict = {}
+  for size in [500, 750]:
+    accum = ""
+    for nn in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+      first_label = ""
+      if nn == 10:
+        first_label = "\\multirow{10}{*}{%s}" % size
+
+      DSDV   = result_dict["DSDV"][size][nn]
+      Greedy = result_dict["GREEDY"][size][nn]
+      GPSR   = result_dict["GPSR"][size][nn]
+      GOAFR  = result_dict["GOAFR"][size][nn]
+
+      accum += " %s & %s & %s & %s & & %s & %s && %s & %s && %s & %s %s" % (first_label, nn, DSDV[0], DSDV[1], Greedy[0], Greedy[1], GPSR[0], GPSR[1], GOAFR[0], GOAFR[1], newline)
+    table_dict[size] = accum 
+  
+  table += table_dict[500]
+  table += "\\hline\n"
+  table += table_dict[750]
+  table += "\\end{tabular}"
+
+  savename = "%scomm_table" % (latex_location)
+  save_file(savename, table)
+
+def make_table(type_name, size, path, algo, index):
+  newline = "\\\\\n"
+  table  = "\\begin{tabular}{cllll}\n"
+  table += "Num nodes: & Avg. %s & Avg. Max %s & Avg. Min %s & Std. deviation %s" %(type_name, type_name, type_name, newline)
+  for nn in [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]:
+    filename = "%s_results/%s-%s-%s.json" % (algo, algo, nn, size)
+        
+    f = open(filename, 'r')
+    json_data = f.read()
+    f.close()
+
+    data = json.loads(json_data)
+    rel_data = data[index]
+    avg      = c_round(rel_data[0])
+    max_val  = c_round(rel_data[2])
+    min_val  = c_round(rel_data[1])
+    std_devi = c_round(rel_data[3])
+    
+    table += "%s       & %s        & %s            & %s & %s %s" % (nn, avg, max_val, min_val, std_devi, newline)
+  
+  table += "\\end{tabular}"
+
+  savename = "%s%s-%s_table_%s" % (path, type_name, algo, size)
+  save_file(savename, table)
 
 def find_value_points(size, path, indicies):
   points = ""
@@ -105,22 +227,28 @@ def make_graph(name, y_left, size, indicies):
 def make_percentage_graph():
   name = "percentage"
   label = "\% of successfully transmitted messages"
-  for size in [100, 500, 750]:
+  make_percent_table()
+  for size in [500, 750]:
     make_graph(name, label, size, [0])
+  
 
 def make_hop_graph():
   name = "hop"
   label = "average number of hops for arrived messages"
-  for size in [100, 500, 750]:
+  for size in [500, 750]:
     make_graph(name, label, size, [1, 0])
+    for algo in algos:
+      make_table(name, size, latex_location, algo, 1)
 
 def make_time_graph():
   name = "time"
-  label = "average time for arrived messages"
-  for size in [100, 500, 750]:
+  label = "average time for arrived messages (s)"
+  for size in [500, 750]:
     make_graph(name, label, size, [2, 0])
+    for algo in algos:
+      make_table(name, size, latex_location, algo, 2)
 
 make_percentage_graph()
 make_hop_graph()
 make_time_graph()
-
+make_comm_table()

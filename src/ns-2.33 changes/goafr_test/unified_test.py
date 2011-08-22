@@ -25,11 +25,12 @@ def do_test((j, i, algo, size)):
   nn = str(10 * (i + 1))
 
   filename = "../../../src/Traces/%s/%s-%s-%s-%s.tr" % (algo, algo, nn, size, j)
+
   if os.path.exists(filename):
     statinfo = os.stat(filename)
     if statinfo.st_size > 0:
       return
-
+  
   output_name = "%s-%s-%s-%s.tr" % (algo, nn, size, j)
   if algo != "DSDV":
     tcl_do = """ #author: Thomas Ogilvie 
@@ -369,22 +370,24 @@ $ns_ run
   os.system("rm %s" % filename)
   os.system("mv ../../../src/Traces/temp/%s ../../../src/Traces/%s/%s"  % (output_name, algo, output_name))
  
-sizes = ["100", "500", "750"]
+sizes = ["500", "750"]
 algos = ["GOAFR", "GREEDY", "GPSR", "DSDV"]
 exp_size = [10]
-time = "90"
+time = "140"
+
+
 
 pool = Pool(5)
 
 for e_size in exp_size:    
-  list_param = []
   for j in xrange(10):
+    list_param = []
     for i in xrange(e_size):
       for size in sizes:
         for algo in algos:
           list_param.append((j, i, algo, size))
      
-  pool.map(do_test, list_param)
+    pool.map(do_test, list_param)
 
 
 

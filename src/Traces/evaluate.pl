@@ -823,7 +823,7 @@ if ($noFiles == 0){ usage(); }else{
       # Line analysis
 #                    $1    -t     $2    -Hs   $3    -Hd    $4   -Ni     -Nx              -Ny              -Nz              -Ne                  -Nl  $5   -Nw  $6       -Ma      $7        -Md    $8     -Ms $9    -Mt $10   -Is $11
 
-    if($line =~ /^([srfD]) -t (\d+.\d+) -Hs (-?\d+) -Hd (-?\d+) -Ni \d+ -Nx \d+(?:.\d+)? -Ny \d+(?:.\d+)? -Nz \d+(?:.\d+)? -Ne [-]?\d+(?:.\d+)? -Nl (\w+) -Nw ([\w+-]+) -Ma (\d+(?:.\d+)?) -Md ([\d\w]+) -Ms (\d+) -Mt (\d+) -Is (-?\d+).\d+ -Id (-?\d+).\d+ -It (\w+) -Il (\d+) -If (\d+(?:.\d+)?) -Ii (\d+) -Iv ([\d\s]+) (\[[-\d\s]+\])?(.*)/o) {
+    if($line =~ /^([srfdD]) -t (\d+.\d+) -Hs (-?\d+) -Hd (-?\d+) -Ni \d+ -Nx \d+(?:.\d+)? -Ny \d+(?:.\d+)? -Nz \d+(?:.\d+)? -Ne [-]?\d+(?:.\d+)? -Nl (\w+) -Nw ([\w+-]+) -Ma (\d+(?:.\d+)?) -Md ([\d\w]+) -Ms (\d+) -Mt (\d+) -Is (-?\d+).\d+ -Id (-?\d+).\d+ -It (\w+) -Il (\d+) -If (\d+(?:.\d+)?) -Ii (\d+) -Iv ([\d\s]+) (\[[-\d\s]+\])?(.*)/o) {
 #-Id   $12       -It  $13  -Il $14   -If  $15           -Ii  $16  -Iv     $17     $18          $19
 
  #                s         -t           -Hs         -Hd         -Ni 57 -Nx 32.50 -Ny 65.16 -Nz 0.00 -Ne -1.000000 -Nl RTR -Nw --- -Ma 0 -Md 0 -Ms 0 -Mt 0 -Is 57.255 -Id -1.255 -It message -Il 32 -If 0 -Ii 0 -Iv 32 
@@ -1000,25 +1000,27 @@ if ($noFiles == 0){ usage(); }else{
 	  next;
 	}
 
-         if (($protocol eq "GREEDY") && ($pkt_ttl =~ /^(\d+) [\d\s]+/o)) {
+	if (($protocol eq "GREEDY") && ($pkt_ttl =~ /^(\d+) [\d\s]+/o)) {
+          
 	  my $id = ($pkt_src, $pkt_dst, $pkt_uid);
+	  
+#	  print "in the zone: $op\n";
 
 	  my $pkt_type = $1;
           my $flowid = "$pkt_src->$pkt_dst/$pkt_uid";
+	
 	  # Packet Statistics
-	  if ($layer eq "RTR") {
-	    if ($op eq 'D') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{drop}++; }
-	    if ($op eq 'r') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{recv}++; }
-	    if ($op eq 'f') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{forw}++; }
-	    if ($op eq 's') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{send}++; }
-	  }
-
+	  if ($op eq 'd' || $op eq 'D') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{drop}++; }
+	  if ($op eq 'r') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{recv}++; }
+	  if ($op eq 'f') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{forw}++; }
+	  if ($op eq 's') { $stats{$protocol}{$GREEDYTYPE[$pkt_type]}{send}++; }
+	
 	  if ($op eq 's' || $op eq 'f') {
 	    $PKT{$GREEDYTYPE[$pkt_type]}{$flowid}{hops}++;
 	  }
 
 
-	  if ($op eq 'D') {
+	  if ($op eq 'D' or $op eq 'd') {
 	    my $reason = "$layer/$drop_rsn";
 	    $drops{$reason}{$GREEDYTYPE[$pkt_type]}++;
 	  }
