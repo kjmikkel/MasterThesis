@@ -41,7 +41,7 @@ for size in size_option:
       if os.path.exists("../Processed Motion/GaussMarkov/" + name + ".ns_movements"):
         continue
 
-      os.system("./bm -f %s GaussMarkov -i 120 -n %s -x %s -y %s -z 0 -d 90 -h %s -u %s" % (name, nodes, size, size, max_speed, 1))
+      os.system("./bm -f %s GaussMarkov -i 120 -n %s -x %s -y %s -z 0 -d 150 -h %s -u %s" % (name, nodes, size, size, max_speed, 1))
 
       os.system("./bm NSFile -f %s" % name)
       os.system("mv %s.ns_params ../../src/Motion/Parameters\ for\ Motion/GaussMarkov/." % name)
