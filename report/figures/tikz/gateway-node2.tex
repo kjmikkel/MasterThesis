@@ -1,0 +1,67 @@
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\colorlet{circle edge}{black!50}
+\colorlet{circle area}{gray!20}
+
+\def\clusterHeads{{(0.75, 2.5)/s}, {(5, 3)/t}}
+\def\gateway{{(1.7, 3.7)/e2},{(2.6, 3.1)/f2}}
+\def\nodesOne{{(2.0, 1.8)/a}, {(1.4, 1.2)/b}, {(1.1, 3.4)/c}, {(1.1, 2.5)/d}, {(1.4, 3.9)/e}, {(2.2, 1.2)/f}, {(0.8, 0.6)/g}, {(1.6, 0.4)/h}, {(0.6, 3.9)/i}}
+\def\nodesTwo{{(6.6, 2.4)/j}, {(4.5, 2.5)/k}, {(3.0, 3.3)/l}, {(6.0, 2.0)/m}, {(5.9, 3.7)/n}, {(4.2, 3.7)/o}, {(3.2, 2.9)/p}, {(4.7, 5.0)/q}, {(4.6, 4.0)/r}, {(6.4, 1.5)/u}, {(4.0, 2.4)/v}, {(6.3, 4.3)/w}, {(4.3, 5.0)/x}, {(6.9, 2.1)/y}, {(6.6, 0.8)/z}, {(6.6, 5.0)/a2}, {(4.7, 5.6)/b2}, {(4.4, 5.1)/c2}, {(2.6, 3.8)/d2}}
+\def\connect{f2/d2, f2/e2, b2/q, a2/w, c2/x, c2/b2, c2/q, e2/c, e2/d2, e2/e, a/f, a/f2, a/b, a/d, e/c, d/c, d/s, d/b, g/b, f/b, i/c, i/e, h/f, h/b, h/g, k/v, k/t, j/y, j/n, m/j, m/t, l/p, l/d2, l/f2, l/o, o/k, o/r, o/v, o/p, o/t, n/t, p/v, r/x, r/t, r/q, r/n, u/y, u/m, w/n, z/u}
+
+\def\radius{2cm}
+
+\tikzset{
+  filled/.style={fill=circle area, draw=circle edge, thick},
+  outline/.style={draw=circle edge, thick}
+  }
+
+\setlength{\parskip}{5mm}
+
+\tikzstyle{edge} = [draw, thick, -]
+\tikzstyle{vertex}=[circle,fill=black!25,minimum size=10pt,inner sep=0pt]
+\tikzstyle{blank}=[circle,fill=white!25,minimum size=10pt,inner sep=0pt]
+\tikzstyle{clusterHead}=[rectangle,fill=gray!25,minimum size=10pt,inner sep=0pt]
+\tikzstyle{gateway}=[diamond,fill=black!50,minimum size=10pt,inner sep=0pt]
+\tikzstyle{invis-vertex}=[circle,fill=white!100,minimum size=0pt, inner sep=0pt]
+
+\tikzstyle{selected edge} = [draw, line width=5pt,-,gray!50]
+\tikzstyle{edge} = [draw, thick, -]
+
+\begin{tikzpicture} 
+  % The source and the sink
+%  \foreach \pos/\name in \sourceSink {
+%    \node[vertex] (\name) at \pos {$\name$};
+%  }
+
+  % The rest of the nodes
+  \foreach \pos/\name in \nodesOne {
+    \node[invis-vertex] (\name) at \pos {};
+    \draw[outline] \pos circle (5pt);
+    \node[blank] () at \pos {};
+  }
+
+  \foreach \pos/\name in \nodesTwo {
+    \node[invis-vertex] (\name) at \pos {};
+    \draw[outline] \pos circle (5pt);
+    \node[blank] () at \pos {};
+  }
+
+  % The cluster heads
+  \foreach \pos/\name in \clusterHeads {
+    \node[clusterHead] (\name) at \pos {CH};
+    \draw[outline] \pos circle (\radius);
+  }
+
+  % The gateway nodes
+  \foreach \pos/\name in \gateway {
+    \node[invis-vertex] (\name) at \pos {};
+    \node[gateway] () at \pos {};
+  }
+
+  % All the connections
+  \foreach \source/\sink in \connect
+    \path[edge] (\source) -- (\sink);
+       
+\end{tikzpicture}

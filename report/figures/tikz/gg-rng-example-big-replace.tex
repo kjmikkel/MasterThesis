@@ -1,0 +1,47 @@
+\colorlet{circle edge}{black!50}
+\colorlet{circle area}{gray!20}
+\def\scale{1}
+
+\tikzset{
+  filled/.style={fill=circle area, draw=circle edge, thick},
+  outline/.style={draw=circle edge, thick}
+  }
+
+\setlength{\parskip}{5mm}
+
+\tikzstyle{edge} = [draw, thick, -]
+\tikzstyle{vertex}=[circle,fill=black!50,minimum size=10pt,inner sep=0pt]
+\tikzstyle{selected edge} = [draw, line width=2cm,-,gray!20] 
+\tikzstyle{real edge} = [draw, line width=2pt,-, gray!70]
+
+
+\subfloat[The nomral graph]{\label{fig:norm_graph}
+\begin{tikzpicture}[scale=\scale]
+\foreach \pos/\name in {{(0.0, 2.0)/a}, {(2.0, 1.0)/b}, {(-2.0, 1.0)/e}, {(1.0, -1.0)/c}, {(-1.0, -1.0)/d}, {(0.0, 3.0)/f}, {(3.0, 1.5)/g}, {(-3.0, 1.5)/j}, {(2.0, -2.0)/h}, {(-2.0, -2.0)/i}}{
+        \node[vertex] (\name) at \pos {};
+        }
+
+\foreach \source/\dest in {a/b, a/e, a/c, a/d, a/f, a/g, a/j, b/e, b/c, b/d, b/f, b/g, b/h, e/c, e/d, e/f, e/j, e/i, c/d, c/g, c/h, c/i, d/j, d/h, d/i, f/g, f/j, g/h, j/i, h/i} {
+         \path[edge] (\source) -- (\dest);
+         }
+
+\end{tikzpicture}}
+\subfloat[The Gabriel graph]{\label{fig:gg_graph}
+\begin{tikzpicture}[scale=\scale]
+\foreach \pos/\name in {{(0.0, 2.0)/a}, {(2.0, 1.0)/b}, {(-2.0, 1.0)/e}, {(1.0, -1.0)/c}, {(-1.0, -1.0)/d}, {(0.0, 3.0)/f}, {(3.0, 1.5)/g}, {(-3.0, 1.5)/j}, {(2.0, -2.0)/h}, {(-2.0, -2.0)/i}}{
+	\node[vertex] (\name) at \pos {};
+}
+\foreach \source/\dest in {a/b, a/e, a/c, a/d, a/f, b/c, b/g, e/d, e/j, c/d, c/h, d/i} {
+ \path[edge] (\source) -- (\dest);
+}
+\end{tikzpicture}}
+
+\subfloat[The RNG graph]{\label{fig:rng_graph}
+\begin{tikzpicture}[scale=\scale]
+\foreach \pos/\name in {{(0.0, 2.0)/a}, {(2.0, 1.0)/b}, {(-2.0, 1.0)/e}, {(1.0, -1.0)/c}, {(-1.0, -1.0)/d}, {(0.0, 3.0)/f}, {(3.0, 1.5)/g}, {(-3.0, 1.5)/j}, {(2.0, -2.0)/h}, {(-2.0, -2.0)/i}}{
+	\node[vertex] (\name) at \pos {};
+}
+\foreach \source/\dest in {a/b, a/e, a/f, b/c, b/g, e/d, e/j, c/d, c/h, d/i} {
+ \path[edge] (\source) -- (\dest);
+}
+\end{tikzpicture}}
